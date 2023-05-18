@@ -163,7 +163,7 @@ class _AccountImportContentState extends State<AccountImportContent> {
                   child: Text(
                     errorDuplicated
                         ? AppLocalizations.of(context)!.account_already_added
-                        : "Invalid mnemonic seed",
+                        : AppLocalizations.of(context)!.invalid_mnemonic_seed,
                     style: TextStyle(color: Colors.grey[600], fontSize: 13),
                   ),
                 ),
@@ -572,13 +572,21 @@ class _AccountCreationConfirmContentState
                       });
                       ReefAppState.instance.appConfigCtrl
                           .setBiometricAuth(value == true);
+<<<<<<< HEAD
                       print("i am here ${value}");
+=======
+>>>>>>> 28c88a45294c2c74aa7ad91397257ce5e0c38c71
                     },
                   ),
                 const Gap(8),
                 Flexible(
                   child: Text(
+<<<<<<< HEAD
                     "Enable Biometric Authentication",
+=======
+                    AppLocalizations.of(context)!
+                        .enable_biometric_authentication,
+>>>>>>> 28c88a45294c2c74aa7ad91397257ce5e0c38c71
                     style: TextStyle(color: Colors.grey[600]!, fontSize: 12),
                   ),
                 )

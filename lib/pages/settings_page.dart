@@ -1,17 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:reef_mobile_app/components/getQrTypeData.dart';
-import 'package:reef_mobile_app/components/modals/auth_url_list_modal.dart';
 import 'package:reef_mobile_app/components/modals/change_password_modal.dart';
 import 'package:reef_mobile_app/components/modals/language_selection_modal.dart';
 import 'package:reef_mobile_app/components/switch_network.dart';
-import 'package:reef_mobile_app/utils/password_manager.dart';
-import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/utils/styles.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -22,10 +21,45 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _showDeveloperSettings = false;
+  String? gqlConnState;
+  StreamSubscription? gqlConnStateSubs;
+  String? providerConnState;
+  StreamSubscription? providerConnStateSubs;
+
+  @override
+  void dispose() {
+    gqlConnStateSubs?.cancel();
+    providerConnStateSubs?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    gqlConnStateSubs =
+        ReefAppState.instance.networkCtrl.getGqlConnLogs().listen((event) {
+      setState(() {
+        gqlConnState = event != null && event.isConnected
+            ? 'connected'
+            : event?.toString();
+      });
+    });
+
+    providerConnStateSubs = ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+    setState(() {
+        providerConnState = event != null && event.isConnected
+            ? 'connected'
+            : event?.toString();
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+    child: Container(
+    height: MediaQuery.of(context).size.height,
         color: Styles.primaryBackgroundColor,
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12),
         child: Column(
@@ -40,58 +74,36 @@ class _SettingsPageState extends State<SettingsPage> {
                     color: Colors.grey[800]),
               );
             }),
-            /*Divider(
-              color: Styles.textLightColor,
-              thickness: 1,
-            ),
-            const Gap(24),
-            MaterialButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () => showAuthUrlListModal(context),
-              padding: const EdgeInsets.all(2),
-              child: Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.list_bullet,
-                    color: Styles.textLightColor,
-                    size: 22,
-                  ),
-                  const Gap(8),
-                  Text('Manage Website Access',
-                      style: Theme.of(context).textTheme.bodyText1),
-                ],
-              ),
-            ),*/
             const Gap(24),
             Observer(builder: (_) {
               var navigateOnAccountSwitchVal =
                   ReefAppState.instance.model.appConfig.navigateOnAccountSwitch;
 
-              return CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Row(children: [
-                  Icon(
-                    Icons.home,
-                    color: Styles.textLightColor,
-                    size: 22,
-                  ),
-                  Gap(9),
-                  Text(
-                      AppLocalizations.of(context)!
-                          .go_to_home_on_account_switch,
-                      style: Theme.of(context).textTheme.bodyText1)
-                ]),
-                value: navigateOnAccountSwitchVal,
-                onChanged: (newValue) {
-                  ReefAppState.instance.appConfigCtrl
-                      .setNavigateOnAccountSwitch(newValue == true);
-                },
-                activeColor: Styles.primaryAccentColor,
-              );
-            }),
-            Observer(builder: (_) {
-              var navigateOnAccountSwitchVal =
-                  ReefAppState.instance.model.appConfig.isBiometricAuthEnabled;
+                return CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Row(children: [
+                    Icon(
+                      Icons.home,
+                      color: Styles.textLightColor,
+                      size: 22,
+                    ),
+                    Gap(9),
+                    Text(
+                        AppLocalizations.of(context)!
+                            .go_to_home_on_account_switch,
+                        style: Theme.of(context).textTheme.bodyLarge)
+                  ]),
+                  value: navigateOnAccountSwitchVal,
+                  onChanged: (newValue) {
+                    ReefAppState.instance.appConfigCtrl
+                        .setNavigateOnAccountSwitch(newValue == true);
+                  },
+                  activeColor: Styles.primaryAccentColor,
+                );
+              }),
+              Observer(builder: (_) {
+                var navigateOnAccountSwitchVal = ReefAppState
+                    .instance.model.appConfig.isBiometricAuthEnabled;
 
               return CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
@@ -102,8 +114,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     size: 22,
                   ),
                   Gap(9),
-                  Text("Biometric Authentication",
-                      style: Theme.of(context).textTheme.bodyText1)
+                  Text(AppLocalizations.of(context)!.biometric_auth,
+                      style: Theme.of(context).textTheme.bodyLarge)
                 ]),
                 value: navigateOnAccountSwitchVal,
                 onChanged: (newValue) {
@@ -130,31 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   const Gap(8),
                   Builder(builder: (context) {
                     return Text(AppLocalizations.of(context)!.change_password,
-                        style: Theme.of(context).textTheme.bodyText1);
-                  }),
-                ],
-              ),
-            ),
-            Gap(24),
-            MaterialButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () => showQrTypeDataModal(
-                  expectedType: ReefQrCodeType.info,
-                  AppLocalizations.of(context)!.get_qr_information,
-                  context),
-              padding: const EdgeInsets.all(2),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.crop_free,
-                    color: Styles.textLightColor,
-                    size: 22,
-                  ),
-                  const Gap(8),
-                  Builder(builder: (context) {
-                    return Text(
-                        AppLocalizations.of(context)!.get_qr_information,
-                        style: Theme.of(context).textTheme.bodyText1);
+                        style: Theme.of(context).textTheme.bodyLarge);
                   }),
                 ],
               ),
@@ -176,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   const Gap(8),
                   Builder(builder: (context) {
                     return Text(AppLocalizations.of(context)!.select_language,
-                        style: Theme.of(context).textTheme.bodyText1);
+                        style: Theme.of(context).textTheme.bodyLarge);
                   }),
                 ],
               ),
@@ -200,7 +188,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Builder(builder: (context) {
                     return Text(
                       AppLocalizations.of(context)!.developer_settings,
-                      style: Theme.of(context).textTheme.bodyText1,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     );
                   }),
                   Expanded(child: Container()),
@@ -216,14 +204,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Column(
                   children: [
                     FutureBuilder<dynamic>(
-                        future:ReefAppState.instance.metadataCtrl.getJsVersions(),
-                        builder: (context, AsyncSnapshot<dynamic> snapshot){
-                          if(snapshot.hasData) {
+                        future:
+                            ReefAppState.instance.metadataCtrl.getJsVersions(),
+                        builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                          if (snapshot.hasData) {
                             return Text(snapshot.data);
                           }
-                          return Text('getting version...');
-                    }),
-
+                          return const Text('getting version...');
+                        }),
+                    const Gap(12),
+                    Text('GQL conn: ${gqlConnState ?? "getting gql status"}'),
+                    const Gap(12),
+                    Text('Provider conn: ${providerConnState ?? "getting provider status"}'),
                     const Gap(12),
                     MaterialButton(
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -240,7 +232,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           const Gap(8),
                           Text(AppLocalizations.of(context)!.switch_network,
-                              style: Theme.of(context).textTheme.bodyText1),
+                              style: Theme.of(context).textTheme.bodyLarge),
                         ],
                       ),
                     ),
@@ -248,6 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
           ],
-        ));
+        ))
+    );
   }
 }

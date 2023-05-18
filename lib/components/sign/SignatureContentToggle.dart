@@ -81,7 +81,6 @@ class SignatureContentToggle extends StatelessObserverWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Gap(74),
           const Text(
             // AppLocalizations.of(context)!.transaction_details,
             'Signing with account:',
@@ -114,10 +113,15 @@ class SignatureContentToggle extends StatelessObserverWidget {
                 : MethodDataDisplay(signatureRequest),
           ])),
           if (signatureRequest != null)
-            SignatureControls(
-                signatureRequest,
-                (String? password) => _confirmSign(signatureRequest, password),
-                () => _cancel(signatureRequest))
+            Column(
+              children: [
+                SignatureControls(
+                    signatureRequest,
+                    (String? password) =>
+                        _confirmSign(signatureRequest, password),
+                    () => _cancel(signatureRequest)),
+              ],
+            )
         ],
       ),
     );

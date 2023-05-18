@@ -14,8 +14,7 @@ class MethodDataDisplay extends StatelessWidget {
   final SignatureRequest? signatureReq;
 
   @override
-  Widget build(BuildContext context) =>
-      Expanded(child: Observer(builder: (_) {
+  Widget build(BuildContext context) => Expanded(child: Observer(builder: (_) {
         if (signatureReq != null && signatureReq!.hasResults) {
           var evmMethodData = signatureReq?.decodedMethod['vm']['evm'];
           var isEVM = evmMethodData != null;
@@ -25,16 +24,21 @@ class MethodDataDisplay extends StatelessWidget {
             var args = List.from(fragmentData['inputs']).asMap().map((i, val) =>
                 MapEntry(val['name'],
                     _getValue(evmMethodData['decodedData']['args'][i])));
+            List<String> argsList =
+                args.entries.map((e) => e.key).join(',').split(',');
+            List<String> argsValuesList = args.entries
+                .map((e) => e.value.toString())
+                .join(',')
+                .split(',');
             Map<String, String> decodedData = {
-              "Contract Address": toShortDisplay(
-                  evmMethodData['contractAddress']),
-              "Method Name": fragmentData['name'],
-              "Arguments": "${args.entries.map((e) => e.key).join(', ')}",
-              "Values": "${args.entries.map((e) => e.value.toString()).join(
-                  ', ')}"
+              "Contract Address":
+                  toShortDisplay(evmMethodData['contractAddress']),
+              "Method Name": fragmentData['name']
             };
+            for (var i = 0; i < argsList.length; i++) {
+              decodedData[argsList[i]] = argsValuesList[i];
+            }
             final decodedDetails = createDecodedDataTable(decodedData);
-
 
             dataWidget = Table(children: decodedDetails, columnWidths: const {
               0: IntrinsicColumnWidth(),
@@ -46,33 +50,37 @@ class MethodDataDisplay extends StatelessWidget {
             final String paramValues = args.length > 1
                 ? "${args.split(':')[1].split('}')[0]},${args.split(',')[1]}"
                 : "empty";
-            var methodName = signatureReq?.decodedMethod['methodName'].split(
-                '(')[0];
-            var params = signatureReq?.decodedMethod['methodName'].split('(')[1]
+            var methodName =
+                signatureReq?.decodedMethod['methodName'].split('(')[0];
+            var params = signatureReq?.decodedMethod['methodName']
+                .split('(')[1]
                 .split(')')[0];
-            Map<String, String> decodedData = {
-              "Method Name": methodName,
-              "Parameters": params,
-              "Values": paramValues.trim(),
-            };
+            List<String> paramsList = params.split(',');
+            List<String> paramValuesList = paramValues.trim().split(',');
+            Map<String, String> decodedData = {"Method Name": methodName};
+            for (var i = 0; i < paramsList.length; i++) {
+              decodedData[paramsList[i]] = paramValuesList[i];
+            }
             final decodedDetails = createDecodedDataTable(decodedData);
             dataWidget = Table(children: decodedDetails, columnWidths: const {
-                0: IntrinsicColumnWidth(),
-                1: FlexColumnWidth(4),
-              });
+              0: IntrinsicColumnWidth(),
+              1: FlexColumnWidth(4),
+            });
           }
           return Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-              child: Column(children: [
-                Text(isEVM?'EVM Contract Call':'Method Call ', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Gap(12),
-                dataWidget
-              ],)
-          );
+              child: Column(
+                children: [
+                  Text(isEVM ? 'EVM Contract Call' : 'Method Call ',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold)),
+                  Gap(12),
+                  dataWidget
+                ],
+              ));
         }
         return Container();
       }));
-
 
   _getValue(dynamic argVal) {
     if (argVal is String) {
@@ -115,7 +123,7 @@ class MethodDataDisplay extends StatelessWidget {
           child: Text(
             valueTexts[i],
             style: const TextStyle(fontSize: 16),
-            overflow: TextOverflow.ellipsis,
+            overflow: TextOverflow.fade,
           ),
         ),
       ]));
