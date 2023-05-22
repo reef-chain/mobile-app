@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:reef_mobile_app/components/dapp_browser/tabs_manager.dart';
 import 'package:reef_mobile_app/components/navigation/liquid_carousel_wrapper.dart';
 import 'package:reef_mobile_app/components/top_bar.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -39,7 +40,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }
@@ -49,7 +50,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     if (kDebugMode) {
       print('APP STATE=$state');
     }
-    if(state==AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed) {
       ReefAppState.instance.tokensCtrl.reload(false);
     }
   }
@@ -114,6 +115,15 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
       label: 'Accounts',
     ),
     BarItemNavigationPage(
+      icon: Icon(Icons.language),
+      page: NavigationPage.browser,
+      //  SvgIcon(
+      //   'assets/images/reef_icon.svg',
+      //   height: 20,
+      // ),
+      label: 'Browser',
+    ),
+    BarItemNavigationPage(
       icon: Icon(Icons.settings_outlined),
       page: NavigationPage.settings,
       label: 'Settings',
@@ -172,6 +182,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                         const LiquidCarouselWrapper(),
                         const HomePage(key: PageStorageKey("homepage")),
                         AccountsPage(key: const PageStorageKey("accountPage")),
+                        const TabsManager(),
                         const SettingsPage(key: PageStorageKey("settingsPage")),
                         const LiquidCarouselWrapper()
                       ],

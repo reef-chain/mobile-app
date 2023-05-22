@@ -13,6 +13,7 @@ abstract class _BrowserModel with Store {
 
   @observable
   List<TabData> tabs = [];
+  bool refreshTrigger = false;
 
   @action
   void addWebView(
@@ -22,6 +23,7 @@ abstract class _BrowserModel with Store {
       required JsApiService? jsApiService,
       required WebViewController? webViewController}) {
     final tabData = TabData(
+        firstBuild: true,
         tabHash: tabHash,
         currentUrl: url,
         webView: webView,
@@ -35,6 +37,7 @@ abstract class _BrowserModel with Store {
     tabs = tabs.map((tabData) {
       if (tabData.tabHash == tabHash) {
         return TabData(
+            firstBuild: tabData.firstBuild,
             tabHash: tabData.tabHash,
             currentUrl: newUrl,
             webView: tabData.webView,
@@ -43,6 +46,7 @@ abstract class _BrowserModel with Store {
       }
       return tabData;
     }).toList();
+    refreshTrigger = !refreshTrigger;
   }
 
   @action
@@ -51,6 +55,7 @@ abstract class _BrowserModel with Store {
     tabs = tabs
         .map((tabData) => tabData.tabHash == tabHash
             ? TabData(
+                firstBuild: tabData.firstBuild,
                 tabHash: tabData.tabHash,
                 currentUrl: tabData.currentUrl,
                 webView: tabData.webView,
@@ -58,6 +63,43 @@ abstract class _BrowserModel with Store {
                 webViewController: webViewController)
             : tabData)
         .toList();
+    refreshTrigger = !refreshTrigger;
+  }
+
+  @action
+  void updateWebView(
+      {required String tabHash,
+      required String newUrl,
+      required JsApiService? jsApiService,
+      required Widget webView}) {
+    tabs = tabs
+        .map((tabData) => tabData.tabHash == tabHash
+            ? TabData(
+                firstBuild: tabData.firstBuild,
+                tabHash: tabData.tabHash,
+                currentUrl: newUrl,
+                webView: webView,
+                jsApiService: jsApiService,
+                webViewController: tabData.webViewController)
+            : tabData)
+        .toList();
+    refreshTrigger = !refreshTrigger;
+  }
+
+  @action
+  void updateFirstBuild({required String tabHash}) {
+    tabs = tabs
+        .map((tabData) => tabData.tabHash == tabHash
+            ? TabData(
+                firstBuild: false,
+                tabHash: tabData.tabHash,
+                currentUrl: tabData.currentUrl,
+                webView: tabData.webView,
+                jsApiService: tabData.jsApiService,
+                webViewController: tabData.webViewController)
+            : tabData)
+        .toList();
+    refreshTrigger = !refreshTrigger;
   }
 
   @action
@@ -68,12 +110,14 @@ abstract class _BrowserModel with Store {
 
 class TabData {
   final String tabHash;
+  bool firstBuild;
   String currentUrl;
   Widget webView;
   WebViewController? webViewController;
   JsApiService? jsApiService;
 
   TabData({
+    required this.firstBuild,
     required this.tabHash,
     required this.currentUrl,
     required this.webView,

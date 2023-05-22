@@ -32,6 +32,22 @@ class BrowserCtrl {
         tabHash: tabHash, webViewController: webViewController);
   }
 
+  void updateWebView(
+      {required String tabHash,
+      required String newUrl,
+      required JsApiService? jsApiService,
+      required Widget webView}) {
+    browserModel.updateWebView(
+        tabHash: tabHash,
+        jsApiService: jsApiService,
+        newUrl: newUrl,
+        webView: webView);
+  }
+
+  void updateFirstBuild({required String tabHash}) {
+    browserModel.updateFirstBuild(tabHash: tabHash);
+  }
+
   String? getTabCurrentUrl({required String tabHash}) {
     final tabIndex =
         browserModel.tabs.indexWhere((tabData) => tabData.tabHash == tabHash);

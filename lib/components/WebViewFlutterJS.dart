@@ -85,13 +85,10 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
             child: WebView(
           javascriptMode: JavascriptMode.unrestricted,
           javascriptChannels: widget.jsChannels,
-          navigationDelegate: (navigation) async {
-            print("BEEN THERE");
-            if (widget.navigationDelegate != null) {
-              await widget.navigationDelegate!(navigation);
-            }
-            return NavigationDecision.navigate;
-          },
+          navigationDelegate: widget.navigationDelegate,
+          gestureNavigationEnabled: true,
+          initialMediaPlaybackPolicy:
+              AutoMediaPlaybackPolicy.require_user_action_for_all_media_types,
           onWebViewCreated: (webViewController) {
             _controller = webViewController;
             if (!widget.controller.isCompleted) {

@@ -25,54 +25,108 @@ class _TabsManagerState extends State<TabsManager> {
     return http.read(Uri.parse(url));
   }
 
-  NavigationDelegate _getNavigationDelegate(String tabHash) => (navigation) {
+  NavigationDelegate _getNavigationDelegate(String tabHash) =>
+      (navigation) async {
         if (navigation.isForMainFrame) {
           try {
             Uri.parse(navigation.url);
-            ReefAppState.instance.browserCtrl
-                .updateWebViewUrl(tabHash: tabHash, newUrl: navigation.url);
+            final tabData = ReefAppState.instance.browserCtrl.browserModel.tabs
+                .firstWhere((tab) => tab.tabHash == tabHash);
+            print("=====================");
+            print(navigation.url);
+            print(tabData.currentUrl);
+            print("=====================");
+            if (navigation.url == tabData.currentUrl) {
+              return NavigationDecision.navigate;
+            }
+            await setup(tabHash, navigation.url);
+            // await tabData.jsApiService?.loadNewURLWithDappInjectedHtml(
+            //     fJsFilePath: 'lib/js/packages/dApp-js/dist/index.js',
+            //     htmlString: await _getHtml(navigation.url),
+            //     baseUrl: navigation.url);
           } catch (e) {
             return NavigationDecision.navigate;
           }
         }
-
         return NavigationDecision.navigate;
       };
+
+  Future<void> setup(String tabHash, [String? url]) async {
+    final tabData = ReefAppState.instance.browserCtrl.browserModel.tabs
+        .firstWhere((tab) => tab.tabHash == tabHash);
+
+    final html = await _getHtml(url ?? tabData.currentUrl);
+
+    final dappJsApi = JsApiService.dAppInjectedHtml(html,
+        url ?? tabData.currentUrl, _getNavigationDelegate(tabData.tabHash));
+    dappJsApi.jsDAppMsgSubj.listen((value) {
+      dAppRequestService.handleDAppMsgRequest(
+          value, dappJsApi.sendDappMsgResponse);
+    });
+
+    ReefAppState.instance.browserCtrl.updateWebView(
+      newUrl: url ?? tabData.currentUrl,
+      tabHash: tabData.tabHash,
+      jsApiService: dappJsApi,
+      webView: dappJsApi.widget,
+    );
+
+    setState(() {
+      print("CALLED RIGHT THERE");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      persistentFooterButtons: [
+        Flex(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          direction: Axis.horizontal,
+          children: [
+            TextButton(
+                onPressed: () {},
+                child: Text(
+                  "Close All",
+                  style: TextStyle(color: Colors.deepPurpleAccent.shade100),
+                )),
+            TextButton(
+                onPressed: () {},
+                child: Text(
+                  "Done",
+                  style: TextStyle(color: Colors.deepPurpleAccent.shade100),
+                ))
+          ],
+        )
+      ],
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Styles.darkBackgroundColor,
+        backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.add),
         onPressed: () async {
           final tabHash = getRandString(20);
           JsApiService? dappJsApi;
-          final html = await _getHtml("https://google.com");
+          final html = await _getHtml("https://reef.io/");
 
           dappJsApi = JsApiService.dAppInjectedHtml(
-              html, "https://google.com", _getNavigationDelegate(tabHash));
+              html, "https://reef.io/", _getNavigationDelegate(tabHash));
           dappJsApi.jsDAppMsgSubj.listen((value) {
             dAppRequestService.handleDAppMsgRequest(
                 value, dappJsApi!.sendDappMsgResponse);
           });
 
           ReefAppState.instance.browserCtrl.addWebView(
-              url: "https://google.com",
+              url: "https://reef.io/",
               tabHash: tabHash,
               webView: dappJsApi.widget,
               jsApiService: dappJsApi,
               webViewController: null);
         },
       ),
-      appBar: AppBar(
-        backgroundColor: Styles.darkBackgroundColor,
-        title: const Text("Reef Browser"),
-      ),
-      body: Flex(
+      body: const Flex(
         direction: Axis.vertical,
-        children: const [
+        children: [
           Expanded(child: TabsDisplay()),
           Divider(
             height: 0.4,

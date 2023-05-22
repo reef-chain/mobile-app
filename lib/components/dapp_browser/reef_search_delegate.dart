@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ReefSearchDelegate extends SearchDelegate {
+class ReefSearchDelegate extends SearchDelegate<String> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -18,16 +18,16 @@ class ReefSearchDelegate extends SearchDelegate {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
-        close(context, null);
+        close(context, query);
       },
     );
   }
 
   @override
   Widget buildResults(BuildContext context) {
-    return Column(
+    return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: const <Widget>[
+      children: <Widget>[
         Center(
           child: Text(
             "Search term must be longer than two letters.",
@@ -39,6 +39,6 @@ class ReefSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return Column();
+    return const Column();
   }
 }

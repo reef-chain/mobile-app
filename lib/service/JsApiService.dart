@@ -34,6 +34,7 @@ class JsApiService {
   final jsMessageUnknownSubj = BehaviorSubject<JsApiMessage>();
 
   late Widget _wdg;
+  late WebViewController webViewController;
 
   WebViewFlutterJS get widget {
     print('JS API SERVICE GET WIDGET $flutterJsFilePath');
@@ -63,22 +64,28 @@ class JsApiService {
       : this._(false, 'lib/js/packages/dApp-js/dist/index.js',
             html: html, url: baseUrl, navigationDelegate: navigationDelegate);
 
-  void renderWithFlutterJS(
-      String fJsFilePath, String? htmlString, String? baseUrl) {
-    print("got here");
+  Future<void> renderWithFlutterJS(
+      String fJsFilePath, String? htmlString, String? baseUrl) async {
     if (controllerInit.isCompleted) return;
-    print("got there");
     htmlString ??= "<html><head></head><body></body></html>";
     controllerInit.future.then((ctrl) {
-      print("and there");
+      webViewController = ctrl;
       return _getFlutterJsHeaderTags(fJsFilePath).then((headerTags) {
-        print("and also there");
         return _insertHeaderTags(htmlString!, headerTags);
       }).then((htmlString) {
-        print("and finally here");
         return _renderHtml(ctrl, htmlString, baseUrl);
       });
     });
+  }
+
+  Future<void> loadNewURLWithDappInjectedHtml(
+      {required String fJsFilePath,
+      String? htmlString,
+      String? baseUrl}) async {
+    htmlString ??= "<html><head></head><body></body></html>";
+    final headerTags = await _getFlutterJsHeaderTags(fJsFilePath);
+    htmlString = await _insertHeaderTags(htmlString, headerTags);
+    await _renderHtml(webViewController, htmlString, baseUrl);
   }
 
   // for js methods with no return value
@@ -89,12 +96,12 @@ class JsApiService {
   Future<dynamic> jsCall<T>(String executeJs) async {
     dynamic res = await _controller
         .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
-    return T == bool?_resolveBooleanValue(res) : res;
+    return T == bool ? _resolveBooleanValue(res) : res;
   }
 
   Future jsPromise<T>(String jsObsRefName) async {
     dynamic res = await jsObservable(jsObsRefName).first;
-    return T == bool?_resolveBooleanValue(res) : res;
+    return T == bool ? _resolveBooleanValue(res) : res;
   }
 
   Stream jsObservable(String jsObsRefName) {
@@ -115,13 +122,13 @@ class JsApiService {
     jsCall('${DAPP_MSG_CONFIRMATION_JS_FN_NAME}(`$reqId`, `$value`)');
   }
 
-  dynamic _resolveBooleanValue(dynamic res){
-      print(' CALL $res');
-      return res == true ||
-          res == 'true' ||
-          res == 1 ||
-          res == '1' ||
-          res == '"true"';
+  dynamic _resolveBooleanValue(dynamic res) {
+    print(' CALL $res');
+    return res == true ||
+        res == 'true' ||
+        res == 1 ||
+        res == '1' ||
+        res == '"true"';
   }
 
   Future<String> _getFlutterJsHeaderTags(String assetsFilePath) async {
@@ -157,9 +164,9 @@ class JsApiService {
         htmlString.substring(insertAt);
   }
 
-  void _renderHtml(
+  Future<void> _renderHtml(
       WebViewController ctrl, String htmlString, String? baseUrl) async {
-    ctrl
+    await ctrl
         .loadHtmlString(htmlString, baseUrl: baseUrl)
         .then((_) => ctrl)
         .catchError((err) {

@@ -14,6 +14,13 @@ class _TabsDisplayState extends State<TabsDisplay> {
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
+      if (ReefAppState.instance.browserCtrl.browserModel.tabs.isEmpty) {
+        return const Center(
+            child: Text(
+          "No Tabs Open",
+          style: TextStyle(fontSize: 16),
+        ));
+      }
       return GridView.builder(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(

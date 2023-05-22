@@ -62,19 +62,6 @@ Widget topBar(BuildContext context) {
                       child: Wrap(
                         alignment: WrapAlignment.end,
                         children: [
-                          IconButton(
-                              style: ButtonStyle(
-                                  iconColor: MaterialStateProperty.resolveWith(
-                                      (states) => Colors.white)),
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => const TabsManager(),
-                                    fullscreenDialog: true));
-                              },
-                              icon: const Icon(
-                                Icons.search,
-                                color: Colors.white,
-                              )),
                           accountPill(context, selSignerList.first.name)
                         ],
                       ),

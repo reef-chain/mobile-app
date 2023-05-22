@@ -73,6 +73,36 @@ mixin _$BrowserModel on _BrowserModel, Store {
   }
 
   @override
+  void updateWebView(
+      {required String tabHash,
+      required String newUrl,
+      required JsApiService? jsApiService,
+      required Widget webView}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.updateWebView');
+    try {
+      return super.updateWebView(
+          tabHash: tabHash,
+          newUrl: newUrl,
+          jsApiService: jsApiService,
+          webView: webView);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void updateFirstBuild({required String tabHash}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.updateFirstBuild');
+    try {
+      return super.updateFirstBuild(tabHash: tabHash);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void removeWebView({required String tabHash}) {
     final _$actionInfo = _$_BrowserModelActionController.startAction(
         name: '_BrowserModel.removeWebView');
