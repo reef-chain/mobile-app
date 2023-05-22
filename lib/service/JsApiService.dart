@@ -34,7 +34,6 @@ class JsApiService {
   final jsMessageUnknownSubj = BehaviorSubject<JsApiMessage>();
 
   late Widget _wdg;
-  late WebViewController webViewController;
 
   WebViewFlutterJS get widget {
     print('JS API SERVICE GET WIDGET $flutterJsFilePath');
@@ -69,23 +68,12 @@ class JsApiService {
     if (controllerInit.isCompleted) return;
     htmlString ??= "<html><head></head><body></body></html>";
     controllerInit.future.then((ctrl) {
-      webViewController = ctrl;
       return _getFlutterJsHeaderTags(fJsFilePath).then((headerTags) {
         return _insertHeaderTags(htmlString!, headerTags);
       }).then((htmlString) {
         return _renderHtml(ctrl, htmlString, baseUrl);
       });
     });
-  }
-
-  Future<void> loadNewURLWithDappInjectedHtml(
-      {required String fJsFilePath,
-      String? htmlString,
-      String? baseUrl}) async {
-    htmlString ??= "<html><head></head><body></body></html>";
-    final headerTags = await _getFlutterJsHeaderTags(fJsFilePath);
-    htmlString = await _insertHeaderTags(htmlString, headerTags);
-    await _renderHtml(webViewController, htmlString, baseUrl);
   }
 
   // for js methods with no return value

@@ -124,8 +124,6 @@ class __OpenContainerWrapperState extends State<_OpenContainerWrapper> {
       jsApiService: dappJsApi,
       webView: dappJsApi.widget,
     );
-
-    await dappJsApi.webViewController.reload();
   }
 
   @override
@@ -286,8 +284,6 @@ class _DetailsPage extends StatelessWidget {
       webView: dappJsApi.widget,
     );
 
-    await dappJsApi.webViewController.reload();
-
     print("THIS ONE WAS SUCCEED");
   }
 
@@ -300,20 +296,8 @@ class _DetailsPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           direction: Axis.horizontal,
           children: [
-            IconButton(
-                onPressed: () {
-                  ReefAppState.instance.browserCtrl.browserModel.tabs[index]
-                      .jsApiService?.webViewController
-                      .goBack();
-                },
-                icon: const Icon(Icons.arrow_back)),
-            IconButton(
-                onPressed: () {
-                  ReefAppState.instance.browserCtrl.browserModel.tabs[index]
-                      .jsApiService?.webViewController
-                      .goForward();
-                },
-                icon: const Icon(Icons.arrow_forward)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_back)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_forward)),
             IconButton(
                 onPressed: () async {
                   await setup("https://reef.io");

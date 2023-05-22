@@ -428,9 +428,9 @@ class _BindEvmState extends State<BindEvm> {
         buildAccount(widget.bindFor),
         const Gap(16),
       ] else
-        Row(
+        const Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             SizedBox(
               height: 20,
               width: 20,
@@ -575,12 +575,13 @@ class _BindEvmState extends State<BindEvm> {
                                 shape: const MaterialStatePropertyAll<
                                     OutlinedBorder>(buttonShape),
                               ),
-                              child: Text(details.isActive &&
-                                      details.currentStep == 3
-                                  ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
-                                      .toUpperCase()
-                                  : localizations.continueButtonLabel
-                                      .toUpperCase()),
+                              child: Text(
+                                  details.isActive && details.currentStep == 3
+                                      ? AppLocalizations.of(context)!
+                                          .go_back_to_home_page
+                                          .toUpperCase()
+                                      : localizations.continueButtonLabel
+                                          .toUpperCase()),
                             ),
                           ],
                         ),
