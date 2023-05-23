@@ -8,6 +8,9 @@ class BrowserCtrl {
 
   BrowserCtrl() : browserModel = BrowserModel();
 
+  void setCurrentTabHash({required String currentTabHash}) =>
+      browserModel.setCurrentTabHash(currentTabHash: currentTabHash);
+
   void addWebView(
       {required String url,
       required String tabHash,
@@ -60,4 +63,8 @@ class BrowserCtrl {
   void removeWebView({required String tabHash}) {
     browserModel.removeWebView(tabHash: tabHash);
   }
+
+  void closeCurrentTab() => browserModel.closeCurrentTab();
+
+  void closeAllTabs() => browserModel.closeAllTabs();
 }

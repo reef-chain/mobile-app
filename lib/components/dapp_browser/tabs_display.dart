@@ -22,7 +22,7 @@ class _TabsDisplayState extends State<TabsDisplay> {
         ));
       }
       return GridView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 25),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
             mainAxisSpacing: 8, crossAxisSpacing: 8, maxCrossAxisExtent: 200),
         itemBuilder: (context, index) => BrowserTab(index: index),

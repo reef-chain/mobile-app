@@ -13,7 +13,14 @@ abstract class _BrowserModel with Store {
 
   @observable
   List<TabData> tabs = [];
-  bool refreshTrigger = false;
+
+  @observable
+  String currentTabHash = "";
+
+  @action
+  void setCurrentTabHash({required String currentTabHash}) {
+    this.currentTabHash = currentTabHash;
+  }
 
   @action
   void addWebView(
@@ -34,36 +41,38 @@ abstract class _BrowserModel with Store {
 
   @action
   void updateWebViewUrl({required String tabHash, required String newUrl}) {
-    tabs = tabs.map((tabData) {
-      if (tabData.tabHash == tabHash) {
-        return TabData(
-            firstBuild: tabData.firstBuild,
-            tabHash: tabData.tabHash,
-            currentUrl: newUrl,
-            webView: tabData.webView,
-            jsApiService: tabData.jsApiService,
-            webViewController: tabData.webViewController);
-      }
-      return tabData;
-    }).toList();
-    refreshTrigger = !refreshTrigger;
+    tabs = [
+      ...tabs.map((tabData) {
+        if (tabData.tabHash == tabHash) {
+          return TabData(
+              firstBuild: tabData.firstBuild,
+              tabHash: tabData.tabHash,
+              currentUrl: newUrl,
+              webView: tabData.webView,
+              jsApiService: tabData.jsApiService,
+              webViewController: tabData.webViewController);
+        }
+        return tabData;
+      }).toList()
+    ];
   }
 
   @action
   void updateWebViewCtrl(
       {required String tabHash, required WebViewController webViewController}) {
-    tabs = tabs
-        .map((tabData) => tabData.tabHash == tabHash
-            ? TabData(
-                firstBuild: tabData.firstBuild,
-                tabHash: tabData.tabHash,
-                currentUrl: tabData.currentUrl,
-                webView: tabData.webView,
-                jsApiService: tabData.jsApiService,
-                webViewController: webViewController)
-            : tabData)
-        .toList();
-    refreshTrigger = !refreshTrigger;
+    tabs = [
+      ...tabs
+          .map((tabData) => tabData.tabHash == tabHash
+              ? TabData(
+                  firstBuild: tabData.firstBuild,
+                  tabHash: tabData.tabHash,
+                  currentUrl: tabData.currentUrl,
+                  webView: tabData.webView,
+                  jsApiService: tabData.jsApiService,
+                  webViewController: webViewController)
+              : tabData)
+          .toList()
+    ];
   }
 
   @action
@@ -72,39 +81,53 @@ abstract class _BrowserModel with Store {
       required String newUrl,
       required JsApiService? jsApiService,
       required Widget webView}) {
-    tabs = tabs
-        .map((tabData) => tabData.tabHash == tabHash
-            ? TabData(
-                firstBuild: tabData.firstBuild,
-                tabHash: tabData.tabHash,
-                currentUrl: newUrl,
-                webView: webView,
-                jsApiService: jsApiService,
-                webViewController: tabData.webViewController)
-            : tabData)
-        .toList();
-    refreshTrigger = !refreshTrigger;
+    tabs = [
+      ...tabs
+          .map((tabData) => tabData.tabHash == tabHash
+              ? TabData(
+                  firstBuild: tabData.firstBuild,
+                  tabHash: tabData.tabHash,
+                  currentUrl: newUrl,
+                  webView: webView,
+                  jsApiService: jsApiService,
+                  webViewController: tabData.webViewController)
+              : tabData)
+          .toList()
+    ];
   }
 
   @action
   void updateFirstBuild({required String tabHash}) {
-    tabs = tabs
-        .map((tabData) => tabData.tabHash == tabHash
-            ? TabData(
-                firstBuild: false,
-                tabHash: tabData.tabHash,
-                currentUrl: tabData.currentUrl,
-                webView: tabData.webView,
-                jsApiService: tabData.jsApiService,
-                webViewController: tabData.webViewController)
-            : tabData)
-        .toList();
-    refreshTrigger = !refreshTrigger;
+    tabs = [
+      ...tabs
+          .map((tabData) => tabData.tabHash == tabHash
+              ? TabData(
+                  firstBuild: false,
+                  tabHash: tabData.tabHash,
+                  currentUrl: tabData.currentUrl,
+                  webView: tabData.webView,
+                  jsApiService: tabData.jsApiService,
+                  webViewController: tabData.webViewController)
+              : tabData)
+          .toList()
+    ];
   }
 
   @action
   void removeWebView({required String tabHash}) {
-    tabs = tabs.where((tabData) => tabData.tabHash != tabHash).toList();
+    tabs = [...tabs.where((tabData) => tabData.tabHash != tabHash).toList()];
+  }
+
+  @action
+  void closeCurrentTab() {
+    tabs = [
+      ...tabs.where((tabData) => tabData.tabHash != currentTabHash).toList()
+    ];
+  }
+
+  @action
+  void closeAllTabs() {
+    tabs = [];
   }
 }
 

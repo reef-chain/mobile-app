@@ -24,8 +24,35 @@ mixin _$BrowserModel on _BrowserModel, Store {
     });
   }
 
+  late final _$currentTabHashAtom =
+      Atom(name: '_BrowserModel.currentTabHash', context: context);
+
+  @override
+  String get currentTabHash {
+    _$currentTabHashAtom.reportRead();
+    return super.currentTabHash;
+  }
+
+  @override
+  set currentTabHash(String value) {
+    _$currentTabHashAtom.reportWrite(value, super.currentTabHash, () {
+      super.currentTabHash = value;
+    });
+  }
+
   late final _$_BrowserModelActionController =
       ActionController(name: '_BrowserModel', context: context);
+
+  @override
+  void setCurrentTabHash({required String currentTabHash}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.setCurrentTabHash');
+    try {
+      return super.setCurrentTabHash(currentTabHash: currentTabHash);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void addWebView(
@@ -114,9 +141,32 @@ mixin _$BrowserModel on _BrowserModel, Store {
   }
 
   @override
+  void closeCurrentTab() {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.closeCurrentTab');
+    try {
+      return super.closeCurrentTab();
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void closeAllTabs() {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.closeAllTabs');
+    try {
+      return super.closeAllTabs();
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
-tabs: ${tabs}
+tabs: ${tabs},
+currentTabHash: ${currentTabHash}
     ''';
   }
 }

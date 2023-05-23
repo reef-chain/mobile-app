@@ -131,6 +131,10 @@ class __OpenContainerWrapperState extends State<_OpenContainerWrapper> {
     return OpenContainer<bool>(
       transitionType: widget.transitionType,
       openBuilder: (BuildContext context, VoidCallback _) {
+        final tabHash = ReefAppState
+            .instance.browserCtrl.browserModel.tabs[widget.index].tabHash;
+        ReefAppState.instance.browserCtrl
+            .setCurrentTabHash(currentTabHash: tabHash);
         return _DetailsPage(index: widget.index);
       },
       onClosed: (data) async {
@@ -166,7 +170,7 @@ class _SmallerCard extends StatelessWidget {
             padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Flexible(
                     child: Text(
@@ -176,13 +180,16 @@ class _SmallerCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                   overflow: TextOverflow.ellipsis,
                 )),
-                InkWell(
-                    onTap: () {
-                      ReefAppState.instance.browserCtrl.removeWebView(
-                          tabHash: ReefAppState.instance.browserCtrl
-                              .browserModel.tabs[index].tabHash);
+                IconButton(
+                    padding: const EdgeInsets.all(1),
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      final tabHash = ReefAppState.instance.browserCtrl
+                          .browserModel.tabs[index].tabHash;
+                      ReefAppState.instance.browserCtrl
+                          .removeWebView(tabHash: tabHash);
                     },
-                    child: const Icon(
+                    icon: const Icon(
                       Icons.close,
                       size: 20,
                     ))

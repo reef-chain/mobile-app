@@ -86,23 +86,27 @@ class _TabsManagerState extends State<TabsManager> {
           direction: Axis.horizontal,
           children: [
             TextButton(
-                onPressed: () {},
-                child: Text(
+                onPressed: () {
+                  ReefAppState.instance.browserCtrl.closeAllTabs();
+                },
+                child: const Text(
                   "Close All",
-                  style: TextStyle(color: Colors.deepPurpleAccent.shade100),
+                  style: TextStyle(color: Styles.primaryAccentColor),
                 )),
             TextButton(
-                onPressed: () {},
-                child: Text(
+                onPressed: () {
+                  ReefAppState.instance.browserCtrl.closeCurrentTab();
+                },
+                child: const Text(
                   "Done",
-                  style: TextStyle(color: Colors.deepPurpleAccent.shade100),
+                  style: TextStyle(color: Styles.primaryAccentColor),
                 ))
           ],
         )
       ],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Styles.primaryAccentColor,
         child: const Icon(Icons.add),
         onPressed: () async {
           final tabHash = getRandString(20);
