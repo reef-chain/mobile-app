@@ -328,8 +328,6 @@ class _SendPageState extends State<SendPage> {
         return "Sending ...";
       case SendStatus.READY:
         return "Confirm Send";
-      case SendStatus.CANCELED:
-        return "Confirm Send";
       default:
         return "Not Valid";
     }
