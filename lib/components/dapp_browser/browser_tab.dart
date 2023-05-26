@@ -5,7 +5,7 @@
 import 'package:animations/animations.dart';
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:reef_mobile_app/components/dapp_browser/reef_search_delegate.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
