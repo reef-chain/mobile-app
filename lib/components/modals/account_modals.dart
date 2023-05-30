@@ -11,8 +11,10 @@ import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
+import 'package:reef_mobile_app/utils/ensureVisibleWhenFocused.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountImportContent extends StatefulWidget {
   final VoidCallback next;
@@ -113,13 +115,15 @@ class _AccountImportContentState extends State<AccountImportContent> {
             buildAccountBox(account),
             const Gap(12),
           ],
-          Text(
-            "EXISTING 12 OR 24-WORD MNEMONIC SEED:",
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Styles.textLightColor),
-          ),
+          Builder(builder: (context) {
+            return Text(
+              AppLocalizations.of(context)!.existing_seed,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Styles.textLightColor),
+            );
+          }),
           const Gap(8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -158,8 +162,8 @@ class _AccountImportContentState extends State<AccountImportContent> {
                 Flexible(
                   child: Text(
                     errorDuplicated
-                        ? "This account has already been added"
-                        : "Invalid mnemonic seed",
+                        ? AppLocalizations.of(context)!.account_already_added
+                        : AppLocalizations.of(context)!.invalid_mnemonic_seed,
                     style: TextStyle(color: Colors.grey[600], fontSize: 13),
                   ),
                 ),
@@ -194,13 +198,15 @@ class _AccountImportContentState extends State<AccountImportContent> {
                       widget.next();
                     }
                   },
-                  child: const Text(
-                    'Next Step',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: Builder(builder: (context) {
+                    return Text(
+                      AppLocalizations.of(context)!.next_step,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    );
+                  }),
                 ),
               ),
               Positioned.fill(
@@ -249,13 +255,15 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
         children: [
           buildAccountBox(widget.account),
           const Gap(12),
-          Text(
-            "GENERATED 12-WORD MNEMONIC SEED:",
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Styles.textLightColor),
-          ),
+          Builder(builder: (context) {
+            return Text(
+              AppLocalizations.of(context)!.generated_2_word,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Styles.textLightColor),
+            );
+          }),
           const Gap(8),
           Container(
             width: double.infinity,
@@ -276,7 +284,8 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Text(
-                widget.account?.mnemonic ?? "Loading...",
+                widget.account?.mnemonic ??
+                    AppLocalizations.of(context)!.loading + "...",
                 style: TextStyle(color: Styles.primaryAccentColorDark),
               ),
             ),
@@ -300,10 +309,12 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
                     color: Styles.textLightColor,
                   ),
                   const Gap(2),
-                  Text(
-                    "Copy to clipboard",
-                    style: TextStyle(color: Styles.textColor, fontSize: 12),
-                  ),
+                  Builder(builder: (context) {
+                    return Text(
+                      AppLocalizations.of(context)!.copy_to_clipboard,
+                      style: TextStyle(color: Styles.textColor, fontSize: 12),
+                    );
+                  }),
                 ],
               )),
           const Gap(12),
@@ -317,10 +328,12 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
               ),
               const Gap(8),
               Flexible(
-                child: Text(
-                  "Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.",
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                ),
+                child: Builder(builder: (context) {
+                  return Text(
+                    AppLocalizations.of(context)!.please_write_down,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  );
+                }),
               ),
             ],
           ),
@@ -342,7 +355,7 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
               const Gap(8),
               Flexible(
                 child: Text(
-                  "I have saved my mnemonic seed safely.",
+                  AppLocalizations.of(context)!.i_saved_mnemonic,
                   style: TextStyle(color: Colors.grey[600]!, fontSize: 14),
                 ),
               )
@@ -376,13 +389,15 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
                     if (_checkedValue && widget.account?.mnemonic != null)
                       widget.next();
                   },
-                  child: const Text(
-                    'Next Step',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: Builder(builder: (context) {
+                    return Text(
+                      AppLocalizations.of(context)!.next_step,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    );
+                  }),
                 ),
               ),
               Positioned.fill(
@@ -423,6 +438,9 @@ class AccountCreationConfirmContent extends StatefulWidget {
 
 class _AccountCreationConfirmContentState
     extends State<AccountCreationConfirmContent> {
+  FocusNode _focusNodeName = FocusNode();
+  FocusNode _focusNodePassword = FocusNode();
+  FocusNode _focusNodeConfirmPassword = FocusNode();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -431,6 +449,8 @@ class _AccountCreationConfirmContentState
   String password = "";
   String confirmPassword = "";
   bool _hasPassword = false;
+  bool _hasBioAuth = false;
+  bool _biometricsIsAvailable = false;
   bool _passwordError = false;
   bool _confirmPasswordError = false;
 
@@ -469,11 +489,20 @@ class _AccountCreationConfirmContentState
         _confirmPasswordError = password != confirmPassword;
       });
     });
-    ReefAppState.instance.storage
+    ReefAppState.instance.storageCtrl
         .getValue(StorageKey.password.name)
         .then((value) => setState(() {
               _hasPassword = value != null && value.isNotEmpty;
             }));
+    ReefAppState.instance.signingCtrl
+        .checkBiometricsSupport()
+        .then((value) => setState(() {
+              _biometricsIsAvailable = value;
+            }));
+    setState(() {
+      _hasBioAuth =
+          ReefAppState.instance.model.appConfig.isBiometricAuthEnabled;
+    });
   }
 
   @override
@@ -484,6 +513,14 @@ class _AccountCreationConfirmContentState
 
   @override
   Widget build(BuildContext context) {
+    final focusedCtx = FocusManager.instance.primaryFocus!.context;
+
+    Future.delayed(const Duration(milliseconds: 400))
+        .then((_) => Scrollable.ensureVisible(
+              focusedCtx!,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOutQuad,
+            ));
     return Padding(
       padding: const EdgeInsets.only(top: 0, left: 24, bottom: 24, right: 24),
       child: Column(
@@ -492,68 +529,105 @@ class _AccountCreationConfirmContentState
           buildAccountBox(widget.account, name: name),
           const Gap(12),
           Text(
-            "A DESCRIPTIVE NAME FOR YOUR ACCOUNT",
-            style: TextStyle(
+            AppLocalizations.of(context)!.descriptive_account_name,
+            style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
                 color: Styles.textLightColor),
           ),
           const Gap(8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              color: Styles.whiteColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0x20000000),
-                width: 1,
-              ),
-            ),
-            child: TextField(
-              controller: _nameController,
-              decoration: const InputDecoration.collapsed(hintText: ''),
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-          const Gap(16),
-          if (!_hasPassword) ...[
-            Text(
-              "A PASSWORD FOR REEF APP",
-              style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: Styles.textLightColor),
-            ),
-            const Gap(8),
-            Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: Styles.whiteColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _passwordError
-                      ? Styles.errorColor
-                      : const Color(0x20000000),
+                  color: const Color(0x20000000),
                   width: 1,
                 ),
               ),
               child: TextField(
-                controller: _passwordController,
-                obscureText: true,
+                focusNode: _focusNodeName,
+                controller: _nameController,
                 decoration: const InputDecoration.collapsed(hintText: ''),
                 style: const TextStyle(
                   fontSize: 16,
                 ),
-              ),
+              )),
+          const Gap(16),
+          if (!_hasPassword || _hasBioAuth) ...[
+            Row(
+              children: [
+                if (_biometricsIsAvailable)
+                  Checkbox(
+                    visualDensity:
+                        const VisualDensity(horizontal: -4, vertical: -4),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    fillColor:
+                        MaterialStateProperty.all<Color>(Colors.grey[800]!),
+                    value: _hasBioAuth,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _hasBioAuth = value ?? false;
+                      });
+                      ReefAppState.instance.appConfigCtrl
+                          .setBiometricAuth(value == true);
+                    },
+                  ),
+                const Gap(8),
+                Flexible(
+                  child: Text(
+                    AppLocalizations.of(context)!
+                        .enable_biometric_authentication,
+                    style: TextStyle(color: Colors.grey[600]!, fontSize: 12),
+                  ),
+                )
+              ],
             ),
+            if (_biometricsIsAvailable) const Gap(16),
+            if (!_hasBioAuth)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.password_for_reef_app,
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: Styles.textLightColor),
+                  ),
+                  const Gap(8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Styles.whiteColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _passwordError
+                            ? Styles.errorColor
+                            : const Color(0x20000000),
+                        width: 1,
+                      ),
+                    ),
+                    child: TextField(
+                      focusNode: _focusNodePassword,
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration.collapsed(hintText: ''),
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             if (_passwordError) ...[
               const Gap(8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
+                  const Icon(
                     CupertinoIcons.exclamationmark_triangle_fill,
                     color: Styles.errorColor,
                     size: 16,
@@ -561,7 +635,7 @@ class _AccountCreationConfirmContentState
                   const Gap(8),
                   Flexible(
                     child: Text(
-                      "Password is too short",
+                      AppLocalizations.of(context)!.password_too_short,
                       style: TextStyle(color: Colors.grey[600], fontSize: 13),
                     ),
                   ),
@@ -571,8 +645,8 @@ class _AccountCreationConfirmContentState
             if (password.isNotEmpty && !_passwordError) ...[
               const Gap(16),
               Text(
-                "REPEAT PASSWORD FOR VERIFICATION",
-                style: TextStyle(
+                AppLocalizations.of(context)!.repetitive_password,
+                style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                     color: Styles.textLightColor),
@@ -592,6 +666,7 @@ class _AccountCreationConfirmContentState
                   ),
                 ),
                 child: TextField(
+                  focusNode: _focusNodeConfirmPassword,
                   controller: _confirmPasswordController,
                   obscureText: true,
                   decoration: const InputDecoration.collapsed(hintText: ''),
@@ -605,7 +680,7 @@ class _AccountCreationConfirmContentState
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    const Icon(
                       CupertinoIcons.exclamationmark_triangle_fill,
                       color: Styles.errorColor,
                       size: 16,
@@ -613,7 +688,7 @@ class _AccountCreationConfirmContentState
                     const Gap(8),
                     Flexible(
                       child: Text(
-                        "Passwords do not match",
+                        AppLocalizations.of(context)!.password_do_not_match,
                         style: TextStyle(color: Colors.grey[600], fontSize: 13),
                       ),
                     ),
@@ -639,7 +714,7 @@ class _AccountCreationConfirmContentState
                       minimumSize: const Size(48, 48),
                       padding: EdgeInsets.zero,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_back,
                       color: Styles.textColor,
                       size: 20,
@@ -648,7 +723,7 @@ class _AccountCreationConfirmContentState
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      splashFactory: !(name.isNotEmpty &&
+                      splashFactory: !(name.trim().isNotEmpty &&
                               (!_hasPassword || password.isNotEmpty))
                           ? NoSplash.splashFactory
                           : InkSplash.splashFactory,
@@ -665,39 +740,44 @@ class _AccountCreationConfirmContentState
                           : const Color(0xff9d6cff),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: () {
-                      if (name.isNotEmpty &&
-                          (_hasPassword ||
-                              (password.isNotEmpty &&
-                                  !_passwordError &&
-                                  !_confirmPasswordError))) {
-                        if (widget.account != null) {
-                          widget.saveAccount(widget.account as StoredAccount);
-                          if (!_hasPassword && password.isNotEmpty) {
-                            ReefAppState.instance.storage
-                                .setValue(StorageKey.password.name, password);
-                          }
+                    onPressed: (name.trim().isNotEmpty &&
+                            name.trim() != "<No Name>" &&
+                            (_hasPassword ||
+                                (password.isNotEmpty &&
+                                    !_passwordError &&
+                                    !_confirmPasswordError &&
+                                    _confirmPasswordController.text ==
+                                        _passwordController.text) ||
+                                _hasBioAuth))
+                        ? () {
+                            if (widget.account != null) {
+                              widget
+                                  .saveAccount(widget.account as StoredAccount);
+                              if (!_hasPassword && password.isNotEmpty) {
+                                ReefAppState.instance.storageCtrl.setValue(
+                                    StorageKey.password.name, password);
+                              }
 
-                          Navigator.of(context).pop();
+                              Navigator.of(context).pop();
 
-                          if (!widget.fromMnemonic) {
-                            ReefAccount signer = ReefAccount(
-                              address: widget.account!.address,
-                              name: name,
-                              balance: BigInt.zero,
-                              evmAddress: "",
-                              isEvmClaimed: false,
-                              iconSVG: widget.account!.svg,
-                            );
-                            showBindEvmModal(context, bindFor: signer);
+                              if (!widget.fromMnemonic) {
+                                ReefAccount signer = ReefAccount(
+                                  address: widget.account!.address,
+                                  name: name,
+                                  balance: BigInt.zero,
+                                  evmAddress: "",
+                                  isEvmClaimed: false,
+                                  iconSVG: widget.account!.svg,
+                                );
+                                showBindEvmModal(context, bindFor: signer);
+                              }
+                            }
                           }
-                        }
-                      }
-                    },
+                        : null,
                     child: Text(
                       widget.fromMnemonic
-                          ? 'Import the account'
-                          : 'Add the account',
+                          ? AppLocalizations.of(context)!.import_the_account
+                          : AppLocalizations.of(context)!.add_the_account,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 14,
@@ -772,31 +852,22 @@ class _CurrentScreenState extends State<CurrentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      switchInCurve: Curves.easeOutExpo,
-      switchOutCurve: Curves.easeInExpo,
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: Tween(
-              begin: const Offset(-1.0, 0.0),
-              end: const Offset(0.0, 0.0),
-            ).animate(animation),
-            child: child,
-          ),
-        );
-      },
-      child: (activeIndex == 0)
-          ? widget.fromMnemonic
-              ? AccountImportContent(next: nextIndex, callback: importAccount)
-              : AccountCreationContent(next: nextIndex, account: account)
-          : AccountCreationConfirmContent(
-              prev: prevIndex,
-              account: account,
-              saveAccount: saveAccount,
-              fromMnemonic: widget.fromMnemonic),
+    return AnimatedCrossFade(
+      crossFadeState: activeIndex == 0
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
+      duration: const Duration(milliseconds: 300),
+      firstCurve: Curves.easeInOutQuad,
+      secondCurve: Curves.easeInOutQuad,
+      sizeCurve: Curves.easeInOutQuad,
+      firstChild: widget.fromMnemonic
+          ? AccountImportContent(next: nextIndex, callback: importAccount)
+          : AccountCreationContent(next: nextIndex, account: account),
+      secondChild: AccountCreationConfirmContent(
+          prev: prevIndex,
+          account: account,
+          saveAccount: saveAccount,
+          fromMnemonic: widget.fromMnemonic),
     );
   }
 }
@@ -806,7 +877,8 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
       color: Styles.whiteColor,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
-        child: Row(
+        child: Flex(
+          direction: Axis.horizontal,
           children: [
             Container(
               decoration: const BoxDecoration(
@@ -824,7 +896,8 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
                         )),
             ),
             const Gap(12),
-            Column(
+            Flex(
+              direction: Axis.vertical,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -835,10 +908,12 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
                   ),
                 ),
                 const Gap(2),
-                Row(
+                Flex(
+                  direction: Axis.horizontal,
                   children: [
                     Text(
                       "Address: ${account?.address.shorten() ?? "Loading..."}",
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.grey[600]!),
                     ),
                     const Gap(2),
@@ -860,9 +935,12 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
       ));
 }
 
-void showCreateAccountModal(BuildContext context, {bool fromMnemonic = false}) {
+void showCreateAccountModal(BuildContext context,
+    {bool fromMnemonic = false, bool fromJson = false}) {
   showModal(context,
-      headText: fromMnemonic ? "Import Account" : "Create Account",
+      headText: fromMnemonic
+          ? AppLocalizations.of(context)!.import_the_account
+          : AppLocalizations.of(context)!.create_new_account,
       dismissible: true,
       child: CurrentScreen(fromMnemonic: fromMnemonic));
 }

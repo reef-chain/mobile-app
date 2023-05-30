@@ -3,6 +3,7 @@ import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AuthUrlList extends StatefulWidget {
   const AuthUrlList({Key? key}) : super(key: key);
@@ -17,21 +18,23 @@ class _AuthUrlListState extends State<AuthUrlList> {
   @override
   void initState() {
     super.initState();
-    ReefAppState.instance.storage.getAllAuthUrls().then((value) => setState(() {
-          authUrls = value;
-        }));
+    ReefAppState.instance.storageCtrl
+        .getAllAuthUrls()
+        .then((value) => setState(() {
+              authUrls = value;
+            }));
   }
 
   showAlertDialog(BuildContext context, AuthUrl authUrl) {
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: const Text("Cancel"),
+      child: Text(AppLocalizations.of(context)!.cancel),
       onPressed: () {
         Navigator.of(context).pop();
       },
     );
     Widget continueButton = TextButton(
-      child: const Text("Yes"),
+      child: Text(AppLocalizations.of(context)!.yes),
       onPressed: () {
         authUrl.delete();
         setState(() {
@@ -43,9 +46,9 @@ class _AuthUrlListState extends State<AuthUrlList> {
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: const Text("Delete Website"),
+      title: Text(AppLocalizations.of(context)!.auth_url_list_del),
       content: Text(
-          "Are you sure you want to delete the Website with URL ${authUrl.url}?"),
+          "${AppLocalizations.of(context)!.delete_website_url} ${authUrl.url}?"),
       actions: [
         cancelButton,
         continueButton,
@@ -68,8 +71,9 @@ class _AuthUrlListState extends State<AuthUrlList> {
       child: Column(
         children: [
           if (authUrls.isEmpty)
-            const Center(
-              child: Text('No website request yet!'),
+            Center(
+              child: Text(
+                  AppLocalizations.of(context)!.auth_url_list_no_website_yet),
             )
           else ...[
             ...authUrls.map((AuthUrl authUrl) {
@@ -83,7 +87,8 @@ class _AuthUrlListState extends State<AuthUrlList> {
                       onChanged: (value) {
                         setState(() {
                           authUrl.isAllowed = value;
-                          ReefAppState.instance.storage.saveAuthUrl(authUrl);
+                          ReefAppState.instance.storageCtrl
+                              .saveAuthUrl(authUrl);
                         });
                       },
                       activeColor: Styles.primaryAccentColorDark,

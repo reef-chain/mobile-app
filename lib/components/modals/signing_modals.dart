@@ -10,6 +10,7 @@ import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
+import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/model/signing/signature_request.dart';
 import 'package:reef_mobile_app/model/signing/tx_decoded_data.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
@@ -17,9 +18,13 @@ import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/gradient_text.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
-import '../../model/feedback-data-model/FeedbackDataModel.dart';
+import '../../model/status-data-object/StatusDataObject.dart';
 
-List<TableRow> createTable({required keyTexts, required valueTexts}) {
+List<TableRow> createTable(
+    {required keyTexts,
+    required valueTexts,
+    double fontSizeLabel = 12,
+    double fontSizeValue = 12}) {
   List<TableRow> rows = [];
   for (int i = 0; i < keyTexts.length; ++i) {
     rows.add(TableRow(children: [
@@ -29,15 +34,18 @@ List<TableRow> createTable({required keyTexts, required valueTexts}) {
           keyTexts[i],
           gradient: textGradient(),
           textAlign: TextAlign.right,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+          style:
+              TextStyle(fontWeight: FontWeight.w600, fontSize: fontSizeLabel),
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-        child: Text(
-          valueTexts[i],
-          style: const TextStyle(fontSize: 12),
-          overflow: TextOverflow.ellipsis,
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+          child: Text(
+            valueTexts[i],
+            style: TextStyle(fontSize: fontSizeValue),
+            overflow: TextOverflow.fade,
+          ),
         ),
       ),
     ]));
@@ -45,7 +53,7 @@ List<TableRow> createTable({required keyTexts, required valueTexts}) {
   return rows;
 }
 
-List<TableRow> createTransactionTable(TxDecodedData txData) {
+/*List<TableRow> createTransactionTable(TxDecodedData txData) {
   List<String> keyTexts = [
     txData.chainName != null ? "Chain" : "Genesis",
     "Version",
@@ -75,10 +83,10 @@ List<TableRow> createTransactionTable(TxDecodedData txData) {
   }
 
   return createTable(keyTexts: keyTexts, valueTexts: valueTexts);
-}
+}*/
 
-class EvmNotClaimedModal extends StatefulWidget {
-  final FeedbackDataModel<ReefAccount> signer;
+/*class EvmNotClaimedModal extends StatefulWidget {
+  final StatusDataObject<ReefAccount> signer;
 
   const EvmNotClaimedModal(this.signer, {Key? key}) : super(key: key);
 
@@ -134,23 +142,23 @@ class _EvmNotClaimedModalState extends State<EvmNotClaimedModal> {
           ],
         ));
   }
-}
+}*/
 
-class SignModal extends StatefulWidget {
+/*class SignModal extends StatefulWidget {
   final List<TableRow> detailsTable;
   final bool isTransaction;
   final String signatureIdent;
-  final FeedbackDataModel<ReefAccount> signer;
+  final StatusDataObject<ReefAccount> signer;
   const SignModal(
       this.detailsTable, this.isTransaction, this.signatureIdent, this.signer,
       {Key? key})
       : super(key: key);
 
   @override
-  State<SignModal> createState() => _SignModalState();
+  State<SignModal> createState() => SignModalState();
 }
 
-class _SignModalState extends State<SignModal> {
+class SignModalState extends State<SignModal> {
   bool _wrongPassword = false;
   bool _biometricsIsAvailable = false;
 
@@ -180,17 +188,24 @@ class _SignModalState extends State<SignModal> {
     return isAvailable && isDeviceSupported;
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _passwordController.dispose();
+  }
+
   Future<void> authenticateWithPassword(String value) async {
     final storedPassword =
-        await ReefAppState.instance.storage.getValue(StorageKey.password.name);
+        await ReefAppState.instance.storageCtrl.getValue(StorageKey.password.name);
     if (storedPassword == value) {
       setState(() {
         _wrongPassword = false;
+        ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
         Navigator.pop(context);
-        ReefAppState.instance.signingCtrl.confirmSignature(
-          widget.signatureIdent,
-          widget.signer.data.address,
-        );
+        // ReefAppState.instance.signingCtrl.confirmSignature(
+        //   widget.signatureIdent,
+        //   widget.signer.data.address,
+        // );
       });
     } else {
       setState(() {
@@ -207,11 +222,12 @@ class _SignModalState extends State<SignModal> {
     if (isValid) {
       setState(() {
         _wrongPassword = false;
+        ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
         Navigator.pop(context);
-        ReefAppState.instance.signingCtrl.confirmSignature(
-          widget.signatureIdent,
-          widget.signer.data.address,
-        );
+        // ReefAppState.instance.signingCtrl.confirmSignature(
+        //   widget.signatureIdent,
+        //   widget.signer.data.address,
+        // );
       });
     }
   }
@@ -229,25 +245,25 @@ class _SignModalState extends State<SignModal> {
               onSelected: () => {},
               showOptions: false),
           //Information Section
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Table(
-              columnWidths: const {
-                0: IntrinsicColumnWidth(),
-                1: FlexColumnWidth(4),
-              },
-              children: widget.detailsTable,
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 0.0),
+          //   child: Table(
+          //     columnWidths: const {
+          //       0: IntrinsicColumnWidth(),
+          //       1: FlexColumnWidth(4),
+          //     },
+          //     children: widget.detailsTable,
+          //   ),
+          // ),
           //Password Section
           // TODO: Allow choosing between password and biometrics
           if (!_biometricsIsAvailable) ...[
-            Divider(
+            const Divider(
               color: Styles.textLightColor,
               thickness: 1,
             ),
             const Gap(12),
-            Text(
+            const Text(
               "PASSWORD FOR REEF APP",
               style: TextStyle(
                   fontSize: 14,
@@ -336,16 +352,16 @@ class _SignModalState extends State<SignModal> {
       ),
     );
   }
-}
+}*/
 
-Future<TxDecodedData> _getTxDecodedData(SignatureRequest request) async {
+/*Future<TxDecodedData> _getTxDecodedData(SignatureRequest request) async {
   TxDecodedData txDecodedData = TxDecodedData(
     specVersion: hexToDecimalString(request.payload.specVersion),
     nonce: hexToDecimalString(request.payload.nonce),
   );
 
   // Chain or genesis hash
-  var metadata = await ReefAppState.instance.storage
+  final metadata = await ReefAppState.instance.storageCtrl
       .getMetadata(request.payload.genesisHash);
   if (metadata != null) {
     txDecodedData.chainName = metadata.chain;
@@ -359,10 +375,10 @@ Future<TxDecodedData> _getTxDecodedData(SignatureRequest request) async {
       metadata.specVersion ==
           int.parse(request.payload.specVersion.substring(2), radix: 16)) {
     types = metadata.types;
-    var decodedMethod = await ReefAppState.instance.signingCtrl
-        .decodeMethod(request.payload.method, types);
+    final decodedMethod = await ReefAppState.instance.signingCtrl
+        .decodeMethod(request.payload.method, types: types);
     txDecodedData.methodName = decodedMethod["methodName"];
-    var jsonEncoder = const JsonEncoder.withIndent("  ");
+    const jsonEncoder = JsonEncoder.withIndent("  ");
     txDecodedData.args = jsonEncoder.convert(decodedMethod["args"]);
     txDecodedData.info = decodedMethod["info"];
   } else {
@@ -378,18 +394,18 @@ Future<TxDecodedData> _getTxDecodedData(SignatureRequest request) async {
   // TODO: era should be an object, instead of a string
 
   return txDecodedData;
-}
+}*/
 
-void showSigningModal(context, SignatureRequest signatureRequest) async {
-  var account = ReefAppState.instance.model.accounts.accountsFDM.data.firstWhere(
-      (acc) => acc.data.address == signatureRequest.payload.address,
-      orElse: () => throw Exception("Signer not found"));
+/*void showSigningModal(context, SignatureRequest signatureRequest) async {
+  final account = ReefAppState.instance.model.accounts.accountsFDM.data
+      .firstWhere((acc) => acc.data.address == signatureRequest.payload.address,
+          orElse: () => throw Exception("Signer not found"));
 
-  var signatureIdent = signatureRequest.signatureIdent;
+  final signatureIdent = signatureRequest.signatureIdent;
 
-  var type = signatureRequest.payload.type;
+  final type = signatureRequest.payload.type;
   if (type == "bytes") {
-    var bytes = await ReefAppState.instance.signingCtrl
+    final bytes = await ReefAppState.instance.signingCtrl
         .bytesString(signatureRequest.payload.data);
     List<TableRow> detailsTable = createTable(keyTexts: [
       "bytes",
@@ -401,7 +417,7 @@ void showSigningModal(context, SignatureRequest signatureRequest) async {
         dismissible: true,
         headText: "Sign Message");
   } else {
-    var txDecodedData = await _getTxDecodedData(signatureRequest);
+    final txDecodedData = await _getTxDecodedData(signatureRequest);
     if (txDecodedData.methodName != null &&
         txDecodedData.methodName!.startsWith("evm.") &&
         !account.data.isEvmClaimed) {
@@ -417,4 +433,4 @@ void showSigningModal(context, SignatureRequest signatureRequest) async {
           headText: "Sign Transaction");
     }
   }
-}
+}*/

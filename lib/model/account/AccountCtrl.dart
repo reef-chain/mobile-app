@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
-import 'package:reef_mobile_app/model/feedback-data-model/FeedbackDataModel.dart';
+import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
@@ -19,8 +19,8 @@ class AccountCtrl {
   final StorageService _storage;
 
   AccountCtrl(this._jsApi, this._storage, this._accountModel) {
-    _initSavedDeviceAccountAddress(_storage);
     _initJsObservables(_jsApi, _storage);
+    _initSavedDeviceAccountAddress(_storage);
     _initWasm(_jsApi);
   }
 
@@ -36,7 +36,6 @@ class AccountCtrl {
   }
 
   Future<void> setSelectedAddress(String address) {
-    // TODO check if in signers
     return _jsApi
         .jsCallVoidReturn('window.reefState.setSelectedAddress("$address")');
   }
@@ -45,14 +44,37 @@ class AccountCtrl {
     return await _jsApi.jsPromise('window.keyring.generate()');
   }
 
+  Future<dynamic> restoreJson(
+      Map<String, dynamic> file, String password) async {
+    return await _jsApi.jsPromise(
+        'window.keyring.restoreJson(${jsonEncode(file)},"$password")');
+  }
+
+  Future<dynamic> exportAccountQr(String address, String password) async {
+    return await _jsApi
+        .jsPromise('window.keyring.exportAccountQr("$address","$password")');
+  }
+
+  Future<dynamic> changeAccountPassword(
+      String address, String newPass, String oldPass) async {
+    return await _jsApi.jsPromise(
+        'window.keyring.changeAccountPassword("$address","$newPass","$oldPass")');
+  }
+
+  Future<dynamic> accountsCreateSuri(String mnemonic, String password) async {
+    return await _jsApi.jsPromise(
+        'window.keyring.accountsCreateSuri("$mnemonic","$password")');
+  }
+
   Future<bool> checkMnemonicValid(String mnemonic) async {
     var isValid = await _jsApi
         .jsPromise('window.keyring.checkMnemonicValid("$mnemonic")');
     return isValid == 'true';
   }
 
-  Future<dynamic> resolveEvmAddress(String nativeAddress) async{
-    return await _jsApi.jsPromise('window.account.resolveEvmAddress("$nativeAddress")');
+  Future<dynamic> resolveEvmAddress(String nativeAddress) async {
+    return await _jsApi
+        .jsPromise('window.account.resolveEvmAddress("$nativeAddress")');
   }
 
   Future<String> accountFromMnemonic(String mnemonic) async {
@@ -97,8 +119,23 @@ class AccountCtrl {
   }
 
   Future<bool> isValidEvmAddress(String address) async {
-    var res = await _jsApi.jsCall('window.utils.isValidEvmAddress("$address")');
-    return res == 'true';
+    return await _jsApi
+            .jsCall<bool>('window.account.isValidEvmAddress("$address")');
+  }
+
+  Future<bool> isValidSubstrateAddress(String address) async {
+    return await _jsApi.jsCall<bool>(
+            'window.account.isValidSubstrateAddress("$address")');
+  }
+
+  Future<String?> resolveToNativeAddress(String evmAddress) async {
+    return await _jsApi
+        .jsPromise('window.account.resolveFromEvmAddress("$evmAddress")');
+  }
+
+  Future<bool> isEvmAddressExist(String address) async {
+    var res = await this.resolveToNativeAddress(address);
+    return res != null;
   }
 
   Stream availableSignersStream() {
@@ -117,12 +154,15 @@ class AccountCtrl {
       _accountModel.setSelectedAddress(address);
     });
 
-    jsApi.jsObservable('window.reefState.accounts_status\$').listen((accs) async {
+    jsApi
+        .jsObservable('window.reefState.accounts_status\$')
+        .listen((accs) async {
+      ParseListFn<StatusDataObject<ReefAccount>> parsableListFn =
+          getParsableListFn(ReefAccount.fromJson);
+      var accsListFdm = StatusDataObject.fromJsonList(accs, parsableListFn);
 
-      ParseListFn<FeedbackDataModel<ReefAccount>> parsableListFn = getParsableListFn(ReefAccount.fromJson);
-      var accsListFdm = FeedbackDataModel.fromJsonList(accs, parsableListFn);
-
-      print('GOT ACCOUNTS ${accsListFdm.hasStatus(StatusCode.completeData)} ${accsListFdm.statusList[0].message} len =${accsListFdm.data.length}');
+      print(
+          'GOT ACCOUNTS ${accsListFdm.hasStatus(StatusCode.completeData)} ${accsListFdm.statusList[0].message} len =${accsListFdm.data.length}');
 
       _setAccountIconsFromStorage(accsListFdm);
 
@@ -131,15 +171,22 @@ class AccountCtrl {
   }
 
   void _initSavedDeviceAccountAddress(StorageService storage) async {
-    // TODO check if this address also exists in keystore
     var savedAddress = await storage.getValue(StorageKey.selected_address.name);
-    // TODO if null get first address from storage // https://app.clickup.com/t/37rvnpw
-    if (kDebugMode) {
-      print('SET SAVED ADDRESS=$savedAddress');
-    }
-    // TODO check if selected is in accounts
+
     if (savedAddress != null) {
-      setSelectedAddress(savedAddress);
+      // check if the saved address exists in the allAccounts list
+      var allAccounts = await storage.getAllAccounts();
+      for (var account in allAccounts) {
+        if (account.address == savedAddress) {
+          await setSelectedAddress(account.address);
+          return; //return from here after saving the selected address
+        }
+      }
+
+      //if the saved address is not found then set first address as saved
+      if (allAccounts.length > 0) {
+        await setSelectedAddress(allAccounts[0].address);
+      }
     }
   }
 
@@ -152,17 +199,24 @@ class AccountCtrl {
         'window.account.toReefEVMAddressWithNotification("$evmAddress")');
   }
 
-  void _setAccountIconsFromStorage(FeedbackDataModel<List<FeedbackDataModel<ReefAccount>>> accsListFdm) async {
+  toReefEVMAddressNoNotificationString(String evmAddress) async {
+    return await _jsApi
+        .jsCall('window.account.toReefEVMAddressNoNotification("$evmAddress")');
+  }
+
+  void _setAccountIconsFromStorage(
+      StatusDataObject<List<StatusDataObject<ReefAccount>>> accsListFdm) async {
     var accIcons = [];
 
-    (await _storage.getAllAccounts()).forEach(((account) => {
-    accIcons.add({"address": account.address, "svg": account.svg})
+    (await _storage.getAllAccounts()).forEach(((account) {
+      accIcons.add({"address": account.address, "svg": account.svg});
     }));
 
     accsListFdm.data.forEach((accFdm) {
-      var accIcon = accIcons.firstWhere((accIcon) => accIcon['address'] == accFdm.data.address, orElse: ()=>null);
+      var accIcon = accIcons.firstWhere(
+          (accIcon) => accIcon['address'] == accFdm.data.address,
+          orElse: () => null);
       accFdm.data.iconSVG = accIcon?['svg'];
     });
-
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
@@ -18,7 +19,7 @@ import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../components/SignatureContentToggle.dart';
+import '../components/sign/SignatureContentToggle.dart';
 
 const FIAT_NAME = 'USD';
 const TOKEN_NAME = 'BUSD'; // TODO change to REEF
@@ -148,7 +149,7 @@ class _BuyPageState extends State<BuyPage> {
 
   Future<String> _authenticate() async {
     try {
-      var signerAddress = await ReefAppState.instance.storage
+      var signerAddress = await ReefAppState.instance.storageCtrl
           .getValue(StorageKey.selected_address.name);
       http.Response responseNonce =
           await http.get(Uri.parse('$baseUrl/auth/$signerAddress'));
@@ -163,7 +164,7 @@ class _BuyPageState extends State<BuyPage> {
       var auth = manageResponse(responseAuth);
       if (auth['authenticated'] == true) {
         var jwt = auth['token'];
-        await ReefAppState.instance.storage.saveJwt(signerAddress, jwt);
+        await ReefAppState.instance.storageCtrl.saveJwt(signerAddress, jwt);
         return jwt;
       } else {
         showAlertModal("Error", ["Authentication failed"], context: context);
@@ -176,9 +177,9 @@ class _BuyPageState extends State<BuyPage> {
   }
 
   void _buy() async {
-    var signerAddress = await ReefAppState.instance.storage
+    var signerAddress = await ReefAppState.instance.storageCtrl
         .getValue(StorageKey.selected_address.name);
-    var jwt = await ReefAppState.instance.storage.getJwt(signerAddress);
+    var jwt = await ReefAppState.instance.storageCtrl.getJwt(signerAddress);
     if (jwt == null) {
       jwt = await _authenticate();
       if (jwt == "") {
@@ -208,7 +209,7 @@ class _BuyPageState extends State<BuyPage> {
       }
     } catch (e) {
       if (e is Exception && e.toString().contains('TokenExpiredError')) {
-        await ReefAppState.instance.storage.deleteJwt(signerAddress);
+        await ReefAppState.instance.storageCtrl.deleteJwt(signerAddress);
         await _authenticate();
         _buy();
       } else {
@@ -250,11 +251,11 @@ class _BuyPageState extends State<BuyPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (network==Network.mainnet.name) {
+    if (network == Network.mainnet.name) {
       return buildBuy(context);
     }
-    if(network==Network.testnet.name){
-        return buildTestnetReef(context);
+    if (network == Network.testnet.name) {
+      return buildTestnetReef(context);
     }
     return const CircularProgressIndicator();
   }
@@ -286,7 +287,7 @@ class _BuyPageState extends State<BuyPage> {
   Widget buildRedirect(BuildContext context) {
     return Column(
       children: [
-        const Text(
+        Text(
           "Complete your purchase on Binance Connect.",
           style: TextStyle(
             fontSize: 16,
@@ -307,8 +308,8 @@ class _BuyPageState extends State<BuyPage> {
             onPressed: () {
               _navigateBinanceConnect();
             },
-            child: const Text(
-              "Go to Binance Connect",
+            child: Text(
+              AppLocalizations.of(context)!.go_to_binance,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -323,8 +324,8 @@ class _BuyPageState extends State<BuyPage> {
   Widget buildRedirected(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          "If you have completed your purchase on Binance Connect, your REEF balance will be updated after the transaction has been confirmed onchain.",
+        Text(
+          AppLocalizations.of(context)!.completed_binance_purchase,
           style: TextStyle(
             fontSize: 16,
           ),
@@ -344,8 +345,8 @@ class _BuyPageState extends State<BuyPage> {
             onPressed: () {
               _getOrder();
             },
-            child: const Text(
-              "Check order status",
+            child: Text(
+              AppLocalizations.of(context)!.scan_address,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -381,8 +382,8 @@ class _BuyPageState extends State<BuyPage> {
                 tradeState = TradeState.pending;
               });
             },
-            child: const Text(
-              "Create a new purchase",
+            child: Text(
+              AppLocalizations.of(context)!.create_purchase,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -572,8 +573,7 @@ class _BuyPageState extends State<BuyPage> {
                   ),
                 ),
                 const Gap(12),
-                const Text(
-                    "The amount of REEF displayed is an approximation of what you will receive. The final amount will be shown at the time of the transaction."),
+                Text(AppLocalizations.of(context)!.approximate_reef),
               ]
             ],
           ),

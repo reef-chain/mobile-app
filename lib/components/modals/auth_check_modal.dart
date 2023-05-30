@@ -8,6 +8,7 @@ import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AuthCheck extends StatefulWidget {
   const AuthCheck({Key? key}) : super(key: key);
@@ -34,10 +35,12 @@ class _AuthCheckState extends State<AuthCheck> {
       });
     });
     _checkBiometricsSupport().then((value) {
-      if (value) authenticateWithBiometrics();
       setState(() {
         _biometricsIsAvailable = value;
       });
+      if (value) {
+        authenticateWithBiometrics();
+      }
     });
   }
 
@@ -48,8 +51,8 @@ class _AuthCheckState extends State<AuthCheck> {
   }
 
   Future<void> authenticateWithPassword(String value) async {
-    final storedPassword =
-        await ReefAppState.instance.storage.getValue(StorageKey.password.name);
+    final storedPassword = await ReefAppState.instance.storageCtrl
+        .getValue(StorageKey.password.name);
     if (storedPassword == value) {
       setState(() {
         _wrongPassword = false;
@@ -63,16 +66,26 @@ class _AuthCheckState extends State<AuthCheck> {
   }
 
   Future<void> authenticateWithBiometrics() async {
-    final isValid = await localAuth.authenticate(
-        localizedReason: 'Authenticate with biometrics',
-        options: const AuthenticationOptions(
-            useErrorDialogs: true, stickyAuth: true, biometricOnly: true));
-    if (isValid) {
-      setState(() {
-        _wrongPassword = false;
-        _isAuthenticated = true;
-      });
+    final isAvailable = await _checkBiometricsSupport();
+    if (isAvailable) {
+      final isValid = await localAuth.authenticate(
+          localizedReason:
+              AppLocalizations.of(context)!.authenticate_with_biometrics,
+          options: const AuthenticationOptions(
+              useErrorDialogs: true, stickyAuth: true, biometricOnly: true));
+      if (isValid) {
+        setState(() {
+          _wrongPassword = false;
+          _isAuthenticated = true;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _passwordController.dispose();
   }
 
   @override
@@ -88,7 +101,7 @@ class _AuthCheckState extends State<AuthCheck> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "PASSWORD FOR REEF APP",
+                    AppLocalizations.of(context)!.password_for_reef_app,
                     style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -128,7 +141,7 @@ class _AuthCheckState extends State<AuthCheck> {
                         const Gap(8),
                         Flexible(
                           child: Text(
-                            "Password is incorrect",
+                            AppLocalizations.of(context)!.incorrect_password,
                             style: TextStyle(
                                 color: Colors.grey[600], fontSize: 13),
                           ),
@@ -163,8 +176,8 @@ class _AuthCheckState extends State<AuthCheck> {
                                 authenticateWithPassword(password);
                               }
                             },
-                            child: const Text(
-                              'Send',
+                            child: Text(
+                              AppLocalizations.of(context)!.send,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 14,

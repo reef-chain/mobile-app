@@ -1,34 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
+import 'package:reef_mobile_app/components/modals/show_qr_code.dart';
+import 'package:reef_mobile_app/components/modals/export_qr_account_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
-import 'package:reef_mobile_app/model/feedback-data-model/FeedbackDataModel.dart';
+import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
 import '../utils/styles.dart';
 import 'BlurableContent.dart';
 
 class AccountBox extends StatefulWidget {
-  final FeedbackDataModel<ReefAccount> reefAccountFDM;
+  final StatusDataObject<ReefAccount> reefAccountFDM;
   final bool selected;
   final VoidCallback onSelected;
   final bool showOptions;
+  final bool lightTheme;
 
   const AccountBox(
       {Key? key,
       required this.reefAccountFDM,
       required this.selected,
       required this.onSelected,
-      required this.showOptions})
+      required this.showOptions,
+      this.lightTheme = false})
       : super(key: key);
 
   @override
   State<AccountBox> createState() => _AccountBoxState();
+  void SelectAccount() {
+    this.onSelected;
+  }
 }
 
 class _AccountBoxState extends State<AccountBox> {
@@ -36,6 +44,15 @@ class _AccountBoxState extends State<AccountBox> {
 
   @override
   Widget build(BuildContext context) {
+    var gradientColors = widget.lightTheme
+        ? [
+            Color.fromARGB(255, 231, 223, 248),
+            Color.fromARGB(194, 200, 220, 250),
+          ]
+        : [
+            Color.fromARGB(198, 37, 19, 79),
+            Color.fromARGB(53, 110, 27, 117),
+          ];
     return InkWell(
       onTap: widget.onSelected,
       child: PhysicalModel(
@@ -45,17 +62,13 @@ class _AccountBoxState extends State<AccountBox> {
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                     begin: Alignment(0, 0.2),
-                     end: Alignment(0.1, 1.3),
-                    colors: [
-                      Color.fromARGB(198, 93, 59, 173),
-                       Color.fromARGB(53, 185, 25, 197),
-                    ]),
+                    end: Alignment(0.1, 1.3),
+                    colors: gradientColors),
                 border: Border.all(
-                  color:   !widget.selected?Color(Styles.purpleColor.value): Color(Styles.blueColor.value),
-                  width: widget.selected?3:1
-                ),
+                    color: Color(Styles.purpleColor.value),
+                    width: widget.selected ? 3 : 0),
                 borderRadius: BorderRadius.circular(15)),
             child: Stack(
               children: [
@@ -67,12 +80,12 @@ class _AccountBoxState extends State<AccountBox> {
                         padding: const EdgeInsets.only(
                             left: 12, bottom: 5, right: 10, top: 2),
                         decoration: BoxDecoration(
-                            color: Styles.blueColor,
+                            color: Styles.purpleColor,
                             borderRadius: const BorderRadius.only(
                                 bottomLeft: Radius.circular(15),
                                 topRight: Radius.circular(12))),
                         child: Text(
-                          "Selected",
+                          AppLocalizations.of(context)!.selected,
                           style: TextStyle(
                               color: Styles.whiteColor,
                               fontWeight: FontWeight.w600,
@@ -82,7 +95,8 @@ class _AccountBoxState extends State<AccountBox> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 24.0),
-                  child: Row(
+                  child: Flex(
+                    direction: Axis.horizontal,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(children: [
@@ -109,7 +123,8 @@ class _AccountBoxState extends State<AccountBox> {
                       Expanded(
                           child: Padding(
                         padding: const EdgeInsets.only(left: 10),
-                        child: buildCentralColumn(widget.reefAccountFDM),
+                        child: buildCentralColumn(
+                            widget.reefAccountFDM, widget.lightTheme),
                       )),
                       if (widget.showOptions)
                         Column(
@@ -121,15 +136,37 @@ class _AccountBoxState extends State<AccountBox> {
                               ),
                               enableFeedback: true,
                               onSelected: (String choice) {
-                                choiceAction(choice, context,
-                                    widget.reefAccountFDM.data);
+                                choiceAction(
+                                    choice,
+                                    context,
+                                    widget.reefAccountFDM.data,
+                                    widget.onSelected);
                               },
-                              tooltip: "More Actions",
+                              tooltip:
+                                  AppLocalizations.of(context)!.more_actions,
                               itemBuilder: (BuildContext context) {
-                                return Constants.choices.map((String choice) {
+                                return Constants(
+                                  delete: AppLocalizations.of(context)!.delete,
+                                  shareAddressQr: AppLocalizations.of(context)!
+                                      .share_address_qr,
+                                  shareEvmQr: AppLocalizations.of(context)!
+                                      .share_evm_qr,
+                                  exportAccount: AppLocalizations.of(context)!
+                                      .export_account,
+                                  selectAccount: AppLocalizations.of(context)!
+                                      .select_account,
+                                ).getConstants().map((String choice) {
                                   return PopupMenuItem<String>(
                                     value: choice,
                                     child: Text(choice),
+                                    enabled: widget
+                                            .reefAccountFDM.data.isEvmClaimed
+                                        ? true
+                                        : choice ==
+                                                AppLocalizations.of(context)!
+                                                    .share_evm_qr
+                                            ? false
+                                            : true,
                                   );
                                 }).toList();
                               },
@@ -145,171 +182,261 @@ class _AccountBoxState extends State<AccountBox> {
     );
   }
 
-  Widget buildCentralColumn(FeedbackDataModel<ReefAccount> reefAccount) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget buildCentralColumn(
+      StatusDataObject<ReefAccount> reefAccount, bool lightTheme) {
+    var textColor1 = lightTheme ? Styles.textColor : Colors.white;
+    var textColor2 = lightTheme ? Colors.black38 : Styles.textLightColor;
+    return Flex(
+        direction: Axis.vertical,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Flexible(
-              child: Text(reefAccount.data.name,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ))),
-          Row(children: [
-            const Image(
-                image: AssetImage("./assets/images/reef.png"),
-                width: 18,
-                height: 18),
-            Gap(4),
-             Observer(builder:(_){
-              return BlurableContent(Text(
-              '${toAmountDisplayBigInt(reefAccount.data.balance)} REEF',
-              style: GoogleFonts.poppins(
-                color: Styles.blueColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ), ReefAppState.instance.model.appConfig.displayBalance);
-            } )
-          ])
-        ],
-      ),
-      Gap(6),
-      Container(color: Colors.purpleAccent.shade100.withAlpha(44), height: 1),
-      Gap(6),
-      Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text.rich(
-              TextSpan(
-                text: "Address:",
-                style: TextStyle(fontSize: 10, color: Colors.grey.shade300),
-                children: <TextSpan>[
-                  TextSpan(
-                      text: " ${widget.reefAccountFDM.data.address.shorten()} ",
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-            if (widget.reefAccountFDM.hasStatus(StatusCode.completeData) &&
-                widget.reefAccountFDM.data.isEvmClaimed)
-              Text.rich(
-                TextSpan(
-                  text: "EVM:",
-                  style: const TextStyle(fontSize: 10),
-                  children: <TextSpan>[
-                    TextSpan(
-                      text:
-                          " ${widget.reefAccountFDM.data.evmAddress?.shorten()}",
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-            if (widget.showOptions &&
-                widget.reefAccountFDM.hasStatus(StatusCode.completeData) &&
-                !widget.reefAccountFDM.data.isEvmClaimed)
-              DecoratedBox(
-                decoration: BoxDecoration(
-                    color: Styles.primaryAccentColor,
-                    // gradient: textGradient(),
-                    borderRadius: BorderRadius.circular(12)),
-                child: TextButton(
-                    onPressed: () {
-                      showBindEvmModal(context,
-                          bindFor: widget.reefAccountFDM.data);
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.black12,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(82, 30),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      "Connect EVM",
-                      style: TextStyle(
-                          color: Styles.whiteColor,
+          Flex(
+            direction: Axis.horizontal,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                  child: Text(reefAccount.data.name,
+                      style: GoogleFonts.poppins(
+                        color: textColor1,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ))),
+              Flexible(
+                  child: Flex(direction: Axis.horizontal, children: [
+                const Image(
+                    image: AssetImage("./assets/images/reef.png"),
+                    width: 18,
+                    height: 18),
+                const Gap(4),
+                Observer(builder: (_) {
+                  return BlurableContent(
+                      Text(
+                        '${formatAmountToDisplayBigInt(reefAccount.data.balance)} REEF',
+                        style: GoogleFonts.poppins(
+                          color: textColor1,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          fontSize: 10),
-                    )),
-              ),
-          ]),
-    ]);
+                        ),
+                      ),
+                      ReefAppState.instance.model.appConfig.displayBalance);
+                })
+              ]))
+            ],
+          ),
+          Gap(6),
+          Container(
+              color: Colors.purpleAccent.shade100.withAlpha(44), height: 1),
+          Gap(6),
+          Flex(
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                    child: Text.rich(
+                  TextSpan(
+                    text: AppLocalizations.of(context)!.address,
+                    style: TextStyle(fontSize: 10, color: textColor2),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text:
+                              " ${widget.reefAccountFDM.data.address.shorten()} ",
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                )),
+                if (widget.reefAccountFDM.hasStatus(StatusCode.completeData) &&
+                    widget.reefAccountFDM.data.isEvmClaimed)
+                  Flexible(
+                      child: Text.rich(
+                    TextSpan(
+                      text: AppLocalizations.of(context)!.reef_evm,
+                      style: TextStyle(fontSize: 10, color: textColor2),
+                      children: <TextSpan>[
+                        TextSpan(
+                          text:
+                              " ${widget.reefAccountFDM.data.evmAddress.shorten()}",
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  )),
+                if (widget.showOptions &&
+                    widget.reefAccountFDM.hasStatus(StatusCode.completeData) &&
+                    !widget.reefAccountFDM.data.isEvmClaimed)
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                        color: Styles.primaryAccentColor,
+                        // gradient: textGradient(),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: TextButton(
+                        onPressed: () {
+                          showBindEvmModal(context,
+                              bindFor: widget.reefAccountFDM.data);
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.black12,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(82, 30),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.connect_evm,
+                          style: TextStyle(
+                              color: Styles.whiteColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10),
+                        )),
+                  ),
+              ]),
+        ]);
   }
 }
 
 class Constants {
-  static const String delete = 'Delete';
-  static const String copyNativeAddress = "Copy Address";
-  static const String copyEvmAddress = "Copy Reef EVM Address";
+  final String delete;
+  final String shareAddressQr;
+  final String shareEvmQr;
+  final String selectAccount;
+  final String exportAccount;
 
-  static const List<String> choices = <String>[
-    copyNativeAddress,
-    copyEvmAddress,
-    delete,
-  ];
+  Constants({
+    required this.delete,
+    required this.shareAddressQr,
+    required this.shareEvmQr,
+    required this.exportAccount,
+    required this.selectAccount,
+  });
+
+  List<String> getConstants() {
+    return [selectAccount, shareEvmQr, shareAddressQr, delete, exportAccount];
+  }
 }
 
 showAlertDialog(BuildContext context, ReefAccount signer) {
   // set up the buttons
   Widget cancelButton = TextButton(
-    child: const Text("Cancel"),
+    child: Text(AppLocalizations.of(context)!.cancel,
+        style: TextStyle(
+          color: Styles.blueColor,
+        )),
     onPressed: () {
       Navigator.of(context).pop();
     },
   );
   Widget continueButton = TextButton(
-    child: const Text("Yes"),
+    child: Row(
+      children: [
+        Icon(Icons.delete, color: Styles.errorColor),
+        const SizedBox(width: 8.0),
+        Text(
+          "Delete Account",
+          style: TextStyle(color: Styles.errorColor),
+        ),
+      ],
+    ),
     onPressed: () {
       ReefAppState.instance.accountCtrl.deleteAccount(signer.address);
       Navigator.of(context).pop();
     },
   );
 
-  // set up the AlertDialog
-  AlertDialog alert = AlertDialog(
-    title: const Text("Delete Account"),
-    content: Text(
-        "You will delete account with name ${signer.name} ${signer.address?.shorten()}. Continue?"),
-    actions: [
-      cancelButton,
-      continueButton,
-    ],
+  // set up the container
+  Container container = Container(
+    decoration: BoxDecoration(
+      color: Styles.primaryBackgroundColor,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: "You will ",
+                style: TextStyle(
+                  color: Styles.textColor,
+                  fontSize: 16,
+                ),
+              ),
+              TextSpan(
+                text: "lose",
+                style: TextStyle(
+                  color: Styles.errorColor,
+                  fontSize: 16,
+                ),
+              ),
+              TextSpan(
+                text: " all balance for ",
+                style: TextStyle(
+                  color: Styles.textColor,
+                  fontSize: 16,
+                ),
+              ),
+              TextSpan(
+                text: "${signer.name}",
+                style: TextStyle(
+                  color: Styles.textColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextSpan(
+                text:
+                    " ${signer.address.shorten()} ${AppLocalizations.of(context)!.unless_saved}",
+                style: TextStyle(
+                  color: Styles.textColor,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            cancelButton,
+            continueButton,
+          ],
+        ),
+      ],
+    ),
   );
 
   // show the dialog
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-  );
+  showModal(context,
+      child: container, headText: AppLocalizations.of(context)!.delete_account);
 }
 
-void choiceAction(
-    String choice, BuildContext context, ReefAccount account) async {
-  if (choice == Constants.delete) {
+void choiceAction(String choice, BuildContext context, ReefAccount account,
+    VoidCallback onSelected) async {
+  Constants localizedConstants = Constants(
+    delete: AppLocalizations.of(context)!.delete,
+    shareAddressQr: AppLocalizations.of(context)!.share_address_qr,
+    shareEvmQr: AppLocalizations.of(context)!.share_evm_qr,
+    selectAccount: AppLocalizations.of(context)!.select_account,
+    exportAccount: AppLocalizations.of(context)!.export_account,
+  );
+  if (choice == AppLocalizations.of(context)!.delete) {
     showAlertDialog(context, account);
-  } else if (choice == Constants.copyNativeAddress) {
-    Clipboard.setData(ClipboardData(text: account.address)).then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Native Address copied to clipboard")));
-    });
-  } else if (choice == Constants.copyEvmAddress) {
-    Clipboard.setData(ClipboardData(
-            text: await ReefAppState.instance.accountCtrl
-                .toReefEVMAddressWithNotificationString(account.evmAddress)))
-        .then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              "EVM Address copied to clipboard.\nUse it ONLY on Reef Chain!")));
-    });
+  } else if (choice == AppLocalizations.of(context)!.share_evm_qr) {
+    if (account.isEvmClaimed) {
+      showQrCode(
+          AppLocalizations.of(context)!.share_evm_qr, account.evmAddress);
+    }
+  } else if (choice == AppLocalizations.of(context)!.share_address_qr) {
+    showQrCode(AppLocalizations.of(context)!.share_address_qr, account.address);
+  } else if (choice == AppLocalizations.of(context)!.select_account) {
+    onSelected();
+  } else if (choice == AppLocalizations.of(context)!.export_account) {
+    showExportQrAccount(
+        AppLocalizations.of(context)!.export_account, account.address);
   }
 }

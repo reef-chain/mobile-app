@@ -6,12 +6,28 @@ class AppConfigModel = _AppConfigModel with _$AppConfigModel;
 
 abstract class _AppConfigModel with Store {
 
-  @observable
+  @observable 
   bool displayBalance = false;
+
+  @observable
+  bool navigateOnAccountSwitch = true;
+  
+  @observable
+  bool isBiometricAuthEnabled = false;
 
   @action
   void setDisplayBalance(bool val) {
-    displayBalance=val;
+    displayBalance = val;
+  }
+
+  @action
+  void setNavigateOnAccountSwitch(bool val) {
+    navigateOnAccountSwitch = val;
+  }
+
+  @action
+  void setBiometricAuthentication(bool val) {
+    isBiometricAuthEnabled = val;
   }
 
 }
