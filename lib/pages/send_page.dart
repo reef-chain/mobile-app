@@ -107,7 +107,8 @@ class _SendPageState extends State<SendPage> {
   Future<bool> _isValidAddress(String address) async {
     //checking if selected address is not evm
     if (address.startsWith("5")) {
-      return await ReefAppState.instance.accountCtrl.isValidSubstrateAddress(address);
+      return await ReefAppState.instance.accountCtrl
+          .isValidSubstrateAddress(address);
     } else if (address.startsWith("0x")) {
       return await ReefAppState.instance.accountCtrl.isValidEvmAddress(address);
     }
@@ -226,8 +227,9 @@ class _SendPageState extends State<SendPage> {
   bool handleExceptionResponse(txResponse) {
     if (txResponse == null || txResponse['success'] != true) {
       setState(() {
+        isFormDisabled = false;
         statusValue = txResponse['data'] == '_canceled'
-            ? SendStatus.CANCELED
+            ? SendStatus.READY
             : SendStatus.ERROR;
       });
       return true;
@@ -834,9 +836,9 @@ class _SendPageState extends State<SendPage> {
                       ],
                     ));
               }
-              return Flex(
+              return const Flex(
                 direction: Axis.horizontal,
-                children: const <Widget>[
+                children: <Widget>[
                   Expanded(
                       child: SizedBox(
                     height: 0,
@@ -851,7 +853,7 @@ class _SendPageState extends State<SendPage> {
   List<ReefStep> steps(SendStatus stat, int index) => [
         ReefStep(
             state: getStepState(stat, 0, index),
-            title: Text(
+            title: const Text(
               'Sending Transaction',
             ),
             content: Padding(
@@ -881,7 +883,7 @@ class _SendPageState extends State<SendPage> {
             )),
         ReefStep(
             state: getStepState(stat, 1, index),
-            title: Text(
+            title: const Text(
               'Adding to Chain',
             ),
             content: Padding(
@@ -911,7 +913,7 @@ class _SendPageState extends State<SendPage> {
             )),
         ReefStep(
             state: getStepState(stat, 2, index),
-            title: Text(
+            title: const Text(
               'Sealing the Block',
             ),
             content: Padding(
@@ -941,7 +943,7 @@ class _SendPageState extends State<SendPage> {
             )),
         ReefStep(
             state: getStepState(stat, 3, index),
-            title: Text(
+            title: const Text(
               'Transaction Finalized',
             ),
             content: const SizedBox(),
