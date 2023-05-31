@@ -30,7 +30,7 @@ dependencies:
   flutter:
     sdk: flutter
   image_picker: ^0.8.4+4
-  qr_flutter: ^4.0.0
+  qr_flutter: 4.0.0
   qr_code_scanner: ^1.0.1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -40,7 +40,7 @@ dependencies:
   webview_flutter: ^3.0.4
   shared_preferences: ^2.0.17
   rxdart: ^0.27.4
-  google_fonts: ^3.0.1
+  google_fonts: ^4.0.4
   gap: ^2.0.1
   # We added jovial_svg for SVGs from URL, as flutter_svg does not offer support support <style> elements
   # We keep flutter_svg for string SVGs, as jovial_svg renders them without colors
