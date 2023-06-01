@@ -38,6 +38,7 @@ class _SendPageState extends State<SendPage> {
   String? resolvedEvmAddress;
   TextEditingController amountController = TextEditingController();
   String amount = "";
+  bool isValidAddress = false;
 
   late String selectedTokenAddress;
   bool _isValueEditing = false;
@@ -66,6 +67,7 @@ class _SendPageState extends State<SendPage> {
         valueController.text = widget.preSelectedTransferAddress!;
         address = widget.preSelectedTransferAddress!;
         statusValue = SendStatus.NO_AMT;
+        isValidAddress = true;
       });
     }
 
@@ -123,6 +125,15 @@ class _SendPageState extends State<SendPage> {
       amt = '0';
     }
     var amtVal = double.parse(amt);
+    if (isValidAddr) {
+      setState(() {
+        isValidAddress = true;
+      });
+    } else {
+      setState(() {
+        isValidAddress = false;
+      });
+    }
     if (addr.isEmpty) {
       return SendStatus.NO_ADDRESS;
     } else if (amtVal <= 0) {
@@ -498,6 +509,16 @@ class _SendPageState extends State<SendPage> {
         ),
       ),
       const Gap(10),
+      if (isValidAddress)
+        Column(
+          children: [
+            Text(
+              address.shorten(),
+              style: TextStyle(color: Styles.textLightColor, fontSize: 10),
+            ),
+            const Gap(5),
+          ],
+        ),
       Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
