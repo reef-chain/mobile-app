@@ -75,6 +75,8 @@ class DAppRequestService {
   Future<AuthUrlStatus> _getAuthUrlStatus(String? url) async {
     if (url == null) return AuthUrlStatus.notFound;
 
+    // TODO add functionality to whitelabel domains from browser
+    // return AuthUrlStatus.authorized;
     var authUrl = await ReefAppState.instance.storage.getAuthUrl(url);
     if (authUrl == null) return AuthUrlStatus.notFound;
 
