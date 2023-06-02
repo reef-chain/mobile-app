@@ -53,7 +53,7 @@ class SignatureContentToggle extends StatelessObserverWidget {
           padding: const EdgeInsets.all(2.0),
           child: Text(
             AppLocalizations.of(context)!.sign_transaction,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Styles.textColor,
@@ -61,7 +61,7 @@ class SignatureContentToggle extends StatelessObserverWidget {
           ),
         ),
         leading: Padding(
-            padding: EdgeInsets.all(6),
+            padding: const EdgeInsets.all(6),
             child: Image.asset('assets/images/reef.png')),
         backgroundColor: Styles.primaryBackgroundColor,
         elevation: 0.0,

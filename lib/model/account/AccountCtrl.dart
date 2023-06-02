@@ -194,7 +194,7 @@ class AccountCtrl {
     await _jsApi.jsPromise('window.keyring.initWasm()');
   }
 
-  toReefEVMAddressWithNotificationString(String evmAddress) async {
+  Future<dynamic> toReefEVMAddressWithNotificationString(String evmAddress) async {
     return await _jsApi.jsCall(
         'window.account.toReefEVMAddressWithNotification("$evmAddress")');
   }

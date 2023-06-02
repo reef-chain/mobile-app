@@ -15,7 +15,9 @@ class TxInfo extends StatefulWidget {
   final String unparsedTimestamp;
   final String? imageUrl;
   final String? iconUrl;
-  TxInfo(this.unparsedTimestamp, this.imageUrl, this.iconUrl, {Key? key})
+  final String? mimetype;
+  TxInfo(this.unparsedTimestamp, this.imageUrl, this.iconUrl, this.mimetype,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -60,7 +62,7 @@ class _TxInfoState extends State<TxInfo> {
             if (isDataFetched)
               Column(
                 children: [
-                  if (widget.imageUrl != null)
+                  if (widget.imageUrl != null && widget.mimetype != "video/mp4")
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: IconFromUrl(

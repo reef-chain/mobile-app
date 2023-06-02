@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:mobx/mobx.dart';
@@ -55,7 +56,7 @@ class _BindEvmState extends State<BindEvm> {
   int currentStep = 0;
   List<ReefAccount> availableTxAccounts = [];
   String address = "";
-  String? resolvedEvmAddress;
+  String resolvedEvmAddress = "";
   ReefAccount? selectedAccount;
   TextEditingController valueController = TextEditingController();
   StreamController<SendStatus> sendStatusStream = StreamController.broadcast();
@@ -376,10 +377,48 @@ class _BindEvmState extends State<BindEvm> {
 
   Widget buildBound() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(AppLocalizations.of(context)!.bind_modal_connected),
-      Text(widget.bindFor.evmAddress.shorten(),
+      Text(AppLocalizations.of(context)!.bind_modal_connected + ':',
           style: const TextStyle(fontWeight: FontWeight.bold)),
-      const Gap(25),
+      // Text('\nReef EVM Address:',style: const TextStyle(fontWeight: FontWeight.bold)),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Gap(16.0),
+          ElevatedButton.icon(
+            icon: const Icon(
+              Icons.copy,
+              size: 12,
+              color: Styles.textLightColor,
+            ),
+            label: Text(
+              resolvedEvmAddress.isNotEmpty ? resolvedEvmAddress : '',
+              style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.textLightColor),
+            ),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
+              backgroundColor: Styles.whiteColor,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 28),
+            ),
+            onPressed: () async {
+              var copyValue = await ReefAppState.instance.accountCtrl
+                  .toReefEVMAddressWithNotificationString(resolvedEvmAddress);
+              Clipboard.setData(ClipboardData(text: copyValue)).then((_) {
+                var message =
+                    "${AppLocalizations.of(context)!.evm_copy}\n${AppLocalizations.of(context)!.reef_only}";
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(message)),
+                );
+              });
+            },
+          ),
+        ],
+      ),
+      const Gap(65),
     ]);
   }
 
@@ -497,6 +536,11 @@ class _BindEvmState extends State<BindEvm> {
                   });
                   final value = await ReefAppState.instance.accountCtrl
                       .bindEvmAccount(widget.bindFor.address);
+                  final resolvedEvmAdr = await ReefAppState.instance.accountCtrl
+                      .resolveEvmAddress(widget.bindFor.address);
+                  setState(() {
+                    resolvedEvmAddress = resolvedEvmAdr;
+                  });
                   if (value == null) {
                     return;
                   } else {
@@ -546,46 +590,52 @@ class _BindEvmState extends State<BindEvm> {
               return ((currentStep == 0 && sendingFundTransaction) ||
                       (currentStep == 1 && sendingBoundTransaction))
                   ? const SizedBox()
-                  : Container(
-                      margin: const EdgeInsets.only(top: 16.0),
-                      child: ConstrainedBox(
-                        constraints:
-                            const BoxConstraints.tightFor(height: 48.0),
-                        child: Row(
-                          children: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                details.onStepContinue!();
-                              },
-                              style: ButtonStyle(
-                                foregroundColor:
-                                    MaterialStateProperty.resolveWith<Color?>(
-                                        (Set<MaterialState> states) {
-                                  return states.contains(MaterialState.disabled)
-                                      ? null
-                                      : colorScheme.onPrimary;
-                                }),
-                                backgroundColor:
-                                    MaterialStateProperty.resolveWith<Color?>(
-                                        (Set<MaterialState> states) {
-                                  return Styles.primaryAccentColorDark;
-                                }),
-                                padding: const MaterialStatePropertyAll<
-                                    EdgeInsetsGeometry>(buttonPadding),
-                                shape: const MaterialStatePropertyAll<
-                                    OutlinedBorder>(buttonShape),
-                              ),
-                              child: Text(
-                                  details.isActive && details.currentStep == 3
-                                      ? AppLocalizations.of(context)!
-                                          .go_back_to_home_page
-                                          .toUpperCase()
-                                      : localizations.continueButtonLabel
-                                          .toUpperCase()),
-                            ),
-                          ],
+                  // : Container(
+                  //     margin: const EdgeInsets.only(top: 16.0),
+                  //     child: ConstrainedBox(
+                  //       constraints:
+                  //           const BoxConstraints.tightFor(height: 48.0),
+                  //       child: Row(
+                  //         children: <Widget>[
+                  //           TextButton(
+                  //             onPressed: () {
+                  //               details.onStepContinue!();
+                  //             },
+                  //             child: Text(details.isActive &&
+                  //                     details.currentStep == 3
+                  //                 ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
+                  //                     .toUpperCase()
+                  //                 : localizations.continueButtonLabel
+                  //                     .toUpperCase()),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   );
+                  : ElevatedButton(
+                      child: Text(
+                        details.isActive && details.currentStep == 3
+                            ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
+                                .toUpperCase()
+                            : localizations.continueButtonLabel,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        shadowColor: const Color(0x559d6cff),
+                        elevation: 5,
+                        backgroundColor: Styles.primaryAccentColor,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
+                      ),
+                      onPressed: () async {
+                        details.onStepContinue!();
+                      },
                     );
             },
             steps: [

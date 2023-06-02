@@ -296,7 +296,7 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
               onPressed: () {
                 if (widget.account?.mnemonic != null) {
                   Clipboard.setData(
-                      ClipboardData(text: widget.account?.mnemonic ?? ""));
+                      ClipboardData(text: widget.account?.mnemonic??''));
                 }
               },
               child: Row(
@@ -923,7 +923,7 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
                       icon: const Icon(Icons.copy, size: 12),
                       onPressed: () {
                         Clipboard.setData(
-                            ClipboardData(text: account?.address ?? ""));
+                            ClipboardData(text: account?.address??''));
                       },
                     )
                   ],

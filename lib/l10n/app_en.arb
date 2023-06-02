@@ -44,7 +44,7 @@
   "auth_url_list_del":"Delete Website",
   "auth_url_list_no_website_yet":"No website request yet!",
   "continue_":"Continue",
-  "bind_modal_connected":"Successfully connected to Ethereum VM address",
+  "bind_modal_connected":"Successfully connected to Reef Ethereum VM address",
   "bind_modal_is_needed_for_transaction":"is needed for transaction fee.",
   "bind_modal_coins_will_be_transferred":"Coins will be transfered from account:",
   "bind_modal_start_using_reef_evm":"Start using Reef EVM smart contracts.",

@@ -106,10 +106,10 @@ class _TokenViewState extends State<TokenView> {
                                 return BlurableContent(
                                     GradientText(
                                         price != 0
-                                            ? NumberFormat.compactLong()
+                                            ? '\$'+(NumberFormat.compactLong()
                                                 .format(getBalanceValueBI(
                                                     balance, price))
-                                                .toString()
+                                                .toString())
                                             : "NA",
                                         gradient: textGradient(),
                                         style: GoogleFonts.poppins(

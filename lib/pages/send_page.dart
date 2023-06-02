@@ -17,8 +17,6 @@ import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
-import '../components/modals/alert_modal.dart';
-
 class SendPage extends StatefulWidget {
   final String preselected;
   String? preSelectedTransferAddress;
@@ -38,6 +36,7 @@ class _SendPageState extends State<SendPage> {
   String? resolvedEvmAddress;
   TextEditingController amountController = TextEditingController();
   String amount = "";
+  bool isValidAddress = false;
 
   late String selectedTokenAddress;
   bool _isValueEditing = false;
@@ -66,6 +65,7 @@ class _SendPageState extends State<SendPage> {
         valueController.text = widget.preSelectedTransferAddress!;
         address = widget.preSelectedTransferAddress!;
         statusValue = SendStatus.NO_AMT;
+        isValidAddress = true;
       });
     }
 
@@ -123,6 +123,9 @@ class _SendPageState extends State<SendPage> {
       amt = '0';
     }
     var amtVal = double.parse(amt);
+      setState(() {
+        isValidAddress = isValidAddr;
+      });
     if (addr.isEmpty) {
       return SendStatus.NO_ADDRESS;
     } else if (amtVal <= 0) {
@@ -227,8 +230,9 @@ class _SendPageState extends State<SendPage> {
   bool handleExceptionResponse(txResponse) {
     if (txResponse == null || txResponse['success'] != true) {
       setState(() {
+        isFormDisabled = false;
         statusValue = txResponse['data'] == '_canceled'
-            ? SendStatus.CANCELED
+            ? SendStatus.READY
             : SendStatus.ERROR;
       });
       return true;
@@ -497,6 +501,21 @@ class _SendPageState extends State<SendPage> {
         ),
       ),
       const Gap(10),
+      if (isValidAddress)
+        Column(
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(Icons.check_circle_outline,
+                  color: Styles.greenColor, size: 16),
+              const Gap(5),
+              Text(
+                address.shorten(),
+                style: const TextStyle(color: Styles.textLightColor, fontSize: 12),
+              )
+            ]),
+            const Gap(10),
+          ],
+        ),
       Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
