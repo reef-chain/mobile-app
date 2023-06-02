@@ -83,7 +83,8 @@ class NavigationCtrl with NavSwipeCompute {
       {required BuildContext context,
       required String unparsedTimestamp,
       required String? imageUrl,
-      required String? iconUrl}) {
+      required String? iconUrl,
+      required String? mimetype}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
@@ -97,7 +98,7 @@ class NavigationCtrl with NavSwipeCompute {
               body: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: TxInfo(unparsedTimestamp, imageUrl, iconUrl),
+                child: TxInfo(unparsedTimestamp, imageUrl, iconUrl, mimetype),
               ),
               backgroundColor: Styles.greyColor,
             ))));
