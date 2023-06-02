@@ -467,9 +467,9 @@ class _BindEvmState extends State<BindEvm> {
         buildAccount(widget.bindFor),
         const Gap(16),
       ] else
-        Row(
+        const Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             SizedBox(
               height: 20,
               width: 20,

@@ -110,12 +110,12 @@ class CustomModalState extends State<CustomModal>
                     child: Padding(
                       padding: EdgeInsets.all(10),
                       child: Column(
-                      // mainAxisSize: MainAxisSize.min,
-                      children: [
-                        buildHeader(context),
-                        Container(child: widget.child),
-                      ],
-                    ),
+                        // mainAxisSize: MainAxisSize.min,
+                        children: [
+                          buildHeader(context),
+                          Container(child: widget.child),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -133,20 +133,20 @@ class CustomModalState extends State<CustomModal>
         children: [
           const Padding(
               padding: EdgeInsets.only(right: 8),
-              child:Image(
+              child: Image(
                 image: AssetImage("./assets/images/reef.png"),
                 width: 31,
                 height: 31,
               )),
           Expanded(
-                  child: Text(
-                    widget.headText,
-                    style: GoogleFonts.spaceGrotesk(
-                        fontSize: 24,
-                        color: widget.textColor,
-                        fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.fade,
-                  )),
+              child: Text(
+            widget.headText,
+            style: GoogleFonts.spaceGrotesk(
+                fontSize: 24,
+                color: widget.textColor,
+                fontWeight: FontWeight.bold),
+            overflow: TextOverflow.fade,
+          )),
           if (widget.dismissible)
             GestureDetector(
                 onTap: () {

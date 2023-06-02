@@ -84,12 +84,11 @@ class AddAccount extends StatelessWidget {
                   ),
                   const Gap(8),
                   Flexible(
-                    child: Builder(
-                      builder: (context) {
-                        return Text(AppLocalizations.of(context)!.restore_from_json,
-                            style: Theme.of(context).textTheme.bodyText1);
-                      }
-                    ),
+                    child: Builder(builder: (context) {
+                      return Text(
+                          AppLocalizations.of(context)!.restore_from_json,
+                          style: Theme.of(context).textTheme.bodyText1);
+                    }),
                   ),
                 ],
               ),
@@ -111,12 +110,11 @@ class AddAccount extends StatelessWidget {
                   ),
                   const Gap(8),
                   Flexible(
-                    child: Builder(
-                      builder: (context) {
-                        return Text(AppLocalizations.of(context)!.import_from_qr_code,
-                            style: Theme.of(context).textTheme.bodyText1);
-                      }
-                    ),
+                    child: Builder(builder: (context) {
+                      return Text(
+                          AppLocalizations.of(context)!.import_from_qr_code,
+                          style: Theme.of(context).textTheme.bodyText1);
+                    }),
                   ),
                 ],
               ),
@@ -132,11 +130,13 @@ void showAddAccountModal(String title, Function(String) callback,
       child: AddAccount(callback: callback), headText: title);
 }
 
-List<Widget> getDivider(){
-  return [const Gap(7),
+List<Widget> getDivider() {
+  return [
+    const Gap(7),
     const Divider(
       color: Styles.textLightColor,
       thickness: 1,
     ),
-    const Gap(7)];
+    const Gap(7)
+  ];
 }

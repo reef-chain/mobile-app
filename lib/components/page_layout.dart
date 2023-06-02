@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:reef_mobile_app/components/dapp_browser/tabs_manager.dart';
 import 'package:reef_mobile_app/components/navigation/liquid_carousel_wrapper.dart';
 import 'package:reef_mobile_app/components/top_bar.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -17,6 +18,7 @@ import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
 
+import '../model/network/NetworkCtrl.dart';
 import 'sign/SignatureContentToggle.dart';
 
 class BottomNav extends StatefulWidget {
@@ -39,7 +41,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }
@@ -49,7 +51,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     if (kDebugMode) {
       print('APP STATE=$state');
     }
-    if(state==AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed) {
       ReefAppState.instance.tokensCtrl.reload(false);
     }
   }
@@ -82,12 +84,12 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     }
   }*/
 
-  void _onItemTapped(int index) async {
+  void _onItemTapped(int index, List<BarItemNavigationPage> items) async {
     // print(index);
     // print(bottomNavigationBarItems[index].page);
     // print(bottomNavigationBarItems[index].label);
     ReefAppState.instance.navigationCtrl
-        .navigate(bottomNavigationBarItems[index].page);
+        .navigate(items[index].page);
   }
 
   List<BarItemNavigationPage> bottomNavigationBarItems = const [
@@ -112,6 +114,15 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
       //   height: 20,
       // ),
       label: 'Accounts',
+    ),
+    BarItemNavigationPage(
+      icon: Icon(Icons.language),
+      page: NavigationPage.browser,
+      //  SvgIcon(
+      //   'assets/images/reef_icon.svg',
+      //   height: 20,
+      // ),
+      label: 'Browser',
     ),
     BarItemNavigationPage(
       icon: Icon(Icons.settings_outlined),
@@ -172,6 +183,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                         const LiquidCarouselWrapper(),
                         const HomePage(key: PageStorageKey("homepage")),
                         AccountsPage(key: const PageStorageKey("accountPage")),
+                        const TabsManager(),
                         const SettingsPage(key: PageStorageKey("settingsPage")),
                         const LiquidCarouselWrapper()
                       ],
@@ -195,13 +207,18 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
           ),
         )),
         bottomNavigationBar: Observer(builder: (_) {
-          int currIndex = bottomNavigationBarItems.indexWhere((barItem) =>
+          var displayBrowser = ReefAppState.instance.model.network.selectedNetworkName == Network.testnet.name;
+          // TODO remove to enable browser in prod/mainnet
+          var items = bottomNavigationBarItems.where((element) => displayBrowser?true : element.label!='Browser').toList();
+          // var items = bottomNavigationBarItems;
+
+          int currIndex = items.indexWhere((barItem) =>
               barItem.page ==
               ReefAppState.instance.model.navigationModel.currentPage);
           if (currIndex < 0) {
             currIndex = 0;
           }
-          var itemColor = bottomNavigationBarItems.firstWhereOrNull((barItem) =>
+          var itemColor = items.firstWhereOrNull((barItem) =>
                       barItem.page ==
                       ReefAppState
                           .instance.model.navigationModel.currentPage) !=
@@ -218,9 +235,9 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: itemColor,
             unselectedItemColor: Colors.black38,
-            items: bottomNavigationBarItems,
+            items: items,
             currentIndex: currIndex,
-            onTap: _onItemTapped,
+            onTap: (i)=>_onItemTapped(i, items),
           );
         }),
       ),

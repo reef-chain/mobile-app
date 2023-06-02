@@ -129,6 +129,13 @@ class NavigationCtrl with NavSwipeCompute {
       {required NavigationPage currentPage,
       required NavigationPage page}) async {
     if (currentPage == NavigationPage.home && page == NavigationPage.settings) {
+      await carouselKey!.currentState!.swipeXNext(x: 3);
+      await carouselKey!.currentState!.swipeXNext(x: 3);
+      await carouselKey!.currentState!.swipeXNext(x: 3);
+    } else if ((currentPage == NavigationPage.home &&
+            page == NavigationPage.browser) ||
+        (currentPage == NavigationPage.accounts &&
+            page == NavigationPage.settings)) {
       // return await carouselKey!.currentState!.swipeXNext(x: 2);
       await carouselKey!.currentState!.swipeXNext(x: 2);
       await carouselKey!.currentState!.swipeXNext(x: 2);
@@ -136,10 +143,14 @@ class NavigationCtrl with NavSwipeCompute {
     } else if ((currentPage == NavigationPage.accounts &&
             page == NavigationPage.home) ||
         (currentPage == NavigationPage.settings &&
+            page == NavigationPage.browser) ||
+        (currentPage == NavigationPage.browser &&
             page == NavigationPage.accounts)) {
       return await carouselKey!.currentState!.swipeXPrevious();
-    } else if (currentPage == NavigationPage.settings &&
-        page == NavigationPage.home) {
+    } else if ((currentPage == NavigationPage.settings &&
+            page == NavigationPage.accounts) ||
+        (currentPage == NavigationPage.browser &&
+            page == NavigationPage.home)) {
       // return await carouselKey!.currentState!.swipeXPrevious(x: 2);
       await carouselKey!.currentState!.swipeXPrevious(x: 2);
       await carouselKey!.currentState!.swipeXPrevious(x: 2);
@@ -147,8 +158,15 @@ class NavigationCtrl with NavSwipeCompute {
     } else if ((currentPage == NavigationPage.home &&
             page == NavigationPage.accounts) ||
         (currentPage == NavigationPage.accounts &&
+            page == NavigationPage.browser) ||
+        (currentPage == NavigationPage.browser &&
             page == NavigationPage.settings)) {
       return await carouselKey!.currentState!.swipeXNext();
+    } else if (currentPage == NavigationPage.settings &&
+        page == NavigationPage.home) {
+      await carouselKey!.currentState!.swipeXPrevious(x: 3);
+      await carouselKey!.currentState!.swipeXPrevious(x: 3);
+      await carouselKey!.currentState!.swipeXPrevious(x: 3);
     }
     return false;
   }

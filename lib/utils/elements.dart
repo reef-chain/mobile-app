@@ -220,9 +220,9 @@ class GradientRectSliderTrackShape extends SliderTrackShape
   final LinearGradient gradient;
   final bool darkenInactive;
   const GradientRectSliderTrackShape(
-      {this.gradient:
+      {this.gradient =
           const LinearGradient(colors: [Colors.lightBlue, Colors.blue]),
-      this.darkenInactive: true});
+      this.darkenInactive = true});
 
   @override
   void paint(PaintingContext context, Offset offset,

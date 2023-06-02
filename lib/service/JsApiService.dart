@@ -23,6 +23,8 @@ class JsApiService {
   final controllerInit = Completer<WebViewController>();
   final jsApiLoaded = Completer<WebViewController>();
 
+  final NavigationDelegate? navigationDelegate;
+
   // when web page loads
   final jsApiReady = Completer<WebViewController>();
 
@@ -33,34 +35,37 @@ class JsApiService {
 
   late Widget _wdg;
 
-  get widget {
-    // print('JS API SERVICE GET WIDGET $flutterJsFilePath');
+  WebViewFlutterJS get widget {
+    print('JS API SERVICE GET WIDGET $flutterJsFilePath');
     return WebViewFlutterJS(
       hidden: hiddenWidget,
       controller: controllerInit,
       loaded: jsApiLoaded,
+      navigationDelegate: navigationDelegate,
       jsChannels: _createJavascriptChannels(),
     );
   }
 
   Future<WebViewController> get _controller => jsApiReady.future;
 
-  JsApiService._(bool this.hiddenWidget, String this.flutterJsFilePath,
-      {String? url, String? html}) {
+  JsApiService._(this.hiddenWidget, this.flutterJsFilePath,
+      {String? url, String? html, this.navigationDelegate}) {
     // print('JS API SERVICE CREATE $flutterJsFilePath');
-    _renderWithFlutterJS(flutterJsFilePath, html, url);
+    renderWithFlutterJS(flutterJsFilePath, html, url);
   }
 
   JsApiService.reefAppJsApi()
       : this._(true, 'lib/js/packages/reef-mobile-js/dist/index.js',
             url: 'https://app.reef.io');
 
-  JsApiService.dAppInjectedHtml(String html, String? baseUrl)
+  JsApiService.dAppInjectedHtml(String html, String? baseUrl,
+      [NavigationDelegate? navigationDelegate])
       : this._(false, 'lib/js/packages/dApp-js/dist/index.js',
-            html: html, url: baseUrl);
+            html: html, url: baseUrl, navigationDelegate: navigationDelegate);
 
-  void _renderWithFlutterJS(
-      String fJsFilePath, String? htmlString, String? baseUrl) {
+  Future<void> renderWithFlutterJS(
+      String fJsFilePath, String? htmlString, String? baseUrl) async {
+    if (controllerInit.isCompleted) return;
     htmlString ??= "<html><head></head><body></body></html>";
     controllerInit.future.then((ctrl) {
       return _getFlutterJsHeaderTags(fJsFilePath).then((headerTags) {
@@ -79,12 +84,12 @@ class JsApiService {
   Future<dynamic> jsCall<T>(String executeJs) async {
     dynamic res = await _controller
         .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
-    return T == bool?_resolveBooleanValue(res) : res;
+    return T == bool ? _resolveBooleanValue(res) : res;
   }
 
   Future jsPromise<T>(String jsObsRefName) async {
     dynamic res = await jsObservable(jsObsRefName).first;
-    return T == bool?_resolveBooleanValue(res) : res;
+    return T == bool ? _resolveBooleanValue(res) : res;
   }
 
   Stream jsObservable(String jsObsRefName) {
@@ -105,13 +110,13 @@ class JsApiService {
     jsCall('${DAPP_MSG_CONFIRMATION_JS_FN_NAME}(`$reqId`, `$value`)');
   }
 
-  dynamic _resolveBooleanValue(dynamic res){
-      print(' CALL $res');
-      return res == true ||
-          res == 'true' ||
-          res == 1 ||
-          res == '1' ||
-          res == '"true"';
+  dynamic _resolveBooleanValue(dynamic res) {
+    print(' CALL $res');
+    return res == true ||
+        res == 'true' ||
+        res == 1 ||
+        res == '1' ||
+        res == '"true"';
   }
 
   Future<String> _getFlutterJsHeaderTags(String assetsFilePath) async {
@@ -147,11 +152,11 @@ class JsApiService {
         htmlString.substring(insertAt);
   }
 
-  void _renderHtml(
+  Future<void> _renderHtml(
       WebViewController ctrl, String htmlString, String? baseUrl) async {
-    ctrl
+    await ctrl
         .loadHtmlString(htmlString, baseUrl: baseUrl)
-        .then((value) => ctrl)
+        .then((_) => ctrl)
         .catchError((err) {
       print('Error loading HTML=$err');
     });
@@ -162,12 +167,15 @@ class JsApiService {
       JavascriptChannel(
         name: REEF_MOBILE_CHANNEL_NAME,
         onMessageReceived: (message) {
+          print("------------received message here");
           JsApiMessage apiMsg =
               JsApiMessage.fromJson(jsonDecode(message.message));
           if (apiMsg.streamId == LOG_STREAM_ID) {
             print('$LOG_STREAM_ID= ${apiMsg.value}');
           } else if (apiMsg.streamId == API_READY_STREAM_ID) {
-            jsApiLoaded.future.then((ctrl) => jsApiReady.complete(ctrl));
+            if (!jsApiLoaded.isCompleted) {
+              jsApiLoaded.future.then((ctrl) => jsApiReady.complete(ctrl));
+            }
           } else if (apiMsg.streamId == TX_SIGNATURE_CONFIRMATION_STREAM_ID) {
             jsTxSignatureConfirmationMessageSubj.add(apiMsg);
           } else if (apiMsg.streamId == DAPP_MSG_CONFIRMATION_STREAM_ID) {

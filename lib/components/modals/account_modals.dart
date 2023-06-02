@@ -11,7 +11,6 @@ import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
-import 'package:reef_mobile_app/utils/ensureVisibleWhenFocused.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -153,7 +152,7 @@ class _AccountImportContentState extends State<AccountImportContent> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   CupertinoIcons.exclamationmark_triangle_fill,
                   color: Styles.errorColor,
                   size: 16,
@@ -285,7 +284,7 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
               padding: const EdgeInsets.all(12.0),
               child: Text(
                 widget.account?.mnemonic ??
-                    AppLocalizations.of(context)!.loading + "...",
+                    "${AppLocalizations.of(context)!.loading}...",
                 style: TextStyle(color: Styles.primaryAccentColorDark),
               ),
             ),
@@ -303,7 +302,7 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.copy,
                     size: 12,
                     color: Styles.textLightColor,
@@ -312,7 +311,8 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
                   Builder(builder: (context) {
                     return Text(
                       AppLocalizations.of(context)!.copy_to_clipboard,
-                      style: TextStyle(color: Styles.textColor, fontSize: 12),
+                      style: const TextStyle(
+                          color: Styles.textColor, fontSize: 12),
                     );
                   }),
                 ],
@@ -591,7 +591,7 @@ class _AccountCreationConfirmContentState
                 children: [
                   Text(
                     AppLocalizations.of(context)!.password_for_reef_app,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                         color: Styles.textLightColor),
@@ -923,7 +923,7 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
                       icon: const Icon(Icons.copy, size: 12),
                       onPressed: () {
                         Clipboard.setData(
-                            ClipboardData(text: account?.address??""));
+                            ClipboardData(text: account?.address??''));
                       },
                     )
                   ],

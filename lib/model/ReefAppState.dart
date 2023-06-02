@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/ViewModel.dart';
 import 'package:reef_mobile_app/model/appConfig/AppConfigCtrl.dart';
+import 'package:reef_mobile_app/model/browser/BrowserCtrl.dart';
 import 'package:reef_mobile_app/model/locale/LocaleCtrl.dart';
 import 'package:reef_mobile_app/model/metadata/MetadataCtrl.dart';
 import 'package:reef_mobile_app/model/navigation/NavigationCtrl.dart';
@@ -37,6 +38,8 @@ class ReefAppState {
   late AppConfigCtrl appConfigCtrl;
   late StorageCtrl storageCtrl;
 
+  final BrowserCtrl browserCtrl = BrowserCtrl();
+
   ReefAppState._();
 
   static ReefAppState get instance => _instance ??= ReefAppState._();
@@ -47,7 +50,8 @@ class ReefAppState {
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
     tokensCtrl = TokenCtrl(jsApi, model.tokens);
     accountCtrl = AccountCtrl(jsApi, storage, model.accounts);
-    signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
+    signingCtrl =
+        SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
     transferCtrl = TransferCtrl(jsApi);
     swapCtrl = SwapCtrl(jsApi);
     metadataCtrl = MetadataCtrl(jsApi);

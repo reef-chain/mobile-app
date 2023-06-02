@@ -1,0 +1,172 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'browser_model.dart';
+
+// **************************************************************************
+// StoreGenerator
+// **************************************************************************
+
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
+
+mixin _$BrowserModel on _BrowserModel, Store {
+  late final _$tabsAtom = Atom(name: '_BrowserModel.tabs', context: context);
+
+  @override
+  List<TabData> get tabs {
+    _$tabsAtom.reportRead();
+    return super.tabs;
+  }
+
+  @override
+  set tabs(List<TabData> value) {
+    _$tabsAtom.reportWrite(value, super.tabs, () {
+      super.tabs = value;
+    });
+  }
+
+  late final _$currentTabHashAtom =
+      Atom(name: '_BrowserModel.currentTabHash', context: context);
+
+  @override
+  String get currentTabHash {
+    _$currentTabHashAtom.reportRead();
+    return super.currentTabHash;
+  }
+
+  @override
+  set currentTabHash(String value) {
+    _$currentTabHashAtom.reportWrite(value, super.currentTabHash, () {
+      super.currentTabHash = value;
+    });
+  }
+
+  late final _$_BrowserModelActionController =
+      ActionController(name: '_BrowserModel', context: context);
+
+  @override
+  void setCurrentTabHash({required String currentTabHash}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.setCurrentTabHash');
+    try {
+      return super.setCurrentTabHash(currentTabHash: currentTabHash);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void addWebView(
+      {required String url,
+      required String tabHash,
+      required Widget webView,
+      required JsApiService? jsApiService,
+      required WebViewController? webViewController}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.addWebView');
+    try {
+      return super.addWebView(
+          url: url,
+          tabHash: tabHash,
+          webView: webView,
+          jsApiService: jsApiService,
+          webViewController: webViewController);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void updateWebViewUrl({required String tabHash, required String newUrl}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.updateWebViewUrl');
+    try {
+      return super.updateWebViewUrl(tabHash: tabHash, newUrl: newUrl);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void updateWebViewCtrl(
+      {required String tabHash, required WebViewController webViewController}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.updateWebViewCtrl');
+    try {
+      return super.updateWebViewCtrl(
+          tabHash: tabHash, webViewController: webViewController);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void updateWebView(
+      {required String tabHash,
+      required String newUrl,
+      required JsApiService? jsApiService,
+      required Widget webView}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.updateWebView');
+    try {
+      return super.updateWebView(
+          tabHash: tabHash,
+          newUrl: newUrl,
+          jsApiService: jsApiService,
+          webView: webView);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void updateFirstBuild({required String tabHash}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.updateFirstBuild');
+    try {
+      return super.updateFirstBuild(tabHash: tabHash);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void removeWebView({required String tabHash}) {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.removeWebView');
+    try {
+      return super.removeWebView(tabHash: tabHash);
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void closeCurrentTab() {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.closeCurrentTab');
+    try {
+      return super.closeCurrentTab();
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void closeAllTabs() {
+    final _$actionInfo = _$_BrowserModelActionController.startAction(
+        name: '_BrowserModel.closeAllTabs');
+    try {
+      return super.closeAllTabs();
+    } finally {
+      _$_BrowserModelActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  String toString() {
+    return '''
+tabs: ${tabs},
+currentTabHash: ${currentTabHash}
+    ''';
+  }
+}
