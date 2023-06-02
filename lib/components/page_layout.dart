@@ -18,6 +18,7 @@ import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
 
+import '../model/network/NetworkCtrl.dart';
 import 'sign/SignatureContentToggle.dart';
 
 class BottomNav extends StatefulWidget {
@@ -206,13 +207,18 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
           ),
         )),
         bottomNavigationBar: Observer(builder: (_) {
-          int currIndex = bottomNavigationBarItems.indexWhere((barItem) =>
+          var displayBrowser = ReefAppState.instance.model.network.selectedNetworkName == Network.testnet.name;
+          // TODO remove to enable browser in prod/mainnet
+          var items = bottomNavigationBarItems.where((element) => displayBrowser?true : element.label!='Browser').toList();
+          // var items = bottomNavigationBarItems;
+
+          int currIndex = items.indexWhere((barItem) =>
               barItem.page ==
               ReefAppState.instance.model.navigationModel.currentPage);
           if (currIndex < 0) {
             currIndex = 0;
           }
-          var itemColor = bottomNavigationBarItems.firstWhereOrNull((barItem) =>
+          var itemColor = items.firstWhereOrNull((barItem) =>
                       barItem.page ==
                       ReefAppState
                           .instance.model.navigationModel.currentPage) !=
@@ -229,7 +235,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: itemColor,
             unselectedItemColor: Colors.black38,
-            items: bottomNavigationBarItems,
+            items: items,
             currentIndex: currIndex,
             onTap: _onItemTapped,
           );
