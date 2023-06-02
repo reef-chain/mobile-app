@@ -377,43 +377,39 @@ class _BindEvmState extends State<BindEvm> {
 
   Widget buildBound() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(AppLocalizations.of(context)!.bind_modal_connected),
-      Text('\nClaimed EVM Address:',
+      Text(AppLocalizations.of(context)!.bind_modal_connected + ':',
           style: const TextStyle(fontWeight: FontWeight.bold)),
+      // Text('\nReef EVM Address:',style: const TextStyle(fontWeight: FontWeight.bold)),
       Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            resolvedEvmAddress.length > 0 ? resolvedEvmAddress : '',
-          ),
           Gap(16.0),
           ElevatedButton.icon(
             icon: const Icon(
               Icons.copy,
               size: 12,
+              color: Styles.textLightColor,
             ),
             label: Text(
-              AppLocalizations.of(context)!.copy_to_clipboard,
+              resolvedEvmAddress.isNotEmpty ? resolvedEvmAddress : '',
               style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.textLightColor),
             ),
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(40),
               ),
-              shadowColor: const Color(0x559d6cff),
-              elevation: 5,
-              backgroundColor: Color.fromARGB(255, 250, 73, 217),
+              backgroundColor: Styles.whiteColor,
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 28),
             ),
             onPressed: () async {
-              Clipboard.setData(ClipboardData(text: resolvedEvmAddress))
-                  .then((_) {
+              var copyValue = await ReefAppState.instance.accountCtrl
+                  .toReefEVMAddressWithNotificationString(resolvedEvmAddress);
+              Clipboard.setData(ClipboardData(text: copyValue)).then((_) {
                 var message =
                     "${AppLocalizations.of(context)!.evm_copy}\n${AppLocalizations.of(context)!.reef_only}";
-
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(message)),
                 );
@@ -422,7 +418,7 @@ class _BindEvmState extends State<BindEvm> {
           ),
         ],
       ),
-      const Gap(25),
+      const Gap(65),
     ]);
   }
 
@@ -621,9 +617,9 @@ class _BindEvmState extends State<BindEvm> {
                         details.isActive && details.currentStep == 3
                             ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
                                 .toUpperCase()
-                            : localizations.continueButtonLabel.toUpperCase(),
+                            : localizations.continueButtonLabel,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -635,7 +631,7 @@ class _BindEvmState extends State<BindEvm> {
                         elevation: 5,
                         backgroundColor: Styles.primaryAccentColor,
                         padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 28),
+                            vertical: 16, horizontal: 32),
                       ),
                       onPressed: () async {
                         details.onStepContinue!();
