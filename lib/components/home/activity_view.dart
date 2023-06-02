@@ -40,6 +40,7 @@ class _ActivityViewState extends State<ActivityView> {
       required DateTime timeStamp,
       required String? iconUrl,
       required bool? isTokenNFT,
+      required String? mimetype,
       isFirstElement = false,
       isLastElement = false}) {
     final tsDate = timeStamp;
@@ -157,10 +158,20 @@ class _ActivityViewState extends State<ActivityView> {
                           ReefAppState.instance.model.appConfig.displayBalance);
                     }),
                     const SizedBox(width: 4),
-                    IconFromUrl(
-                      iconUrl,
-                      size: isTokenNFT! ? 45 : 18,
-                    )
+                    if (mimetype != 'video/mp4')
+                      IconFromUrl(
+                        iconUrl,
+                        size: isTokenNFT! ? 45 : 18,
+                      ),
+                    if (mimetype == 'video/mp4')
+                      CircleAvatar(
+                        backgroundColor: Styles.primaryAccentColor,
+                        child: Image.asset(
+                          'assets/images/video_icon_white.png',
+                          width: 24,
+                          height: 24,
+                        ),
+                      )
                   ]),
                 ],
               ),
@@ -184,6 +195,8 @@ class _ActivityViewState extends State<ActivityView> {
     //       item.extrinsic,
     //       item.timestamp,
     //     ]));
+    // print(
+    //     "anuna ${ReefAppState.instance.model.tokens.txHistory.data[0].tokenNFT?.mimetype}");
 
     return Observer(builder: (_) {
       var txHistory = ReefAppState.instance.model.tokens.txHistory;
@@ -223,24 +236,29 @@ class _ActivityViewState extends State<ActivityView> {
                                       child: Column(
                                         children: [
                                           activityItem(
-                                            tokenName: item.token?.name ??
-                                                (item.tokenNFT!.balance ==
-                                                        BigInt.one
-                                                    ? item.tokenNFT!.name
-                                                    : "${item.tokenNFT!.balance} ${item.tokenNFT!.name}s"),
-                                            type: item.isInbound
-                                                ? 'received'
-                                                : 'sent',
-                                            timeStamp: item.timestamp.toLocal(),
-                                            amount: item.tokenNFT?.iconUrl == ""
-                                                ? item.token?.balance
-                                                : item.token?.balance,
-                                            iconUrl: item.token?.iconUrl ??
-                                                item.tokenNFT?.iconUrl,
-                                            isTokenNFT: item.tokenNFT == null
-                                                ? false
-                                                : true,
-                                          ),
+                                              tokenName: item.token?.name ??
+                                                  (item.tokenNFT!.balance ==
+                                                          BigInt.one
+                                                      ? item.tokenNFT!.name
+                                                      : "${item.tokenNFT!.balance} ${item.tokenNFT!.name}s"),
+                                              type: item.isInbound
+                                                  ? 'received'
+                                                  : 'sent',
+                                              timeStamp:
+                                                  item.timestamp.toLocal(),
+                                              amount:
+                                                  item.tokenNFT?.iconUrl == ""
+                                                      ? item.token?.balance
+                                                      : item.token?.balance,
+                                              iconUrl: item.token?.iconUrl ??
+                                                  item.tokenNFT?.iconUrl,
+                                              isTokenNFT: item.tokenNFT == null
+                                                  ? false
+                                                  : true,
+                                              mimetype: item.tokenNFT == null
+                                                  ? ''
+                                                  : item.tokenNFT!.mimetype ??
+                                                      item.tokenNFT!.mimetype),
                                           if (txHistory.data.last != item)
                                             const Divider(
                                               height: 32,
@@ -265,8 +283,11 @@ class _ActivityViewState extends State<ActivityView> {
                                 ),
                                 if (txHistory.hasStatus(StatusCode.error))
                                   ElevatedButton(
-                                      onPressed:()=>ReefAppState.instance.tokensCtrl.reload(true),
-                                      child: Text(AppLocalizations.of(context)!.reload))
+                                      onPressed: () => ReefAppState
+                                          .instance.tokensCtrl
+                                          .reload(true),
+                                      child: Text(
+                                          AppLocalizations.of(context)!.reload))
                               ],
                             ),
                           ))),
