@@ -84,12 +84,12 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     }
   }*/
 
-  void _onItemTapped(int index) async {
+  void _onItemTapped(int index, List<BarItemNavigationPage> items) async {
     // print(index);
     // print(bottomNavigationBarItems[index].page);
     // print(bottomNavigationBarItems[index].label);
     ReefAppState.instance.navigationCtrl
-        .navigate(bottomNavigationBarItems[index].page);
+        .navigate(items[index].page);
   }
 
   List<BarItemNavigationPage> bottomNavigationBarItems = const [
@@ -237,7 +237,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
             unselectedItemColor: Colors.black38,
             items: items,
             currentIndex: currIndex,
-            onTap: _onItemTapped,
+            onTap: (i)=>_onItemTapped(i, items),
           );
         }),
       ),
