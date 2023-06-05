@@ -24,6 +24,8 @@ class _SendNFTState extends State<SendNFT> {
   bool _isValueEditing = false;
   int amountToSend = 0;
   bool isFormDisabled = false;
+  bool isMinBtnEnabled = false;
+  bool isMaxBtnEnabled = true;
 
   @override
   void initState() {
@@ -68,13 +70,30 @@ class _SendNFTState extends State<SendNFT> {
   final FocusNode _focus = FocusNode();
   SendStatus statusValue = SendStatus.NO_ADDRESS;
 
+  Future<bool> _isValidAddress(String address) async {
+    //checking if selected address is not evm
+    if (address.startsWith("5")) {
+      return await ReefAppState.instance.accountCtrl
+          .isValidSubstrateAddress(address);
+    } else if (address.startsWith("0x")) {
+      return await ReefAppState.instance.accountCtrl.isValidEvmAddress(address);
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> buildInputElements() {
       void onSelectAccount(String selectedAddress) async {
+        bool isValidAddr = await _isValidAddress(address);
         setState(() {
           address = selectedAddress.trim();
           valueController.text = address;
+          if (isValidAddr) {
+            statusValue = SendStatus.NO_AMT;
+          } else {
+            statusValue = SendStatus.ADDR_NOT_VALID;
+          }
         });
       }
 
@@ -146,10 +165,17 @@ class _SendNFTState extends State<SendNFT> {
                         border: InputBorder.none,
                         hintText: AppLocalizations.of(context)!.send_to_address,
                         hintStyle: TextStyle(color: Styles.textLightColor)),
-                    onChanged: (value) {
-                      print("anuna ${value} $address");
+                    onChanged: (value) async {
                       setState(() {
                         address = value;
+                      });
+                      bool isValidAddr = await _isValidAddress(address);
+                      setState(() {
+                        if (isValidAddr) {
+                          statusValue = SendStatus.NO_AMT;
+                        } else {
+                          statusValue = SendStatus.ADDR_NOT_VALID;
+                        }
                       });
                     }),
               ),
@@ -320,28 +346,32 @@ class _SendNFTState extends State<SendNFT> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    height: 30,
-                    width: 30,
+                    height: 32,
+                    width: 32,
                     decoration: BoxDecoration(
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0xff742cb2),
-                          spreadRadius: -10,
-                          offset: Offset(0, 5),
-                          blurRadius: 20,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(80),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xffae27a5), Color(0xff742cb2)],
-                        begin: Alignment(-1, -1),
-                        end: Alignment(1, 1),
-                      ),
-                    ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0xff742cb2),
+                            spreadRadius: -10,
+                            offset: Offset(0, 5),
+                            blurRadius: 20,
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(80),
+                        gradient: isMinBtnEnabled
+                            ? const LinearGradient(
+                                colors: [Color(0xffae27a5), Color(0xff742cb2)],
+                                begin: Alignment(-1, -1),
+                                end: Alignment(1, 1),
+                              )
+                            : const LinearGradient(colors: [
+                                Color.fromARGB(76, 174, 174, 174),
+                                Color.fromARGB(86, 136, 144, 171),
+                              ])),
                     child: IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.remove,
-                        color: Colors.white,
+                        color: isMinBtnEnabled ? Colors.white : Colors.black,
                         size: 16.0,
                       ),
                       style: ElevatedButton.styleFrom(
@@ -355,6 +385,11 @@ class _SendNFTState extends State<SendNFT> {
                           if (amountToSend > 0) {
                             amountToSend -= 1;
                             _amountController!.text = amountToSend.toString();
+                            isMaxBtnEnabled = true;
+                          }
+                          if (amountToSend == 0) {
+                            isMinBtnEnabled = false;
+                            isMaxBtnEnabled = true;
                           }
                         });
                       },
@@ -369,11 +404,16 @@ class _SendNFTState extends State<SendNFT> {
                             setState(() {
                               amountToSend = 0;
                               _amountController!.text = amountToSend.toString();
+                              isMinBtnEnabled = false;
+                              isMaxBtnEnabled = true;
                             });
                           },
                           child: Text(
                             'Min',
-                            style: TextStyle(color: Styles.primaryAccentColor),
+                            style: TextStyle(
+                                color: isMinBtnEnabled
+                                    ? Styles.primaryAccentColor
+                                    : Styles.textLightColor),
                           )),
                     ],
                   ),
@@ -395,14 +435,22 @@ class _SendNFTState extends State<SendNFT> {
                           setState(() {
                             if (value.isEmpty) {
                               amountToSend = 0;
+                              isMinBtnEnabled = false;
+                              isMaxBtnEnabled = true;
                             } else {
                               int enteredValue = int.tryParse(value) ?? 0;
                               if (enteredValue < 0 ||
                                   enteredValue > widget.balance) {
                                 _amountController!.text = '0';
                                 amountToSend = 0;
+                                isMinBtnEnabled = false;
+                                isMaxBtnEnabled = true;
                               } else {
                                 amountToSend = enteredValue;
+                                isMinBtnEnabled = true;
+                                if (enteredValue == widget.balance) {
+                                  isMaxBtnEnabled = false;
+                                }
                               }
                             }
                           });
@@ -418,18 +466,23 @@ class _SendNFTState extends State<SendNFT> {
                             setState(() {
                               amountToSend = widget.balance;
                               _amountController!.text = amountToSend.toString();
+                              isMinBtnEnabled = true;
+                              isMaxBtnEnabled = false;
                             });
                           },
                           child: Text(
                             'Max',
-                            style: TextStyle(color: Styles.primaryAccentColor),
+                            style: TextStyle(
+                                color: isMaxBtnEnabled
+                                    ? Styles.primaryAccentColor
+                                    : Styles.textLightColor),
                           )),
                     ],
                   ),
                   Gap(8.0),
                   Container(
-                    height: 30,
-                    width: 30,
+                    height: 32,
+                    width: 32,
                     decoration: BoxDecoration(
                       boxShadow: const [
                         BoxShadow(
@@ -440,16 +493,21 @@ class _SendNFTState extends State<SendNFT> {
                         ),
                       ],
                       borderRadius: BorderRadius.circular(80),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xffae27a5), Color(0xff742cb2)],
-                        begin: Alignment(-1, -1),
-                        end: Alignment(1, 1),
-                      ),
+                      gradient: isMaxBtnEnabled
+                          ? const LinearGradient(
+                              colors: [Color(0xffae27a5), Color(0xff742cb2)],
+                              begin: Alignment(-1, -1),
+                              end: Alignment(1, 1),
+                            )
+                          : const LinearGradient(colors: [
+                              Color.fromARGB(76, 174, 174, 174),
+                              Color.fromARGB(86, 136, 144, 171),
+                            ]),
                     ),
                     child: IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.add,
-                        color: Colors.white,
+                        color: isMaxBtnEnabled ? Colors.white : Colors.black,
                         size: 16.0,
                       ),
                       style: ElevatedButton.styleFrom(
@@ -463,6 +521,12 @@ class _SendNFTState extends State<SendNFT> {
                           if (amountToSend < widget.balance) {
                             amountToSend += 1;
                             _amountController!.text = amountToSend.toString();
+                            isMaxBtnEnabled = true;
+                            isMinBtnEnabled = true;
+                          }
+                          if (amountToSend == widget.balance) {
+                            isMaxBtnEnabled = false;
+                            isMinBtnEnabled = true;
                           }
                         });
                       },
