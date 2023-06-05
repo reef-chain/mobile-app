@@ -95,6 +95,10 @@ class _NFTViewState extends State<NFTView> {
     final dialogKey = GlobalKey<AnimatedDialogState>();
     return Builder(
       builder: (context) => GestureDetector(
+        onTap: () {
+          ReefAppState.instance.navigationCtrl.navigateToSendNFTPage(
+              context: context, nftUrl: url, name: name, balance: balance);
+        },
         onLongPress: () {
           setState(() {
             _remountNFTsVideoPlayer = !_remountNFTsVideoPlayer;
