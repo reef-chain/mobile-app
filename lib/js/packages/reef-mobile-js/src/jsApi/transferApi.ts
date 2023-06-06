@@ -168,10 +168,12 @@ export const initApi = (signingKey: Signer) => {
                         
                             const response = await tokenContract.safeTransferFrom(from,to,nftId,nftAmount,[]);
             console.log(response);
+            return true;
                         } catch (error) {
-                            console.log(error);
+                            console.log(`encountered error in nft tx ${error}`);
+                            return false;
                         }
-                        
+                        return false;
            
                 }),
                 catchError(err => of({success: false, data: err.message}))

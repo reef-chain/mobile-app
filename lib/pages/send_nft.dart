@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:mobx/mobx.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -33,6 +34,7 @@ class _SendNFTState extends State<SendNFT> {
   bool isMinBtnEnabled = false;
   bool isMaxBtnEnabled = true;
   bool _showNFTinfo = false;
+  dynamic transactionData;
 
   @override
   void initState() {
@@ -242,6 +244,10 @@ class _SendNFTState extends State<SendNFT> {
                   padding: const EdgeInsets.all(0),
                 ),
                 onPressed: () async {
+                  setState(() {
+                    statusValue = SendStatus.SIGNING;
+                  });
+
                   String? unresolvedFrom =
                       ReefAppState.instance.model.accounts.selectedAddress;
                   String evmFrom = await ReefAppState.instance.accountCtrl
