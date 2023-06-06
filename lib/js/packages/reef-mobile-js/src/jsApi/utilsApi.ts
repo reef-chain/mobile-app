@@ -7,6 +7,7 @@ import {isAscii, u8aToString, u8aUnwrapBytes} from '@reef-defi/util';
 import {ERC20} from "./abi/ERC20";
 import { gql } from '@apollo/client';
 import { fetchTxInfo } from './txInfoApi';
+import { fetchNFTinfo } from './nftInfoApi';
 
 function lagWhenDisconnected() {
     return status => {
@@ -48,6 +49,18 @@ export const initApi = () => {
                 )
             );
         },
+        getNftInfo: async (nftId:string,ownerAddress:string) => {
+            console.log('i am here bro22')
+            return firstValueFrom(
+                combineLatest([graphql.apolloClientInstance$,nftId,ownerAddress]).pipe(
+                    take(1),
+                    switchMap(async ([apolloInstance, abc]:[any, string]) => {
+                        return await fetchNFTinfo(apolloInstance, nftId,ownerAddress);
+                    }),
+                    take(1)
+                )
+            );
+        },
 
         decodeMethod: (data: string, types?: any) => {
             return firstValueFrom(reefState.selectedProvider$.pipe(
@@ -64,6 +77,8 @@ export const initApi = () => {
                 take(1)
             ));
         },
+
+
 
         setSelectedNetwork: (networkName: string) => {
             const net: network.Network = network.AVAILABLE_NETWORKS[networkName] || network.AVAILABLE_NETWORKS.mainnet;
