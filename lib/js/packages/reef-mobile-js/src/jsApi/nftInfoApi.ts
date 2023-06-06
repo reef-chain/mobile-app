@@ -11,7 +11,6 @@ export const fetchNFTinfo = (
       variables: { nftId: nftId,ownerAddress:ownerAddress },
     })
     .then((verContracts: any) => {
-      console.log("anuna "+nftId + ownerAddress);
         const vContract = verContracts.data.tokenHolders[0];
         if (!vContract) return null;
 

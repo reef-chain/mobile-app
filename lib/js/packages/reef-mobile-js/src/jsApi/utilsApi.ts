@@ -50,7 +50,6 @@ export const initApi = () => {
             );
         },
         getNftInfo: async (nftId:string,ownerAddress:string) => {
-            console.log('i am here bro22')
             return firstValueFrom(
                 combineLatest([graphql.apolloClientInstance$,nftId,ownerAddress]).pipe(
                     take(1),
