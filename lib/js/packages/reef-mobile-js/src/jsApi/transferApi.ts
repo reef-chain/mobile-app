@@ -6,6 +6,7 @@ import {ERC20} from "./abi/ERC20";
 import {firstValueFrom, Observable, of, Subject} from "rxjs";
 import {findAccount} from "./signApi";
 import Signer from "@reef-defi/extension-base/page/Signer";
+import { nftTxAbi, sendNft } from './utils/nftTxUtils';
 
 const nativeTransfer = async (amount: string, destinationAddress: string, provider: Provider, signer: ReefAccount, signingKey: Signer): Promise<any> => {
     return await provider.api.tx.balances
@@ -140,6 +141,38 @@ export const initApi = (signingKey: Signer) => {
                             }))
                         );
                     }
+                }),
+                catchError(err => of({success: false, data: err.message}))
+            );
+        },
+        sendNft: (tokenContract:string,from: string, to: string, tokenAmount: string, nftId: string) => {
+            return reefState.accounts$.pipe(
+                combineLatest([of(from)]),
+                take(1),
+                map(([sgnrs, addr]: [ReefAccount[], string]) => findAccount(sgnrs, addr)),
+                combineLatest([reefState.selectedProvider$]),
+                switchMap(([signer, provider]: [ReefAccount | undefined, Provider]) => {
+                    if (!signer) {
+                        console.log(" nft.send() - NO SIGNER FOUND",);
+                        return {success: false, data: null};
+                    }
+                    return getAccountSigner(signer.address, provider, signingKey).then((evmSigner) => [signer, provider, evmSigner]);
+                }),
+                switchMap(async([signer, provider, evmSigner]: [ReefAccount | undefined, Provider, EvmSigner]) => {
+                    if (!evmSigner) {
+                        throw new Error('Signer not created');
+                    }
+                        const tokenContract = new Contract("0x0601202b75C96A61CDb9A99D4e2285E43c6e60e4", nftTxAbi, evmSigner as EvmSigner);
+                        console.log('transfering NFT');
+                        try {
+                        
+                            const response = await tokenContract.safeTransferFrom("0x7Ca7886e0b851e6458770BC1d85Feb6A5307b9a2","0x8Eb24026196108108E71E45F37591164BDefcB76",19,1,[]);
+            console.log(response);
+                        } catch (error) {
+                            console.log(error);
+                        }
+                        
+           
                 }),
                 catchError(err => of({success: false, data: err.message}))
             );

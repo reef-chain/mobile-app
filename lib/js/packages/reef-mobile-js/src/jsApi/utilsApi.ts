@@ -8,6 +8,7 @@ import {ERC20} from "./abi/ERC20";
 import { gql } from '@apollo/client';
 import { fetchTxInfo } from './txInfoApi';
 import { fetchNFTinfo } from './nftInfoApi';
+import { sendNft } from './utils/nftTxUtils';
 
 function lagWhenDisconnected() {
     return status => {

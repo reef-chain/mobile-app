@@ -97,17 +97,18 @@ class _NFTViewState extends State<NFTView> {
     return Builder(
       builder: (context) => GestureDetector(
         onTap: () async {
-          String? ownerAddress =
-              ReefAppState.instance.model.accounts.selectedAddress;
-          var contractAddress = await ReefAppState.instance.tokensCtrl
-              .getNftInfo(nftId, ownerAddress!);
-          ReefAppState.instance.navigationCtrl.navigateToSendNFTPage(
-              context: context,
-              nftUrl: url,
-              name: name,
-              balance: balance,
-              contractAddress: contractAddress["contractAddress"],
-              nftId: nftId);
+          await ReefAppState.instance.tokensCtrl.sendNFT();
+          // String? ownerAddress =
+          //     ReefAppState.instance.model.accounts.selectedAddress;
+          // var contractAddress = await ReefAppState.instance.tokensCtrl
+          //     .getNftInfo(nftId, ownerAddress!);
+          // ReefAppState.instance.navigationCtrl.navigateToSendNFTPage(
+          //     context: context,
+          //     nftUrl: url,
+          //     name: name,
+          //     balance: balance,
+          //     contractAddress: contractAddress["contractAddress"],
+          //     nftId: nftId);
         },
         onLongPress: () {
           setState(() {
