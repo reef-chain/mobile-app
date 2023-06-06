@@ -82,9 +82,10 @@ class TokenCtrl {
     return jsApi.jsPromise('window.utils.getNftInfo("$nftId","$ownerAddress")');
   }
 
-  Future<dynamic> sendNFT() async {
+  Future<dynamic> sendNFT(String unresolvedFrom, String nftContractAddress,
+      String from, String to, int nftAmount, int nftId) async {
     return jsApi.jsPromise(
-        'window.transfer.sendNft("5EnY9eFwEDcEJ62dJWrTXhTucJ4pzGym4WZ2xcDKiT3eJecP","5EnY9eFwEDcEJ62dJWrTXhTucJ4pzGym4WZ2xcDKiT3eJecP",19,1)');
+        'window.transfer.sendNft("${unresolvedFrom}","${from}","${to}",${nftAmount},${nftId},"${nftContractAddress}")');
   }
 
   void reload(bool force) async {

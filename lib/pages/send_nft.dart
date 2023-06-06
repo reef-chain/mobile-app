@@ -74,8 +74,22 @@ class _SendNFTState extends State<SendNFT> {
 
   String address = "";
   TextEditingController valueController = TextEditingController();
-  final FocusNode _focus = FocusNode();
   SendStatus statusValue = SendStatus.NO_ADDRESS;
+
+  void setAmountState() async {
+    bool isValidAddr = await _isValidAddress(address);
+    setState(() {
+      if (amountToSend <= widget.balance && amountToSend > 0) {
+        if (isValidAddr) {
+          statusValue = SendStatus.READY;
+        } else {
+          statusValue = SendStatus.ADDR_NOT_VALID;
+        }
+      } else {
+        statusValue = SendStatus.NO_AMT;
+      }
+    });
+  }
 
   Future<bool> _isValidAddress(String address) async {
     //checking if selected address is not evm
@@ -92,12 +106,13 @@ class _SendNFTState extends State<SendNFT> {
   Widget build(BuildContext context) {
     List<Widget> buildInputElements() {
       void onSelectAccount(String selectedAddress) async {
-        bool isValidAddr = await _isValidAddress(address);
+        bool isValidAddr = await _isValidAddress(selectedAddress);
         setState(() {
           address = selectedAddress.trim();
           valueController.text = address;
           if (isValidAddr) {
             statusValue = SendStatus.NO_AMT;
+            setAmountState();
           } else {
             statusValue = SendStatus.ADDR_NOT_VALID;
           }
@@ -226,7 +241,21 @@ class _SendNFTState extends State<SendNFT> {
                       : Colors.transparent,
                   padding: const EdgeInsets.all(0),
                 ),
-                onPressed: () => {},
+                onPressed: () async {
+                  String? unresolvedFrom =
+                      ReefAppState.instance.model.accounts.selectedAddress;
+                  String evmFrom = await ReefAppState.instance.accountCtrl
+                      .resolveEvmAddress(unresolvedFrom!);
+                  String evmTo = await ReefAppState.instance.accountCtrl
+                      .resolveEvmAddress(address);
+                  await ReefAppState.instance.tokensCtrl.sendNFT(
+                      unresolvedFrom,
+                      widget.contractAddress,
+                      evmFrom,
+                      evmTo,
+                      amountToSend,
+                      int.tryParse(widget.nftId)!);
+                },
                 child: Ink(
                   width: double.infinity,
                   padding:
@@ -421,12 +450,6 @@ class _SendNFTState extends State<SendNFT> {
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xffe6e2f1),
-                  gradient: (statusValue == SendStatus.READY)
-                      ? const LinearGradient(colors: [
-                          Color(0xffae27a5),
-                          Color(0xff742cb2),
-                        ])
-                      : null,
                   borderRadius: const BorderRadius.all(Radius.circular(14.0)),
                 ),
                 padding: EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
@@ -483,6 +506,7 @@ class _SendNFTState extends State<SendNFT> {
                               isMaxBtnEnabled = true;
                             }
                           });
+                          setAmountState();
                         },
                       ),
                     ),
@@ -499,6 +523,7 @@ class _SendNFTState extends State<SendNFT> {
                                 isMinBtnEnabled = false;
                                 isMaxBtnEnabled = true;
                               });
+                              setAmountState();
                             },
                             child: Text(
                               'Min',
@@ -531,12 +556,20 @@ class _SendNFTState extends State<SendNFT> {
                                 isMaxBtnEnabled = true;
                               } else {
                                 int enteredValue = int.tryParse(value) ?? 0;
-                                if (enteredValue < 0 ||
-                                    enteredValue > widget.balance) {
-                                  _amountController!.text = '0';
-                                  amountToSend = 0;
+                                if (enteredValue < 0) {
+                                  statusValue = SendStatus.NO_AMT;
+                                  _amountController!.text =
+                                      enteredValue.toString();
+                                  amountToSend = enteredValue;
                                   isMinBtnEnabled = false;
                                   isMaxBtnEnabled = true;
+                                } else if (enteredValue > widget.balance) {
+                                  statusValue = SendStatus.AMT_TOO_HIGH;
+                                  _amountController!.text =
+                                      enteredValue.toString();
+                                  amountToSend = enteredValue;
+                                  isMinBtnEnabled = true;
+                                  isMaxBtnEnabled = false;
                                 } else {
                                   amountToSend = enteredValue;
                                   isMinBtnEnabled = true;
@@ -562,6 +595,7 @@ class _SendNFTState extends State<SendNFT> {
                                 isMinBtnEnabled = true;
                                 isMaxBtnEnabled = false;
                               });
+                              setAmountState();
                             },
                             child: Text(
                               'Max',
@@ -621,6 +655,7 @@ class _SendNFTState extends State<SendNFT> {
                               isMaxBtnEnabled = false;
                               isMinBtnEnabled = true;
                             }
+                            setAmountState();
                           });
                         },
                       ),

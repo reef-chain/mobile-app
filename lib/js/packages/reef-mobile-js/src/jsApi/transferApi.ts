@@ -145,9 +145,9 @@ export const initApi = (signingKey: Signer) => {
                 catchError(err => of({success: false, data: err.message}))
             );
         },
-        sendNft: (tokenContract:string,from: string, to: string, tokenAmount: string, nftId: string) => {
+        sendNft: (unresolvedFrom:string,from: string, to: string, nftAmount: any, nftId: any,nftContractAddress:string) => {
             return reefState.accounts$.pipe(
-                combineLatest([of(from)]),
+                combineLatest([of(unresolvedFrom)]),
                 take(1),
                 map(([sgnrs, addr]: [ReefAccount[], string]) => findAccount(sgnrs, addr)),
                 combineLatest([reefState.selectedProvider$]),
@@ -162,11 +162,11 @@ export const initApi = (signingKey: Signer) => {
                     if (!evmSigner) {
                         throw new Error('Signer not created');
                     }
-                        const tokenContract = new Contract("0x0601202b75C96A61CDb9A99D4e2285E43c6e60e4", nftTxAbi, evmSigner as EvmSigner);
+                        const tokenContract = new Contract(nftContractAddress, nftTxAbi, evmSigner as EvmSigner);
                         console.log('transfering NFT');
                         try {
                         
-                            const response = await tokenContract.safeTransferFrom("0x7Ca7886e0b851e6458770BC1d85Feb6A5307b9a2","0x8Eb24026196108108E71E45F37591164BDefcB76",19,1,[]);
+                            const response = await tokenContract.safeTransferFrom(from,to,nftId,nftAmount,[]);
             console.log(response);
                         } catch (error) {
                             console.log(error);
