@@ -84,7 +84,7 @@ class TokenCtrl {
 
   Future<dynamic> sendNFT(String unresolvedFrom, String nftContractAddress,
       String from, String to, int nftAmount, int nftId) async {
-    return jsApi.jsPromise(
+    return jsApi.jsObservable(
         'window.transfer.sendNft("${unresolvedFrom}","${from}","${to}",${nftAmount},${nftId},"${nftContractAddress}")');
   }
 
