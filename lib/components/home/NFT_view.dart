@@ -102,7 +102,8 @@ class _NFTViewState extends State<NFTView> {
               nftUrl: url,
               name: name,
               balance: balance,
-              nftId: nftId);
+              nftId: nftId,
+              mimetype: mimetype);
         },
         onLongPress: () {
           setState(() {

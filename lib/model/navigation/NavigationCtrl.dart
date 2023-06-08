@@ -85,7 +85,8 @@ class NavigationCtrl with NavSwipeCompute {
       required String nftUrl,
       required String name,
       required int balance,
-      required String nftId}) {
+      required String nftId,
+      required String mimetype}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
@@ -99,7 +100,7 @@ class NavigationCtrl with NavSwipeCompute {
               body: Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: SendNFT(nftUrl, name, balance, nftId)),
+                  child: SendNFT(nftUrl, name, balance, nftId, mimetype)),
               backgroundColor: Styles.greyColor,
             ))));
   }
