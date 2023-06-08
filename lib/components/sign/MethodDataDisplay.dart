@@ -14,29 +14,33 @@ class MethodDataDisplay extends StatelessWidget {
   final SignatureRequest? signatureReq;
 
   @override
-  Widget build(BuildContext context) => Expanded(child: Observer(builder: (_) {
+  Widget build(BuildContext context) =>
+      Expanded(child: Observer(builder: (_) {
         if (signatureReq != null && signatureReq!.hasResults) {
           var evmMethodData = signatureReq?.decodedMethod['vm']['evm'];
           var isEVM = evmMethodData != null;
           var dataWidget;
           if (isEVM == true) {
-            var fragmentData = evmMethodData['decodedData']['functionFragment'];
-            var args = List.from(fragmentData['inputs']).asMap().map((i, val) =>
-                MapEntry(val['name'],
-                    _getValue(evmMethodData['decodedData']['args'][i])));
-            List<String> argsList =
-                args.entries.map((e) => e.key).join(',').split(',');
-            List<String> argsValuesList = args.entries
-                .map((e) => e.value.toString())
-                .join(',')
-                .split(',');
             Map<String, String> decodedData = {
               "Contract Address":
-                  toShortDisplay(evmMethodData['contractAddress']),
-              "Method Name": fragmentData['name']
+              toShortDisplay(evmMethodData['contractAddress'])
             };
-            for (var i = 0; i < argsList.length; i++) {
-              decodedData[argsList[i]] = argsValuesList[i];
+            if (evmMethodData['decodedData'] != null) {
+              var fragmentData = evmMethodData['decodedData']['functionFragment'];
+              var args = List.from(fragmentData['inputs']).asMap().map((i,
+                  val) =>
+                  MapEntry(val['name'],
+                      _getValue(evmMethodData['decodedData']['args'][i])));
+              List<String> argsList =
+              args.entries.map((e) => e.key).join(',').split(',');
+              List<String> argsValuesList = args.entries
+                  .map((e) => e.value.toString())
+                  .join(',')
+                  .split(',');
+              decodedData["Method Name"] = fragmentData['name'];
+              for (var i = 0; i < argsList.length; i++) {
+                decodedData[argsList[i]] = argsValuesList[i];
+              }
             }
             final decodedDetails = createDecodedDataTable(decodedData);
 
@@ -51,7 +55,7 @@ class MethodDataDisplay extends StatelessWidget {
                 ? "${args.split(':')[1].split('}')[0]},${args.split(',')[1]}"
                 : "empty";
             var methodName =
-                signatureReq?.decodedMethod['methodName'].split('(')[0];
+            signatureReq?.decodedMethod['methodName'].split('(')[0];
             var params = signatureReq?.decodedMethod['methodName']
                 .split('(')[1]
                 .split(')')[0];
