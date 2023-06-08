@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mobx/mobx.dart';
+import 'package:reef_mobile_app/components/NFT_videoplayer.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
@@ -438,6 +439,11 @@ class _SendNFTState extends State<SendNFT> {
                             size: 320,
                           ),
                         ),
+                      ),
+                    if (widget.mimetype == "video/mp4")
+                      NFTsVideoPlayer(
+                        widget.nftUrl,
+                        displayChild: false,
                       ),
                     Gap(18.0),
                     InkWell(

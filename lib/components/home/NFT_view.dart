@@ -244,7 +244,10 @@ class _NFTViewState extends State<NFTView> {
     return mimetype == "video/mp4"
         ? Container(
             key: Key(_remountNFTsVideoPlayer.toString()),
-            child: NFTsVideoPlayer(iconURL, child))
+            child: NFTsVideoPlayer(
+              iconURL,
+              child: child,
+            ))
         : ImageBoxContainer(imageUrl: iconURL, child: child);
   }
 
