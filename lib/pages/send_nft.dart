@@ -15,12 +15,9 @@ class SendNFT extends StatefulWidget {
   final String nftUrl;
   final String name;
   final int balance;
-  final String contractAddress;
   final String nftId;
 
-  SendNFT(
-      this.nftUrl, this.name, this.balance, this.contractAddress, this.nftId,
-      {Key? key})
+  SendNFT(this.nftUrl, this.name, this.balance, this.nftId, {Key? key})
       : super(key: key);
 
   @override
@@ -36,18 +33,29 @@ class _SendNFTState extends State<SendNFT> {
   bool isMaxBtnEnabled = true;
   bool _showNFTinfo = false;
   dynamic transactionData;
+  String contractAddress = "";
 
   @override
   void initState() {
     super.initState();
     _amountController = TextEditingController();
     _amountController!.text = amountToSend.toString();
+    getContractAddress();
   }
 
   @override
   void dispose() {
     _amountController!.dispose();
     super.dispose();
+  }
+
+  void getContractAddress() async {
+    String? ownerAddress = ReefAppState.instance.model.accounts.selectedAddress;
+    var fetchedContractAddress = await ReefAppState.instance.tokensCtrl
+        .getNftInfo(widget.nftId, ownerAddress!);
+    setState(() {
+      contractAddress = fetchedContractAddress["contractAddress"];
+    });
   }
 
   getSendBtnLabel(SendStatus validation) {
@@ -114,9 +122,9 @@ class _SendNFTState extends State<SendNFT> {
 
   Future<Stream<dynamic>> executeTransferTransaction(
       String unresolvedFrom, String evmFrom, String evmTo) async {
-    return await ReefAppState.instance.tokensCtrl.sendNFT(
+    return await ReefAppState.instance.signingCtrl.sendNFT(
         unresolvedFrom,
-        widget.contractAddress,
+        contractAddress,
         evmFrom,
         evmTo,
         amountToSend,
@@ -274,6 +282,8 @@ class _SendNFTState extends State<SendNFT> {
                   padding: const EdgeInsets.all(0),
                 ),
                 onPressed: () async {
+                  print(await ReefAppState
+                      .instance.signingCtrl.signatureRequests.list);
                   setStatusOnSignatureClosed();
                   String? unresolvedFrom =
                       ReefAppState.instance.model.accounts.selectedAddress;
@@ -500,15 +510,27 @@ class _SendNFTState extends State<SendNFT> {
                                 ),
                               ),
                               Expanded(
-                                child: Text(
-                                  "${widget.contractAddress}",
-                                  softWrap: true,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Styles.primaryAccentColor,
-                                  ),
-                                ),
+                                child: contractAddress == ""
+                                    ? Column(
+                                        children: [
+                                          Gap(8.0),
+                                          Center(
+                                            child: LinearProgressIndicator(
+                                              color: Styles.primaryAccentColor,
+                                              backgroundColor: Styles.greyColor,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Text(
+                                        "${contractAddress}",
+                                        softWrap: true,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Styles.primaryAccentColor,
+                                        ),
+                                      ),
                               ),
                             ],
                           ),

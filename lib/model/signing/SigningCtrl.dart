@@ -25,7 +25,8 @@ class SigningCtrl {
   static final LocalAuthentication localAuth = LocalAuthentication();
   final AccountModel accountModel;
 
-  SigningCtrl(this.jsApi, this.storage, this.signatureRequests, this.accountModel) {
+  SigningCtrl(
+      this.jsApi, this.storage, this.signatureRequests, this.accountModel) {
     jsApi.jsTxSignatureConfirmationMessageSubj.listen((jsApiMessage) {
       var signatureRequest = _buildSignatureRequest(jsApiMessage);
       signatureRequest.decodeMethod();
@@ -33,21 +34,29 @@ class SigningCtrl {
     });
   }
 
-  Future<bool> authenticateAndSign(SignatureRequest signatureRequest, String? verifyPassword) async {
+  Future<bool> authenticateAndSign(
+      SignatureRequest signatureRequest, String? verifyPassword) async {
     bool authenticated = false;
 
-    if (await checkBiometricsSupport() && verifyPassword==null) {
+    if (await checkBiometricsSupport() && verifyPassword == null) {
       authenticated = await _authenticateWithBiometrics(signatureRequest);
     } else {
-      authenticated = await _authenticateWithPassword( signatureRequest, verifyPassword);
+      authenticated =
+          await _authenticateWithPassword(signatureRequest, verifyPassword);
     }
-    if (authenticated == true){
+    if (authenticated == true) {
       _confirmSignature(
         signatureRequest.signatureIdent,
         signatureRequest.payload.address,
       );
     }
     return authenticated;
+  }
+
+  Future<dynamic> sendNFT(String unresolvedFrom, String nftContractAddress,
+      String from, String to, int nftAmount, int nftId) async {
+    return jsApi.jsObservable(
+        'window.transfer.sendNft("${unresolvedFrom}","${from}","${to}",${nftAmount},${nftId},"${nftContractAddress}")');
   }
 
   Future<dynamic> signRaw(String address, String message) =>
@@ -57,7 +66,10 @@ class SigningCtrl {
       jsApi.jsPromise(
           'window.signApi.signPayloadPromise(`$address`, ${jsonEncode(payload)})');
 
-  Future<dynamic> decodeMethod(String data, {dynamic types})=>types==null?jsApi.jsPromise('window.utils.decodeMethod(`$data`)') : jsApi.jsPromise('window.utils.decodeMethod(`$data`, ${jsonEncode(types)})');
+  Future<dynamic> decodeMethod(String data, {dynamic types}) => types == null
+      ? jsApi.jsPromise('window.utils.decodeMethod(`$data`)')
+      : jsApi.jsPromise(
+          'window.utils.decodeMethod(`$data`, ${jsonEncode(types)})');
 
   Future<dynamic> bytesString(String bytes) =>
       jsApi.jsPromise('window.utils.bytesString("$bytes")');
@@ -73,10 +85,9 @@ class SigningCtrl {
     jsApi.confirmTxSignature(sigConfirmationIdent, account.mnemonic);
   }
 
-  Future<dynamic> getTypes(String genesisHash, String specVersion)async{
+  Future<dynamic> getTypes(String genesisHash, String specVersion) async {
     dynamic types;
-    var metadata = await storage
-        .getMetadata(genesisHash);
+    var metadata = await storage.getMetadata(genesisHash);
     if (metadata != null &&
         metadata.specVersion ==
             int.parse(specVersion.substring(2), radix: 16)) {
@@ -115,11 +126,12 @@ class SigningCtrl {
     jsApi.rejectTxSignature(signatureIdent);
   }
 
-  Future<TxDecodedData> getTxDecodedData(dynamic payload, dynamic decodedMethod) async {
-  TxDecodedData txDecodedData = TxDecodedData(
-    specVersion: hexToDecimalString(payload.specVersion),
-    nonce: hexToDecimalString(payload.nonce),
-  );
+  Future<TxDecodedData> getTxDecodedData(
+      dynamic payload, dynamic decodedMethod) async {
+    TxDecodedData txDecodedData = TxDecodedData(
+      specVersion: hexToDecimalString(payload.specVersion),
+      nonce: hexToDecimalString(payload.nonce),
+    );
 
     txDecodedData.genesisHash = payload.genesisHash;
 
@@ -130,11 +142,11 @@ class SigningCtrl {
 
     txDecodedData.rawMethodData = payload.method;
 
-  if (payload.tip != null) {
-    txDecodedData.tip = hexToDecimalString(payload.tip);
+    if (payload.tip != null) {
+      txDecodedData.tip = hexToDecimalString(payload.tip);
+    }
+    return txDecodedData;
   }
-  return txDecodedData;
-}
 
   Future<bool> checkBiometricsSupport() async {
     final isDeviceSupported = await localAuth.isDeviceSupported();
@@ -142,7 +154,8 @@ class SigningCtrl {
     return isAvailable && isDeviceSupported;
   }
 
-  Future<bool> _authenticateWithBiometrics(SignatureRequest signatureReq) async {
+  Future<bool> _authenticateWithBiometrics(
+      SignatureRequest signatureReq) async {
     getSignatureSigner(signatureReq);
 
     return localAuth.authenticate(
@@ -151,24 +164,25 @@ class SigningCtrl {
             useErrorDialogs: true, stickyAuth: true, biometricOnly: true));
   }
 
-  Future<bool> _authenticateWithPassword(SignatureRequest signatureReq, String? value) async {
-    if(value==null || value.isEmpty) {
+  Future<bool> _authenticateWithPassword(
+      SignatureRequest signatureReq, String? value) async {
+    if (value == null || value.isEmpty) {
       return false;
     }
     getSignatureSigner(signatureReq);
-    final storedPassword =
-    await storage.getValue(StorageKey.password.name);
+    final storedPassword = await storage.getValue(StorageKey.password.name);
     return storedPassword == value;
   }
 
-  StatusDataObject<ReefAccount> getSignatureSigner(SignatureRequest signatureReq) {
-    final signer = accountModel.accountsFDM.data
-        .firstWhere((acc) => acc.data.address == signatureReq?.payload.address,
+  StatusDataObject<ReefAccount> getSignatureSigner(
+      SignatureRequest signatureReq) {
+    final signer = accountModel.accountsFDM.data.firstWhere(
+        (acc) => acc.data.address == signatureReq?.payload.address,
         orElse: () => throw Exception("Signer not found"));
     return signer;
   }
 
-  bool isTransaction(SignatureRequest signatureRequest){
-    return signatureRequest.payload.type== "bytes";
+  bool isTransaction(SignatureRequest signatureRequest) {
+    return signatureRequest.payload.type == "bytes";
   }
 }

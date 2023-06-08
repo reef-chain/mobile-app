@@ -82,12 +82,6 @@ class TokenCtrl {
     return jsApi.jsPromise('window.utils.getNftInfo("$nftId","$ownerAddress")');
   }
 
-  Future<dynamic> sendNFT(String unresolvedFrom, String nftContractAddress,
-      String from, String to, int nftAmount, int nftId) async {
-    return jsApi.jsObservable(
-        'window.transfer.sendNft("${unresolvedFrom}","${from}","${to}",${nftAmount},${nftId},"${nftContractAddress}")');
-  }
-
   void reload(bool force) async {
     var isProvConn =
         await ReefAppState.instance.networkCtrl.getProviderConnLogs().first;

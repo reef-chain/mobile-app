@@ -6,7 +6,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/components/account_box.dart';
 import 'package:reef_mobile_app/components/sign/MethodBytesDataDisplay.dart';
-import 'package:reef_mobile_app/components/sign/MethodGeneralDataDisplay.dart';
 import 'package:reef_mobile_app/components/sign/SignatureControls.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
