@@ -56,8 +56,7 @@ class _ActivityViewState extends State<ActivityView> {
     switch (type) {
       case "received":
         if (amount != null) {
-          amountText =
-              "+ ${formatAmountToDisplayBigInt(amount, fractionDigits: 2)}";
+          amountText = "+ ${formatDisplayBalance(amount)}";
         } else {
           if (isTokenNFT!) {
             amountText = "";
@@ -73,7 +72,7 @@ class _ActivityViewState extends State<ActivityView> {
         break;
       case "sent":
         if (amount != null) {
-          amountText = "- ${formatAmountToDisplayBigInt(amount)}";
+          amountText = "- ${formatDisplayBalance(amount)}";
         } else {
           if (isTokenNFT!) {
             amountText = "";

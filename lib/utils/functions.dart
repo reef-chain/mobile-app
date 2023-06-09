@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:intl/intl.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 
@@ -38,8 +40,8 @@ extension ShortenExtension on String {
   }
 }
 
-String toShortDisplay(String? value){
-  return value!=null?value.shorten():"";
+String toShortDisplay(String? value) {
+  return value != null ? value.shorten() : "";
 }
 
 String formatAmountToDisplayBigInt(BigInt decimalsVal,
@@ -94,9 +96,12 @@ String toStringWithoutDecimals(String amount, int decimals) {
   return intPart + fractionalPart;
 }
 
-bool isMainnet(String? genHash){
-  return genHash==null?false : Constants.REEF_MAINNET_GENESIS_HASH==genHash.trim();
+bool isMainnet(String? genHash) {
+  return genHash == null
+      ? false
+      : Constants.REEF_MAINNET_GENESIS_HASH == genHash.trim();
 }
+
 // To check for valid checksum use JS utility
 bool isEvmAddress(String address) {
   return RegExp(r'^(0x|0X)([0-9a-fA-F]{40})$').hasMatch(address);
@@ -127,4 +132,48 @@ String hexToDecimalString(String hex) {
 
 bool isReefAddrPrefix(String address) {
   return address.startsWith('5');
+}
+
+String _zeroPadding(String val, int num) {
+  while (num > 0) {
+    val = "0" + val;
+    num--;
+  }
+  return val;
+}
+
+bool allZeroes(String num) {
+  for (var i = 0; i < num.length; i++) {
+    if (num[i] != "0") return false;
+  }
+  return true;
+}
+
+String formatDouble(double value) {
+  if (value < 1000) {
+    return value.toStringAsFixed(1);
+  } else if (value < 1000000) {
+    return '${(value / 1000).toStringAsFixed(1)}k';
+  } else if (value < 1000000000) {
+    return '${(value / 1000000).toStringAsFixed(3)}M';
+  } else if (value < 1000000000000) {
+    return '${(value / 1000000000).toStringAsFixed(3)}B';
+  } else {
+    return '${(value / 1000000000000).toStringAsFixed(3)}T';
+  }
+}
+
+String formatDisplayBalance(BigInt val, {int fraction = 4}) {
+  if (val < BigInt.from(pow(10, 18))) {
+    String zeroPaddedNum =
+        _zeroPadding(val.toString(), 18 - val.toString().length)
+            .substring(0, fraction);
+    if (allZeroes(zeroPaddedNum)) {
+      zeroPaddedNum = "${zeroPaddedNum.substring(0, fraction - 1)}1";
+    }
+    return "0.$zeroPaddedNum";
+  }
+  double balance = (val / BigInt.from(pow(10, 18)));
+
+  return formatDouble(balance);
 }
