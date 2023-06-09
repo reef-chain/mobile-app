@@ -249,15 +249,17 @@ class _SendNFTState extends State<SendNFT> {
                         hintStyle: TextStyle(color: Styles.textLightColor)),
                     onChanged: (value) async {
                       setState(() {
+                        print("anuna $value");
                         address = value;
                       });
-                      bool isValidAddr = await _isValidAddress(address);
+                      bool isValidAddr = await _isValidAddress(value);
                       setState(() {
                         if (isValidAddr) {
                           statusValue = SendStatus.NO_AMT;
                           isValidAddress = true;
                         } else {
                           statusValue = SendStatus.ADDR_NOT_VALID;
+                          isValidAddress = false;
                         }
                       });
                     }),
@@ -591,6 +593,7 @@ class _SendNFTState extends State<SendNFT> {
                         Column(
                           children: buildInputElements(),
                         ),
+                        Gap(8.0),
                         if (isValidAddress)
                           Column(
                             children: [
@@ -610,7 +613,7 @@ class _SendNFTState extends State<SendNFT> {
                               const Gap(10),
                             ],
                           ),
-                        Gap(18.0),
+                        Gap(4.0),
                         Container(
                           decoration: BoxDecoration(
                             color: const Color(0xffe6e2f1),
