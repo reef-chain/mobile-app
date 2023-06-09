@@ -6,6 +6,7 @@ import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
@@ -388,419 +389,428 @@ class _SendNFTState extends State<SendNFT> {
         buildFeedbackUI(context, statusValue, resetState, () {
       final navigator = Navigator.of(context);
       navigator.pop();
-      // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
+      ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
     return SingleChildScrollView(
-      child: transferStatusUI ?? contractAddress == ""
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    color: Styles.primaryAccentColor,
-                  ),
-                  Gap(24.0),
-                  Text("Fetching NFT details...")
-                ],
-              ),
-            )
-          : Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Styles.primaryBackgroundColor,
-                boxShadow: neumorphicShadow(),
-              ),
-              padding: const EdgeInsets.all(24.0),
-              child: Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.name,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Styles.textColor,
-                      ),
-                    ),
-                    Gap(16.0),
-                    if (widget.mimetype != "video/mp4")
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Styles.primaryBackgroundColor,
-                          boxShadow: neumorphicShadow(),
+      child: transferStatusUI ??
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Styles.primaryBackgroundColor,
+              boxShadow: neumorphicShadow(),
+            ),
+            padding: const EdgeInsets.all(24.0),
+            child: contractAddress == ""
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          color: Styles.primaryAccentColor,
                         ),
-                        padding: const EdgeInsets.all(8.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: IconFromUrl(
-                            widget.nftUrl,
-                            size: 320,
+                        Gap(24.0),
+                        Text("Fetching NFT details...")
+                      ],
+                    ),
+                  )
+                : Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.name,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Styles.textColor,
                           ),
                         ),
-                      ),
-                    if (widget.mimetype == "video/mp4")
-                      NFTsVideoPlayer(
-                        widget.nftUrl,
-                        displayChild: false,
-                      ),
-                    Gap(18.0),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _showNFTinfo = !_showNFTinfo;
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          const Icon(Icons.info, color: Styles.textLightColor),
-                          const Gap(8),
-                          Builder(builder: (context) {
-                            return Text(
-                              "Show NFT info",
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            );
-                          }),
-                          Expanded(child: Container()),
-                          Icon(_showNFTinfo
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down),
-                        ],
-                      ),
-                    ),
-                    if (_showNFTinfo)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12.0, bottom: 4.0),
-                        child: Column(
-                          children: [
-                            Gap(4.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Your Balance : ",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Styles.textLightColor,
-                                  ),
-                                ),
-                                Text(
-                                  "${widget.balance}",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Styles.primaryAccentColor,
-                                  ),
-                                ),
-                              ],
+                        Gap(16.0),
+                        if (widget.mimetype != "video/mp4")
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Styles.primaryBackgroundColor,
+                              boxShadow: neumorphicShadow(),
                             ),
-                            Gap(4.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "NFT ID : ",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Styles.textLightColor,
-                                  ),
-                                ),
-                                Text(
-                                  "${widget.nftId}",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Styles.primaryAccentColor,
-                                  ),
-                                ),
-                              ],
+                            padding: const EdgeInsets.all(8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: IconFromUrl(
+                                widget.nftUrl,
+                                size: 320,
+                              ),
                             ),
-                            Gap(4.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          ),
+                        if (widget.mimetype == "video/mp4")
+                          NFTsVideoPlayer(
+                            widget.nftUrl,
+                            displayChild: false,
+                          ),
+                        Gap(18.0),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _showNFTinfo = !_showNFTinfo;
+                            });
+                          },
+                          child: Row(
+                            children: [
+                              const Icon(Icons.info,
+                                  color: Styles.textLightColor),
+                              const Gap(8),
+                              Builder(builder: (context) {
+                                return Text(
+                                  "Show NFT info",
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                );
+                              }),
+                              Expanded(child: Container()),
+                              Icon(_showNFTinfo
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down),
+                            ],
+                          ),
+                        ),
+                        if (_showNFTinfo)
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 12.0, bottom: 4.0),
+                            child: Column(
                               children: [
-                                Text(
-                                  "Contract Address ",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Styles.textLightColor,
-                                  ),
+                                Gap(4.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Your Balance : ",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Styles.textLightColor,
+                                      ),
+                                    ),
+                                    Text(
+                                      "${widget.balance}",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Styles.primaryAccentColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Expanded(
-                                  child: contractAddress == ""
-                                      ? Column(
-                                          children: [
-                                            Gap(8.0),
-                                            Center(
-                                              child: LinearProgressIndicator(
+                                Gap(4.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "NFT ID : ",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Styles.textLightColor,
+                                      ),
+                                    ),
+                                    Text(
+                                      "${widget.nftId}",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Styles.primaryAccentColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Gap(4.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Contract Address ",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Styles.textLightColor,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: contractAddress == ""
+                                          ? Column(
+                                              children: [
+                                                Gap(8.0),
+                                                Center(
+                                                  child:
+                                                      LinearProgressIndicator(
+                                                    color: Styles
+                                                        .primaryAccentColor,
+                                                    backgroundColor:
+                                                        Styles.greyColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Text(
+                                              "${contractAddress}",
+                                              softWrap: true,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
                                                 color:
                                                     Styles.primaryAccentColor,
-                                                backgroundColor:
-                                                    Styles.greyColor,
                                               ),
                                             ),
-                                          ],
-                                        )
-                                      : Text(
-                                          "${contractAddress}",
-                                          softWrap: true,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Styles.primaryAccentColor,
-                                          ),
-                                        ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    Gap(18.0),
-                    Column(
-                      children: buildInputElements(),
-                    ),
-                    Gap(18.0),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xffe6e2f1),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(14.0)),
-                      ),
-                      padding: EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            height: 32,
-                            width: 32,
-                            decoration: BoxDecoration(
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0xff742cb2),
-                                    spreadRadius: -10,
-                                    offset: Offset(0, 5),
-                                    blurRadius: 20,
-                                  ),
-                                ],
-                                borderRadius: BorderRadius.circular(80),
-                                gradient: isMinBtnEnabled
-                                    ? const LinearGradient(
-                                        colors: [
-                                          Color(0xffae27a5),
-                                          Color(0xff742cb2)
-                                        ],
-                                        begin: Alignment(-1, -1),
-                                        end: Alignment(1, 1),
-                                      )
-                                    : const LinearGradient(colors: [
-                                        Color.fromARGB(76, 174, 174, 174),
-                                        Color.fromARGB(86, 136, 144, 171),
-                                      ])),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.remove,
-                                color: isMinBtnEnabled
-                                    ? Colors.white
-                                    : Colors.black,
-                                size: 16.0,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                backgroundColor: Colors.transparent,
-                                shape: const StadiumBorder(),
-                                elevation: 0,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (amountToSend > 0) {
-                                    amountToSend -= 1;
-                                    _amountController!.text =
-                                        amountToSend.toString();
-                                    isMaxBtnEnabled = true;
-                                  }
-                                  if (amountToSend == 0) {
-                                    isMinBtnEnabled = false;
-                                    isMaxBtnEnabled = true;
-                                  }
-                                });
-                                setAmountState();
-                              },
-                            ),
                           ),
-                          Gap(8.0),
-                          Column(
+                        Gap(18.0),
+                        Column(
+                          children: buildInputElements(),
+                        ),
+                        Gap(18.0),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xffe6e2f1),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(14.0)),
+                          ),
+                          padding: EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Gap(8.0),
-                              TextButton(
+                              Container(
+                                height: 32,
+                                width: 32,
+                                decoration: BoxDecoration(
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color(0xff742cb2),
+                                        spreadRadius: -10,
+                                        offset: Offset(0, 5),
+                                        blurRadius: 20,
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(80),
+                                    gradient: isMinBtnEnabled
+                                        ? const LinearGradient(
+                                            colors: [
+                                              Color(0xffae27a5),
+                                              Color(0xff742cb2)
+                                            ],
+                                            begin: Alignment(-1, -1),
+                                            end: Alignment(1, 1),
+                                          )
+                                        : const LinearGradient(colors: [
+                                            Color.fromARGB(76, 174, 174, 174),
+                                            Color.fromARGB(86, 136, 144, 171),
+                                          ])),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.remove,
+                                    color: isMinBtnEnabled
+                                        ? Colors.white
+                                        : Colors.black,
+                                    size: 16.0,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    backgroundColor: Colors.transparent,
+                                    shape: const StadiumBorder(),
+                                    elevation: 0,
+                                  ),
                                   onPressed: () {
                                     setState(() {
-                                      amountToSend = 0;
-                                      _amountController!.text =
-                                          amountToSend.toString();
-                                      isMinBtnEnabled = false;
-                                      isMaxBtnEnabled = true;
-                                    });
-                                    setAmountState();
-                                  },
-                                  child: Text(
-                                    'Min',
-                                    style: TextStyle(
-                                        color: isMinBtnEnabled
-                                            ? Styles.primaryAccentColor
-                                            : Styles.textLightColor),
-                                  )),
-                            ],
-                          ),
-                          Expanded(
-                            child: Container(
-                              child: TextField(
-                                controller: _amountController,
-                                keyboardType: TextInputType.number,
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Styles.primaryAccentColor,
-                                ),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                ),
-                                textAlign: TextAlign.center,
-                                onChanged: (value) {
-                                  setState(() {
-                                    if (value.isEmpty) {
-                                      amountToSend = 0;
-                                      isMinBtnEnabled = false;
-                                      isMaxBtnEnabled = true;
-                                    } else {
-                                      int enteredValue =
-                                          int.tryParse(value) ?? 0;
-                                      if (enteredValue < 0) {
-                                        statusValue = SendStatus.NO_AMT;
+                                      if (amountToSend > 0) {
+                                        amountToSend -= 1;
                                         _amountController!.text =
-                                            enteredValue.toString();
-                                        amountToSend = enteredValue;
+                                            amountToSend.toString();
+                                        isMaxBtnEnabled = true;
+                                      }
+                                      if (amountToSend == 0) {
                                         isMinBtnEnabled = false;
                                         isMaxBtnEnabled = true;
-                                      } else if (enteredValue >
-                                          widget.balance) {
-                                        statusValue = SendStatus.AMT_TOO_HIGH;
-                                        _amountController!.text =
-                                            enteredValue.toString();
-                                        amountToSend = enteredValue;
-                                        isMinBtnEnabled = true;
-                                        isMaxBtnEnabled = false;
-                                      } else {
-                                        amountToSend = enteredValue;
-                                        isMinBtnEnabled = true;
-                                        if (enteredValue == widget.balance) {
-                                          isMaxBtnEnabled = false;
-                                        }
                                       }
-                                    }
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          Column(
-                            children: [
-                              Gap(8.0),
-                              TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      amountToSend = widget.balance;
-                                      _amountController!.text =
-                                          amountToSend.toString();
-                                      isMinBtnEnabled = true;
-                                      isMaxBtnEnabled = false;
                                     });
                                     setAmountState();
                                   },
-                                  child: Text(
-                                    'Max',
+                                ),
+                              ),
+                              Gap(8.0),
+                              Column(
+                                children: [
+                                  Gap(8.0),
+                                  TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          amountToSend = 0;
+                                          _amountController!.text =
+                                              amountToSend.toString();
+                                          isMinBtnEnabled = false;
+                                          isMaxBtnEnabled = true;
+                                        });
+                                        setAmountState();
+                                      },
+                                      child: Text(
+                                        'Min',
+                                        style: TextStyle(
+                                            color: isMinBtnEnabled
+                                                ? Styles.primaryAccentColor
+                                                : Styles.textLightColor),
+                                      )),
+                                ],
+                              ),
+                              Expanded(
+                                child: Container(
+                                  child: TextField(
+                                    controller: _amountController,
+                                    keyboardType: TextInputType.number,
                                     style: TextStyle(
-                                        color: isMaxBtnEnabled
-                                            ? Styles.primaryAccentColor
-                                            : Styles.textLightColor),
-                                  )),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Styles.primaryAccentColor,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        if (value.isEmpty) {
+                                          amountToSend = 0;
+                                          isMinBtnEnabled = false;
+                                          isMaxBtnEnabled = true;
+                                        } else {
+                                          int enteredValue =
+                                              int.tryParse(value) ?? 0;
+                                          if (enteredValue < 0) {
+                                            statusValue = SendStatus.NO_AMT;
+                                            _amountController!.text =
+                                                enteredValue.toString();
+                                            amountToSend = enteredValue;
+                                            isMinBtnEnabled = false;
+                                            isMaxBtnEnabled = true;
+                                          } else if (enteredValue >
+                                              widget.balance) {
+                                            statusValue =
+                                                SendStatus.AMT_TOO_HIGH;
+                                            _amountController!.text =
+                                                enteredValue.toString();
+                                            amountToSend = enteredValue;
+                                            isMinBtnEnabled = true;
+                                            isMaxBtnEnabled = false;
+                                          } else {
+                                            amountToSend = enteredValue;
+                                            isMinBtnEnabled = true;
+                                            if (enteredValue ==
+                                                widget.balance) {
+                                              isMaxBtnEnabled = false;
+                                            }
+                                          }
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  Gap(8.0),
+                                  TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          amountToSend = widget.balance;
+                                          _amountController!.text =
+                                              amountToSend.toString();
+                                          isMinBtnEnabled = true;
+                                          isMaxBtnEnabled = false;
+                                        });
+                                        setAmountState();
+                                      },
+                                      child: Text(
+                                        'Max',
+                                        style: TextStyle(
+                                            color: isMaxBtnEnabled
+                                                ? Styles.primaryAccentColor
+                                                : Styles.textLightColor),
+                                      )),
+                                ],
+                              ),
+                              Gap(8.0),
+                              Container(
+                                height: 32,
+                                width: 32,
+                                decoration: BoxDecoration(
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0xff742cb2),
+                                      spreadRadius: -10,
+                                      offset: Offset(0, 5),
+                                      blurRadius: 20,
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(80),
+                                  gradient: isMaxBtnEnabled
+                                      ? const LinearGradient(
+                                          colors: [
+                                            Color(0xffae27a5),
+                                            Color(0xff742cb2)
+                                          ],
+                                          begin: Alignment(-1, -1),
+                                          end: Alignment(1, 1),
+                                        )
+                                      : const LinearGradient(colors: [
+                                          Color.fromARGB(76, 174, 174, 174),
+                                          Color.fromARGB(86, 136, 144, 171),
+                                        ]),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.add,
+                                    color: isMaxBtnEnabled
+                                        ? Colors.white
+                                        : Colors.black,
+                                    size: 16.0,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    backgroundColor: Colors.transparent,
+                                    shape: const StadiumBorder(),
+                                    elevation: 0,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      if (amountToSend < widget.balance) {
+                                        amountToSend += 1;
+                                        _amountController!.text =
+                                            amountToSend.toString();
+                                        isMaxBtnEnabled = true;
+                                        isMinBtnEnabled = true;
+                                      }
+                                      if (amountToSend == widget.balance) {
+                                        isMaxBtnEnabled = false;
+                                        isMinBtnEnabled = true;
+                                      }
+                                      setAmountState();
+                                    });
+                                  },
+                                ),
+                              ),
                             ],
                           ),
-                          Gap(8.0),
-                          Container(
-                            height: 32,
-                            width: 32,
-                            decoration: BoxDecoration(
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0xff742cb2),
-                                  spreadRadius: -10,
-                                  offset: Offset(0, 5),
-                                  blurRadius: 20,
-                                ),
-                              ],
-                              borderRadius: BorderRadius.circular(80),
-                              gradient: isMaxBtnEnabled
-                                  ? const LinearGradient(
-                                      colors: [
-                                        Color(0xffae27a5),
-                                        Color(0xff742cb2)
-                                      ],
-                                      begin: Alignment(-1, -1),
-                                      end: Alignment(1, 1),
-                                    )
-                                  : const LinearGradient(colors: [
-                                      Color.fromARGB(76, 174, 174, 174),
-                                      Color.fromARGB(86, 136, 144, 171),
-                                    ]),
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.add,
-                                color: isMaxBtnEnabled
-                                    ? Colors.white
-                                    : Colors.black,
-                                size: 16.0,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                backgroundColor: Colors.transparent,
-                                shape: const StadiumBorder(),
-                                elevation: 0,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (amountToSend < widget.balance) {
-                                    amountToSend += 1;
-                                    _amountController!.text =
-                                        amountToSend.toString();
-                                    isMaxBtnEnabled = true;
-                                    isMinBtnEnabled = true;
-                                  }
-                                  if (amountToSend == widget.balance) {
-                                    isMaxBtnEnabled = false;
-                                    isMinBtnEnabled = true;
-                                  }
-                                  setAmountState();
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        Gap(24.0),
+                        buildSendStatusButton()
+                      ],
                     ),
-                    Gap(24.0),
-                    buildSendStatusButton()
-                  ],
-                ),
-              ),
-            ),
+                  ),
+          ),
     );
   }
 }

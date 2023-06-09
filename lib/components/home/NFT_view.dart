@@ -97,13 +97,15 @@ class _NFTViewState extends State<NFTView> {
     return Builder(
       builder: (context) => GestureDetector(
         onTap: () async {
-          ReefAppState.instance.navigationCtrl.navigateToSendNFTPage(
-              context: context,
-              nftUrl: url,
-              name: name,
-              balance: balance,
-              nftId: nftId,
-              mimetype: mimetype);
+          if (url != '') {
+            ReefAppState.instance.navigationCtrl.navigateToSendNFTPage(
+                context: context,
+                nftUrl: url,
+                name: name,
+                balance: balance,
+                nftId: nftId,
+                mimetype: mimetype);
+          }
         },
         onLongPress: () {
           setState(() {
