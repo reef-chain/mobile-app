@@ -285,8 +285,9 @@ class _SendNFTState extends State<SendNFT> {
                   padding: const EdgeInsets.all(0),
                 ),
                 onPressed: () async {
-                  print(await ReefAppState
-                      .instance.signingCtrl.signatureRequests.list);
+                  setState(() {
+                    statusValue = SendStatus.SIGNING;
+                  });
                   setStatusOnSignatureClosed();
                   String? unresolvedFrom =
                       ReefAppState.instance.model.accounts.selectedAddress;
