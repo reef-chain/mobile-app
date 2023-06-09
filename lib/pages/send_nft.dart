@@ -410,7 +410,7 @@ class _SendNFTState extends State<SendNFT> {
         buildFeedbackUI(context, statusValue, resetState, () {
       final navigator = Navigator.of(context);
       navigator.pop();
-      ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
+      // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
     return SingleChildScrollView(
       child: transferStatusUI ??
