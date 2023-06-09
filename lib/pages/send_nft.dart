@@ -38,6 +38,7 @@ class _SendNFTState extends State<SendNFT> {
   bool _showNFTinfo = false;
   dynamic transactionData;
   String contractAddress = "";
+  bool isValidAddress = false;
 
   @override
   void initState() {
@@ -87,6 +88,19 @@ class _SendNFTState extends State<SendNFT> {
     }
   }
 
+  bool handleExceptionResponse(txResponse) {
+    if (txResponse == null || txResponse['success'] != true) {
+      setState(() {
+        isFormDisabled = false;
+        statusValue = txResponse['data'] == '_canceled'
+            ? SendStatus.READY
+            : SendStatus.ERROR;
+      });
+      return true;
+    }
+    return false;
+  }
+
   void setStatusOnSignatureClosed() {
     when(
         (p0) =>
@@ -114,6 +128,7 @@ class _SendNFTState extends State<SendNFT> {
     setState(() {
       if (amountToSend <= widget.balance && amountToSend > 0) {
         if (isValidAddr) {
+          isValidAddress = true;
           statusValue = SendStatus.READY;
         } else {
           statusValue = SendStatus.ADDR_NOT_VALID;
@@ -156,6 +171,7 @@ class _SendNFTState extends State<SendNFT> {
           valueController.text = address;
           if (isValidAddr) {
             statusValue = SendStatus.NO_AMT;
+            isValidAddress = true;
             setAmountState();
           } else {
             statusValue = SendStatus.ADDR_NOT_VALID;
@@ -239,6 +255,7 @@ class _SendNFTState extends State<SendNFT> {
                       setState(() {
                         if (isValidAddr) {
                           statusValue = SendStatus.NO_AMT;
+                          isValidAddress = true;
                         } else {
                           statusValue = SendStatus.ADDR_NOT_VALID;
                         }
@@ -306,6 +323,7 @@ class _SendNFTState extends State<SendNFT> {
 
                   transferTransactionFeedbackStream.listen((txResponse) {
                     print('TRANSACTION RESPONSE=$txResponse');
+                    handleExceptionResponse(txResponse);
                     if (txResponse['data']['status'] == 'broadcast') {
                       setState(() {
                         transactionData = txResponse['data'];
@@ -379,6 +397,7 @@ class _SendNFTState extends State<SendNFT> {
       setState(() {
         transactionData = null;
         address = '';
+        isValidAddress = false;
         isFormDisabled = false;
         statusValue = SendStatus.NO_ADDRESS;
         transactionData = null;
@@ -572,6 +591,25 @@ class _SendNFTState extends State<SendNFT> {
                         Column(
                           children: buildInputElements(),
                         ),
+                        if (isValidAddress)
+                          Column(
+                            children: [
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.check_circle_outline,
+                                        color: Styles.greenColor, size: 16),
+                                    const Gap(5),
+                                    Text(
+                                      address.shorten(),
+                                      style: const TextStyle(
+                                          color: Styles.textLightColor,
+                                          fontSize: 12),
+                                    )
+                                  ]),
+                              const Gap(10),
+                            ],
+                          ),
                         Gap(18.0),
                         Container(
                           decoration: BoxDecoration(
