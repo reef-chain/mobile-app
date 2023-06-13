@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:reef_mobile_app/components/NFT_videoplayer.dart';
 import 'package:reef_mobile_app/components/home/NFT_zoom_viewer.dart';
+import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
@@ -91,10 +92,21 @@ class _NFTViewState extends State<NFTView> {
   bool _remountNFTsVideoPlayer = false;
 
   Widget _createGridTileCard(
-      String name, String mimetype, String url, int balance) {
+      String name, String nftId, String mimetype, String url, int balance) {
     final dialogKey = GlobalKey<AnimatedDialogState>();
     return Builder(
       builder: (context) => GestureDetector(
+        onTap: () async {
+          if (url != '') {
+            ReefAppState.instance.navigationCtrl.navigateToSendNFTPage(
+                context: context,
+                nftUrl: url,
+                name: name,
+                balance: balance,
+                nftId: nftId,
+                mimetype: mimetype);
+          }
+        },
         onLongPress: () {
           setState(() {
             _remountNFTsVideoPlayer = !_remountNFTsVideoPlayer;
@@ -234,7 +246,10 @@ class _NFTViewState extends State<NFTView> {
     return mimetype == "video/mp4"
         ? Container(
             key: Key(_remountNFTsVideoPlayer.toString()),
-            child: NFTsVideoPlayer(iconURL, child))
+            child: NFTsVideoPlayer(
+              iconURL,
+              child: child,
+            ))
         : ImageBoxContainer(imageUrl: iconURL, child: child);
   }
 
@@ -290,6 +305,7 @@ class _NFTViewState extends State<NFTView> {
                   final tkn = selectedNFTs.data[index];
                   return _createGridTileCard(
                     tkn.data.name,
+                    tkn.data.nftId,
                     tkn.data.mimetype ?? '',
                     tkn.data.iconUrl ?? '',
                     tkn.data.balance.toInt(),

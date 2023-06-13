@@ -78,6 +78,10 @@ class TokenCtrl {
     return jsApi.jsPromise('window.utils.getTxInfo("$timestamp")');
   }
 
+  Future<dynamic> getNftInfo(String nftId, String ownerAddress) async {
+    return jsApi.jsPromise('window.utils.getNftInfo("$nftId","$ownerAddress")');
+  }
+
   void reload(bool force) async {
     var isProvConn =
         await ReefAppState.instance.networkCtrl.getProviderConnLogs().first;

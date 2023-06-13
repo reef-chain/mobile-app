@@ -7,8 +7,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class NFTsVideoPlayer extends StatefulWidget {
   final String url;
-  final Widget child;
-  NFTsVideoPlayer(this.url, this.child);
+  final Widget? child;
+  final bool? displayChild;
+  NFTsVideoPlayer(this.url, {this.child, this.displayChild});
 
   @override
   State<NFTsVideoPlayer> createState() => _NFTsVideoPlayerState();
@@ -99,9 +100,8 @@ class _NFTsVideoPlayerState extends State<NFTsVideoPlayer> {
                       ),
                     )
                   : ClipRRect(
-                      borderRadius: BorderRadius.vertical(
-                        top: new Radius.circular(15.0),
-                      ),
+                      borderRadius:
+                          BorderRadius.vertical(top: new Radius.circular(15.0)),
                       child: AspectRatio(
                         aspectRatio: _controller?.value?.aspectRatio ?? 1,
                         child: Stack(children: [
@@ -140,20 +140,21 @@ class _NFTsVideoPlayerState extends State<NFTsVideoPlayer> {
               top: new Radius.circular(15.0),
             ),
           )),
-      Container(
-          width: double.infinity,
-          height: 50,
-          decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              color: Colors.white,
-              borderRadius: new BorderRadius.vertical(
-                bottom: new Radius.circular(15.0),
-              )),
-          child: SizedBox(
+      if (widget.displayChild != false)
+        Container(
             width: double.infinity,
-            height: 150,
-            child: widget.child,
-          ))
+            height: 50,
+            decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                color: Colors.white,
+                borderRadius: new BorderRadius.vertical(
+                  bottom: new Radius.circular(15.0),
+                )),
+            child: SizedBox(
+              width: double.infinity,
+              height: 150,
+              child: widget.child,
+            ))
     ]);
   }
 }

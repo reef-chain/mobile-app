@@ -43,10 +43,10 @@ abstract class _SignatureRequest with Store {
   @action
   Future<dynamic> decodeMethod() async {
     decodedMethod = {};
-    final future = _signingCtrl.decodeMethod(payload.method);
-    fetchMethodDataFuture = ObservableFuture(future);
+    final decodeFuture = _signingCtrl.decodeMethod(payload.method);
+    fetchMethodDataFuture = ObservableFuture(decodeFuture);
 
-    decodedMethod = await future;
+    decodedMethod = await decodeFuture;
     txDecodedData = await _signingCtrl.getTxDecodedData(payload, decodedMethod);
     if(toSignatureRequest().payload.type == "bytes"){
     bytesData = await _signingCtrl.bytesString(toSignatureRequest().payload.data);
