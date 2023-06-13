@@ -27,11 +27,10 @@
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>NSAppTransportSecurity</key>
-<dict>
-  <key>NSAllowsArbitraryLoads</key>
-  <true/>
-</dict>
-
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
@@ -55,6 +54,13 @@
 	<string>Authenticate with biometrics</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	
+	<key>NSCameraUsageDescription</key>
+	<string>Scan code</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select file</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Area of usage</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Area of usage</string>
 </dict>
 </plist>
