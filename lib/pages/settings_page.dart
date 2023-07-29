@@ -22,28 +22,17 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _showDeveloperSettings = false;
   String? gqlConnState;
-  StreamSubscription? gqlConnStateSubs;
   String? providerConnState;
   StreamSubscription? providerConnStateSubs;
 
   @override
   void dispose() {
-    gqlConnStateSubs?.cancel();
     providerConnStateSubs?.cancel();
     super.dispose();
   }
 
   @override
   void initState() {
-    gqlConnStateSubs =
-        ReefAppState.instance.networkCtrl.getGqlConnLogs().listen((event) {
-      setState(() {
-        gqlConnState = event != null && event.isConnected
-            ? 'connected'
-            : event?.toString();
-      });
-    });
-
     providerConnStateSubs =
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
       setState(() {

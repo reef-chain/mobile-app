@@ -26,7 +26,6 @@ class NetworkCtrl {
     });
 
     // need to listen here so other subscriptions immediately receive last value
-    getGqlConnLogs().listen((event) {print('GQL CONN=$event');});
     getProviderConnLogs().listen((event) {print('PROV CONN=$event');});
   }
 
@@ -35,7 +34,6 @@ class NetworkCtrl {
     jsApi.jsCallVoidReturn('window.utils.setSelectedNetwork(`${network.name}`)');
   }
 
-  Stream<WsConnState?> getGqlConnLogs()=> jsApi.jsObservable('window.utils.apolloClientWsConnState\$').map((event) => WsConnState.fromJson(event));
   Stream<WsConnState?> getProviderConnLogs()=> jsApi.jsObservable('window.utils.providerConnState\$').map((event) => WsConnState.fromJson(event));
 
 }

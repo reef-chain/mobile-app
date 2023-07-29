@@ -15,7 +15,7 @@ const {AVAILABLE_NETWORKS } = network;
 
 export const initFlutterApi = async (flutterJS: FlutterJS) => {
     try {
-        console.log("INIT FLUTTER JS API");
+        console.log("INIT FLUTTER JS API util-lib v1.0.0-rc1");
         const signingKey = getFlutterSigningKey(flutterJS);
 
         (window as any).jsApi = {

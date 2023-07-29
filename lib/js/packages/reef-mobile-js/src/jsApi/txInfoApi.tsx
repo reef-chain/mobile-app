@@ -1,11 +1,16 @@
 import { gql } from '@apollo/client';
+import {graphql} from "@reef-chain/util-lib";
 
 
 export const fetchTxInfo = (
-    apollo: any,
+    httpClient: any,
     searchTimestamp: string,
-  ): Promise<TokenWithAmount> => apollo
+  ): Promise<TokenWithAmount> => /*apollo
     .query({
+      query: FETCH_TX_INFO_ANUKUL,
+      variables: { timestamp: searchTimestamp },
+    })*/
+    graphql.queryGql$(httpClient, {
       query: FETCH_TX_INFO_ANUKUL,
       variables: { timestamp: searchTimestamp },
     })
@@ -35,7 +40,7 @@ export const fetchTxInfo = (
 
 
 
-const FETCH_TX_INFO_ANUKUL = gql`
+const FETCH_TX_INFO_ANUKUL = `
 query FETCH_TX_Info_anukul($timestamp: DateTime!) {
     transfers(limit: 1, where: {timestamp_eq: $timestamp}) {
       id

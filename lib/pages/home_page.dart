@@ -53,7 +53,6 @@ class _HomePageState extends State<HomePage> {
 
   WsConnState? providerConn;
   WsConnState? gqlConn;
-  StreamSubscription? gqlConnStateSubs;
   StreamSubscription? providerConnStateSubs;
 
   @override
@@ -63,18 +62,12 @@ class _HomePageState extends State<HomePage> {
         providerConn = event;
       });
     });
-    gqlConnStateSubs = ReefAppState.instance.networkCtrl.getGqlConnLogs().listen((event) {
-      setState(() {
-        gqlConn = event;
-      });
-    });
     super.initState();
   }
 
   @override
   void dispose() {
     providerConnStateSubs?.cancel();
-    gqlConnStateSubs?.cancel();
     super.dispose();
   }
 

@@ -1,11 +1,10 @@
-import {graphql, network, reefState, signatureUtils, tokenUtil} from '@reef-chain/util-lib';
-import {debounceTime, map, shareReplay, switchMap, take} from "rxjs/operators";
-import {combineLatest, firstValueFrom, Observable} from "rxjs";
+import { graphql, network, reefState, signatureUtils, tokenUtil} from '@reef-chain/util-lib';
+import {debounceTime, map, shareReplay, startWith, switchMap, take} from "rxjs/operators";
+import {combineLatest, firstValueFrom, Observable, of} from "rxjs";
 import {fetchTokenData} from './utils/tokenUtils';
 import {Provider} from "@reef-defi/evm-provider";
 import {isAscii, u8aToString, u8aUnwrapBytes} from '@reef-defi/util';
 import {ERC20} from "./abi/ERC20";
-import { gql } from '@apollo/client';
 import { fetchTxInfo } from './txInfoApi';
 
 function lagWhenDisconnected() {
@@ -28,10 +27,10 @@ export const initApi = () => {
                 map((value => value.data))
             );
             return firstValueFrom(
-                combineLatest([graphql.apolloClientInstance$, reefState.selectedNetwork$, reefState.selectedProvider$, price$]).pipe(
+                combineLatest([graphql.httpClientInstance$, reefState.selectedNetwork$, reefState.selectedProvider$, price$]).pipe(
                     take(1),
-                    switchMap(async ([apolloInstance, net, provider, reefPrice]: [any, network.Network, Provider, number]) => {
-                        return await fetchTokenData(apolloInstance, tokenAddress, provider, network.getReefswapNetworkConfig(net).factoryAddress, reefPrice);
+                    switchMap(async ([httpClientInstance, net, provider, reefPrice]: [any, network.Network, Provider, number]) => {
+                        return await fetchTokenData(httpClientInstance, tokenAddress, provider, network.getReefswapNetworkConfig(net).factoryAddress, reefPrice);
                     }),
                     take(1)
                 )
@@ -39,10 +38,10 @@ export const initApi = () => {
         },
         getTxInfo: async (timestamp: string) => {
             return firstValueFrom(
-                combineLatest([graphql.apolloClientInstance$,timestamp]).pipe(
+                combineLatest([graphql.httpClientInstance$, timestamp]).pipe(
                     take(1),
-                    switchMap(async ([apolloInstance, abc]:[any, string]) => {
-                        return await fetchTxInfo(apolloInstance, timestamp);
+                    switchMap(async ([httpClient, abc]:[any, string]) => {
+                        return await fetchTxInfo(httpClient, timestamp);
                     }),
                     take(1)
                 )
@@ -74,11 +73,6 @@ export const initApi = () => {
         bytesString: (bytes: string) => {
             return isAscii(bytes) ? u8aToString(u8aUnwrapBytes(bytes)) : bytes;
         },
-
-        apolloClientWsConnState$: graphql.apolloClientWsConnState$.pipe(
-            switchMap(lagWhenDisconnected()),
-            shareReplay(1)
-        ),
 
         providerConnState$: reefState.providerConnState$.pipe(
             switchMap(lagWhenDisconnected()),
