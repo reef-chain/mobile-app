@@ -15,9 +15,8 @@ export const initApi = (signingKey: Signer) => {
         signRawPromise: (address: string, message: string | HexString) => {
             // TODO getting account is in many places - create method
             return firstValueFrom(reefState.accounts$.pipe(
-                withLatestFrom([of(address)]),
                 take(1),
-                map(([sgnrs,addr]: [ReefAccount[]|undefined|null, string]) => findAccount(sgnrs, addr)),
+                map((sgnrs: ReefAccount[]|undefined) => findAccount(sgnrs, address)),
                 switchMap((signer: ReefAccount | undefined) => {
                     if (!signer) {
                         throw Error('signer not found addr=' + address);
@@ -34,9 +33,8 @@ export const initApi = (signingKey: Signer) => {
         },
         signPayloadPromise: (address: string, payload: SignerPayloadJSON) => {
             return firstValueFrom(reefState.accounts$.pipe(
-                withLatestFrom([of(address)]),
                 take(1),
-                map(([sgnrs,addr]: [ReefAccount[], string]) => findAccount(sgnrs, addr)),
+                map((sgnrs: ReefAccount[]|undefined) => findAccount(sgnrs, address)),
                 switchMap((signer: ReefAccount | undefined) => {
                     if (!signer) {
                         throw Error('signer not found addr=' + address);

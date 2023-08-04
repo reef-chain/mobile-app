@@ -37,8 +37,10 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
         return "This is Account Address , You can send funds here by scanning this QR Code";
       case ReefQrCodeType.accountJson:
         return "You can import this Account by scanning this QR code and entering the password.";
+      case ReefQrCodeType.walletConnect:
+        return "This is WalletConnect QR Code.";
       default:
-        return "Not Reef QR Code.";
+        return "Not a valid QR Code.";
     }
   }
 
@@ -67,6 +69,11 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
               ));
         }
         break;
+      case ReefQrCodeType.walletConnect:
+        Navigator.pop(context);
+        ReefAppState.instance.navigationCtrl
+            .navigateToWalletConnectPage(context: context, uri: qrCode.data);
+        break;
 
       default:
         break;
@@ -75,15 +82,20 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
 
   Future<void> handleQrCodeData(String qrCodeData) async {
     ReefQrCode? qrCode;
-    try {
+
+    if (qrCodeData.startsWith("wc:")) {
+      qrCode = ReefQrCode(ReefQrCodeType.walletConnect, qrCodeData);
+    } else {
       var decoded = jsonDecode(qrCodeData);
-      var qrCodeType = ReefQrCodeType.values.byName(decoded["type"]);
-      qrCode = ReefQrCode(qrCodeType, decoded["data"]);
-    } on FormatException catch (e) {
-      var isAddr = await ReefAppState.instance.accountCtrl
-          .isValidSubstrateAddress(qrCodeData);
-      if (isAddr && isReefAddrPrefix(qrCodeData)) {
-        qrCode = ReefQrCode(ReefQrCodeType.address, qrCodeData);
+      try {
+        var qrCodeType = ReefQrCodeType.values.byName(decoded["type"]);
+        qrCode = ReefQrCode(qrCodeType, decoded["data"]);
+      } on FormatException catch (e) {
+        var isAddr = await ReefAppState.instance.accountCtrl
+            .isValidSubstrateAddress(qrCodeData);
+        if (isAddr && isReefAddrPrefix(qrCodeData)) {
+          qrCode = ReefQrCode(ReefQrCodeType.address, qrCodeData);
+        }
       }
     }
 
@@ -100,9 +112,9 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
 
   void qr(QRViewController controller) async {
     this.controller = controller;
-    /*controller.scannedDataStream.listen((event) {
+    controller.scannedDataStream.listen((event) {
       handleQrCodeData(event.code!);
-    });*/
+    });
     var scanRes = await controller.scannedDataStream.first;
     await handleQrCodeData(scanRes.code!);
     this.controller?.dispose();
@@ -250,4 +262,4 @@ Future<String?> scanFile() async {
   }
 }
 
-enum ReefQrCodeType { address, accountJson, info, invalid }
+enum ReefQrCodeType { address, accountJson, info, walletConnect, invalid }

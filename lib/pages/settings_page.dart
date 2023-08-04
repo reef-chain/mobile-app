@@ -11,6 +11,7 @@ import 'package:reef_mobile_app/components/modals/language_selection_modal.dart'
 import 'package:reef_mobile_app/components/switch_network.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+import 'package:reef_mobile_app/components/getQrTypeData.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -156,6 +157,33 @@ class _SettingsPageState extends State<SettingsPage> {
                       Builder(builder: (context) {
                         return Text(
                             AppLocalizations.of(context)!.select_language,
+                            style: Theme.of(context).textTheme.bodyLarge);
+                      }),
+                    ],
+                  ),
+                ),
+                const Gap(12),
+                const Divider(
+                  color: Styles.textLightColor,
+                  thickness: 1,
+                ),
+                const Gap(24),
+                MaterialButton(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onPressed: () => showQrTypeDataModal(
+                      AppLocalizations.of(context)!.scan_qr_code, context,
+                      expectedType: ReefQrCodeType.walletConnect),
+                  padding: const EdgeInsets.all(2),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        CupertinoIcons.qrcode,
+                        color: Styles.textLightColor,
+                        size: 22,
+                      ),
+                      const Gap(8),
+                      Builder(builder: (context) {
+                        return Text(AppLocalizations.of(context)!.scan_qr_code,
                             style: Theme.of(context).textTheme.bodyLarge);
                       }),
                     ],
