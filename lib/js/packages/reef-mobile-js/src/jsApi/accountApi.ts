@@ -80,7 +80,7 @@ export const innitApi = (signingKey: Signer) => {
                         reefState.onTxUpdateResetSigners({isInBlock: true, txTypeEvm: false}, updateActions);
                         return true;
                     } catch (e) {
-                        console.log(' account.claimEvmAccount() - ', e.message);
+                        console.log('account.claimEvmAccount() - ', e.message);
                         return null;
                     }
                 }),
