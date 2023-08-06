@@ -3097,10 +3097,10 @@
     graphql "^16.6.0"
     subscriptions-transport-ws "^0.11.0"
 
-"@reef-chain/util-lib@^1.0.0-rc5":
-  version "1.0.0-rc5"
-  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-1.0.0-rc5.tgz#f60ead452c7561374ea14f2f414d55e59a12be77"
-  integrity sha512-x7lMCYE4PUsLbL2PTm57jsEuWQ58SFJJ5wn35SIJYxhuQvZbLh3uIeubqh0v3kIaCWNsoWeHNeK/kn9jhA+cGA==
+"@reef-chain/util-lib@^1.0.0-rc7":
+  version "1.0.0-rc7"
+  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-1.0.0-rc7.tgz#166c94abfb2d6b0f4b783cdd76853c1bf3d43bb0"
+  integrity sha512-XeABSBVYLxvcxYQyJkkvNGcooCoaxoBVJqv9d3kB/hGIoEN4tsFP5xdTJACWGjRQC6LC1EYi2f1oG8Yl735ZBg==
   dependencies:
     "@polkadot/extension-inject" "^0.44.6"
     "@reef-defi/evm-provider" "^1.0.10"

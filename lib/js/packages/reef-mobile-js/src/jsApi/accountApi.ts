@@ -65,7 +65,6 @@ export const innitApi = (signingKey: Signer) => {
                     }
 
                     try {
-
                         let address = signer.address;
                         const evmSigner = await getAccountSigner(address, provider, signingKey);
                         await evmSigner.claimDefaultAccount();
@@ -78,12 +77,10 @@ export const innitApi = (signingKey: Signer) => {
                             address,
                             type: reefState.UpdateDataType.ACCOUNT_NATIVE_BALANCE,
                         } as reefState.UpdateAction);
-                        console.log("account binded:", address, signer.isEvmClaimed, signer.evmAddress);
-                        const state = {}
                         reefState.onTxUpdateResetSigners({isInBlock: true, txTypeEvm: false}, updateActions);
                         return true;
                     } catch (e) {
-                        console.log(' account.claimEvmAccount() - ', e);
+                        console.log(' account.claimEvmAccount() - ', e.message);
                         return null;
                     }
                 }),
