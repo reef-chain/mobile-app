@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:reef_mobile_app/components/modals/auth_url_aproval_modal.dart';
-import 'package:reef_mobile_app/components/modals/metadata_aproval_modal.dart';
+import 'package:reef_mobile_app/components/modals/auth_url_approval_modal.dart';
+import 'package:reef_mobile_app/components/modals/metadata_approval_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
 import 'package:reef_mobile_app/model/metadata/metadata.dart';
@@ -89,7 +89,7 @@ class DAppRequestService {
         return true;
       case AuthUrlStatus.notFound:
         var response =
-            await showAuthUrlAprovalModal(origin: dAppName, url: url);
+            await showAuthUrlApprovalModal(origin: dAppName, url: url);
         await ReefAppState.instance.storage
             .saveAuthUrl(AuthUrl(url!, response == true));
         return response == true;
@@ -104,7 +104,7 @@ class DAppRequestService {
     var chain =
         await ReefAppState.instance.storage.getMetadata(metadata.genesisHash);
     var currVersion = chain != null ? chain.specVersion.toString() : 0;
-    var response = await showMetadataAprovalModal(
+    var response = await showMetadataApprovalModal(
       metadata: metadata,
       currVersion: currVersion,
     );

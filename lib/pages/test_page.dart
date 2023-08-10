@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reef_mobile_app/components/modals/metadata_aproval_modal.dart';
+import 'package:reef_mobile_app/components/modals/metadata_approval_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/metadata/metadata.dart';
@@ -22,7 +22,7 @@ class _TestPageState extends State<TestPage> {
     var chain =
         await ReefAppState.instance.storageCtrl.getMetadata(metadata.genesisHash);
     int currVersion = chain != null ? chain.specVersion : 0;
-    var response = await showMetadataAprovalModal(
+    var response = await showMetadataApprovalModal(
         metadata: metadata, currVersion: currVersion);
     if (response == true) {
       ReefAppState.instance.storageCtrl.saveMetadata(metadata);

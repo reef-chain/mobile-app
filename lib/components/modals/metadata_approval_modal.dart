@@ -2,38 +2,99 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/components/modal.dart';
+import 'package:reef_mobile_app/model/metadata/metadata.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
+import 'package:reef_mobile_app/utils/gradient_text.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class AuthUrlAproval extends StatefulWidget {
-  final String origin;
-  final String url;
-  const AuthUrlAproval({Key? key, required this.origin, required this.url})
+List<TableRow> createTable({required keyTexts, required valueTexts}) {
+  List<TableRow> rows = [];
+  for (int i = 0; i < keyTexts.length; ++i) {
+    rows.add(TableRow(children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        child: GradientText(
+          keyTexts[i],
+          gradient: textGradient(),
+          textAlign: TextAlign.right,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        child: Text(
+          valueTexts[i],
+          style: const TextStyle(fontSize: 12),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ]));
+  }
+  return rows;
+}
+
+class MetadataApproval extends StatefulWidget {
+  final Metadata metadata;
+  final int currVersion;
+  const MetadataApproval(
+      {Key? key, required this.metadata, required this.currVersion})
       : super(key: key);
 
   @override
-  State<AuthUrlAproval> createState() => _AuthUrlAprovalState();
+  State<MetadataApproval> createState() => _MetadataApprovalState();
 }
 
-class _AuthUrlAprovalState extends State<AuthUrlAproval> {
+class _MetadataApprovalState extends State<MetadataApproval> {
+  TextEditingController valueContainer = TextEditingController();
+  bool value = false;
+
   @override
   Widget build(BuildContext context) {
+    if (widget.currVersion == widget.metadata.specVersion) {
+      return Padding(
+          padding: EdgeInsets.fromLTRB(24, 0, 24, 32.0),
+          child: Text(
+            AppLocalizations.of(context)!.metadata_up_to_date,
+            style: TextStyle(fontSize: 16),
+            overflow: TextOverflow.ellipsis,
+          ));
+    }
+
+    String currVersion =
+        widget.currVersion == 0 ? "<unknown>" : widget.currVersion.toString();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 32.0),
       child: Column(
         children: [
-          Text(
-            "An application, self-identifying as ${widget.origin} is requesting access from ${widget.url}.",
-            style: const TextStyle(fontSize: 16),
+          //Information Section
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Table(
+              columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: FlexColumnWidth(4),
+              },
+              children: createTable(keyTexts: [
+                "Chain",
+                "Decimals",
+                "Symbol",
+                "Upgrade"
+              ], valueTexts: [
+                widget.metadata.chain,
+                widget.metadata.tokenDecimals.toString(),
+                widget.metadata.tokenSymbol,
+                "$currVersion -> ${widget.metadata.specVersion}"
+              ]),
+            ),
           ),
-          const Gap(16),
+          //BoxContent
           ViewBoxContainer(
             color: Colors.white,
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+              padding: EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
               child: Column(children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,8 +113,7 @@ class _AuthUrlAprovalState extends State<AuthUrlAproval> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                AppLocalizations.of(context)!
-                                    .approve_domain_message,
+                                AppLocalizations.of(context)!.approve_metadata,
                                 style: TextStyle(
                                     fontSize: 16, color: Styles.textColor),
                                 textAlign: TextAlign.justify,
@@ -81,8 +141,8 @@ class _AuthUrlAprovalState extends State<AuthUrlAproval> {
                     onPressed: () {
                       Navigator.pop(context, true);
                     },
-                    child: Text(
-                      AppLocalizations.of(context)!.auth_allow,
+                    child: const Text(
+                      'Yes, do this metadata update',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -94,7 +154,7 @@ class _AuthUrlAprovalState extends State<AuthUrlAproval> {
                     onPressed: () {
                       Navigator.pop(context, false);
                     },
-                    child: Text(AppLocalizations.of(context)!.auth_reject,
+                    child: Text(AppLocalizations.of(context)!.reject,
                         style: TextStyle(
                           color: Styles.primaryAccentColorDark,
                           decoration: TextDecoration.underline,
@@ -109,12 +169,10 @@ class _AuthUrlAprovalState extends State<AuthUrlAproval> {
   }
 }
 
-Future<dynamic> showAuthUrlAprovalModal({required origin, required url}) {
+Future<dynamic> showMetadataApprovalModal(
+    {required metadata, required currVersion}) {
   return showModal(navigatorKey.currentContext,
-      child: AuthUrlAproval(
-        origin: origin,
-        url: url,
-      ),
+      child: MetadataApproval(metadata: metadata, currVersion: currVersion),
       dismissible: false,
-      headText: "Authorize");
+      headText: "Metadata");
 }
