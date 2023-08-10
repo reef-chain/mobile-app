@@ -11,25 +11,24 @@ class MethodBytesDataDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(child: Observer(builder: (_) {
-        if (signatureReq != null && signatureReq!.hasResults) {
-        List<TableRow> detailsTable = createTable(keyTexts: [
-      "bytes",
-    ], valueTexts: [
-      bytes,
-    ]);
+    if (signatureReq != null && bytes != null) { // && signatureReq!.hasResults) {
+      List<TableRow> detailsTable = createTable(
+        keyTexts: ["bytes"], 
+        valueTexts: [bytes]
+      );
 
-          return Padding(
-            padding: EdgeInsets.fromLTRB(16.0,0.0,16.0,0.0),
-            child: Table(
-              columnWidths: const {
-                  0: IntrinsicColumnWidth(),
-                  1: FlexColumnWidth(4),
-                },
-              children: detailsTable,
-            ),
-          );
-        }
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16.0,0.0,16.0,0.0),
+        child: Table(
+          columnWidths: const {
+              0: IntrinsicColumnWidth(),
+              1: FlexColumnWidth(4),
+            },
+          children: detailsTable,
+        ),
+      );
+    }
 
-        return Container();
-      }));
+    return Container();
+  }));
 }

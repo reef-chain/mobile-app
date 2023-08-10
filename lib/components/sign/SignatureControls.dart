@@ -193,10 +193,9 @@ class _SignatureControlsState extends State<SignatureControls> {
                 });
               },
               child: Text(
-                ReefAppState.instance.signingCtrl
-                        .isTransaction(widget._signatureReq)
-                    ? AppLocalizations.of(context)!.sign_transaction
-                    : AppLocalizations.of(context)!.sign_message,
+                ReefAppState.instance.signingCtrl.isTransaction(widget._signatureReq)
+                  ? AppLocalizations.of(context)!.sign_transaction
+                  : AppLocalizations.of(context)!.sign_message,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,

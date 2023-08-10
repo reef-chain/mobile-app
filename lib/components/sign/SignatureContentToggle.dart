@@ -6,7 +6,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/components/account_box.dart';
 import 'package:reef_mobile_app/components/sign/MethodBytesDataDisplay.dart';
-import 'package:reef_mobile_app/components/sign/MethodGeneralDataDisplay.dart';
 import 'package:reef_mobile_app/components/sign/SignatureControls.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
@@ -52,7 +51,11 @@ class SignatureContentToggle extends StatelessObserverWidget {
         title: Padding(
           padding: const EdgeInsets.all(2.0),
           child: Text(
-            AppLocalizations.of(context)!.sign_transaction,
+            signatureRequest == null
+                ? "Signature request not found"
+                : ReefAppState.instance.signingCtrl.isTransaction(signatureRequest)
+                    ? AppLocalizations.of(context)!.sign_transaction
+                    : AppLocalizations.of(context)!.sign_message,
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -101,10 +104,13 @@ class SignatureContentToggle extends StatelessObserverWidget {
           Expanded(
               child: Column(children: [
             const Gap(48),
-            Text(
-                "Transaction on ${isMainnet(signatureRequest?.payload.genesisHash) ? 'Reef Mainnet' : toShortDisplay(signatureRequest?.payload.genesisHash?.toString())}",
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            if (signatureRequest?.payload.type == "transaction")
+              Text(
+                "Transaction on ${isMainnet(signatureRequest?.payload.genesisHash) 
+                  ? 'Reef Mainnet' 
+                  : toShortDisplay(signatureRequest?.payload.genesisHash?.toString())}",
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
+              ),
             const Gap(24),
             MethodDataLoadingIndicator(signatureRequest),
             signatureRequest?.payload.type == "bytes"

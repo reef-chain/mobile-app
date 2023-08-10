@@ -114,66 +114,43 @@ class _WalletConnectPage extends State<WalletConnectPage> {
         handler: signMessageRequestHandler,
       );
 
-      String uriString =
-          "wc:a69461ac67ecb1db815b25f983ad892728060ddb34ae474a72e43fd1f137f393@2?relay-protocol=irn&symKey=a86c7ed18e6129324f19ff7127bdbff8ae1c905f0f439c85338cee7a6535ddc2";
-      Uri uri = Uri.parse(uriString);
+      String uriString = 
+      "wc:c6127535ecd993280e40da439343c6c09f127bec58ac155e25f56bebace006f4@2?relay-protocol=irn&symKey=1f1e3271534a4e913c06742a9599cd48c92353feedab28ebc88fca3731a590ed";
+      Uri uri = Uri.parse(uriString); // TODO: use widget.uriString
       pairing = await web3Wallet.pair(uri: uri);
     } catch (e) {
       print('Error initializing WalletConnect: $e');
     }
   }
 
-  Future<String> signMessageRequestHandler(
-      String topic, dynamic parameters) async {
+  Future<dynamic> signMessageRequestHandler(String topic, dynamic parameters) async {
     String address = parameters["address"];
     String message = parameters["message"];
-    var signature =
-        await ReefAppState.instance.signingCtrl.signRaw(address, message);
+
+    var signature;
+    try {
+      signature = await ReefAppState.instance.signingCtrl.signRaw(address, message);
+      // TODO: Catch rejection from user
+    } catch (e) {
+      print('Error signing transaction: $e');
+      throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
+    }
     return signature;
   }
 
-  Future<String> signTxRequestHandler(String topic, dynamic parameters) async {
-    // 1. Parse the request, if there are any errors thrown while trying to parse
-    // the client will automatically respond to the requester with a
-    // JsonRpcError.invalidParams error
-    final parsedResponse = parameters;
+  Future<dynamic> signTxRequestHandler(String topic, dynamic parameters) async {
     String address = parameters["address"];
     Map<String, dynamic> payload = parameters["transactionPayload"];
 
-    // 2. Show a modal to the user with the signature info: Allow approval/rejection
-    bool userApproved = await showDialog(
-      // This is an example, you will have to make your own changes to make it work.
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Sign Transaction'),
-          content: SizedBox(
-            width: 300,
-            height: 350,
-            child: Text(parsedResponse.toString()),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text('Accept'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text('Reject'),
-            ),
-          ],
-        );
-      },
-    );
-
-    // 3. Respond to the dApp based on user response
-    if (userApproved) {
-      var signature =
-          await ReefAppState.instance.signingCtrl.signPayload(address, payload);
-      return signature;
-    } else {
+    var signature;
+    try {
+      signature = await ReefAppState.instance.signingCtrl.signPayload(address, payload);
+      // TODO: Catch rejection from user
+    } catch (e) {
+      print('Error signing transaction: $e');
       throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
     }
+    return signature;
   }
 
   Future<void> handleApproval(approve) async {

@@ -1,10 +1,10 @@
 import { graphql, network, reefState, signatureUtils, tokenUtil} from '@reef-chain/util-lib';
-import {debounceTime, map, shareReplay, startWith, switchMap, take} from "rxjs/operators";
-import {combineLatest, firstValueFrom, Observable, of} from "rxjs";
+import {debounceTime, map, shareReplay, switchMap, take} from "rxjs/operators";
+import {combineLatest, firstValueFrom, Observable} from "rxjs";
 import {fetchTokenData} from './utils/tokenUtils';
 import {Provider} from "@reef-defi/evm-provider";
 import {isAscii, u8aToString, u8aUnwrapBytes} from '@reef-defi/util';
-import {ERC20} from "./abi/ERC20";
+// import {ERC20} from "./abi/ERC20";
 import { fetchTxInfo } from './txInfoApi';
 
 function lagWhenDisconnected() {
@@ -55,7 +55,7 @@ export const initApi = () => {
                     const api = provider.api;
                     await api.isReady;
 
-                    const abi = ERC20;
+                    const abi = null;
                     const sentValue = '0';
                     return signatureUtils.decodePayloadMethod(provider, data, abi, sentValue, types);
 

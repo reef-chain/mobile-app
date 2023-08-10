@@ -29,8 +29,7 @@ abstract class _SignatureRequest with Store {
   @observable
   dynamic txDecodedData;
 
-  static ObservableFuture<dynamic> emptyResponse =
-      ObservableFuture.value({});
+  static ObservableFuture<dynamic> emptyResponse = ObservableFuture.value({});
 
   @computed
   bool get hasResults =>
@@ -43,13 +42,16 @@ abstract class _SignatureRequest with Store {
   @action
   Future<dynamic> decodeMethod() async {
     decodedMethod = {};
-    final future = _signingCtrl.decodeMethod(payload.method);
-    fetchMethodDataFuture = ObservableFuture(future);
+    if (toSignatureRequest().payload.type == "bytes") {
+      bytesData =
+          await _signingCtrl.bytesString(toSignatureRequest().payload.data);
+    } else {
+      final future = _signingCtrl.decodeMethod(payload.method);
+      fetchMethodDataFuture = ObservableFuture(future);
 
-    decodedMethod = await future;
-    txDecodedData = await _signingCtrl.getTxDecodedData(payload, decodedMethod);
-    if(toSignatureRequest().payload.type == "bytes"){
-    bytesData = await _signingCtrl.bytesString(toSignatureRequest().payload.data);
+      decodedMethod = await future;
+      txDecodedData =
+          await _signingCtrl.getTxDecodedData(payload, decodedMethod);
     }
     return decodedMethod;
   }
