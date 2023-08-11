@@ -71,8 +71,14 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
         break;
       case ReefQrCodeType.walletConnect:
         Navigator.pop(context);
-        ReefAppState.instance.navigationCtrl
-            .navigateToWalletConnectPage(context: context, uri: qrCode.data);
+          String uri = 
+          "wc:19ecc7c55acd15b834485b0014705df728074ac61e3878207ff6f265cc2e9e3b@2?relay-protocol=irn&symKey=3f9e37560cf297b11e34e7c52f7902b02d0c0b815aa8b66daacbe0c684021de8"
+          ;
+          final Uri uriData = Uri.parse(uri);
+          // final Uri uriData = Uri.parse(qrCode.data); TODO uncomment this line
+          await ReefAppState.instance.walletConnect.getWeb3Wallet().pair(
+            uri: uriData,
+          );
         break;
 
       default:

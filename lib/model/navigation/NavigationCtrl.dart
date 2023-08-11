@@ -7,7 +7,6 @@ import 'package:reef_mobile_app/model/navigation/nav_swipe_compute.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/swap_page.dart';
-import 'package:reef_mobile_app/pages/wc_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
@@ -117,27 +116,6 @@ class NavigationCtrl with NavSwipeCompute {
                 padding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                 child: SwapPage(preselected),
-              ),
-              backgroundColor: Styles.greyColor,
-            ))));
-  }
-
-  void navigateToWalletConnectPage(
-      {required BuildContext context, required String uri}) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text("WalletConnect",
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 24,
-                    )),
-                backgroundColor: Colors.deepPurple.shade700,
-              ),
-              body: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: WalletConnectPage(uri),
               ),
               backgroundColor: Styles.greyColor,
             ))));

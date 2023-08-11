@@ -104,14 +104,15 @@ class SignatureContentToggle extends StatelessObserverWidget {
           Expanded(
               child: Column(children: [
             const Gap(48),
-            if (signatureRequest?.payload.type == "transaction")
+            if (signatureRequest?.payload.type == "transaction") ...[
               Text(
                 "Transaction on ${isMainnet(signatureRequest?.payload.genesisHash) 
                   ? 'Reef Mainnet' 
                   : toShortDisplay(signatureRequest?.payload.genesisHash?.toString())}",
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
               ),
-            const Gap(24),
+              const Gap(24),
+            ],
             MethodDataLoadingIndicator(signatureRequest),
             signatureRequest?.payload.type == "bytes"
                 ? MethodBytesDataDisplay(

@@ -16,6 +16,7 @@ import 'package:reef_mobile_app/model/tokens/TokensCtrl.dart';
 import 'package:reef_mobile_app/model/transfer/TransferCtrl.dart';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
+import 'package:reef_mobile_app/service/WalletConnectService.dart';
 
 import 'account/AccountCtrl.dart';
 
@@ -25,6 +26,7 @@ class ReefAppState {
   final ViewModel model = ViewModel();
 
   late StorageService storage;
+  late WalletConnectService walletConnect;
   late TokenCtrl tokensCtrl;
   late AccountCtrl accountCtrl;
   late SigningCtrl signingCtrl;
@@ -41,8 +43,9 @@ class ReefAppState {
 
   static ReefAppState get instance => _instance ??= ReefAppState._();
 
-  init(JsApiService jsApi, StorageService storage) async {
+  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
     this.storage = storage;
+    this.walletConnect = walletConnect;
     await _initReefObservables(jsApi);
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
     tokensCtrl = TokenCtrl(jsApi, model.tokens);

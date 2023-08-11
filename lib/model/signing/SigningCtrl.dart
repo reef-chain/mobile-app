@@ -169,6 +169,6 @@ class SigningCtrl {
   }
 
   bool isTransaction(SignatureRequest signatureRequest){
-    return signatureRequest.payload.type== "bytes";
+    return signatureRequest.payload.type== "transaction";
   }
 }

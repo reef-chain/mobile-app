@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:reef_mobile_app/components/modals/signing_modals.dart';
 import '../../model/signing/signature_request.dart';
 
 class MethodBytesDataDisplay extends StatelessWidget {
@@ -11,20 +10,28 @@ class MethodBytesDataDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(child: Observer(builder: (_) {
-    if (signatureReq != null && bytes != null) { // && signatureReq!.hasResults) {
-      List<TableRow> detailsTable = createTable(
-        keyTexts: ["bytes"], 
-        valueTexts: [bytes]
-      );
-
+    if (signatureReq != null && signatureReq!.hasResults && bytes != null) {
       return Padding(
-        padding: EdgeInsets.fromLTRB(16.0,0.0,16.0,0.0),
-        child: Table(
-          columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FlexColumnWidth(4),
-            },
-          children: detailsTable,
+        padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              "Message to be signed",
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            Text(
+              bytes.toString(),
+              style: const TextStyle(
+                fontSize: 14.0,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
         ),
       );
     }
