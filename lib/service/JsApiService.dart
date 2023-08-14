@@ -19,6 +19,7 @@ class JsApiService {
   final DAPP_MSG_CONFIRMATION_JS_FN_NAME = '_dAppMsgConfirmationJsFnName';
   final REEF_MOBILE_CHANNEL_NAME = 'reefMobileChannel';
   final FLUTTER_SUBSCRIBE_METHOD_NAME = 'flutterSubscribe';
+  final MSG_TYPE_ERROR = 'MSG_TYPE_ERROR';
 
   final controllerInit = Completer<WebViewController>();
   final jsApiLoaded = Completer<WebViewController>();
@@ -94,7 +95,12 @@ class JsApiService {
         "window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName', '$ident')");
     return jsMessageSubj.stream
         .where((event) => event.streamId == ident)
-        .map((event) => event.value);
+        .map((event) {
+          if(event.msgType==MSG_TYPE_ERROR){
+            throw Exception(event.value);
+          }
+          return event.value;
+        });
   }
 
   void confirmTxSignature(String reqId, String? mnemonic) {
