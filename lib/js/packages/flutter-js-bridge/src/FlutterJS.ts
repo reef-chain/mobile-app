@@ -9,6 +9,7 @@ export class FlutterJS {
     private txSignStreamId: string;
     private txDappStreamId: string;
     private onInit?: (fltJS: FlutterJS) => void;
+    private MSG_TYPE_ERROR = 'MSG_TYPE_ERROR';
 
     constructor(onInitFn?: (fltJS: FlutterJS) => void) {
         if (onInitFn) {
@@ -109,7 +110,10 @@ export class FlutterJS {
             }
             if (!!observableRef.subscribe || !!observableRef.then) {
                 // TODO unsubscribe
-                from(observableRef).subscribe((value) => this.sendToFlutterStream(subscriptionId, value));
+                from(observableRef).subscribe((value) => this.sendToFlutterStream(subscriptionId, value), (err)=>{
+                    console.log('FlutterJS ERROR=', err.message);
+                    this.sendToFlutterStream(subscriptionId, err.message, this.MSG_TYPE_ERROR)
+                });
             } else {
                 this.sendToFlutterStream(subscriptionId, observableRef);
             }
