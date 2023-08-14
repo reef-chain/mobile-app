@@ -170,9 +170,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 const Gap(24),
                 MaterialButton(
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  onPressed: () => showQrTypeDataModal(
-                      AppLocalizations.of(context)!.scan_qr_code, context,
-                      expectedType: ReefQrCodeType.walletConnect),
+                  onPressed: () => ReefAppState.instance.walletConnect.signMessageRequestHandler(
+                    "", {"address": ReefAppState.instance.model.accounts.selectedAddress, "message": "Hello world"}),
+                  // showQrTypeDataModal(
+                  //     AppLocalizations.of(context)!.scan_qr_code, context,
+                  //     expectedType: ReefQrCodeType.walletConnect),
                   padding: const EdgeInsets.all(2),
                   child: Row(
                     children: [
@@ -183,7 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       const Gap(8),
                       Builder(builder: (context) {
-                        return Text(AppLocalizations.of(context)!.scan_qr_code,
+                        return Text("WalletConnect",
                             style: Theme.of(context).textTheme.bodyLarge);
                       }),
                     ],
