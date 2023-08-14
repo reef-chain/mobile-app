@@ -50,7 +50,7 @@ class WalletConnectService {
     _web3Wallet!.onSessionProposal.subscribe(_onSessionProposal);
     _web3Wallet!.onSessionProposalError.subscribe(_onSessionProposalError);
     _web3Wallet!.onSessionConnect.subscribe(_onSessionConnect);
-    
+
     // Await the initialization of the web3wallet
     print('web3wallet init');
     await _web3Wallet!.init();
@@ -130,7 +130,7 @@ class WalletConnectService {
     // Chains validations
     RequiredNamespace requiredNamespace = args.params.requiredNamespaces.entries.first.value;
     if (requiredNamespace.chains == null || requiredNamespace.chains!.isEmpty ||
-        !requiredNamespace.chains!.every((chain) => chain == MAINNET_CHAIN_ID || 
+        !requiredNamespace.chains!.every((chain) => chain == MAINNET_CHAIN_ID ||
         chain == TESTNET_CHAIN_ID)
     ) {
       showAlertModal("Error", ["Invalid chain IDs in session proposal"]);
@@ -140,7 +140,7 @@ class WalletConnectService {
       );
     }
     // Methods validations
-    if (requiredNamespace.methods.isEmpty || 
+    if (requiredNamespace.methods.isEmpty ||
         !requiredNamespace.methods.every((method) => supportedMethods.contains(method))
     ) {
       showAlertModal("Error", ["Unsupported methods in session proposal"]);
@@ -173,11 +173,11 @@ class WalletConnectService {
     // Show approval modal
     String proposerName = args.params.proposer.metadata.name;
     String proposerUrl = args.params.proposer.metadata.url;
-    String? proposerIcon = args.params.proposer.metadata.icons.isEmpty 
+    String? proposerIcon = args.params.proposer.metadata.icons.isEmpty
       ? null : args.params.proposer.metadata.icons.first;
     final approved = await showWalletConnectSessionModal(
       address: selectedAddress, name: proposerName, url: proposerUrl, icon: proposerIcon);
-    
+
     // Handle user response
     if (approved != null && approved) {
       final walletNamespaces = {
@@ -201,7 +201,7 @@ class WalletConnectService {
         reason: Errors.getSdkError(Errors.USER_REJECTED)
       );
     }
-    
+
   }
 
   void _onPairingInvalid(PairingInvalidEvent? args) {
@@ -225,7 +225,7 @@ class WalletConnectService {
       reason: Errors.getSdkError(Errors.USER_DISCONNECTED),
     );
   }
-  
+
   Future<dynamic> signTxRequestHandler(String topic, dynamic parameters) async {
     String address = parameters["address"];
     Map<String, dynamic> payload = parameters["transactionPayload"];
@@ -245,14 +245,11 @@ class WalletConnectService {
     String address = parameters["address"];
     String message = parameters["message"];
 
-    var signature;
-    try {
-      signature = await ReefAppState.instance.signingCtrl.signRaw(address, message);
-      // TODO: Catch rejection from user
-    } catch (e) {
-      print('Error signing transaction: $e');
-      throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
-    }
-    return signature;
+    var signature = await ReefAppState.instance.signingCtrl.signRaw(address, message).catchError((err){
+        print('Error signing transaction: $err');
+        throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
+      });
+      print('WC sig=$signature');
+     return signature;
   }
 }
