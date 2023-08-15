@@ -11,7 +11,6 @@ import 'package:reef_mobile_app/components/modals/language_selection_modal.dart'
 import 'package:reef_mobile_app/components/switch_network.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:reef_mobile_app/components/getQrTypeData.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -170,11 +169,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 const Gap(24),
                 MaterialButton(
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  onPressed: () => ReefAppState.instance.walletConnect.signMessageRequestHandler(
-                    "", {"address": ReefAppState.instance.model.accounts.selectedAddress, "message": "Hello world"}),
-                  // showQrTypeDataModal(
-                  //     AppLocalizations.of(context)!.scan_qr_code, context,
-                  //     expectedType: ReefQrCodeType.walletConnect),
+                  onPressed: () => ReefAppState.instance.navigationCtrl
+                    .navigateToWalletConnectPage(context: context),
                   padding: const EdgeInsets.all(2),
                   child: Row(
                     children: [

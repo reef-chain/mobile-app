@@ -18,11 +18,8 @@ const List<String> supportedEvents = []; // Events not supported for now
 class WalletConnectService {
   Web3Wallet? _web3Wallet;
 
-  ValueNotifier<List<PairingInfo>> pairings =
-      ValueNotifier<List<PairingInfo>>([]);
   ValueNotifier<List<SessionData>> sessions =
       ValueNotifier<List<SessionData>>([]);
-  ValueNotifier<List<StoredCacao>> auth = ValueNotifier<List<StoredCacao>>([]);
 
   WalletConnectService() {
     _initAsync();
@@ -44,20 +41,20 @@ class WalletConnectService {
 
     // Setup listeners
     print('web3wallet create');
-    _web3Wallet!.core.pairing.onPairingInvalid.subscribe(_onPairingInvalid);
-    _web3Wallet!.core.pairing.onPairingCreate.subscribe(_onPairingCreate);
-    _web3Wallet!.pairings.onSync.subscribe(_onPairingsSync);
-    _web3Wallet!.onSessionProposal.subscribe(_onSessionProposal);
+    // _web3Wallet!.core.pairing.onPairingCreate.subscribe(_onPairingCreate);
+    // _web3Wallet!.core.pairing.onPairingInvalid.subscribe(_onPairingInvalid);
+    // _web3Wallet!.pairings.onSync.subscribe(_onPairingsSync);
     _web3Wallet!.onSessionProposalError.subscribe(_onSessionProposalError);
+    _web3Wallet!.onSessionProposal.subscribe(_onSessionProposal);
     _web3Wallet!.onSessionConnect.subscribe(_onSessionConnect);
+    _web3Wallet!.onSessionDelete.subscribe(_onSessionDelete);
+    _web3Wallet!.onSessionExpire.subscribe(_onSessionExpire);
 
     // Await the initialization of the web3wallet
     print('web3wallet init');
     await _web3Wallet!.init();
 
-    pairings.value = _web3Wallet!.pairings.getAll();
     sessions.value = _web3Wallet!.sessions.getAll();
-    auth.value = _web3Wallet!.completeRequests.getAll();
 
     // Register method handlers
     _web3Wallet!.registerRequestHandler(
@@ -84,25 +81,34 @@ class WalletConnectService {
 
   FutureOr onDispose() {
     print('web3wallet dispose');
-    _web3Wallet!.core.pairing.onPairingInvalid.unsubscribe(_onPairingInvalid);
-    _web3Wallet!.pairings.onSync.unsubscribe(_onPairingsSync);
-    _web3Wallet!.onSessionProposal.unsubscribe(_onSessionProposal);
+    // _web3Wallet!.core.pairing.onPairingCreate.unsubscribe(_onPairingCreate);
+    // _web3Wallet!.core.pairing.onPairingInvalid.unsubscribe(_onPairingInvalid);
+    // _web3Wallet!.pairings.onSync.unsubscribe(_onPairingsSync);
     _web3Wallet!.onSessionProposalError.unsubscribe(_onSessionProposalError);
+    _web3Wallet!.onSessionProposal.unsubscribe(_onSessionProposal);
     _web3Wallet!.onSessionConnect.unsubscribe(_onSessionConnect);
+    _web3Wallet!.onSessionDelete.unsubscribe(_onSessionDelete);
+    _web3Wallet!.onSessionExpire.unsubscribe(_onSessionExpire);
   }
 
   Web3Wallet getWeb3Wallet() {
     return _web3Wallet!;
   }
 
-  void _onPairingsSync(StoreSyncEvent? args) {
-    if (args != null) {
-      pairings.value = _web3Wallet!.pairings.getAll();
-    }
-  }
+  // void _onPairingCreate(PairingEvent? args) {
+  //   print('Pairing Create Event: $args');
+  // }
+
+  // void _onPairingInvalid(PairingInvalidEvent? args) {
+  //   print('Pairing Invalid Event: $args');
+  // }
+
+  // void _onPairingsSync(StoreSyncEvent? args) {
+  //   print('Pairings Sync Event: $args');
+  // }
 
   void _onSessionProposalError(SessionProposalErrorEvent? args) {
-    print(args);
+    showAlertModal("Error", ["Error in session proposal"]);
   }
 
   void _onSessionProposal(SessionProposalEvent? args) async {
@@ -201,27 +207,32 @@ class WalletConnectService {
         reason: Errors.getSdkError(Errors.USER_REJECTED)
       );
     }
-
-  }
-
-  void _onPairingInvalid(PairingInvalidEvent? args) {
-    print('Pairing Invalid Event: $args');
-  }
-
-  void _onPairingCreate(PairingEvent? args) {
-    print('Pairing Create Event: $args');
   }
 
   void _onSessionConnect(SessionConnect? args) {
     if (args != null) {
-      print(args);
-      sessions.value.add(args.session);
+      sessions.value = List.from(sessions.value)
+        ..add(args.session);
     }
   }
 
-  Future<void> disconnectSession(String pairingTopic) async {
+  void _onSessionDelete(SessionDelete? args) {
+    if (args != null) {
+      sessions.value = List.from(sessions.value)
+        ..removeWhere((session) => session.topic == args.topic);
+    }
+  }
+
+  void _onSessionExpire(SessionExpire? args) {
+    if (args != null) {
+      sessions.value = List.from(sessions.value)
+        ..removeWhere((session) => session.topic == args.topic);
+    }
+  }
+
+  Future<void> disconnectSession(String topic) async {
     await _web3Wallet!.disconnectSession(
-      topic: pairingTopic,
+      topic: topic,
       reason: Errors.getSdkError(Errors.USER_DISCONNECTED),
     );
   }
@@ -230,12 +241,10 @@ class WalletConnectService {
     String address = parameters["address"];
     Map<String, dynamic> payload = parameters["transactionPayload"];
 
-    var signature;
+    dynamic signature;
     try {
       signature = await ReefAppState.instance.signingCtrl.signPayload(address, payload);
-      // TODO: Catch rejection from user
     } catch (e) {
-      print('Error signing transaction: $e');
       throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
     }
     return signature;
@@ -245,11 +254,12 @@ class WalletConnectService {
     String address = parameters["address"];
     String message = parameters["message"];
 
-    var signature = await ReefAppState.instance.signingCtrl.signRaw(address, message).catchError((err){
-        print('Error signing transaction: $err');
-        throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
-      });
-      print('WC sig=$signature');
-     return signature;
+    dynamic signature;
+    try {
+      signature = await ReefAppState.instance.signingCtrl.signRaw(address, message);
+    } catch (e) {
+      throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
+    }
+    return signature;
   }
 }

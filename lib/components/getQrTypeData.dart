@@ -72,7 +72,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
       case ReefQrCodeType.walletConnect:
         Navigator.pop(context);
           String uri =
-          "wc:96340a9ee3dfab543b05fd7e90b7bf0972aebcd2395bde903774ea795b7aca2c@2?relay-protocol=irn&symKey=19fbe127af237df83e519aaa7ca64d4907c5dc61ab81aef71aa41247a2ae4a38"
+          "wc:98bf1b64164f9fbf00df2fb5b013e7d9788840c3caf2bdec0c7741c482d248f6@2?relay-protocol=irn&symKey=690590830adc0f252da7cd97907bc75e60cf4bd84b3208a153012705219ae537"
           ;
           final Uri uriData = Uri.parse(uri);
           // final Uri uriData = Uri.parse(qrCode.data); TODO uncomment this line
