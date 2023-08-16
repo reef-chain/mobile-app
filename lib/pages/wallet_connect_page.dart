@@ -22,8 +22,8 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
           Container(
             padding: const EdgeInsets.fromLTRB(12, 24, 12, 32),
             child: Column(children: [
-              const Text("Scan QR code to create new connection", 
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)
+              Text(AppLocalizations.of(context)!.get_qr_information, 
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)
               ),
               const Gap(16),
               Row(
@@ -41,10 +41,10 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                       onPressed: () => showQrTypeDataModal(
                         AppLocalizations.of(context)!.scan_qr_code, context,
                         expectedType: ReefQrCodeType.walletConnect),
-                      child: const Text(
-                        "Create new connection",
+                      child: Text(
+                        AppLocalizations.of(context)!.create_new_connection,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -59,9 +59,9 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
             valueListenable: ReefAppState.instance.walletConnect.sessions, 
             builder: (context, sessionList, child) {
               if (sessionList.isEmpty) {
-                return const Text(
-                  "No active sessions", 
-                  style: TextStyle(fontSize: 16)
+                return Text(
+                  AppLocalizations.of(context)!.no_active_sessions, 
+                  style: const TextStyle(fontSize: 16)
                 );
               }
               return Expanded(
@@ -75,7 +75,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(session.peer.metadata.url),
-                          Text("Address: ${session.namespaces["reef"]?.accounts[0].substring(5).shorten() ?? "???"}"),
+                          Text("${AppLocalizations.of(context)!.address}: ${session.namespaces["reef"]?.accounts[0].substring(5).shorten() ?? "???"}"),
                       ]),
                       leading: Image.network(session.peer.metadata.icons.isNotEmpty 
                           ? session.peer.metadata.icons[0] 

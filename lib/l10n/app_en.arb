@@ -80,7 +80,6 @@
   "transaction_details":"Transaction Details",
   "decoded_data":"Decoded Data",
   "sign_message":"Sign Message",
-  "no_account_currently":"No Account currently available, create or import an account to view your assets.",
   "scan_address":"Scan Address",
   "address_can_not_be_empty":"Address cannot be empty",
   "select_address":"Select Address",
@@ -154,5 +153,8 @@
   "go_to_binance":"Go to Binance Connect",
   "biometric_auth":"Biometric Authentication",
   "dont_send_funds_here":"don't send funds here",
-  "scan_qr_code":"Scan QR Code"
+  "scan_qr_code":"Scan QR Code",
+  "scan_qr_code_connect": "Scan QR code to create new connection",
+  "create_new_connection": "Create new connection",
+  "no_active_sessions": "No active sessions"
 }
