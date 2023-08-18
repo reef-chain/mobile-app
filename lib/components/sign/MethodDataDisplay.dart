@@ -20,30 +20,47 @@ class MethodDataDisplay extends StatelessWidget {
           var isEVM = evmMethodData != null;
           var dataWidget;
           if (isEVM == true) {
-            var fragmentData = evmMethodData['decodedData']['functionFragment'];
-            var args = List.from(fragmentData['inputs']).asMap().map((i, val) =>
-                MapEntry(val['name'],
-                    _getValue(evmMethodData['decodedData']['args'][i])));
-            List<String> argsList =
-                args.entries.map((e) => e.key).join(',').split(',');
-            List<String> argsValuesList = args.entries
-                .map((e) => e.value.toString())
-                .join(',')
-                .split(',');
-            Map<String, String> decodedData = {
-              "Contract Address":
-                  toShortDisplay(evmMethodData['contractAddress']),
-              "Method Name": fragmentData['name']
-            };
-            for (var i = 0; i < argsList.length; i++) {
-              decodedData[argsList[i]] = argsValuesList[i];
-            }
-            final decodedDetails = createDecodedDataTable(decodedData);
+            if (evmMethodData['decodedData'] == null) {
+              String args = '[\n' + signatureReq?.decodedMethod['args'].map((arg) => '  "$arg"').join(',\n') + '\n]';
+              Map<String, String> data = {
+                "Contract Address":
+                    toShortDisplay(evmMethodData['contractAddress']),
+                "Method": signatureReq?.decodedMethod['methodName'],
+                "Args": args,
+                "Info": signatureReq?.decodedMethod['info'],
+              };
+              final txDetails = createDataTable(data);
 
-            dataWidget = Table(children: decodedDetails, columnWidths: const {
-              0: IntrinsicColumnWidth(),
-              1: FlexColumnWidth(4),
-            });
+              dataWidget = Table(children: txDetails, columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: FlexColumnWidth(4),
+              });
+            } else {
+              var fragmentData = evmMethodData['decodedData']['functionFragment'];
+              var args = List.from(fragmentData['inputs']).asMap().map((i, val) =>
+                  MapEntry(val['name'],
+                      _getValue(evmMethodData['decodedData']['args'][i])));
+              List<String> argsList =
+                  args.entries.map((e) => e.key).join(',').split(',');
+              List<String> argsValuesList = args.entries
+                  .map((e) => e.value.toString())
+                  .join(',')
+                  .split(',');
+              Map<String, String> decodedData = {
+                "Contract Address":
+                    toShortDisplay(evmMethodData['contractAddress']),
+                "Method Name": fragmentData['name']
+              };
+              for (var i = 0; i < argsList.length; i++) {
+                decodedData[argsList[i]] = argsValuesList[i];
+              }
+              final decodedDetails = createDataTable(decodedData);
+
+              dataWidget = Table(children: decodedDetails, columnWidths: const {
+                0: IntrinsicColumnWidth(),
+                1: FlexColumnWidth(4),
+              });
+            }
           } else {
             final List<dynamic>? argsList = signatureReq?.decodedMethod['args'];
             final String args = argsList?.join(', ').toString() ?? "";
@@ -61,7 +78,7 @@ class MethodDataDisplay extends StatelessWidget {
             for (var i = 0; i < paramsList.length; i++) {
               decodedData[paramsList[i]] = paramValuesList[i];
             }
-            final decodedDetails = createDecodedDataTable(decodedData);
+            final decodedDetails = createDataTable(decodedData);
             dataWidget = Table(children: decodedDetails, columnWidths: const {
               0: IntrinsicColumnWidth(),
               1: FlexColumnWidth(4),
@@ -93,7 +110,7 @@ class MethodDataDisplay extends StatelessWidget {
     }
   }
 
-  List<TableRow> createDecodedDataTable(Map<String, String> decodedData) {
+  List<TableRow> createDataTable(Map<String, String> decodedData) {
     List<String> keyTexts = [];
     List<String> valueTexts = [];
 

@@ -6,7 +6,6 @@ import 'package:reef_mobile_app/components/modals/wallet_connect_session_modal.d
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
 
-// TODO: get this with `String.fromEnvironment('WALLET_CONNECT_PROJECT_ID')`
 const String PROJECT_ID = 'b20768c469f63321e52923a168155240';
 const String MAINNET_CHAIN_ID = 'reef:7834781d38e4798d548e34ec947d19de';
 const String TESTNET_CHAIN_ID = 'reef:b414a8602b2251fa538d38a932239150';
