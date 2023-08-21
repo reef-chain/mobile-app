@@ -10,7 +10,7 @@ class MethodBytesDataDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(child: Observer(builder: (_) {
-    if (signatureReq != null && signatureReq!.hasResults && bytes != null) {
+    if (signatureReq != null && bytes != null) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
         child: Column(
