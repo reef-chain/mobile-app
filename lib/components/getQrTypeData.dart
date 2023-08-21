@@ -85,7 +85,8 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
   Future<void> handleQrCodeData(String qrCodeData) async {
     ReefQrCode? qrCode;
 
-    if (qrCodeData.startsWith("wc:")) {
+    // TODO: Test `reefApp:` deep link with web3Modal once Reef app is added to explorer
+    if (qrCodeData.startsWith("wc:") || qrCodeData.startsWith("reefApp:")) {
       qrCode = ReefQrCode(ReefQrCodeType.walletConnect, qrCodeData);
     } else {
       var decoded = jsonDecode(qrCodeData);
