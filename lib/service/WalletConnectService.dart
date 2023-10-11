@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:reef_mobile_app/components/modals/alert_modal.dart';
 import 'package:reef_mobile_app/components/modals/wallet_connect_session_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
 
 const String PROJECT_ID = 'b20768c469f63321e52923a168155240';
@@ -167,7 +168,7 @@ class WalletConnectService {
 
     // Validate selected address
     String? selectedAddress = ReefAppState.instance.model.accounts.selectedAddress;
-    if (selectedAddress == null) {
+    if (selectedAddress == null || selectedAddress == Constants.ZERO_ADDRESS) {
       showAlertModal("Error", ["No account selected"]);
       return _web3Wallet!.rejectSession(
         id: args.id,
