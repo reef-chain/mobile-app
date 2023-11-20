@@ -146,10 +146,10 @@ class _TxInfoState extends State<TxInfo> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => WebViewScreen(
-                              url:
-                                  "https://reefscan.com/transfer/${txData['block_number']}/${txData['extrinsicIdx']}/${txData['eventIdx']}"),
-                        ),
+                            builder: (context) => WebViewScreen(
+                                title: "Transaction Info",
+                                url:
+                                    "https://reefscan.com/transfer/${txData['block_number']}/${txData['extrinsicIdx']}/${txData['eventIdx']}")),
                       );
                     },
                     child: GradientText(

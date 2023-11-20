@@ -5,8 +5,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String url;
+  final String title;
 
-  const WebViewScreen({required this.url});
+  const WebViewScreen({required this.url, required this.title});
 
   @override
   _WebViewScreenState createState() => _WebViewScreenState();
@@ -19,7 +20,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Transaction Info",
+          title: Text(widget.title,
               style: GoogleFonts.spaceGrotesk(
                 fontWeight: FontWeight.w500,
                 fontSize: 24,
