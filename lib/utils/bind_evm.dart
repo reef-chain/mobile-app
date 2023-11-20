@@ -20,3 +20,12 @@ List<ReefAccount> getSignersWithEnoughBalance(ReefAccount bindFor) {
   _availableTxAccounts.sort((a, b) => b.balance.compareTo(a.balance));
   return _availableTxAccounts;
 }
+
+bool hasThresholdBalance() {
+  List<ReefAccount> _availableTxAccounts = ReefAppState
+      .instance.model.accounts.accountsList
+      .where((signer) => signer.balance >= BigInt.from(MIN_BALANCE * 1e18))
+      .toList();
+
+  return _availableTxAccounts.isNotEmpty;
+}

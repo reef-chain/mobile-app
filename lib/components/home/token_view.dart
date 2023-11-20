@@ -5,10 +5,12 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:reef_mobile_app/components/BlurableContent.dart';
+import 'package:reef_mobile_app/components/InsufficientBalance.dart';
 import 'package:reef_mobile_app/components/jumping_dots.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/gradient_text.dart';
@@ -106,10 +108,11 @@ class _TokenViewState extends State<TokenView> {
                                 return BlurableContent(
                                     GradientText(
                                         price != 0
-                                            ? '\$'+(NumberFormat.compactLong()
-                                                .format(getBalanceValueBI(
-                                                    balance, price))
-                                                .toString())
+                                            ? '\$' +
+                                                (NumberFormat.compactLong()
+                                                    .format(getBalanceValueBI(
+                                                        balance, price))
+                                                    .toString())
                                             : "NA",
                                         gradient: textGradient(),
                                         style: GoogleFonts.poppins(
@@ -228,6 +231,15 @@ class _TokenViewState extends State<TokenView> {
             //     child: ElevatedButton(
             //         onPressed: ReefAppState.instance.tokensCtrl.reload,
             //         child: const Text("ReloadTEST"))),
+            if (!hasThresholdBalance())
+              Column(
+                children: [
+                  Container(
+                      margin:
+                          EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
+                      child: InsufficientBalance()),
+                ],
+              ),
             if (message != null)
               SliverToBoxAdapter(
                 child: Padding(
