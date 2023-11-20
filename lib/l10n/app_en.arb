@@ -153,5 +153,6 @@
   "completed_binance_purchase":"If you have completed your purchase on Binance Connect, your REEF balance will be updated after the transaction has been confirmed onchain.",
   "go_to_binance":"Go to Binance Connect",
   "biometric_auth":"Biometric Authentication",
-  "dont_send_funds_here":"don't send funds here"
+  "dont_send_funds_here":"don't send funds here",
+  "account_imported_successfully":"Insufficient Funds! Please fill up your Reef Wallet"
 }
