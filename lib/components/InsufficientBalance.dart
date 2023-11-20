@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:reef_mobile_app/components/home/WebviewPage.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
 
 class InsufficientBalance extends StatelessWidget {
   const InsufficientBalance({super.key});
@@ -25,8 +25,11 @@ class InsufficientBalance extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => WebViewScreen(
                   title: "Buy Reef",
-                  url:
-                      "https://onramp.money/main/buy/?appId=487411&walletAddress=${ReefAppState.instance.signingCtrl.accountModel.selectedAddress}}"),
+                  url: ReefAppState
+                              .instance.model.network.selectedNetworkName ==
+                          Network.mainnet.name
+                      ? "https://onramp.money/main/buy/?appId=487411&walletAddress=${ReefAppState.instance.signingCtrl.accountModel.selectedAddress}}"
+                      : "https://discord.com/channels/793946260171259904/1087737503550816396"),
             ),
           )
         },
