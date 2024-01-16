@@ -67,17 +67,19 @@ class MethodDataDisplay extends StatelessWidget {
               1: FlexColumnWidth(4),
             });
           }
-          return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-              child: Column(
-                children: [
-                  Text(isEVM ? 'EVM Contract Call' : 'Method Call ',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold)),
-                  Gap(12),
-                  dataWidget
-                ],
-              ));
+          return SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+                child: Column(
+                  children: [
+                    Text(isEVM ? 'EVM Contract Call' : 'Method Call ',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    Gap(12),
+                    dataWidget
+                  ],
+                )),
+          );
         }
         return Container();
       }));
