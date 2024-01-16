@@ -30,6 +30,8 @@ class SendPage extends StatefulWidget {
   State<SendPage> createState() => _SendPageState();
 }
 
+const MIN_EVM_TX_BALANCE = 80;
+
 class _SendPageState extends State<SendPage> {
   bool isTokenReef = false;
   SendStatus statusValue = SendStatus.NO_ADDRESS;

@@ -21,7 +21,6 @@ import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const MIN_BALANCE = 5;
-const MIN_EVM_TX_BALANCE = 80;
 
 enum SendStatus {
   READY,
