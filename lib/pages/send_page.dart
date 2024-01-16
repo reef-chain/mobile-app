@@ -138,13 +138,16 @@ class _SendPageState extends State<SendPage> {
     });
     if (addr.isEmpty) {
       return SendStatus.NO_ADDRESS;
+    } else if (amtVal > getMaxTransferAmount(token, balance)) {
+      if (getMaxTransferAmount(token, balance) < 5 &&
+          selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS)
+        return SendStatus.LOW_REEF_NATIVE;
+      return SendStatus.AMT_TOO_HIGH;
     } else if (amtVal <= 0) {
       return SendStatus.NO_AMT;
-    } else if (amtVal > getMaxTransferAmount(token, balance)) {
-      return SendStatus.AMT_TOO_HIGH;
     } else if (token.address != Constants.REEF_TOKEN_ADDRESS &&
         !hasEnoughForEvmTx) {
-      return SendStatus.LOW_REEF;
+      return SendStatus.LOW_REEF_EVM;
     } else if (isValidAddr &&
         token.address != Constants.REEF_TOKEN_ADDRESS &&
         !addr.startsWith('0x')) {
@@ -343,8 +346,10 @@ class _SendPageState extends State<SendPage> {
         return "Signing transaction ...";
       case SendStatus.SENDING:
         return "Sending ...";
-      case SendStatus.LOW_REEF:
+      case SendStatus.LOW_REEF_EVM:
         return "Minimum balance 80 REEF";
+      case SendStatus.LOW_REEF_NATIVE:
+        return "Minimum balance 5 REEF";
       case SendStatus.READY:
         return "Confirm Send";
       default:
@@ -792,9 +797,11 @@ class _SendPageState extends State<SendPage> {
     }
     var maxTransferAmount = getMaxTransferAmount(selectedToken, balance);
     if (amountValue != null && amountValue > maxTransferAmount) {
-      amountValue = maxTransferAmount;
+      if (maxTransferAmount >= 0)
+        amountValue = maxTransferAmount;
+      else
+        amountValue = 0;
     }
-
     var amountStr = amountValue?.toStringAsFixed(2) ?? '';
     return amountStr;
   }
@@ -1022,7 +1029,8 @@ enum SendStatus {
   AMT_TOO_HIGH,
   ADDR_NOT_VALID,
   ADDR_NOT_EXIST,
-  LOW_REEF,
+  LOW_REEF_EVM,
+  LOW_REEF_NATIVE,
   SIGNING,
   SENDING,
   CANCELED,
