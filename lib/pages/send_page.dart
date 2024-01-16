@@ -6,10 +6,12 @@ import 'package:gap/gap.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
+import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
+import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
@@ -115,23 +117,34 @@ class _SendPageState extends State<SendPage> {
     return false;
   }
 
+  bool hasBalanceForEvmTx(ReefAccount reefSigner) {
+    return reefSigner.balance >= BigInt.from(MIN_EVM_TX_BALANCE * 1e18);
+  }
+
   Future<SendStatus> _validate(String addr, TokenWithAmount token, String amt,
       [bool skipAsync = false]) async {
     var isValidAddr = await _isValidAddress(addr);
     var balance = getSelectedTokenBalance(token);
+    var hasEnoughForEvmTx = hasBalanceForEvmTx(
+        ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
+            e.address == ReefAppState.instance.model.accounts.selectedAddress));
+
     if (amt == '') {
       amt = '0';
     }
     var amtVal = double.parse(amt);
-      setState(() {
-        isValidAddress = isValidAddr;
-      });
+    setState(() {
+      isValidAddress = isValidAddr;
+    });
     if (addr.isEmpty) {
       return SendStatus.NO_ADDRESS;
     } else if (amtVal <= 0) {
       return SendStatus.NO_AMT;
     } else if (amtVal > getMaxTransferAmount(token, balance)) {
       return SendStatus.AMT_TOO_HIGH;
+    } else if (token.address != Constants.REEF_TOKEN_ADDRESS &&
+        !hasEnoughForEvmTx) {
+      return SendStatus.LOW_REEF;
     } else if (isValidAddr &&
         token.address != Constants.REEF_TOKEN_ADDRESS &&
         !addr.startsWith('0x')) {
@@ -330,6 +343,8 @@ class _SendPageState extends State<SendPage> {
         return "Signing transaction ...";
       case SendStatus.SENDING:
         return "Sending ...";
+      case SendStatus.LOW_REEF:
+        return "Minimum balance 80 REEF";
       case SendStatus.READY:
         return "Confirm Send";
       default:
@@ -510,7 +525,8 @@ class _SendPageState extends State<SendPage> {
               const Gap(5),
               Text(
                 address.shorten(),
-                style: const TextStyle(color: Styles.textLightColor, fontSize: 12),
+                style:
+                    const TextStyle(color: Styles.textLightColor, fontSize: 12),
               )
             ]),
             const Gap(10),
@@ -1006,6 +1022,7 @@ enum SendStatus {
   AMT_TOO_HIGH,
   ADDR_NOT_VALID,
   ADDR_NOT_EXIST,
+  LOW_REEF,
   SIGNING,
   SENDING,
   CANCELED,
