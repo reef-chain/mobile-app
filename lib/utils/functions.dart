@@ -16,7 +16,12 @@ double getBalanceValueBI(BigInt? balance, double? price) {
   }
   var priceSplit = price.toString().split('.');
   var decimalPlaces = priceSplit.length == 2 ? priceSplit[1].length : 0;
-  var res = ((balance * BigInt.parse(priceSplit[0] + (priceSplit[1] ?? ''))) /
+  var priceAfterDecimal = '';
+  try {
+    priceAfterDecimal = BigInt.parse(priceSplit[1]).toString();
+  } catch (e) {}
+
+  var res = ((balance * BigInt.parse(priceSplit[0] + priceAfterDecimal)) /
           BigInt.from(10).pow(decimalPlaces)) /
       BigInt.from(10).pow(18).toDouble();
   return res;
@@ -38,8 +43,8 @@ extension ShortenExtension on String {
   }
 }
 
-String toShortDisplay(String? value){
-  return value!=null?value.shorten():"";
+String toShortDisplay(String? value) {
+  return value != null ? value.shorten() : "";
 }
 
 String formatAmountToDisplayBigInt(BigInt decimalsVal,
@@ -94,9 +99,12 @@ String toStringWithoutDecimals(String amount, int decimals) {
   return intPart + fractionalPart;
 }
 
-bool isMainnet(String? genHash){
-  return genHash==null?false : Constants.REEF_MAINNET_GENESIS_HASH==genHash.trim();
+bool isMainnet(String? genHash) {
+  return genHash == null
+      ? false
+      : Constants.REEF_MAINNET_GENESIS_HASH == genHash.trim();
 }
+
 // To check for valid checksum use JS utility
 bool isEvmAddress(String address) {
   return RegExp(r'^(0x|0X)([0-9a-fA-F]{40})$').hasMatch(address);

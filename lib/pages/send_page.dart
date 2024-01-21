@@ -123,9 +123,9 @@ class _SendPageState extends State<SendPage> {
       amt = '0';
     }
     var amtVal = double.parse(amt);
-      setState(() {
-        isValidAddress = isValidAddr;
-      });
+    setState(() {
+      isValidAddress = isValidAddr;
+    });
     if (addr.isEmpty) {
       return SendStatus.NO_ADDRESS;
     } else if (amtVal <= 0) {
@@ -510,7 +510,8 @@ class _SendPageState extends State<SendPage> {
               const Gap(5),
               Text(
                 address.shorten(),
-                style: const TextStyle(color: Styles.textLightColor, fontSize: 12),
+                style:
+                    const TextStyle(color: Styles.textLightColor, fontSize: 12),
               )
             ]),
             const Gap(10),
@@ -570,9 +571,10 @@ class _SendPageState extends State<SendPage> {
                     focusNode: _focusSecond,
                     readOnly: isFormDisabled,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))
                     ],
-                    keyboardType: TextInputType.number,
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
                     controller: amountController,
                     onChanged: (text) async {
                       amount = amountController.text;

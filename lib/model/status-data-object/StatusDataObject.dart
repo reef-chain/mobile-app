@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 enum StatusCode {
   _,
   loading,
@@ -38,10 +40,13 @@ class FeedbackStatus {
         if(e is Map && e.isEmpty) {
           return FeedbackStatus(StatusCode.completeData, '');
         }
-      return FeedbackStatus(toStatusCode(e['code']), e['message'],
+        if(e is Map && e['code'] is List && e['code'].isEmpty) {
+          return FeedbackStatus(StatusCode.completeData, '');
+        }
+        return FeedbackStatus(toStatusCode(e['code']), e['message'],
           propertyName: e['propertyName']);
       }catch(err){
-        print("StatusDataObject ERROR PARSING JSON=${e['code']} v=${e['message']}");
+        print("StatusDataObject ERROR PARSING JSON=${e['code']} v=${e['message']} e=${err}");
         return FeedbackStatus(StatusCode.completeData, 'failed to parse');
       }
     }).toList();
