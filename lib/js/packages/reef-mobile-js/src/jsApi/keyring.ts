@@ -1,5 +1,5 @@
 import { u8aToHex , hexToU8a } from "@polkadot/util";
-import { sr25519PairFromSeed  } from "@polkadot/util-crypto";
+import { naclKeypairFromSeed  } from "@polkadot/util-crypto";
 import { Keyring as ReefKeyring } from "@reef-defi/keyring";
 import {
     mnemonicGenerate,
@@ -128,7 +128,7 @@ function checkKeyValidity(privateKey: string): boolean {
       const privateKeyBytes = hexToU8a(privateKey);
 
       // Generate the keypair from the seed (private key)
-      const keypair = sr25519PairFromSeed(privateKeyBytes);
+      const keypair = naclKeypairFromSeed(privateKeyBytes);
 
       // Convert the public key to hex format and verify it starts with the Polkadot prefix "0x" followed by 64 hexadecimal characters
       const publicKeyHex = u8aToHex(keypair.publicKey);
