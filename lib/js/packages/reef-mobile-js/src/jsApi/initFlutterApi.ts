@@ -13,6 +13,11 @@ import {getSignatureSendRequest} from "flutter-js-bridge/src/sendRequestSignatur
 
 const {AVAILABLE_NETWORKS } = network;
 
+const getIpfsGatewayUrl = (hash: string): string => {
+    const ret = `https://reef.infura-ipfs.io/ipfs/${hash}`
+    return ret;
+};
+
 export const initFlutterApi = async (flutterJS: FlutterJS) => {
     try {
         console.log("INIT FLUTTER JS API util-lib v1.0.0-rc1");
@@ -28,7 +33,8 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                 console.log("INIT REEF ACCOUNTS len=",accountsWithMeta.length);
                 const destroyFn = await reefState.initReefState({
                     network: AVAILABLE_NETWORKS[selNetwork],
-                    jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey}
+                    jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey},
+                    ipfsHashResolverFn: getIpfsGatewayUrl
                 });
                 // TODO check if it's really destroyed
                 /*setTimeout((  )=>{

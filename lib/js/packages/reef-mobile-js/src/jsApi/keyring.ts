@@ -126,16 +126,16 @@ function checkKeyValidity(privateKey: string): boolean {
     try {
       // Convert the private key from hex to Uint8Array format
       const privateKeyBytes = hexToU8a(privateKey);
-  
+
       // Generate the keypair from the seed (private key)
       const keypair = naclKeypairFromSeed(privateKeyBytes);
-  
+
       // Convert the public key to hex format and verify it starts with the Polkadot prefix "0x" followed by 64 hexadecimal characters
       const publicKeyHex = u8aToHex(keypair.publicKey);
       if (publicKeyHex.length !== 66 || !publicKeyHex.startsWith('0x')) {
         return false;
       }
-  
+
       // The private key is valid if no errors were thrown
       return true;
     } catch {

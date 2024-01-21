@@ -58,9 +58,5 @@
 	<string>Scan code</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Select file</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Area of usage</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Area of usage</string>
 </dict>
 </plist>

@@ -46,7 +46,10 @@ export const fetchTokenData = (
       query: CONTRACT_DATA_GQL,
       variables: { address: searchAddress },
     })*/
-    firstValueFrom(graphql.queryGql$(httpClient, graphql.getContractDataQuery([searchAddress])))
+    firstValueFrom(
+      graphql.queryGql$(httpClient, graphql.getContractDataQuery([searchAddress])
+      )
+      )
     .then((verContracts: any) => {
         const vContract = verContracts.data.verifiedContracts[0];
         if (!vContract) return null;
