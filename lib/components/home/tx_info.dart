@@ -148,12 +148,12 @@ class _TxInfoState extends State<TxInfo> {
                         MaterialPageRoute(
                           builder: (context) => WebViewScreen(
                               url:
-                                  "https://reefscan.com/transfer/${txData['block_number']}/${txData['extrinsicIdx']}/${txData['eventIdx']}"),
+                                  "https://${ReefAppState.instance.networkCtrl.networkModel.selectedNetworkName == "testnet" ? "testnet." : ""}reefscan.com/transfer/${txData['block_number']}/${txData['extrinsicIdx']}/${txData['eventIdx']}"),
                         ),
                       );
                     },
                     child: GradientText(
-                      "https://reefscan.com/transfer/${txData['block_number']}/${txData['extrinsicIdx']}/${txData['eventIdx']}",
+                      "https://${ReefAppState.instance.networkCtrl.networkModel.selectedNetworkName == "testnet" ? "testnet." : ""}reefscan.com/transfer/${txData['block_number']}/${txData['extrinsicIdx']}/${txData['eventIdx']}",
                       gradient: textGradient(),
                       style:
                           TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
