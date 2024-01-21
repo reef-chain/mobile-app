@@ -6,8 +6,8 @@ export const fetchTxInfo = async (
     httpClient: any,
     searchTimestamp: string,
   ): Promise<TokenWithAmount|any> => {
-const FETCH_TX_INFO_ANUKUL = `
-query FETCH_TX_Info_anukul {
+const FETCH_TX_INFO = `
+query FETCH_TX_INFO {
     transfers(limit: 1, where: {timestamp_eq: "${searchTimestamp}"}) {
       id
       amount
@@ -32,7 +32,7 @@ query FETCH_TX_Info_anukul {
 `
 try {
   const txResponse = await firstValueFrom(graphql.queryGql$(httpClient, {
-    query: FETCH_TX_INFO_ANUKUL,
+    query: FETCH_TX_INFO,
   }))
 
   const txData = (txResponse as any).data.transfers[0];
@@ -69,7 +69,7 @@ try {
   } as TxInfo;
   return txInfo;
 } catch (error) {
-  console.log(`ERR=== ${error}`)
+  console.log(`fetchTxInfo ERR= ${error.message}`)
   }
   return undefined;
 }
