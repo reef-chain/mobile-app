@@ -4259,10 +4259,10 @@
     graphql "^16.6.0"
     subscriptions-transport-ws "^0.11.0"
 
-"@reef-chain/util-lib@^2.1.9":
-  version "2.1.10"
-  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.1.10.tgz#c39a7e979f4e95d49a8c67fbbd9f5d3d41391ae6"
-  integrity sha512-hUBlKUKEbEYqGpeSC+9hbIvy0MCokaUFxQ0SgcRY13NZM8PcOufOkRb7CdLyw53FQ7KC5Sp+WoPnN7p/eyQjWw==
+"@reef-chain/util-lib@^2.1.11":
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.1.11.tgz#fb46e1c3cb5d6277e4372c13efb01547d0f70258"
+  integrity sha512-WrUTzfp1PzldOsbo4f2Y2FRFGi34bewgkhaZp/Hh5i2rhln5NNl6/dowIGMecEjzBPhYADl9mqYfzU2Cl5nUXw==
   dependencies:
     "@polkadot/extension-inject" "^0.46.5"
     "@reef-chain/evm-provider" "^2.0.1"
@@ -4528,9 +4528,9 @@
     ws "^8.8.1"
 
 "@substrate/ss58-registry@^1.17.0", "@substrate/ss58-registry@^1.23.0", "@substrate/ss58-registry@^1.38.0", "@substrate/ss58-registry@^1.44.0":
-  version "1.45.0"
-  resolved "https://registry.yarnpkg.com/@substrate/ss58-registry/-/ss58-registry-1.45.0.tgz#8ed56847557413dadb6410c28075c223ed730fbb"
-  integrity sha512-NHmOkILimbLRPKvpnR+JGVckc1q4AJjxz9FnzZ3dKAVBL17AKknDy2FxXcwlJbmOXl9u7W3FS3bLDHgfKi4tQw==
+  version "1.46.0"
+  resolved "https://registry.yarnpkg.com/@substrate/ss58-registry/-/ss58-registry-1.46.0.tgz#bfe3e6a30d39929f57ecc178acde4e74a773e2b6"
+  integrity sha512-rBvWnlrBeFTd5LVG7oX3rOHzR16yqyffOFHKmUiVcblpXI3D89CXOvAljW9tWlA1H/2/FegaZnHPhdObPsvi+w==
 
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
