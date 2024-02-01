@@ -81,9 +81,7 @@ class TokenCtrl {
   void reload(bool force) async {
     var isProvConn =
         await ReefAppState.instance.networkCtrl.getProviderConnLogs().first;
-    if (force ||
-        isProvConn == null ||
-        !isProvConn.isConnected) {
+    if (force || isProvConn == null || !isProvConn.isConnected) {
       if (kDebugMode) {
         print('RELOADING TOKENS');
       }

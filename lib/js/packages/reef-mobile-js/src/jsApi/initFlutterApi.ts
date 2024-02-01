@@ -15,7 +15,6 @@ const {AVAILABLE_NETWORKS } = network;
 
 const getIpfsGatewayUrl = (hash: string): string => {
     const ret = `https://reef.infura-ipfs.io/ipfs/${hash}`
-    console.log('IPFS hash=',hash, ret);
     return ret;
 };
 

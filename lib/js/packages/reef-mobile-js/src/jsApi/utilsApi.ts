@@ -38,10 +38,10 @@ export const initApi = () => {
         },
         getTxInfo: async (timestamp: string) => {
             return firstValueFrom(
-                combineLatest([graphql.httpClientInstance$, timestamp]).pipe(
+                combineLatest([graphql.httpClientInstance$]).pipe(
                     take(1),
-                    switchMap(async ([httpClient, abc]:[any, string]) => {
-                        return await fetchTxInfo(httpClient, timestamp);
+                    switchMap(async ([httpClientInstance]:[any]) => {
+                        return await fetchTxInfo(httpClientInstance, timestamp);
                     }),
                     take(1)
                 )

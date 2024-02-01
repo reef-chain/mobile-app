@@ -9,6 +9,7 @@
     "@polkadot/types": "6.4.2"
   },
   "scripts": {
+    "build:clean": "rm -rf node_modules && rm -f yarn.lock&&yarn install&&yarn start0",
     "start0": "yarn --cwd ./packages/reef-mobile-js start",
     "start1": "yarn --cwd ./packages/dApp-js start"
   }

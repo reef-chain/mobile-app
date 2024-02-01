@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
@@ -580,7 +581,7 @@ class _SendPageState extends State<SendPage> {
                                   : Styles.darkBackgroundColor),
                         ),
                         Text(
-                          "${toAmountDisplayBigInt(selectedToken.balance)} ${selectedToken.name.toUpperCase()}",
+                          "${selectedToken.balance != null && selectedToken.balance > BigInt.zero ? NumberFormat.compact().format((selectedToken.balance) / BigInt.from(10).pow(18)).toString() : 0} ${selectedToken.name.toUpperCase()}",
                           style: TextStyle(
                               color: Styles.textLightColor, fontSize: 12),
                         )
@@ -593,9 +594,10 @@ class _SendPageState extends State<SendPage> {
                     focusNode: _focusSecond,
                     readOnly: isFormDisabled,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))
                     ],
-                    keyboardType: TextInputType.number,
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
                     controller: amountController,
                     onChanged: (text) async {
                       amount = amountController.text;
