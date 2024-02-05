@@ -28,7 +28,7 @@ class InsufficientBalance extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) {
                 return WebViewScreen(
-                  title: isMainnet?"Buy Reef":"Get Testnet Reef",
+                  title: isMainnet?"Buy Reef":"Get Reef Testnet Tokens",
                   url: isMainnet
                       ? "https://onramp.money/main/buy/?appId=487411&walletAddress=${ReefAppState.instance.signingCtrl.accountModel.selectedAddress}"
                       : "https://discord.com/channels/793946260171259904/1087737503550816396");
