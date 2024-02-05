@@ -28,7 +28,7 @@ class InsufficientBalance extends StatelessWidget {
                   url: ReefAppState
                               .instance.model.network.selectedNetworkName ==
                           Network.mainnet.name
-                      ? "https://onramp.money/main/buy/?appId=487411&walletAddress=${ReefAppState.instance.signingCtrl.accountModel.selectedAddress}}"
+                      ? "https://onramp.money/main/buy/?appId=487411&walletAddress=${ReefAppState.instance.signingCtrl.accountModel.selectedAddress}"
                       : "https://discord.com/channels/793946260171259904/1087737503550816396"),
             ),
           )
