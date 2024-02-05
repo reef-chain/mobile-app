@@ -8,6 +8,9 @@ class InsufficientBalance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var isMainnet = ReefAppState
+        .instance.model.network.selectedNetworkName ==
+        Network.mainnet.name;
     return Container(
       margin: EdgeInsets.only(top: 10.0),
       child: ElevatedButton(
@@ -23,13 +26,13 @@ class InsufficientBalance extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WebViewScreen(
-                  title: "Buy Reef",
-                  url: ReefAppState
-                              .instance.model.network.selectedNetworkName ==
-                          Network.mainnet.name
+              builder: (context) {
+                return WebViewScreen(
+                  title: isMainnet?"Buy Reef":"Get Testnet Reef",
+                  url: isMainnet
                       ? "https://onramp.money/main/buy/?appId=487411&walletAddress=${ReefAppState.instance.signingCtrl.accountModel.selectedAddress}"
-                      : "https://discord.com/channels/793946260171259904/1087737503550816396"),
+                      : "https://discord.com/channels/793946260171259904/1087737503550816396");
+              },
             ),
           )
         },
@@ -50,7 +53,7 @@ class InsufficientBalance extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              "Insufficient Funds! Buy Reef",
+              isMainnet?"Buy Reef":"Get Testnet Tokens",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
