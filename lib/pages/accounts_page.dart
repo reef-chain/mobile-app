@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/InsufficientBalance.dart';
 import 'package:reef_mobile_app/components/accounts/accounts_list.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/account_modals.dart';
@@ -18,6 +19,7 @@ import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/utils/account_profile.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
@@ -108,65 +110,70 @@ class _AccountsPageState extends State<AccountsPage> {
   Padding buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // const Image(
-              //   image: AssetImage("./assets/images/reef.png"),
-              //   width: 24,
-              //   height: 24,
-              // ),
-              const Gap(8),
-              Builder(builder: (context) {
-                return Text(
-                  AppLocalizations.of(context)!.my_account,
-                  style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 32,
-                      color: Colors.grey.shade100),
-                );
-              }),
-            ],
-          ),
-          Row(
-            children: [
-              MaterialButton(
-                onPressed: () => showAddAccountModal(
-                    AppLocalizations.of(context)!.add_account, openModal,
-                    context: context),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                minWidth: 0,
-                height: 36,
-                elevation: 0,
-                color: Colors.transparent,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: Styles.purpleColor)),
-                child: Row(children: [
-                  Icon(
-                    Icons.add_circle_rounded,
-                    color: Styles.purpleColor,
-                    size: 22,
-                  ),
-                  const Gap(4),
+              Row(
+                children: [
+                  // const Image(
+                  //   image: AssetImage("./assets/images/reef.png"),
+                  //   width: 24,
+                  //   height: 24,
+                  // ),
+                  const Gap(8),
                   Builder(builder: (context) {
                     return Text(
-                      AppLocalizations.of(context)!.add,
-                      style: GoogleFonts.roboto(
-                          color: Colors.grey.shade100,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
+                      AppLocalizations.of(context)!.my_account,
+                      style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 32,
+                          color: Colors.grey.shade100),
                     );
-                  })
-                ]),
+                  }),
+                ],
               ),
-              const Gap(8)
+              Row(
+                children: [
+                  MaterialButton(
+                    onPressed: () => showAddAccountModal(
+                        AppLocalizations.of(context)!.add_account, openModal,
+                        context: context),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    minWidth: 0,
+                    height: 36,
+                    elevation: 0,
+                    color: Colors.transparent,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Styles.purpleColor)),
+                    child: Row(children: [
+                      Icon(
+                        Icons.add_circle_rounded,
+                        color: Styles.purpleColor,
+                        size: 22,
+                      ),
+                      const Gap(4),
+                      Builder(builder: (context) {
+                        return Text(
+                          AppLocalizations.of(context)!.add,
+                          style: GoogleFonts.roboto(
+                              color: Colors.grey.shade100,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
+                        );
+                      })
+                    ]),
+                  ),
+                  const Gap(8)
+                ],
+              ),
             ],
           ),
+          if (!hasThresholdBalance()) InsufficientBalance(),
         ],
       ),
     );

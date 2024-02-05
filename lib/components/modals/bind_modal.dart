@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:mobx/mobx.dart';
 import 'package:reef_mobile_app/components/modals/signing_modals.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import '../sign/SignatureContentToggle.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
@@ -19,8 +20,6 @@ import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-const MIN_BALANCE = 5;
 
 enum SendStatus {
   READY,
@@ -80,24 +79,6 @@ class _BindEvmState extends State<BindEvm> {
     if (availableTxAccounts.isNotEmpty) {
       transferBalanceFrom = availableTxAccounts[0];
     }
-  }
-
-  bool hasBalanceForBinding(ReefAccount reefSigner) {
-    return reefSigner.balance >= BigInt.from(MIN_BALANCE * 1e18);
-  }
-
-  bool hasBalanceForFunding(ReefAccount reefSigner) {
-    return reefSigner.balance >= BigInt.from(MIN_BALANCE * 1e18 * 2);
-  }
-
-  List<ReefAccount> getSignersWithEnoughBalance(ReefAccount bindFor) {
-    List<ReefAccount> _availableTxAccounts = ReefAppState
-        .instance.model.accounts.accountsList
-        .where((signer) =>
-            signer.address != bindFor.address && hasBalanceForFunding(signer))
-        .toList();
-    _availableTxAccounts.sort((a, b) => b.balance.compareTo(a.balance));
-    return _availableTxAccounts;
   }
 
   Future<void> startFunding() async {
