@@ -5,8 +5,7 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/wasm-crypto": "4.6.1",
-    "@polkadot/types": "6.4.2"
+    "@polkadot/wasm-crypto": "4.6.1"
   },
   "scripts": {
     "build:clean": "rm -rf node_modules && rm -f yarn.lock&&yarn install&&yarn start0",
