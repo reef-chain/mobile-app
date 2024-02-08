@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
-import 'package:reef_mobile_app/components/modals/signing_modals.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/gradient_text.dart';
@@ -17,7 +16,7 @@ class MethodDataDisplay extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(child: Observer(builder: (_) {
         if (signatureReq != null && signatureReq!.hasResults) {
           var evmMethodData = signatureReq?.decodedMethod['vm']['evm'];
-          var isEVM = evmMethodData != null;
+          var isEVM = evmMethodData != null && !evmMethodData.isEmpty;
           var dataWidget;
           if (isEVM == true) {
             var fragmentData = evmMethodData['decodedData']['functionFragment'];
@@ -45,18 +44,29 @@ class MethodDataDisplay extends StatelessWidget {
               1: FlexColumnWidth(4),
             });
           } else {
-            final List<dynamic>? argsList = signatureReq?.decodedMethod['args'];
+            final List<dynamic>? argsList = [
+              signatureReq?.decodedMethod['args']
+            ];
             final String args = argsList?.join(', ').toString() ?? "";
-            final String paramValues = args.length > 1
-                ? "${args.split(':')[1].split('}')[0]},${args.split(',')[1]}"
-                : "empty";
             var methodName =
                 signatureReq?.decodedMethod['methodName'].split('(')[0];
-            var params = signatureReq?.decodedMethod['methodName']
-                .split('(')[1]
-                .split(')')[0];
-            List<String> paramsList = params.split(',');
-            List<String> paramValuesList = paramValues.trim().split(',');
+
+            String input = args.substring(1, args.length - 1);
+            List<String> pairs = input.length > 0 ? input.split(", ") : [];
+            Map<String, dynamic> resultMap = {};
+            pairs.forEach((pair) {
+              List<String> keyValue = pair.split(": ");
+              String key = keyValue[0].trim();
+              String value = keyValue[1].trim();
+              resultMap[key] = value;
+            });
+            List<String> paramsList = [];
+            List<String> paramValuesList = [];
+            pairs.forEach((pair) {
+              paramsList.add(pair.substring(0, pair.indexOf(":")));
+              paramValuesList.add(pair.substring(pair.indexOf(":") + 1));
+            });
+
             Map<String, String> decodedData = {"Method Name": methodName};
             for (var i = 0; i < paramsList.length; i++) {
               decodedData[paramsList[i]] = paramValuesList[i];
