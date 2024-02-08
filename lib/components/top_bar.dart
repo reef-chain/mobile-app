@@ -31,7 +31,7 @@ Widget topBar(BuildContext context) {
                   children: [
                     SvgPicture.asset(
                       'assets/images/reef-logo-light.svg',
-                      semanticsLabel: "Reef Logo",
+                      semanticsLabel: "Reef Chain Logo",
                       height: 46,
                     ),
                     Observer(builder: (_) {

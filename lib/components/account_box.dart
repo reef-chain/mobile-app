@@ -277,14 +277,15 @@ class _AccountBoxState extends State<AccountBox> {
                         onPressed: () {
                           var availableAccounts = getSignersWithEnoughBalance(
                               widget.reefAccountFDM.data);
+
                           var hasBalance =
                               hasBalanceForBinding(widget.reefAccountFDM.data);
 
-                          if (availableAccounts.isEmpty || !hasBalance) {
+                          if (!hasBalance && availableAccounts.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(AppLocalizations.of(context)!
-                                    .account_imported_successfully),
+                                    .insufficient_funds_fill_up),
                                 duration: Duration(seconds: 2),
                               ),
                             );
