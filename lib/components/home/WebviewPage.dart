@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -24,6 +25,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
               style: GoogleFonts.spaceGrotesk(
                 fontWeight: FontWeight.w500,
                 fontSize: 24,
+                color: Styles.whiteColor
               )),
           backgroundColor: Colors.deepPurple.shade700,
         ),

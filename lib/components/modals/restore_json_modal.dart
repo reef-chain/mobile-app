@@ -234,6 +234,7 @@ class _RestoreJSONState extends State<RestoreJSON> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
+                                color: Styles.whiteColor
                               ),
                             );
                           }),
