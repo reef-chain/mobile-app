@@ -35,12 +35,13 @@ class QRCodeGenerator extends StatelessWidget {
             height: 8,
           ),
           ElevatedButton.icon(
-            icon: const Icon(Icons.copy),
+            icon: Icon(Icons.copy,color: Styles.whiteColor),
             label: Text(
               AppLocalizations.of(context)!.copy_to_clipboard,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
+                color: Styles.whiteColor
               ),
             ),
             style: ElevatedButton.styleFrom(
