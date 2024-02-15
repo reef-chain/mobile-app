@@ -72,7 +72,7 @@ String? getFdmListMessage(
     StatusDataObject<List> list, String itemName, String loading) {
   String? message;
   if (list.hasStatus(StatusCode.completeData) && list.data.isEmpty) {
-    message = 'No ${itemName}s found.';
+    message = 'No ${itemName} found.';
   }
   if (list.hasStatus(StatusCode.loading)) {
     message = '${loading} ${itemName}...';
