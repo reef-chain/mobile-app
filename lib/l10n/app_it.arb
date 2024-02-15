@@ -19,6 +19,7 @@
   "new_password":"NUOVA PASSWORD",
   "add_account":"Aggiungi account",
   "create_new_account":"Crea nuovo account",
+  "add_account":"Crea nuovo account",
   "import_account_from_pre_existing_seed":"Importa account da un Seed presistente",
   "copy_to_clipboard":"Copia negli appunti",
   "please_write_down":"Annotare il seed mnemonico del proprio portafoglio e conservarlo in un luogo sicuro. Il mnemonico può essere utilizzato per ripristinare il portafoglio. Conservatelo con cura per non perdere i vostri assets.",

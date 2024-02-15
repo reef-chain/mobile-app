@@ -291,7 +291,7 @@ class _HomePageState extends State<HomePage> {
                       parentContext: context);
                 },
                 icon: const Icon(Icons.account_balance_wallet_outlined),
-                label: Text(AppLocalizations.of(context)!.create_new_account,style: TextStyle(color: Styles.whiteColor),));
+                label: Text(AppLocalizations.of(context)!.add_account,style: TextStyle(color: Styles.whiteColor),));
           }),
         ],
       );
