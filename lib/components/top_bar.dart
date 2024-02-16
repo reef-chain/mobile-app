@@ -61,7 +61,7 @@ Widget topBar(BuildContext context) {
                       child: Wrap(
                         alignment: WrapAlignment.end,
                         children: [
-                          accountPill(context, selSignerList.first.name)
+                          AccountPill(selSignerList.first.name)
                         ],
                       ),
                     )
@@ -75,14 +75,42 @@ Widget topBar(BuildContext context) {
   );
 }
 
-Widget accountPill(BuildContext context, String title) {
-  return ActionChip(
+class AccountPill extends StatefulWidget {
+  final String title;
+  const AccountPill(this.title,{super.key});
+
+  @override
+  State<AccountPill> createState() => _AccountPillState();
+}
+
+class _AccountPillState extends State<AccountPill> {
+var color = Styles.textColor;
+  
+  @override
+  void initState() {
+    ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+      if(event != null && event.isConnected){
+        setState(() {
+          color = Styles.greenColor;
+        });
+      }else{
+        setState(() {
+          color = Styles.textColor;
+        });
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
       avatar: Icon(
         Icons.wallet,
-        color: Styles.textColor,
+        color: color,
       ),
       label: Text(
-        title,
+        widget.title,
         style: GoogleFonts.spaceGrotesk(
             color: Styles.purpleColor,
             fontSize: 18,
@@ -96,4 +124,5 @@ Widget accountPill(BuildContext context, String title) {
       onPressed: () {
         ReefAppState.instance.navigationCtrl.navigate(NavigationPage.accounts);
       });
+  }
 }
