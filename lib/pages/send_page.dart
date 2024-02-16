@@ -610,7 +610,10 @@ class _SendPageState extends State<SendPage> {
                         var amt = amount != '' ? double.parse(amount) : 0;
                         var calcRating = (amt /
                             getMaxTransferAmount(selectedToken, balance));
-                        if (calcRating < 0) {
+
+                        if (calcRating < 0 ||
+                            calcRating.isInfinite ||
+                            calcRating.isNaN) {
                           calcRating = 0;
                         }
                         rating = calcRating > 1 ? 1 : calcRating;
