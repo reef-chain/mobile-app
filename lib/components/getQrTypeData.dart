@@ -140,7 +140,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
                         Gap(16.0),
                         Center(
                           child: ElevatedButton.icon(
-                            icon: Icon(Icons.crop_free),
+                            icon: Icon(Icons.crop_free,color: Styles.whiteColor),
                             label: Text(
                               AppLocalizations.of(context)!.scan_from_image,
                               style: TextStyle(

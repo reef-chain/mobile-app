@@ -177,7 +177,7 @@ class _RestoreJSONState extends State<RestoreJSON> {
                           child: Builder(builder: (context) {
                             return Text(
                               _fileButtonText,
-                              style: TextStyle(fontSize: 16.0),
+                              style: TextStyle(fontSize: 16.0,color: Styles.whiteColor),
                             );
                           }),
                         ),
