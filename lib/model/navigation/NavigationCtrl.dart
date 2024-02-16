@@ -64,6 +64,7 @@ class NavigationCtrl with NavSwipeCompute {
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w500,
                       fontSize: 24,
+                      color: Styles.whiteColor,
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
