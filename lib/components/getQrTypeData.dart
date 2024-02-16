@@ -143,9 +143,10 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
                             icon: Icon(Icons.crop_free),
                             label: Text(
                               AppLocalizations.of(context)!.scan_from_image,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
+                                color: Styles.whiteColor
                               ),
                             ),
                             style: ElevatedButton.styleFrom(

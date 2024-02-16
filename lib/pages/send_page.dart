@@ -875,7 +875,7 @@ class _SendPageState extends State<SendPage> {
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: const Text("Go Back to Homepage"),
+                            child: Text("Go Back to Homepage",style: TextStyle(color: Styles.whiteColor),),
                           ),
                         )
                       ],
