@@ -599,9 +599,10 @@ class _BindEvmState extends State<BindEvm> {
                             ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
                                 .toUpperCase()
                             : localizations.continueButtonLabel,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
+                          color: Styles.whiteColor
                         ),
                       ),
                       style: ElevatedButton.styleFrom(

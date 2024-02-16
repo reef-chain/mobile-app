@@ -204,6 +204,7 @@ class _AccountImportContentState extends State<AccountImportContent> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
+                        color: Styles.whiteColor
                       ),
                     );
                   }),
@@ -395,6 +396,7 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
+                        color: Styles.whiteColor
                       ),
                     );
                   }),
@@ -779,9 +781,10 @@ class _AccountCreationConfirmContentState
                           ? AppLocalizations.of(context)!.import_the_account
                           : AppLocalizations.of(context)!.add_the_account,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        color: Styles.whiteColor
                       ),
                     ),
                   ),
