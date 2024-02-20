@@ -10,6 +10,7 @@ import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/ensureVisibleWhenFocused.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -771,7 +772,9 @@ class _AccountCreationConfirmContentState
                                   isEvmClaimed: false,
                                   iconSVG: widget.account!.svg,
                                 );
+                                if(hasThresholdBalance()){
                                 showBindEvmModal(context, bindFor: signer);
+                                }
                               }
                             }
                           }
