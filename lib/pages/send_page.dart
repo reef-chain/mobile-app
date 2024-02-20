@@ -128,9 +128,10 @@ class _SendPageState extends State<SendPage> {
       [bool skipAsync = false]) async {
     var isValidAddr = await _isValidAddress(addr);
     var balance = getSelectedTokenBalance(token);
-    var hasEnoughForEvmTx = hasBalanceForEvmTx(
-        ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress));
+    var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
+            e.address == ReefAppState.instance.model.accounts.selectedAddress);
+    var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
+    var isEvmClaimed = selectedAccount.isEvmClaimed;
 
     if (amt == '') {
       amt = '0';
@@ -168,9 +169,14 @@ class _SendPageState extends State<SendPage> {
     } else if (!isValidAddr) {
       return SendStatus.ADDR_NOT_VALID;
     } else if (skipAsync == false &&
-        addr.startsWith('0x') &&
-        !(await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr))) {
-      return SendStatus.ADDR_NOT_EXIST;
+        addr.startsWith('0x'))
+        {
+          if(!(await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr))){
+          return SendStatus.ADDR_NOT_EXIST;
+          }
+          else {
+            return SendStatus.EVM_NOT_BINDED;
+          }
     }
     return SendStatus.READY;
   }
@@ -353,6 +359,8 @@ class _SendPageState extends State<SendPage> {
         return "Minimum balance 80 REEF";
       case SendStatus.LOW_REEF_NATIVE:
         return "Minimum balance 5 REEF";
+      case SendStatus.EVM_NOT_BINDED:
+        return "Bind EVM address";
       case SendStatus.READY:
         return "Confirm Send";
       default:
@@ -1046,4 +1054,5 @@ enum SendStatus {
   INCLUDED_IN_BLOCK,
   FINALIZED,
   NOT_FINALIZED,
+  EVM_NOT_BINDED,
 }
