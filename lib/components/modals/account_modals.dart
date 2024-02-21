@@ -772,7 +772,7 @@ class _AccountCreationConfirmContentState
                                   isEvmClaimed: false,
                                   iconSVG: widget.account!.svg,
                                 );
-                                if(hasThresholdBalance()){
+                                if(anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18))){
                                 showBindEvmModal(context, bindFor: signer);
                                 }
                               }
