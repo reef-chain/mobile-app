@@ -21,12 +21,10 @@ List<ReefAccount> getSignersWithEnoughBalance(ReefAccount bindFor) {
   return _availableTxAccounts;
 }
 
-bool hasThresholdBalance() {
+bool anyAccountHasBalance(BigInt minBalance) {
   List<ReefAccount> accountsWithoutThreshold = ReefAppState
       .instance.model.accounts.accountsList
-      .where((signer) => !signer.isEvmClaimed
-          ? signer.balance < BigInt.from(MIN_BALANCE * 1e18)
-          : false)
+      .where((signer) => signer.balance < minBalance)
       .toList();
 
   if (accountsWithoutThreshold.isEmpty) return true;

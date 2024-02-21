@@ -231,7 +231,7 @@ class _TokenViewState extends State<TokenView> {
             //     child: ElevatedButton(
             //         onPressed: ReefAppState.instance.tokensCtrl.reload,
             //         child: const Text("ReloadTEST"))),
-            if (!hasThresholdBalance())
+            if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
               Column(
                 children: [
                   Container(
