@@ -131,7 +131,6 @@ class _SendPageState extends State<SendPage> {
     var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
             e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
-    var isEvmClaimed = selectedAccount.isEvmClaimed;
 
     if (amt == '') {
       amt = '0';
@@ -174,7 +173,7 @@ class _SendPageState extends State<SendPage> {
           if(!(await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr))){
           return SendStatus.ADDR_NOT_EXIST;
           }
-          else if(!isEvmClaimed) {
+          else if(!selectedAccount.isEvmClaimed) {
             return SendStatus.EVM_NOT_BINDED;
           }
     }
