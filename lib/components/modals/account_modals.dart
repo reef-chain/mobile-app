@@ -772,7 +772,7 @@ class _AccountCreationConfirmContentState
                                   isEvmClaimed: false,
                                   iconSVG: widget.account!.svg,
                                 );
-                                if(anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18))){
+                                if(anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)) && ReefAppState.instance.model.accounts.accountsList.length!=0){
                                 showBindEvmModal(context, bindFor: signer);
                                 }
                               }
