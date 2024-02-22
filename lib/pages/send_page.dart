@@ -174,7 +174,7 @@ class _SendPageState extends State<SendPage> {
           if(!(await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr))){
           return SendStatus.ADDR_NOT_EXIST;
           }
-          else {
+          else if(!isEvmClaimed) {
             return SendStatus.EVM_NOT_BINDED;
           }
     }
