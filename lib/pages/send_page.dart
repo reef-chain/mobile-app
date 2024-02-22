@@ -14,6 +14,7 @@ import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -804,7 +805,7 @@ class _SendPageState extends State<SendPage> {
                 ),
         ),
        Gap(8.0),
-       if(statusValue==SendStatus.EVM_NOT_BINDED && ReefAppState.instance.model.accounts.accountsList.length!=0)
+       if(statusValue==SendStatus.EVM_NOT_BINDED && anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
        SizedBox(
           width: double.infinity,
           child: ElevatedButton(
