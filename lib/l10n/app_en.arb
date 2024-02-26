@@ -155,5 +155,6 @@
   "go_to_binance":"Go to Binance Connect",
   "biometric_auth":"Biometric Authentication",
   "dont_send_funds_here":"don't send funds here",
-  "insufficient_funds_fill_up":"Insufficient Funds! Please fill up your Reef Wallet"
+  "insufficient_funds_fill_up":"Insufficient Funds! Please fill up your Reef Wallet",
+  "changes_recorded":"Changes recorded"
 }

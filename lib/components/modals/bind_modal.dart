@@ -62,6 +62,7 @@ class _BindEvmState extends State<BindEvm> {
   bool boundComplete = false;
   bool sendingFundTransaction = false;
   bool sendingBoundTransaction = false;
+  bool recordingChanges = false;
 
   final FocusNode _focus = FocusNode();
   final FocusNode _focusSecond = FocusNode();
@@ -356,7 +357,8 @@ class _BindEvmState extends State<BindEvm> {
     ]);
   }
 
-  Widget buildBound() {
+
+  Widget buildRecordedChanges() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(AppLocalizations.of(context)!.bind_modal_connected + ':',
           style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -400,6 +402,32 @@ class _BindEvmState extends State<BindEvm> {
         ],
       ),
       const Gap(65),
+    ]);
+  }
+
+
+
+  Widget buildBound() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Gap(16.0),
+           Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.purple,
+              ),
+            ),
+            SizedBox(width: 12),
+            Flexible(child: Text("Waiting for EVM bound to complete..."))
+          ],
+        )],
+      ),
     ]);
   }
 
@@ -528,7 +556,7 @@ class _BindEvmState extends State<BindEvm> {
                     boundComplete = true;
                   }
                   break;
-                case 2:
+                case 3:
                   Navigator.of(context).pop();
                   return;
                 default:
@@ -537,7 +565,18 @@ class _BindEvmState extends State<BindEvm> {
               if (currentStep <= 2) {
                 setState(() {
                   currentStep += 1;
+                  recordingChanges = true;
                 });
+                try {
+                var isEvmBounded = await ReefAppState.instance.accountCtrl.listenBindActivity(widget.bindFor.address);
+                if(isEvmBounded['updatedAccounts']['boundEvm'].length>0){
+                    setState(() {
+                    currentStep += 1;
+                  });
+                }
+                } catch (e) {
+                  print("boundEVM ERROORORRORO====$e");
+                }
               }
             },
             onStepCancel: () {
@@ -569,33 +608,11 @@ class _BindEvmState extends State<BindEvm> {
                   EdgeInsets.symmetric(horizontal: 16.0);
 
               return ((currentStep == 0 && sendingFundTransaction) ||
-                      (currentStep == 1 && sendingBoundTransaction))
+                      (currentStep == 1 && sendingBoundTransaction)) || (currentStep == 2 && recordingChanges)
                   ? const SizedBox()
-                  // : Container(
-                  //     margin: const EdgeInsets.only(top: 16.0),
-                  //     child: ConstrainedBox(
-                  //       constraints:
-                  //           const BoxConstraints.tightFor(height: 48.0),
-                  //       child: Row(
-                  //         children: <Widget>[
-                  //           TextButton(
-                  //             onPressed: () {
-                  //               details.onStepContinue!();
-                  //             },
-                  //             child: Text(details.isActive &&
-                  //                     details.currentStep == 3
-                  //                 ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
-                  //                     .toUpperCase()
-                  //                 : localizations.continueButtonLabel
-                  //                     .toUpperCase()),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   );
                   : ElevatedButton(
                       child: Text(
-                        details.isActive && details.currentStep == 3
+                        details.isActive && details.currentStep >= 3
                             ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
                                 .toUpperCase()
                             : localizations.continueButtonLabel,
@@ -640,11 +657,17 @@ class _BindEvmState extends State<BindEvm> {
                   title: Text(AppLocalizations.of(context)!.bind_transaction),
                   content: buildBind()),
               ReefStep(
-                  state: (currentStep == 2)
+                  state: (currentStep > 2)
                       ? ReefStepState.complete
                       : ReefStepState.indexed,
                   title: Text(AppLocalizations.of(context)!.evm_is_bound),
                   content: buildBound()),
+              ReefStep(
+                  state: (currentStep == 3)
+                      ? ReefStepState.complete
+                      : ReefStepState.indexed,
+                  title: Text(AppLocalizations.of(context)!.changes_recorded),
+                  content: buildRecordedChanges()),
             ]),
         // child: Column(
         //   crossAxisAlignment: CrossAxisAlignment.start,
