@@ -689,7 +689,7 @@ void showBindEvmModal(BuildContext context, {required bindFor}) {
   Navigator.of(context).push(MaterialPageRoute(
     builder: (context) => Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.connect_evm),
+          title: Text(AppLocalizations.of(context)!.connect_evm,style: TextStyle(color: Styles.whiteColor),),
           backgroundColor: Colors.purple,
         ),
         body: BindEvm(bindFor: bindFor)),

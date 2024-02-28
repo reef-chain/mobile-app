@@ -14,6 +14,7 @@ import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -131,7 +132,6 @@ class _SendPageState extends State<SendPage> {
     var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
             e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
-    var isEvmClaimed = selectedAccount.isEvmClaimed;
 
     if (amt == '') {
       amt = '0';
@@ -174,7 +174,7 @@ class _SendPageState extends State<SendPage> {
           if(!(await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr))){
           return SendStatus.ADDR_NOT_EXIST;
           }
-          else {
+          else if(!selectedAccount.isEvmClaimed) {
             return SendStatus.EVM_NOT_BINDED;
           }
     }
@@ -360,7 +360,7 @@ class _SendPageState extends State<SendPage> {
       case SendStatus.LOW_REEF_NATIVE:
         return "Minimum balance 5 REEF";
       case SendStatus.EVM_NOT_BINDED:
-        return "Bind EVM address";
+        return "EVM not binded";
       case SendStatus.READY:
         return "Confirm Send";
       default:
@@ -745,61 +745,107 @@ class _SendPageState extends State<SendPage> {
     ];
   }
 
-  SizedBox buildSendStatusButton(TokenWithAmount selectedToken) {
-    return SizedBox(
-      width: double.infinity,
-      child: statusValue != SendStatus.SIGNING
-          ? ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-                shadowColor: const Color(0x559d6cff),
-                elevation: 0,
-                backgroundColor: (statusValue == SendStatus.READY)
-                    ? const Color(0xffe6e2f1)
-                    : Colors.transparent,
-                padding: const EdgeInsets.all(0),
-              ),
-              onPressed: () => {_onConfirmSend(selectedToken)},
-              child: Ink(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-                decoration: BoxDecoration(
-                  color: const Color(0xffe6e2f1),
-                  gradient: (statusValue == SendStatus.READY)
-                      ? const LinearGradient(colors: [
-                          Color(0xffae27a5),
-                          Color(0xff742cb2),
-                        ])
-                      : null,
-                  borderRadius: const BorderRadius.all(Radius.circular(14.0)),
-                ),
-                child: Center(
-                  child: Text(
-                    getSendBtnLabel(statusValue),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: (statusValue != SendStatus.READY)
-                          ? const Color(0x65898e9c)
-                          : Colors.white,
+  Column buildSendStatusButton(TokenWithAmount selectedToken) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: statusValue != SendStatus.SIGNING
+              ? ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    shadowColor: const Color(0x559d6cff),
+                    elevation: 0,
+                    backgroundColor: (statusValue == SendStatus.READY)
+                        ? const Color(0xffe6e2f1)
+                        : Colors.transparent,
+                    padding: const EdgeInsets.all(0),
+                  ),
+                  onPressed: () => {_onConfirmSend(selectedToken)},
+                  child: Ink(
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffe6e2f1),
+                      gradient: (statusValue == SendStatus.READY)
+                          ? const LinearGradient(colors: [
+                              Color(0xffae27a5),
+                              Color(0xff742cb2),
+                            ])
+                          : null,
+                      borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        getSendBtnLabel(statusValue),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: (statusValue != SendStatus.READY)
+                              ? const Color(0x65898e9c)
+                              : Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            )
-          : Column(
-              children: [
-                Text('Generating Signature'),
-                Gap(12),
-                LinearProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(Styles.primaryAccentColor),
-                  backgroundColor: Styles.greyColor,
                 )
-              ],
-            ),
+              : Column(
+                  children: [
+                    Text('Generating Signature'),
+                    Gap(12),
+                    LinearProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Styles.primaryAccentColor),
+                      backgroundColor: Styles.greyColor,
+                    )
+                  ],
+                ),
+        ),
+       Gap(8.0),
+       if(statusValue==SendStatus.EVM_NOT_BINDED && anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
+       SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    shadowColor: const Color(0x559d6cff),
+                    elevation: 0,
+                    backgroundColor: const Color(0xffe6e2f1),
+                    padding: const EdgeInsets.all(0),
+                  ),
+                  onPressed: () => {
+                    showBindEvmModal(context, bindFor: ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
+            e.address == ReefAppState.instance.model.accounts.selectedAddress))
+                    },
+                  child: Ink(
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffe6e2f1),
+                      gradient: const LinearGradient(colors: [
+                              Color(0xffae27a5),
+                              Color(0xff742cb2),
+                            ]),
+                      borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Bind EVM",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color:Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+        ),
+      ],
     );
   }
 
