@@ -1,7 +1,7 @@
-import {AddressName, getAccountSigner, ReefAccount, reefState, addressUtils} from '@reef-chain/util-lib';
+import {AddressName, getAccountSigner, ReefAccount, reefState, addressUtils, network} from '@reef-chain/util-lib';
 import {combineLatest, map, switchMap, take} from "rxjs/operators";
 import type {InjectedAccountWithMeta} from "@reef-defi/extension-inject/types";
-import {firstValueFrom} from 'rxjs';
+import {Observable, firstValueFrom} from 'rxjs';
 import {REEF_EXTENSION_IDENT} from "@reef-defi/extension-inject";
 import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-defi/evm-provider/utils";
 import {Provider} from "@reef-defi/evm-provider";
@@ -109,6 +109,10 @@ export const innitApi = (signingKey: Signer) => {
         isValidEvmAddress: (address: string) =>  ethers.utils.isAddress(address),
 
         isValidSubstrateAddress: (address: string) => isSubstrateAddress(address),
+
+        listenBindActivity: (address: string) => {
+            return network.getLatestBlockAccountUpdates$([address])
+        }        
     };
 }
 

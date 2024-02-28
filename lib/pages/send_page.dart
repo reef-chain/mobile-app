@@ -360,7 +360,7 @@ class _SendPageState extends State<SendPage> {
       case SendStatus.LOW_REEF_NATIVE:
         return "Minimum balance 5 REEF";
       case SendStatus.EVM_NOT_BINDED:
-        return "EVM not binded";
+        return "EVM not connected";
       case SendStatus.READY:
         return "Confirm Send";
       default:
@@ -834,7 +834,7 @@ class _SendPageState extends State<SendPage> {
                     ),
                     child: Center(
                       child: Text(
-                        "Bind EVM",
+                        "Connect EVM",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,

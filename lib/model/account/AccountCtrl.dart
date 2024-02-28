@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -49,6 +50,20 @@ class AccountCtrl {
     return await _jsApi.jsPromise(
         'window.keyring.restoreJson(${jsonEncode(file)},"$password")');
   }
+
+Future<dynamic> listenBindActivity(String address) async {
+  StreamController<dynamic> controller = StreamController<dynamic>();
+
+  StreamSubscription<dynamic> subscription;
+  subscription = _jsApi.jsObservable('window.account.listenBindActivity("$address")')
+    .listen((event) {
+      controller.add(event);
+      controller.close();
+    });
+
+  return controller.stream.first;
+}
+
 
   Future<dynamic> exportAccountQr(String address, String password) async {
     return await _jsApi
