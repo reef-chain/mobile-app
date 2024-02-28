@@ -424,7 +424,7 @@ class _BindEvmState extends State<BindEvm> {
               ),
             ),
             SizedBox(width: 12),
-            Flexible(child: Text("Waiting for EVM bound to complete..."))
+            Flexible(child: Text("Connecting to EVM address ..."))
           ],
         )],
       ),
@@ -575,7 +575,7 @@ class _BindEvmState extends State<BindEvm> {
                   });
                 }
                 } catch (e) {
-                  print("boundEVM ERROORORRORO====$e");
+                  print("boundEVM ERR=$e");
                 }
               }
             },
@@ -654,13 +654,13 @@ class _BindEvmState extends State<BindEvm> {
                   state: currentStep > 1
                       ? ReefStepState.complete
                       : ReefStepState.indexed,
-                  title: Text(AppLocalizations.of(context)!.bind_transaction),
+                  title: Text(AppLocalizations.of(context)!.evm_connect_transaction),
                   content: buildBind()),
               ReefStep(
                   state: (currentStep > 2)
                       ? ReefStepState.complete
                       : ReefStepState.indexed,
-                  title: Text(AppLocalizations.of(context)!.evm_is_bound),
+                  title: Text(AppLocalizations.of(context)!.evm_is_connected),
                   content: buildBound()),
               ReefStep(
                   state: (currentStep == 3)
