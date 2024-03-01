@@ -29,6 +29,25 @@ double getBalanceValueBI(BigInt? balance, double? price) {
   return res;
 }
 
+String toHumanReadable(balance){
+  var l = balance.length;
+  var suffix = "";
+  var position = l-2;
+  if(l >= 7 && l <= 9){
+    position = l-6;
+    suffix = "M";
+  }else if(l >= 10 && l <= 12){
+    position = l-9;
+    suffix = "B";
+  }
+  else if(l >= 13 && l <= 15){
+    position = l-12;
+    suffix = "T";
+  }
+  var formattedBalance = "${balance.substring(0, position)}.${balance.substring(position, position + 2)} $suffix";
+  return formattedBalance;
+}
+
 String formatBalance(String balanceValue){
   var splittedBalance = balanceValue.split(".");
   var beforeDecimal =splittedBalance[0];
@@ -43,15 +62,8 @@ String formatBalance(String balanceValue){
   result = beforeDecimal;
 } else if (beforeDecimal.length == 6) {
   result = "${beforeDecimal.substring(0, 3)}k";
-} else if (beforeDecimal.length >= 7 && beforeDecimal.length <= 9) {
-  var position = beforeDecimal.length - 6;
-  result = "${beforeDecimal.substring(0, position)}.${beforeDecimal.substring(position, position + 2)}M";
-} else if (beforeDecimal.length >= 10 && beforeDecimal.length <= 12) {
-  var position = beforeDecimal.length - 9;
-  result = "${beforeDecimal.substring(0, position)}.${beforeDecimal.substring(position, position + 2)}B";
-} else if (beforeDecimal.length >= 13 && beforeDecimal.length <= 15) {
-  var position = beforeDecimal.length - 12;
-  result = "${beforeDecimal.substring(0, position)}.${beforeDecimal.substring(position, position + 2)}T";
+} else{
+  result = toHumanReadable(beforeDecimal);
 }
   return result;
 }
