@@ -1,8 +1,10 @@
-import {injectExtension, REEF_EXTENSION_IDENT, REEF_INJECTED_EVENT, startInjection} from "@reef-defi/extension-inject";
 import FlutterJS from "flutter-js-bridge";
 import {getDAppSendRequestFn} from "flutter-js-bridge/src/sendRequestDApp";
-import Injected from "@reef-defi/extension-base/page/Injected";
 let sendDAppMessage;
+import {extension} from '@reef-chain/util-lib'
+import type { extension as extTypes } from "@reef-chain/util-lib";
+
+const {startInjection,REEF_EXTENSION_IDENT,REEF_INJECTED_EVENT,injectExtension} = extension;
 
 startInjection(REEF_EXTENSION_IDENT);
 
@@ -24,7 +26,7 @@ async function redirectIfPhishing (): Promise<boolean>{
     return sendDAppMessage('pub(phishing.redirectIfDenied)', { url: window.location.href });
 }
 
-async function enable (origin: string): Promise<Injected> {
+async function enable (origin: string): Promise<extTypes.Injected> {
     const res = await sendDAppMessage('pub(authorize.tab)', { origin });
     if(!res){
         return;
