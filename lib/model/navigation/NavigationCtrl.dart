@@ -61,7 +61,7 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text("Send Tokens",
+                title: Text(AppLocalizations.of(context)!.send_tokens,
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w500,
                       fontSize: 24,
@@ -112,7 +112,7 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: const Text("Swap Tokens"),
+                title: Text(AppLocalizations.of(context)!.swap_tokens),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
               body: Padding(

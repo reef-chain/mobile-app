@@ -159,5 +159,7 @@
   "changes_recorded":"Changes recorded",
   "evm_connect_transaction":"EVM connect transaction",
   "evm_is_connected":"EVM is connected",
-  "transaction_info":"Transaction Info"
+  "transaction_info":"Transaction Info",
+  "send_tokens":"Send Tokens",
+  "swap_tokens":"Swap Tokens"
 }
