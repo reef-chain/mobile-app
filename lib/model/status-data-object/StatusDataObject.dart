@@ -68,6 +68,12 @@ ParseListFn<StatusDataObject<T>> getParsableListFn<T>(ParseFn<T> fn) {
   return parsableFn;
 }
 
+// helper function to return plural in error 
+String getPlural(String singular){
+  if(singular == "Activity")return "Activities";
+  return singular.padRight(2,'s');
+}
+
 String? getFdmListMessage(
     StatusDataObject<List> list, String itemName, String loading) {
   String? message;
@@ -78,7 +84,7 @@ String? getFdmListMessage(
     message = '${loading} ${itemName}...';
   }
   if (list.hasStatus(StatusCode.error)) {
-    message = 'Error ${loading} ${itemName}s (${list.statusList[0].message})';
+    message = 'Error ${loading} ${getPlural(itemName)} (${list.statusList[0].message})';
   }
   return message;
 }
