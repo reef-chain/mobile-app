@@ -88,7 +88,19 @@ class _ExportQrAccountState extends State<ExportQrAccount> {
       child: Column(
         children: [
           if (data != null)
-            GenerateQrJsonValue(type: ReefQrCodeType.accountJson, data: data!),
+            Column(
+              children: [
+                Text("Scan with Reef App on another device to import.",style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Styles.textColor
+                ),),
+                Gap(4.0),
+                GenerateQrJsonValue(type: ReefQrCodeType.accountJson, data: data!),
+                
+              ],
+            ),
+            
           if (!_isLoading && data == null)
             Column(
               children: [
