@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:intl/intl.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 
@@ -25,6 +27,47 @@ double getBalanceValueBI(BigInt? balance, double? price) {
           BigInt.from(10).pow(decimalPlaces)) /
       BigInt.from(10).pow(18).toDouble();
   return res;
+}
+
+String formatBalance(String balanceValue){
+  var splittedBalance = balanceValue.split(".");
+  var beforeDecimal ="2312320";
+  var afterDecimal = splittedBalance[1];
+
+  var afterDecimalRoundedOff = afterDecimal.substring(0,2);
+
+  var result = "";
+  switch (beforeDecimal.length) {
+    case 1: // 0 - 9
+      result = "$beforeDecimal.$afterDecimalRoundedOff";
+      break;
+    case 2: // 10 - 99
+    case 3: // 100 - 999
+      result = beforeDecimal;
+      break;
+    case 4: // 1k - 9.999k
+    case 5: // 10k to 99.999k
+      var position = beforeDecimal.length - 3;
+      result = "${beforeDecimal.substring(0,position)},${beforeDecimal.substring(position)}";
+      break;
+    case 6: // 100k - 999.999k
+      result = "${beforeDecimal.substring(0,3)}k";
+      break;
+    case 7: // 1M-999M
+    case 8:
+    case 9:
+      result = "${beforeDecimal.substring(0,1)}.${beforeDecimal.substring(1,3)}M";
+      break;
+    case 10: // 1B-999.999B
+    case 11:
+    case 12:
+      result = "${beforeDecimal.substring(0,1)}.${beforeDecimal.substring(1,3)}B";
+      break;
+    default:
+      result = beforeDecimal;
+  }
+ 
+  return result;
 }
 
 extension CapitalizeExtension on String {

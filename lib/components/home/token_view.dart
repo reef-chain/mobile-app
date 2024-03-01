@@ -109,10 +109,13 @@ class _TokenViewState extends State<TokenView> {
                                     GradientText(
                                         price != 0
                                             ? '\$' +
-                                                (NumberFormat.compactLong()
-                                                    .format(getBalanceValueBI(
-                                                        balance, price))
-                                                    .toString())
+                                                // (NumberFormat.compactLong()
+                                                //     .format(getBalanceValueBI(
+                                                //         balance, price))
+                                                //     .toString())
+                                                    formatBalance(getBalanceValueBI(
+                                                        balance, price).toString())
+                                             
                                             : "NA",
                                         gradient: textGradient(),
                                         style: GoogleFonts.poppins(
