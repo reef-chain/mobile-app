@@ -243,6 +243,7 @@ class _ExportQrAccountState extends State<ExportQrAccount> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
+                      color: Styles.whiteColor
                     ),
                   );
                 }),
