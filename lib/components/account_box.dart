@@ -384,14 +384,14 @@ showAlertDialog(BuildContext context, ReefAccount signer) {
                 ),
               ),
               TextSpan(
-                text: "lose",
+                text: "permanently lose",
                 style: TextStyle(
                   color: Styles.errorColor,
                   fontSize: 16,
                 ),
               ),
               TextSpan(
-                text: " all balance for ",
+                text: " access to ",
                 style: TextStyle(
                   color: Styles.textColor,
                   fontSize: 16,
