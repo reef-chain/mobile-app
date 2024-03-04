@@ -32,15 +32,16 @@ class _HeroVideoState extends State<HeroVideo> {
 
   @override
   Widget build(BuildContext context) {
+    var fixedWidth = _controller.value.size.width<_controller.value.size.height?_controller.value.size.width:_controller.value.size.height;
     return Stack(
       children: <Widget>[
         SizedBox.expand(
           child: FittedBox(
             fit: BoxFit.cover,
             child: SizedBox(
-              width: _controller.value.size.width,
-              height: _controller.value.size.height,
-              child: VideoPlayer(_controller),
+              width: fixedWidth,
+              height:fixedWidth,
+                  child: VideoPlayer(_controller),
             ),
           ),
         ),
