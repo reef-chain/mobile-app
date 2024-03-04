@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-
-import 'package:flutter/scheduler.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -11,8 +8,6 @@ class IntroductionSlide extends StatelessWidget {
   final Color buttonColor;
   final String title;
   final Widget child;
-  final bool isFirst;
-  final bool isLast;
   final Future<void> Function()? done;
 
   const IntroductionSlide(
@@ -22,8 +17,6 @@ class IntroductionSlide extends StatelessWidget {
       required this.color,
       required this.buttonColor,
       required this.child,
-      this.isFirst = false,
-      this.isLast = false,
       this.done})
       : super(key: key);
   @override
@@ -47,33 +40,8 @@ class IntroductionSlide extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(30),
             child: Row(
-              mainAxisAlignment: isFirst
-                  ? MainAxisAlignment.end
-                  : MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:  MainAxisAlignment.end,
               children: [
-                if (!isFirst)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: TextButton(
-                      style: ButtonStyle(
-                          foregroundColor: MaterialStateProperty.resolveWith(
-                              (states) => buttonColor)),
-                      onPressed: isFirst
-                          ? null
-                          : () {
-                              liquidCarouselKey.currentState?.swipeXPrevious();
-                            },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 0),
-                        child: Text(AppLocalizations.of(context)!.previous,
-                            style: TextStyle(
-                              fontSize: 16,
-                              letterSpacing: .8,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ),
-                    ),
-                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: TextButton(
@@ -89,9 +57,7 @@ class IntroductionSlide extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 0),
                       child: Text(
-                          isLast
-                              ? AppLocalizations.of(context)!.done
-                              : AppLocalizations.of(context)!.next,
+                          AppLocalizations.of(context)!.next,
                           style: const TextStyle(
                             fontSize: 16,
                             letterSpacing: .8,
