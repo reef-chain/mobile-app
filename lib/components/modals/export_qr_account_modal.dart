@@ -90,7 +90,7 @@ class _ExportQrAccountState extends State<ExportQrAccount> {
           if (data != null)
             Column(
               children: [
-                Text("Scan with Reef App on another device to import.",style: TextStyle(
+                Text(AppLocalizations.of(context)!.scan_with_reef_app,style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Styles.textColor
