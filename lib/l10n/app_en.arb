@@ -159,4 +159,9 @@
   "changes_recorded":"Changes recorded",
   "permanently_lose":"permanently lose",
   "access_to":"access to"
+  "evm_connect_transaction":"EVM connect transaction",
+  "evm_is_connected":"EVM is connected",
+  "transaction_info":"Transaction Info",
+  "send_tokens":"Send Tokens",
+  "swap_tokens":"Swap Tokens"
 }
