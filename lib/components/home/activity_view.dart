@@ -204,7 +204,7 @@ class _ActivityViewState extends State<ActivityView> {
       String? message = getFdmListMessage(
           txHistory,
           AppLocalizations.of(context)!.activity,
-          AppLocalizations.of(context)!.loading);
+          AppLocalizations.of(context)!.loading,context);
 
       return SliverList(
         delegate: SliverChildListDelegate([
