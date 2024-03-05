@@ -384,14 +384,14 @@ showAlertDialog(BuildContext context, ReefAccount signer) {
                 ),
               ),
               TextSpan(
-                text: "permanently lose",
+                text: AppLocalizations.of(context)!.permanently_lose,
                 style: TextStyle(
                   color: Styles.errorColor,
                   fontSize: 16,
                 ),
               ),
               TextSpan(
-                text: " access to ",
+                text: " ${AppLocalizations.of(context)!.access_to} ",
                 style: TextStyle(
                   color: Styles.textColor,
                   fontSize: 16,
