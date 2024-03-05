@@ -158,4 +158,9 @@
   "insufficient_funds_fill_up":"Insufficient Funds! Please fill up your Reef Wallet",
   "changes_recorded":"Changes recorded",
   "activities":"Activities"
+  "evm_connect_transaction":"EVM connect transaction",
+  "evm_is_connected":"EVM is connected",
+  "transaction_info":"Transaction Info",
+  "send_tokens":"Send Tokens",
+  "swap_tokens":"Swap Tokens"
 }
