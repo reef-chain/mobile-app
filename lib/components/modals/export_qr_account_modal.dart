@@ -88,7 +88,19 @@ class _ExportQrAccountState extends State<ExportQrAccount> {
       child: Column(
         children: [
           if (data != null)
-            GenerateQrJsonValue(type: ReefQrCodeType.accountJson, data: data!),
+            Column(
+              children: [
+                Text(AppLocalizations.of(context)!.scan_with_reef_app,style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Styles.textColor
+                ),),
+                Gap(4.0),
+                GenerateQrJsonValue(type: ReefQrCodeType.accountJson, data: data!),
+                
+              ],
+            ),
+            
           if (!_isLoading && data == null)
             Column(
               children: [
@@ -243,6 +255,7 @@ class _ExportQrAccountState extends State<ExportQrAccount> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
+                      color: _isButtonEnabled?Styles.whiteColor:null
                     ),
                   );
                 }),
