@@ -9,8 +9,6 @@
     "@polkadot/util-crypto": "^7.8.2",
     "@popperjs/core": "^2.11.5",
     "@reef-chain/util-lib": "^2.4.6",
-    "@reef-defi/extension-base": "^1.0.22",
-    "@reef-defi/extension-dapp": "^1.0.22",
     "crypto-browserify": "^3.12.0",
     "esbuild": "^0.14.42",
     "ethers": "^5.6.9",

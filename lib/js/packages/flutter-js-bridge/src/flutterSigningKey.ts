@@ -1,6 +1,6 @@
 import FlutterJS from "flutter-js-bridge";
 import {getSignatureSendRequest} from "./sendRequestSignature";
-import Signer from "@reef-defi/extension-base/page/Signer";
+import Signer from "reef-mobile-js/src/jsApi/background/Signer";
 
 let signingKey;
 

@@ -1,5 +1,5 @@
 import {FlutterJS} from "./FlutterJS";
-import {FlutterConnector, Handler} from "./FlutterConnector";
+import {FlutterConnector} from "./FlutterConnector";
 import dAppResponseMsgHandler from "./dappFlutterResponseHandler";
 
 let dAppSendRequestFn;

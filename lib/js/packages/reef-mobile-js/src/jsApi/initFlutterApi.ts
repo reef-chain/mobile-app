@@ -7,8 +7,8 @@ import * as utilsApi from "./utilsApi";
 import * as metadataApi from "./metadataApi";
 import {reefState, network} from "@reef-chain/util-lib";
 import {FlutterJS} from "flutter-js-bridge/src/FlutterJS";
-import type {InjectedAccountWithMeta} from "@reef-defi/extension-inject/types";
-import Signer from "@reef-defi/extension-base/page/Signer";
+import {InjectedAccountWithMeta} from '@reef-chain/util-lib/dist/dts/extension'
+import Signer from "./background/Signer";
 import {getSignatureSendRequest} from "flutter-js-bridge/src/sendRequestSignature";
 
 const {AVAILABLE_NETWORKS } = network;

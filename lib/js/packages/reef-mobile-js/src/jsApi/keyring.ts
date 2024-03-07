@@ -7,11 +7,10 @@ import {
     encodeAddress,
     cryptoWaitReady,
 } from "@reef-defi/util-crypto";
-import { KeypairType } from "@reef-defi/util-crypto/types";
-import { KeyringPair } from "@reef-defi/keyring/types";
+import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { KeyringPair } from '@polkadot/keyring/types';
 import { polkadotIcon } from "@polkadot/ui-shared";
 import {keyring as kr} from '@polkadot/ui-keyring';
-import { RequestAccountExport , ResponseAccountExport} from "./background/types";
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 
 const CRYPTO_TYPE: KeypairType = "sr25519";

@@ -2,7 +2,7 @@ import { graphql, network, reefState, signatureUtils, tokenUtil} from '@reef-cha
 import {debounceTime, map, shareReplay, startWith, switchMap, take} from "rxjs/operators";
 import {combineLatest, firstValueFrom, Observable, of} from "rxjs";
 import {fetchTokenData} from './utils/tokenUtils';
-import {Provider} from "@reef-defi/evm-provider";
+import {Provider} from "@reef-chain/evm-provider";
 import {isAscii, u8aToString, u8aUnwrapBytes} from '@reef-defi/util';
 import {ERC20} from "./abi/ERC20";
 import { fetchTxInfo } from './txInfoApi';

@@ -1,12 +1,12 @@
 import {AddressName, getAccountSigner, ReefAccount, reefState, addressUtils, network} from '@reef-chain/util-lib';
 import {combineLatest, map, switchMap, take} from "rxjs/operators";
-import type {InjectedAccountWithMeta} from "@reef-defi/extension-inject/types";
 import {firstValueFrom} from 'rxjs';
 import { extension } from '@reef-chain/util-lib';
-import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-defi/evm-provider/utils";
-import {Provider} from "@reef-defi/evm-provider";
-import Signer from "@reef-defi/extension-base/page/Signer";
+import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-chain/evm-provider/utils";
+import {Provider} from "@reef-chain/evm-provider";
+import Signer from "./background/Signer";
 import {ethers} from 'ethers';
+import type { InjectedAccountWithMeta } from '@reef-chain/util-lib/dist/dts/extension';
 
 const {REEF_EXTENSION_IDENT} = extension;
 
