@@ -6,7 +6,7 @@ import {
     mnemonicValidate,
     encodeAddress,
     cryptoWaitReady,
-} from "@reef-defi/util-crypto";
+} from "@polkadot/util-crypto";
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import { polkadotIcon } from "@polkadot/ui-shared";
