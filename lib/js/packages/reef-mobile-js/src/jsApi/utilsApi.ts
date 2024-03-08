@@ -3,7 +3,7 @@ import {debounceTime, map, shareReplay, startWith, switchMap, take} from "rxjs/o
 import {combineLatest, firstValueFrom, Observable, of} from "rxjs";
 import {fetchTokenData} from './utils/tokenUtils';
 import {Provider} from "@reef-chain/evm-provider";
-import {isAscii, u8aToString, u8aUnwrapBytes} from '@reef-defi/util';
+import {isAscii, u8aToString, u8aUnwrapBytes} from '@polkadot/util';
 import {ERC20} from "./abi/ERC20";
 import { fetchTxInfo } from './txInfoApi';
 
