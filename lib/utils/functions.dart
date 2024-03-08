@@ -48,26 +48,6 @@ String toHumanReadable(balance){
   return formattedBalance;
 }
 
-String formatBalance(String balanceValue){
-  var splittedBalance = balanceValue.split(".");
-  var beforeDecimal =splittedBalance[0];
-  var afterDecimal = splittedBalance[1];
-
-  var afterDecimalRoundedOff = afterDecimal.substring(0,2);
-
-  var result = "";
-  if (beforeDecimal.length == 1) {
-  result = "${beforeDecimal}.${afterDecimalRoundedOff}";
-} else if (beforeDecimal.length >= 2 && beforeDecimal.length <= 5) {
-  result = beforeDecimal;
-} else if (beforeDecimal.length == 6) {
-  result = "${beforeDecimal.substring(0, 3)}k";
-} else{
-  result = toHumanReadable(beforeDecimal);
-}
-  return result;
-}
-
 extension CapitalizeExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
