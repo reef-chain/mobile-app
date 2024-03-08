@@ -8,8 +8,16 @@
     "@polkadot/wasm-crypto": "4.6.1"
   },
   "scripts": {
-    "build:clean": "rm -rf node_modules && rm -f yarn.lock&&yarn install&&yarn start0",
+    "build:clean": "yarn clean0&&yarn clean1&&yarn clean2&&yarn clean&&yarn install&&yarn build0&&yarn build1&&yarn build2",
+    "start0:clean": "yarn clean&&yarn clean0&&yarn install&&yarn start0",
     "start0": "yarn --cwd ./packages/reef-mobile-js start",
-    "start1": "yarn --cwd ./packages/dApp-js start"
+    "start1": "yarn --cwd ./packages/dApp-js start",
+    "clean": "rm -rf node_modules && rm -f yarn.lock",
+    "clean1": "yarn --cwd ./packages/dApp-js clean",
+    "clean2": "yarn --cwd ./packages/flutter-js-bridge clean",
+    "clean0": "yarn --cwd ./packages/reef-mobile-js clean",
+    "build0": "yarn --cwd ./packages/reef-mobile-js build",
+    "build1": "yarn --cwd ./packages/dApp-js build",
+    "build2": "yarn --cwd ./packages/flutter-js-bridge build"
   }
 }
