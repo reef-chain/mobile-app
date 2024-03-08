@@ -249,7 +249,7 @@ class _NFTViewState extends State<NFTView> {
       String? message = getFdmListMessage(
           ReefAppState.instance.model.tokens.selectedNFTs,
           AppLocalizations.of(context)!.nfts,
-          AppLocalizations.of(context)!.loading);
+          AppLocalizations.of(context)!.loading,context);
 
       return MultiSliver(children: [
         if (message != null)

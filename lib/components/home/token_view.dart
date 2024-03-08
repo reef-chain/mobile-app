@@ -226,7 +226,7 @@ class _TokenViewState extends State<TokenView> {
         String? message = getFdmListMessage(
             selectedERC20s,
             AppLocalizations.of(context)!.balance,
-            AppLocalizations.of(context)!.loading);
+            AppLocalizations.of(context)!.loading,context);
 
         return MultiSliver(
           pushPinnedChildren: false,
