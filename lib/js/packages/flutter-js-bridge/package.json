@@ -17,6 +17,7 @@
     "esbuild": "^0.14.42"
   },
   "scripts": {
+    "clean": "rm -rf node_modules && rm -rf dist",
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --tsconfig=tsconfig.json",
     "start": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --watch --tsconfig=tsconfig.json"
   }
