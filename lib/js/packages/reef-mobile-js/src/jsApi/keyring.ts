@@ -1,6 +1,6 @@
 import { u8aToHex , hexToU8a } from "@polkadot/util";
 import { naclKeypairFromSeed  } from "@polkadot/util-crypto";
-import { Keyring as ReefKeyring } from "@reef-defi/keyring";
+import { Keyring as ReefKeyring } from "./keyring/keyring";
 import {
     mnemonicGenerate,
     mnemonicValidate,
