@@ -57,7 +57,7 @@ class AccountCtrl {
     return await _jsApi.jsPromise(
         'window.keyring.formatBalance("$value",$price)');
         } catch (e) {
-          print(e);
+          print('window.keyring.formatBalance ERR=$e');
           return "";
         }
   }
