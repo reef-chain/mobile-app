@@ -3,8 +3,8 @@ import {map, switchMap, take, withLatestFrom} from "rxjs/operators";
 import {firstValueFrom, of} from "rxjs";
 import {stringToHex} from "@polkadot/util";
 import type {SignerPayloadJSON} from "@polkadot/types/types";
-import type {HexString} from "@reef-defi/util/types";
-import Signer from "@reef-defi/extension-base/page/Signer";
+import type { HexString } from '@polkadot/util/types';
+import Signer from "reef-mobile-js/src/jsApi/background/Signer";
 
 export const findAccount = (signers: ReefAccount[], address: string) => {
     return signers.find(s => s.address === address);

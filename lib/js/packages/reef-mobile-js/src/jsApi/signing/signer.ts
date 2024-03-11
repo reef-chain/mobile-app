@@ -1,8 +1,7 @@
-import { u8aToHex } from "@polkadot/util";
-import { wrapBytes } from '@reef-defi/extension-dapp/wrapBytes';
+import { u8aToHex,u8aWrapBytes } from "@polkadot/util";
 import { TypeRegistry } from '@polkadot/types';
 import Keyring from '../keyring';
-import { KeyringPair, KeyringPair$Json } from '@polkadot/keyring/types';
+import { KeyringPair } from '@polkadot/keyring/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 
 async function signPayload(mnemonic: string, payload: SignerPayloadJSON): Promise<string> {
@@ -63,7 +62,7 @@ async function signRaw(mnemonic: any, message: string): Promise<string> {
     pair = await Keyring.keyPairFromMnemonic(mnemonic);
   }
 
-  return u8aToHex(pair.sign(wrapBytes(message)));
+  return u8aToHex(pair.sign(u8aWrapBytes(message)));
 }
 
 export default {

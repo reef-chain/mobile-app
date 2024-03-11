@@ -1,10 +1,8 @@
 import { Contract } from "ethers";
-import { Signer as EvmProviderSigner, Provider} from "@reef-defi/evm-provider";
+import { Signer as EvmProviderSigner, Provider} from "@reef-chain/evm-provider";
 import { ERC20 } from "../abi/ERC20";
-import { gql } from '@apollo/client';
 import {graphql, tokenUtil,} from "@reef-chain/util-lib";
 import { getPoolReserves } from "./poolUtils";
-import {reefTokenWithAmount} from "../../../../../../../../reef-util-lib/lib/token";
 import {firstValueFrom} from "rxjs";
 
 export const getREEF20Contract = async (address: string, signerOrProvider: EvmProviderSigner): Promise<Contract> => {
