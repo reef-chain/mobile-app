@@ -29,25 +29,6 @@ double getBalanceValueBI(BigInt? balance, double? price) {
   return res;
 }
 
-String toHumanReadable(balance){
-  var l = balance.length;
-  var suffix = "";
-  var position = l-2;
-  if(l >= 7 && l <= 9){
-    position = l-6;
-    suffix = "M";
-  }else if(l >= 10 && l <= 12){
-    position = l-9;
-    suffix = "B";
-  }
-  else if(l >= 13 && l <= 15){
-    position = l-12;
-    suffix = "T";
-  }
-  var formattedBalance = "${balance.substring(0, position)}.${balance.substring(position, position + 2)} $suffix";
-  return formattedBalance;
-}
-
 extension CapitalizeExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
