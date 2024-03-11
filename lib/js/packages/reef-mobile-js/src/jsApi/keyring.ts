@@ -12,6 +12,7 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import { polkadotIcon } from "@polkadot/ui-shared";
 import {keyring as kr} from '@polkadot/ui-keyring';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
+import {balanceUtils} from "@reef-chain/util-lib";
 
 const CRYPTO_TYPE: KeypairType = "sr25519";
 const SS58_FORMAT = 42;
@@ -198,6 +199,16 @@ function changeAccountPassword (address:string, newPass:string, oldPass:string )
     return true;
   }
 
+
+function formatBalance(value:string,price:number): string  {
+    try {
+        return balanceUtils.formatDisplayBalance(value,4,{
+            price:price
+        })
+    } catch (error) {
+        return "";
+    }
+}
 export default {
     initWasm,
     generate,
@@ -209,5 +220,6 @@ export default {
     checkKeyValidity,
     krFromJson,
     changeAccountPassword,
-    accountsCreateSuri
+    accountsCreateSuri,
+    formatBalance
 };

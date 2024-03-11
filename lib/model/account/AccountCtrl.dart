@@ -51,6 +51,17 @@ class AccountCtrl {
         'window.keyring.restoreJson(${jsonEncode(file)},"$password")');
   }
 
+  Future<String> formatBalance(
+      String value, double price) async {
+        try {   
+    return await _jsApi.jsPromise(
+        'window.keyring.formatBalance("$value",$price)');
+        } catch (e) {
+          print('window.keyring.formatBalance ERR=$e');
+          return "";
+        }
+  }
+
 Future<dynamic> listenBindActivity(String address) async {
   StreamController<dynamic> controller = StreamController<dynamic>();
 

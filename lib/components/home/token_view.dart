@@ -105,24 +105,28 @@ class _TokenViewState extends State<TokenView> {
                                 innerPadding: 2,
                               )
                             : Observer(builder: (context) {
-                                return BlurableContent(
-                                    GradientText(
-                                        price != 0
-                                            ? '\$' +
-                                                (NumberFormat.compactLong()
-                                                    .format(getBalanceValueBI(
-                                                        balance, price))
-                                                    .toString())
-                                            : "NA",
-                                        gradient: textGradient(),
-                                        style: GoogleFonts.poppins(
-                                          color: Styles.textColor,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w900,
-                                        )),
-                                    ReefAppState.instance.model.appConfig
-                                        .displayBalance);
-                              }),
+  return FutureBuilder<String>(
+    future: ReefAppState.instance.accountCtrl.formatBalance(balance.toString(), price),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text("");
+      } else {
+        return BlurableContent(
+          GradientText(
+            price != 0 ? (snapshot.data ?? "") : "NA",
+            gradient: textGradient(),
+            style: GoogleFonts.poppins(
+              color: Styles.textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          ReefAppState.instance.model.appConfig.displayBalance,
+        );
+      }
+    },
+  );
+}),
                         Observer(builder: (context) {
                           return BlurableContent(
                               Text(
