@@ -5,9 +5,6 @@
       "crypto": [
         "../../node_modules/crypto-browserify"
       ],
-      "@reef-defi/extension-inject": [
-        "../../node_modules/@reef-defi/extension-inject"
-      ]
     },
     "lib": [
       "dom",

@@ -1,6 +1,5 @@
 import {from, Observable} from "rxjs";
-import {MessageTypes} from "@reef-defi/extension-base/background/types";
-
+import type {MessageTypes} from "reef-mobile-js/src/jsApi/background/types";
 export class FlutterJS {
 
     REEF_MOBILE_CHANNEL_NAME: string;

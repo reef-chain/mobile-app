@@ -1,17 +1,16 @@
 import { u8aToHex , hexToU8a } from "@polkadot/util";
 import { naclKeypairFromSeed  } from "@polkadot/util-crypto";
-import { Keyring as ReefKeyring } from "@reef-defi/keyring";
+import { Keyring as ReefKeyring } from "./keyring/keyring";
 import {
     mnemonicGenerate,
     mnemonicValidate,
     encodeAddress,
     cryptoWaitReady,
-} from "@reef-defi/util-crypto";
-import { KeypairType } from "@reef-defi/util-crypto/types";
-import { KeyringPair } from "@reef-defi/keyring/types";
+} from "@polkadot/util-crypto";
+import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { KeyringPair } from '@polkadot/keyring/types';
 import { polkadotIcon } from "@polkadot/ui-shared";
 import {keyring as kr} from '@polkadot/ui-keyring';
-import { RequestAccountExport , ResponseAccountExport} from "./background/types";
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import {balanceUtils} from "@reef-chain/util-lib";
 
