@@ -109,6 +109,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
                       AppLocalizations.of(context)!.change_language,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
+                        color: Styles.whiteColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
