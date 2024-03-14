@@ -269,7 +269,8 @@ class _ChangePasswordState extends State<ChangePassword> {
                         return Text(
                           AppLocalizations.of(context)!.change_password,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
+                            color: Styles.whiteColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
