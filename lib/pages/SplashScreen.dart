@@ -97,7 +97,7 @@ class _SplashAppState extends State<SplashApp> {
         _isFirstLaunch = isFirstLaunch;
     });
     //if firstLaunch or debugMode set authenticated to true
-    if(isFirstLaunch ){
+    if(isFirstLaunch || kDebugMode){
       setState(() {
         _requiresAuth = false;
         _isAuthenticated = true;
