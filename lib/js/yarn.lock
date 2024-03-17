@@ -3078,10 +3078,10 @@
     blakejs "~1.2.1"
     ethers "~5.5.0"
 
-"@reef-chain/util-lib@^2.4.6":
-  version "2.4.9"
-  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.4.9.tgz#96f3d3463cefb7d814575645a6d95272a2c99f99"
-  integrity sha512-ctKLyFRcdBQn84f0wfxUbuHtX+K+CdIcWizYE8Vn5ymAs26Vk0zpN8XWItQ29UOQSbI0ZSmPb0F/Pfk/nBaJow==
+"@reef-chain/util-lib@^2.4.10", "@reef-chain/util-lib@^2.4.9":
+  version "2.4.10"
+  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.4.10.tgz#a0b256cdae32da5bab005e55f9f1c215cd49244e"
+  integrity sha512-SeGxHZCCtkDLE0CUJaFMmS6+G0UmWA2tfHfZH68a3VBS3n2S5uzTxNnDldvWTPyT3bP4ZsqDelGOw1D2uz79Jg==
   dependencies:
     "@metamask/providers" "^14.0.2"
     "@polkadot/api" "^10.11.2"

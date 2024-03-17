@@ -37,7 +37,7 @@ class NetworkCtrl {
   Stream<WsConnState?> getProviderConnLogs()=> jsApi.jsObservable('window.utils.providerConnState\$').map((event) => WsConnState.fromJson(event));
 
   Future<void> reconnectProvider() async {
-    await jsApi.jsPromise('window.utils.reconnectProvider()');
+    jsApi.jsCallVoidReturn('window.utils.reconnectProvider()');
   }
 
 }
