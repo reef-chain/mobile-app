@@ -19,6 +19,7 @@
     "clean0": "yarn --cwd ./packages/reef-mobile-js clean",
     "build0": "yarn --cwd ./packages/reef-mobile-js build",
     "build1": "yarn --cwd ./packages/dApp-js build",
-    "build2": "yarn --cwd ./packages/flutter-js-bridge build"
+    "build2": "yarn --cwd ./packages/flutter-js-bridge build",
+    "man-link": "cd ./node_modules/@reef-chain&&rm -rf util-lib&&ln -s ~/reef/util-lib ./util-lib&&cd ../.."
   }
 }

@@ -78,5 +78,14 @@ export const initApi = () => {
             switchMap(lagWhenDisconnected()),
             shareReplay(1)
         ),
+
+        reconnectProvider: () => {
+            network.reconnectProvider().then((v)=>{
+            console.log('provider reconnected=',v)
+            }).catch((e)=>{
+            console.log('reconnectProvider err=',e.message)
+            });
+        },
+
     }
 }

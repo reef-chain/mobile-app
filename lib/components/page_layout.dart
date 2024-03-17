@@ -45,11 +45,12 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async{
     if (kDebugMode) {
       print('APP STATE=$state');
     }
     if(state==AppLifecycleState.resumed) {
+      await ReefAppState.instance.networkCtrl.reconnectProvider();
       ReefAppState.instance.tokensCtrl.reload(false);
     }
   }
