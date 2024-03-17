@@ -97,7 +97,7 @@ class _SplashAppState extends State<SplashApp> {
         _isFirstLaunch = isFirstLaunch;
     });
     //if firstLaunch or debugMode set authenticated to true
-    if(isFirstLaunch || kDebugMode ){
+    if(isFirstLaunch || kDebugMode){
       setState(() {
         _requiresAuth = false;
         _isAuthenticated = true;
@@ -300,6 +300,19 @@ class _SplashAppState extends State<SplashApp> {
         _wrongPassword = false;
         _isAuthenticated = true;
       });
+    }
+    else{
+      // if password set by user , show password screen
+      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
+      if(requiresPasswordAuth){
+        setState(() {
+          _requiresAuth = true;
+          _isAuthenticated = false;
+        });
+      }else{
+      // else recursive call
+      authenticateWithBiometrics();
+      }
     }
   }
 
