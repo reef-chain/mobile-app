@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   );
                 }),
                 Observer(builder: (_) {
-                  var navigateOnAccountSwitchVal = ReefAppState
+                  var isBiometricAuthEnabled = ReefAppState
                       .instance.model.appConfig.isBiometricAuthEnabled;
 
                   return CheckboxListTile(
@@ -107,7 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       Text(AppLocalizations.of(context)!.biometric_auth,
                           style: Theme.of(context).textTheme.bodyLarge)
                     ]),
-                    value: navigateOnAccountSwitchVal,
+                    value: isBiometricAuthEnabled,
                     onChanged: (newValue) {
                       ReefAppState.instance.appConfigCtrl
                           .setBiometricAuth(newValue == true);

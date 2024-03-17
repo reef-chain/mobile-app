@@ -79,7 +79,7 @@ class _SplashAppState extends State<SplashApp> {
   return isAvailable && isDeviceSupported && isEnrolled;
 }
 
-  Future<bool> _checkRequiresAuth() async {
+  Future<bool> _checkRequiresPasswordAuth() async {
     final storedPassword =
         await ReefAppState.instance.storage.getValue(StorageKey.password.name);
     return storedPassword != null && storedPassword != "";
@@ -91,44 +91,55 @@ class _SplashAppState extends State<SplashApp> {
     return languageCode;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getLocale().then((value) => setLocale(value));
-
-    _initializeAsyncDependencies();
-    _checkIfFirstLaunch().then((value) {
-      setState(() {
-        _isFirstLaunch = value;
-      });
+  Future<void> initAuthentication() async{
+    var isFirstLaunch = await _checkIfFirstLaunch();
+    setState(() {
+        _isFirstLaunch = isFirstLaunch;
     });
-    Timer(const Duration(milliseconds: 3830), () {
-      setState(() {
-        _isGifFinished = true;
-      });
-    });
-    _passwordController.addListener(() {
-      setState(() {
-        password = _passwordController.text;
-      });
-    });
-    if (kDebugMode) {
+    //if firstLaunch or debugMode set authenticated to true
+    if(isFirstLaunch || kDebugMode){
       setState(() {
         _requiresAuth = false;
         _isAuthenticated = true;
       });
       return;
     }
-    _checkRequiresAuth().then((value) {
+    // check for bio auth
+    var supportsBioAuth = await _checkBiometricsSupport();
+    if(supportsBioAuth){
+      // check if user enabled biometrics auth
+      var hasUserEnabledBioAuth = await ReefAppState.instance.storage.getValue("biometricAuth");
+      if(hasUserEnabledBioAuth){
+        authenticateWithBiometrics();
+        setState(() {
+          _biometricsIsAvailable = true;
+        });
+        return;
+      }
+    }
+    // check for password authentication
+      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
       setState(() {
-        _requiresAuth = value;
-        _isAuthenticated = !value;
+          _requiresAuth = requiresPasswordAuth;
+          _isAuthenticated = !requiresPasswordAuth;
       });
-    });
-    _checkBiometricsSupport().then((value) {
-      if (value) authenticateWithBiometrics();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getLocale().then((value) => setLocale(value));
+
+    _initializeAsyncDependencies();
+    initAuthentication();
+    _passwordController.addListener(() {
+        setState(() {
+          password = _passwordController.text;
+        });
+      });
+    Timer(const Duration(milliseconds: 3830), () {
       setState(() {
-        _biometricsIsAvailable = value;
+        _isGifFinished = true;
       });
     });
   }
@@ -290,6 +301,19 @@ class _SplashAppState extends State<SplashApp> {
         _isAuthenticated = true;
       });
     }
+    else{
+      // if password set by user , show password screen
+      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
+      if(requiresPasswordAuth){
+        setState(() {
+          _requiresAuth = true;
+          _isAuthenticated = false;
+        });
+      }else{
+      // else recursive call
+      authenticateWithBiometrics();
+      }
+    }
   }
 
   Widget _buildAuth() {
@@ -374,10 +398,11 @@ class _SplashAppState extends State<SplashApp> {
                           authenticateWithPassword(password);
                         }
                       },
-                      child: const Text(
+                      child: Text(
                         'Send',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
+                          color: Styles.whiteColor,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
