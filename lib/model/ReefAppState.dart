@@ -81,7 +81,7 @@ class ReefAppState {
     try {
       await _initReefState(jsApi, currentNetwork);
     } catch (e){
-      this.initStatusStream.add("Error state= ${e.toString()}");
+      this.initStatusStream.add("error state= ${e.toString()}");
     }
     this.initStatusStream.add("starting config...");
     appConfigCtrl = AppConfigCtrl(storage, model.appConfig);
