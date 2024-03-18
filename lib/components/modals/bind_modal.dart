@@ -551,6 +551,7 @@ class _BindEvmState extends State<BindEvm> {
                     resolvedEvmAddress = resolvedEvmAdr;
                   });
                   if (value == null) {
+                    sendingBoundTransaction=false;
                     return;
                   } else {
                     boundComplete = true;

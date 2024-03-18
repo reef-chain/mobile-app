@@ -84,9 +84,6 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }*/
 
   void _onItemTapped(int index) async {
-    // print(index);
-    // print(bottomNavigationBarItems[index].page);
-    // print(bottomNavigationBarItems[index].label);
     ReefAppState.instance.navigationCtrl
         .navigate(bottomNavigationBarItems[index].page);
   }

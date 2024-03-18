@@ -255,7 +255,7 @@ class _SwapPageState extends State<SwapPage> {
     var res = await ReefAppState.instance.swapCtrl.swapTokens(
         signerAddress, selectedTopToken!, selectedBottomToken!, settings);
     _getPoolReserves();
-    print(res);
+    print("SWAP TOKEN RESPONSE === $res");
   }
 
   String _toAmountDisplay(String amount, int decimals) {
