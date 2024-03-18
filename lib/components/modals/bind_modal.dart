@@ -63,13 +63,34 @@ class _BindEvmState extends State<BindEvm> {
   bool sendingFundTransaction = false;
   bool sendingBoundTransaction = false;
   bool recordingChanges = false;
+  bool isReconnectingProvider = false;
 
   final FocusNode _focus = FocusNode();
   final FocusNode _focusSecond = FocusNode();
 
+  String? gqlConnState;
+  String? providerConnState;
+  StreamSubscription? providerConnStateSubs;
+
+  @override
+  void dispose() {
+    providerConnStateSubs?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+
+    providerConnStateSubs =
+        ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+      setState(() {
+        providerConnState = event != null && event.isConnected
+            ? 'connected'
+            : event?.toString();
+        isReconnectingProvider= !(event != null && event.isConnected);
+      });
+    });
 
     if (hasBalanceForBinding(widget.bindFor)) {
       currentStep = 1;
@@ -611,16 +632,35 @@ class _BindEvmState extends State<BindEvm> {
                       (currentStep == 1 && sendingBoundTransaction)) || (currentStep == 2 && recordingChanges)
                   ? const SizedBox()
                   : ElevatedButton(
-                      child: Text(
+                      child: !isReconnectingProvider
+                       ? Text(
                         details.isActive && details.currentStep >= 3
                             ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
                                 .toUpperCase()
-                            : localizations.continueButtonLabel,
+                            : providerConnState=="connected" ? localizations.continueButtonLabel:"Reconnect" ,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: Styles.whiteColor
+                          color: Styles.whiteColor,
+                          
                         ),
+                      ):Row(
+                        children: [
+                          SizedBox(
+                            width: 20.0,
+                            height: 20.0,
+                            child: CircularProgressIndicator(
+                              color: Styles.whiteColor,
+                              strokeWidth: 1.0,
+                            ),
+                          ),
+                          Gap(12.0),
+                          Text("Reconnecting Provider",style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Styles.whiteColor
+                        ),),
+                        ],
                       ),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -633,7 +673,14 @@ class _BindEvmState extends State<BindEvm> {
                             vertical: 16, horizontal: 32),
                       ),
                       onPressed: () async {
-                        details.onStepContinue!();
+                        if(providerConnState=="connected"){
+                          details.onStepContinue!();
+                        }else{
+                        await ReefAppState.instance.networkCtrl.reconnectProvider();
+                        setState(() {
+                          isReconnectingProvider=true;
+                        });
+                        }
                       },
                     );
             },

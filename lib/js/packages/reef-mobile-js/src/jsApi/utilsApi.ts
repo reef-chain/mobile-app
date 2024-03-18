@@ -79,12 +79,13 @@ export const initApi = () => {
             shareReplay(1)
         ),
 
-        reconnectProvider: () => {
-            network.reconnectProvider().then((v)=>{
-            console.log('provider reconnected=',v)
-            }).catch((e)=>{
-            console.log('reconnectProvider err=',e.message)
-            });
+        reconnectProvider: async() => {
+            try {
+                const providerConnection = await network.reconnectProvider();
+                console.log("provider connected [reconnectProvider] = ",providerConnection);
+            } catch (error) {
+                console.log("reconnectProvider err=",error);
+            }
         },
 
     }

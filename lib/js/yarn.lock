@@ -8148,9 +8148,9 @@ mqtt-packet@^9.0.0:
     process-nextick-args "^2.0.1"
 
 mqtt@^5.2.0, mqtt@^5.3.5:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-5.4.0.tgz#c3ebbe62b510be10b090ffe61a2f32f8536a4ea0"
-  integrity sha512-vU03lqX+IpMuHlPSRNl3+HSMNrz5vN5yyZ6wWyv23mDQj/1Lm1JlAT4pvQCfZq9jvsnmSwMqSkB5mm2WUOJw6Q==
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-5.5.0.tgz#a1c76592f47ce348fca8d11f0240824c829213d9"
+  integrity sha512-8WGQpjEzABcCh/UwLj7XaEoLsSLHJrJK3YLu57fJoLUBdz6zPGFdxWK3i1YYdPqKDu0sU6YHt+tly/qdLsLiyg==
   dependencies:
     "@types/readable-stream" "^4.0.5"
     "@types/ws" "^8.5.9"
