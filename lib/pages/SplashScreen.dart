@@ -26,7 +26,9 @@ typedef WidgetCallback = Widget Function();
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class SplashApp extends StatefulWidget {
-  final JsApiService reefJsApiService = JsApiService.reefAppJsApi();
+  final JsApiService reefJsApiService = JsApiService.reefAppJsApi(onErrorCb: (){
+    print('JS CONNECTION ERRORORRRRR - RESET');
+  });
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
@@ -127,7 +129,6 @@ class _SplashAppState extends State<SplashApp> {
 
   @override
   void initState() {
-    super.initState();
     getLocale().then((value) => setLocale(value));
 
     _initializeAsyncDependencies();
@@ -142,6 +143,8 @@ class _SplashAppState extends State<SplashApp> {
         _isGifFinished = true;
       });
     });
+
+    super.initState();
   }
 
   @override
