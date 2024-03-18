@@ -20,7 +20,6 @@ class _HeroVideoState extends State<HeroVideo> {
       await Future.delayed(Duration(milliseconds: 1000));
       _controller.play();
     });
-
     super.initState();
   }
 
@@ -45,10 +44,6 @@ class _HeroVideoState extends State<HeroVideo> {
             ),
           ),
         ),
-        ElevatedButton(onPressed: (){
-          print('presss');
-          _controller.play();
-        }, child: Text("tttt"))
         //FURTHER IMPLEMENTATION
       ],
     );
