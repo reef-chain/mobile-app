@@ -26,7 +26,9 @@ typedef WidgetCallback = Widget Function();
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class SplashApp extends StatefulWidget {
-  final JsApiService reefJsApiService = JsApiService.reefAppJsApi();
+  final JsApiService reefJsApiService = JsApiService.reefAppJsApi(onErrorCb: (){
+    print('JS CONNECTION ERRORORRRRR - RESET');
+  });
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
@@ -65,7 +67,7 @@ class _SplashAppState extends State<SplashApp> {
   bool? _isFirstLaunch;
   Widget? onInitWidget;
 
-  var loaded = false;
+  var appReady = false;
   final TextEditingController _passwordController = TextEditingController();
   String password = "";
   static final LocalAuthentication localAuth = LocalAuthentication();
@@ -127,7 +129,6 @@ class _SplashAppState extends State<SplashApp> {
 
   @override
   void initState() {
-    super.initState();
     getLocale().then((value) => setLocale(value));
 
     _initializeAsyncDependencies();
@@ -142,6 +143,8 @@ class _SplashAppState extends State<SplashApp> {
         _isGifFinished = true;
       });
     });
+
+    super.initState();
   }
 
   @override
@@ -160,7 +163,7 @@ class _SplashAppState extends State<SplashApp> {
     final storageService = StorageService();
     await ReefAppState.instance.init(widget.reefJsApiService, storageService);
     setState(() {
-      loaded = true;
+      appReady = true;
     });
   }
 
@@ -199,7 +202,7 @@ class _SplashAppState extends State<SplashApp> {
 
     return Stack(children: <Widget>[
       widget.reefJsApiService.widget,
-      if ((loaded == false || _isAuthenticated == false) ||
+      if ( (appReady == false || _isAuthenticated == false) ||
           _isFirstLaunch == null)
         Stack(
           children: [
@@ -231,18 +234,37 @@ class _SplashAppState extends State<SplashApp> {
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOutCirc,
-                opacity: _isGifFinished && _isAuthenticated ? 1 : 0,
+                opacity: 1,//_isGifFinished && _isAuthenticated ? 1 : 0,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Loading App",
+                      "Starting app",
                       style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w400,
                           fontSize: 16,
                           color: Styles.textLightColor,
                           decoration: TextDecoration.none),
                     ),
+                    const Gap(4),
+                    StreamBuilder<String>(stream: ReefAppState.instance.initStatusStream.stream,
+                        initialData: ".",
+                        builder: (BuildContext context,AsyncSnapshot<String> snapshot) {
+                          if(snapshot.hasData) {
+                            return Text(snapshot.data??"...",
+                              style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16,
+                                  color: Styles.textLightColor,
+                                  decoration: TextDecoration.none),);
+                          }
+                          return Text("..",
+                            style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Styles.textLightColor,
+                                decoration: TextDecoration.none),);
+                    }),
                     const Gap(4),
                     const SizedBox(
                       height: 12,
@@ -259,7 +281,7 @@ class _SplashAppState extends State<SplashApp> {
           ],
         )
       else if (_isFirstLaunch == true &&
-          loaded == true &&
+          appReady == true &&
           _isAuthenticated == true)
         IntroductionPage(
           heroVideo: widget.heroVideo,

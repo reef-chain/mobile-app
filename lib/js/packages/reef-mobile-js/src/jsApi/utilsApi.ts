@@ -79,6 +79,11 @@ export const initApi = () => {
             shareReplay(1)
         ),
 
+        indexerConnState$: reefState.getIndexerConnState$().pipe(
+            map(v=>!!v.isConnected),
+            shareReplay(1)
+        ),
+
         reconnectProvider: () => {
             network.reconnectProvider().then((v)=>{
             console.log('provider reconnected=',v)
