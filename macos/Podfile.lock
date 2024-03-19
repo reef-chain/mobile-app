@@ -1,5 +1,5 @@
 PODS:
-  - flutter_secure_storage_macos (3.3.1):
+  - flutter_secure_storage_macos (6.1.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - FMDB (2.7.5):
@@ -44,7 +44,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
-  flutter_secure_storage_macos: 6ceee8fbc7f484553ad17f79361b556259df89aa
+  flutter_secure_storage_macos: d56e2d218c1130b262bef8b4a7d64f88d7f9c9ea
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
@@ -54,4 +54,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2

@@ -16,6 +16,7 @@ import 'package:reef_mobile_app/pages/swap_page.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
+import 'package:restart_app/restart_app.dart';
 
 import 'sign/SignatureContentToggle.dart';
 
@@ -50,8 +51,9 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
       print('APP STATE=$state');
     }
     if(state==AppLifecycleState.resumed) {
-      await ReefAppState.instance.networkCtrl.reconnectProvider();
-      ReefAppState.instance.tokensCtrl.reload(false);
+      Restart.restartApp();
+      // await ReefAppState.instance.networkCtrl.reconnectProvider();
+      // ReefAppState.instance.tokensCtrl.reload(false);
     }
   }
 
