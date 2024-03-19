@@ -30,6 +30,7 @@ class BottomNav extends StatefulWidget {
 class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   final _liquidCarouselKey = GlobalKey<LiquidCarouselState>();
   bool _swiping = false;
+  bool _fromHidden = false;
 
   @override
   void initState() {
@@ -40,18 +41,24 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async{
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (kDebugMode) {
       print('APP STATE=$state');
     }
-    if(state==AppLifecycleState.resumed) {
-      Restart.restartApp();
+    if (state == AppLifecycleState.hidden) {
+      this._fromHidden = true;
+    }
+    if (state == AppLifecycleState.resumed) {
+      if (this._fromHidden) {
+        this._fromHidden = false;
+          Restart.restartApp();
+      }
       // await ReefAppState.instance.networkCtrl.reconnectProvider();
       // ReefAppState.instance.tokensCtrl.reload(false);
     }
