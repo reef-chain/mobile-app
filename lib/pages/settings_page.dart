@@ -228,7 +228,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             }),
                         const Gap(12),
                         Text(
-                            'JS conn: ${jsConnState ?? "disconnected"}'),
+                            'JS conn: ${jsConnState ?? "getting status"}'),
                         const Gap(12),
                         Text(
                             'Indexer conn: ${indexerConnState ?? "getting indexer status"}'),

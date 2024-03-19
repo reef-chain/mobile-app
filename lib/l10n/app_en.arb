@@ -165,5 +165,6 @@
   "evm_is_connected":"EVM is connected",
   "transaction_info":"Transaction Info",
   "send_tokens":"Send Tokens",
-  "swap_tokens":"Swap Tokens"
+  "swap_tokens":"Swap Tokens",
+  "connecting":"connecting..."
 }

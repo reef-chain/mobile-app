@@ -88,6 +88,7 @@ class JsApiService {
       if(this.onJsConnectionError!=null) {
         this.onJsConnectionError!();
       }
+      throw e;
     }
     return null;
   }
