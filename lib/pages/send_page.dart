@@ -65,7 +65,6 @@ class _SendPageState extends State<SendPage> {
     super.initState();
     providerConnStateSubs =
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
-          print("anuna $event");
           if(event!=null && !event.isConnected && !isReconnectingProvider){
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
