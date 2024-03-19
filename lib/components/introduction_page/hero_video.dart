@@ -14,13 +14,12 @@ class _HeroVideoState extends State<HeroVideo> {
   @override
   void initState() {
     _controller = VideoPlayerController.asset('assets/video/hero-r-loop.mp4');
-
     _controller.setLooping(true);
-    _controller.initialize().then((_) {
+    _controller.initialize().then((_)async {
       setState(() {});
+      await Future.delayed(Duration(milliseconds: 1000));
+      _controller.play();
     });
-    _controller.play();
-
     super.initState();
   }
 

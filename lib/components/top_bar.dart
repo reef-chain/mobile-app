@@ -85,32 +85,42 @@ class AccountPill extends StatefulWidget {
 
 class _AccountPillState extends State<AccountPill> {
 var color = Styles.textColor;
-  
+var indexerConn = false;
+var providerConn = false;
+var jsConn = false;
+
   @override
   void initState() {
     ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
-      if(event != null && event.isConnected){
-        setState(() {
-          color = Styles.greenColor;
-        });
-      }else{
-        setState(() {
-          color = Styles.textColor;
-        });
-      }
+      setState(() {
+        this.providerConn = event != null && event.isConnected;
+      });
+    });
+    ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+      setState(() {
+        this.indexerConn = event != null && event==true;
+      });
+    });
+    ReefAppState.instance.metadataCtrl.getJsConnStream().listen((event) {
+      setState(() {
+        this.jsConn = event != null && event==true;
+      });
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    var isConnected = jsConn&&indexerConn&&providerConn;
+    var icon = Icon(
+      isConnected?Icons.wallet: Icons.error_outline,
+      color: isConnected?Styles.textColor:Styles.primaryAccentColor,
+    );
+    var title = isConnected?widget.title:"no connection";
     return ActionChip(
-      avatar: Icon(
-        Icons.wallet,
-        color: color,
-      ),
+      avatar: icon,
       label: Text(
-        widget.title,
+        title,
         style: GoogleFonts.spaceGrotesk(
             color: Styles.purpleColor,
             fontSize: 18,

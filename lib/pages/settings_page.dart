@@ -21,13 +21,18 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _showDeveloperSettings = false;
-  String? gqlConnState;
+  String? jsConnState;
+  String? indexerConnState;
   String? providerConnState;
+  StreamSubscription? jsConnStateSubs;
   StreamSubscription? providerConnStateSubs;
+  StreamSubscription? indexerConnStateSubs;
 
   @override
   void dispose() {
+    jsConnStateSubs?.cancel();
     providerConnStateSubs?.cancel();
+    indexerConnStateSubs?.cancel();
     super.dispose();
   }
 
@@ -37,6 +42,22 @@ class _SettingsPageState extends State<SettingsPage> {
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
       setState(() {
         providerConnState = event != null && event.isConnected
+            ? 'connected'
+            : event?.toString();
+      });
+    });
+    indexerConnStateSubs =
+        ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+      setState(() {
+        indexerConnState = event!=null && !!event
+            ? 'connected'
+            : event?.toString();
+      });
+    });
+    jsConnStateSubs =
+        ReefAppState.instance.metadataCtrl.getJsConnStream().listen((event) {
+      setState(() {
+        jsConnState = event!=null && !!event
             ? 'connected'
             : event?.toString();
       });
@@ -207,7 +228,10 @@ class _SettingsPageState extends State<SettingsPage> {
                             }),
                         const Gap(12),
                         Text(
-                            'GQL conn: ${gqlConnState ?? "getting gql status"}'),
+                            'JS conn: ${jsConnState ?? "disconnected"}'),
+                        const Gap(12),
+                        Text(
+                            'Indexer conn: ${indexerConnState ?? "getting indexer status"}'),
                         const Gap(12),
                         Text(
                             'Provider conn: ${providerConnState ?? "getting provider status"}'),

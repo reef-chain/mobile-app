@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ class ReefAppState {
   late LocaleCtrl localeCtrl;
   late AppConfigCtrl appConfigCtrl;
   late StorageCtrl storageCtrl;
+  StreamController<String> initStatusStream = StreamController<String>();
 
   ReefAppState._();
 
@@ -43,24 +45,54 @@ class ReefAppState {
 
   init(JsApiService jsApi, StorageService storage) async {
     this.storage = storage;
+    this.initStatusStream.add("starting observables...");
     await _initReefObservables(jsApi);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting network...");
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting tokens...");
     tokensCtrl = TokenCtrl(jsApi, model.tokens);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting account...");
     accountCtrl = AccountCtrl(jsApi, storage, model.accounts);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting signer...");
     signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting transfers...");
     transferCtrl = TransferCtrl(jsApi);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting swap...");
     swapCtrl = SwapCtrl(jsApi);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting metadata...");
     metadataCtrl = MetadataCtrl(jsApi);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting navigation...");
     navigationCtrl =
         NavigationCtrl(model.navigationModel, model.homeNavigationModel);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting state...");
     Network currentNetwork =
         await storage.getValue(StorageKey.network.name) == Network.testnet.name
             ? Network.testnet
             : Network.mainnet;
-    await _initReefState(jsApi, currentNetwork);
+    try {
+      await _initReefState(jsApi, currentNetwork);
+    } catch (e){
+      this.initStatusStream.add("error state= ${e.toString()}");
+    }
+    this.initStatusStream.add("starting config...");
     appConfigCtrl = AppConfigCtrl(storage, model.appConfig);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting locale...");
     localeCtrl = LocaleCtrl(storage, model.locale);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("starting storage...");
     storageCtrl = StorageCtrl(storage);
+    await Future.delayed(Duration(milliseconds: 200));
+    this.initStatusStream.add("complete");
   }
 
   _initReefState(JsApiService jsApiService, Network currentNetwork) async {

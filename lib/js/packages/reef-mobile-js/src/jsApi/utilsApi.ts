@@ -89,6 +89,9 @@ export const initApi = () => {
                 return false;
             }
         },
-
+        indexerConnState$: reefState.getIndexerConnState$().pipe(
+            map(v=>!!v.isConnected),
+            shareReplay(1)
+        )
     }
 }

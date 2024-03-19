@@ -34,6 +34,8 @@ class NetworkCtrl {
     jsApi.jsCallVoidReturn('window.utils.setSelectedNetwork(`${network.name}`)');
   }
 
+  Stream<bool?> getIndexerConnected()=> jsApi.jsObservable('window.utils.indexerConnState\$').map((event)=>event==true);
+
   Stream<WsConnState?> getProviderConnLogs()=> jsApi.jsObservable('window.utils.providerConnState\$').map((event) => WsConnState.fromJson(event));
 
   Future<bool> reconnectProvider() async {
