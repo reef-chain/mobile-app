@@ -932,7 +932,7 @@ class _SendPageState extends State<SendPage> {
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: Text("Go Back to Homepage",style: TextStyle(color: Styles.whiteColor),),
+                            child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(color: Styles.whiteColor),),
                           ),
                         )
                       ],

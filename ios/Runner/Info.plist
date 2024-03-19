@@ -58,5 +58,18 @@
 	<string>Scan code</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Select file</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+	<dict>
+		<key>CFBundleTypeRole</key>
+		<string>Editor</string>
+		<key>CFBundleURLName</key>
+		<string>com.example.reefMobileApp</string>
+		<key>CFBundleURLSchemes</key>
+		<array>
+		<string>example</string>
+		</array>
+	</dict>
+	</array>
 </dict>
 </plist>
