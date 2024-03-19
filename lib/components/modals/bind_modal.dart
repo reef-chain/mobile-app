@@ -68,7 +68,6 @@ class _BindEvmState extends State<BindEvm> {
   final FocusNode _focus = FocusNode();
   final FocusNode _focusSecond = FocusNode();
 
-  String? gqlConnState;
   String? providerConnState;
   StreamSubscription? providerConnStateSubs;
 
@@ -84,12 +83,24 @@ class _BindEvmState extends State<BindEvm> {
 
     providerConnStateSubs =
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+          if(event!=null && !event.isConnected && !isReconnectingProvider){
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Provider not connected, Kindly reconnect!"),
+              duration: Duration(seconds:  10),
+            ),
+          );
+      }
       setState(() {
         providerConnState = event != null && event.isConnected
             ? 'connected'
             : event?.toString();
-        isReconnectingProvider= !(event != null && event.isConnected);
       });
+      if(providerConnState=="connected"){
+        setState(() {
+          isReconnectingProvider=false;
+        });
+      }
     });
 
     if (hasBalanceForBinding(widget.bindFor)) {
@@ -676,10 +687,16 @@ class _BindEvmState extends State<BindEvm> {
                         if(providerConnState=="connected"){
                           details.onStepContinue!();
                         }else{
-                        await ReefAppState.instance.networkCtrl.reconnectProvider();
                         setState(() {
                           isReconnectingProvider=true;
                         });
+                        var isProviderConnectedResponse = await ReefAppState.instance.networkCtrl.reconnectProvider();
+                        if(isProviderConnectedResponse){
+                          setState(() {
+                          isReconnectingProvider=false;
+                          providerConnState="connected";
+                        });
+                        }
                         }
                       },
                     );

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,9 +58,33 @@ class _SendPageState extends State<SendPage> {
 
   dynamic transactionData;
 
+  bool isReconnectingProvider=false;
+
   @override
   void initState() {
     super.initState();
+    providerConnStateSubs =
+        ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+          print("anuna $event");
+          if(event!=null && !event.isConnected && !isReconnectingProvider){
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Provider not connected, Kindly reconnect!"),
+              duration: Duration(seconds:  10),
+            ),
+          );
+      }
+      setState(() {
+        providerConnState = event != null && event.isConnected
+            ? 'connected'
+            : event?.toString();
+      });
+      if(providerConnState=="connected"){
+        setState(() {
+          isReconnectingProvider=false;
+        });
+      }
+        });
 
     _focus.addListener(_onFocusChange);
     _focusSecond.addListener(_onFocusSecondChange);
@@ -95,9 +121,13 @@ class _SendPageState extends State<SendPage> {
     });
   }
 
+  String? providerConnState;
+  StreamSubscription? providerConnStateSubs;
+
   @override
   void dispose() {
     super.dispose();
+    providerConnStateSubs?.cancel();
     _focus.removeListener(_onFocusChange);
     _focusSecond.removeListener(_onFocusSecondChange);
     _focus.dispose();
@@ -751,7 +781,7 @@ class _SendPageState extends State<SendPage> {
         SizedBox(
           width: double.infinity,
           child: statusValue != SendStatus.SIGNING
-              ? ElevatedButton(
+              ? providerConnState=="connected"? ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
@@ -786,6 +816,67 @@ class _SendPageState extends State<SendPage> {
                           color: (statusValue != SendStatus.READY)
                               ? const Color(0x65898e9c)
                               : Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ): ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    shadowColor: const Color(0x559d6cff),
+                    elevation: 0,
+                    backgroundColor:  const Color(0xffe6e2f1),
+                    padding: const EdgeInsets.all(0),
+                  ),
+                  onPressed: () async{
+                    setState(() {
+                      isReconnectingProvider=true;
+                    });
+                    var isProviderConnectedResponse = await ReefAppState.instance.networkCtrl.reconnectProvider();
+                     if(isProviderConnectedResponse){
+                    setState(() {
+                        isReconnectingProvider=false;
+                        providerConnState="connected";
+                    });
+                     }
+                  },
+                  child: Ink(
+                    width: double.infinity,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffe6e2f1),
+                      gradient: const LinearGradient(colors: [
+                              Color(0xffae27a5),
+                              Color(0xff742cb2),
+                            ]),
+                      borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+                    ),
+                    child: Center(
+                      child: isReconnectingProvider? Row(
+                        children: [
+                          SizedBox(
+                            width: 20.0,
+                            height: 20.0,
+                            child: CircularProgressIndicator(
+                              color: Styles.whiteColor,
+                              strokeWidth: 1.0,
+                            ),
+                          ),
+                          Gap(12.0),
+                          Text("Reconnecting Provider",style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Styles.whiteColor
+                        ),),
+                        ],
+                      ): Text(
+                       "Reconnect Provider",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
                     ),
