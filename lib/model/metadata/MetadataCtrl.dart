@@ -19,16 +19,17 @@ class MetadataCtrl {
 
   Future<bool> isJsConn() => jsApi.jsCall('window.isJsConn();').then((value) {
     if(kDebugMode) {
-      print('JS=$value');
+      print('JS CONN=$value');
     }
     return value=='true';
   });
 
-  Stream<bool> getJsConnStream() {
+  Future<Stream<bool>> getJsConnStream()async {
     if(_jsConnStream==null) {
-      this._jsConnStream = Stream.periodic(Duration(milliseconds: 5000)).asyncMap((_) =>
+      var startVal = await this.isJsConn();
+      this._jsConnStream = Stream.periodic(const Duration(milliseconds: 5000)).asyncMap((_) =>
               this.isJsConn()).onErrorReturn(false)
-              .startWith(false)
+              .startWith(startVal)
               .asBroadcastStream();
     }
     return _jsConnStream!;

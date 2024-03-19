@@ -54,14 +54,17 @@ class _SettingsPageState extends State<SettingsPage> {
             : event?.toString();
       });
     });
-    jsConnStateSubs =
-        ReefAppState.instance.metadataCtrl.getJsConnStream().listen((event) {
-      setState(() {
-        jsConnState = event!=null && !!event
-            ? 'connected'
-            : event?.toString();
-      });
+    ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
+      jsConnStateSubs =
+          jsStream.listen((event) {
+            setState(() {
+              jsConnState = event!=null && !!event
+                  ? 'connected'
+                  : event?.toString();
+            });
+          });
     });
+
     super.initState();
   }
 
@@ -216,6 +219,28 @@ class _SettingsPageState extends State<SettingsPage> {
                     padding: const EdgeInsets.only(left: 12.0, bottom: 4.0),
                     child: Column(
                       children: [
+
+                        const Gap(12),
+                        MaterialButton(
+                          materialTapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
+                          onPressed: () => showSwitchNetworkModal(
+                              AppLocalizations.of(context)!.switch_network,
+                              context: context),
+                          padding: const EdgeInsets.all(2),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.network_wifi_1_bar_rounded,
+                                color: Styles.textLightColor,
+                                size: 22,
+                              ),
+                              const Gap(8),
+                              Text(AppLocalizations.of(context)!.switch_network,
+                                  style: Theme.of(context).textTheme.bodyLarge),
+                            ],
+                          ),
+                        ),
                         FutureBuilder<dynamic>(
                             future: ReefAppState.instance.metadataCtrl
                                 .getJsVersions(),
@@ -235,27 +260,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         const Gap(12),
                         Text(
                             'Provider conn: ${providerConnState ?? "getting provider status"}'),
-                        const Gap(12),
-                        MaterialButton(
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          onPressed: () => showSwitchNetworkModal(
-                              AppLocalizations.of(context)!.switch_network,
-                              context: context),
-                          padding: const EdgeInsets.all(2),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.network_wifi_1_bar_rounded,
-                                color: Styles.textLightColor,
-                                size: 22,
-                              ),
-                              const Gap(8),
-                              Text(AppLocalizations.of(context)!.switch_network,
-                                  style: Theme.of(context).textTheme.bodyLarge),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
