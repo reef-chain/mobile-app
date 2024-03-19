@@ -83,7 +83,6 @@ String? getFdmListMessage(
     message = 'No ${itemName} found.';
   }
   if (list.hasStatus(StatusCode.loading)) {
-    print("anuna $itemName");
     message = '${loading} ${itemName}...';
   }
   if (list.hasStatus(StatusCode.error)) {

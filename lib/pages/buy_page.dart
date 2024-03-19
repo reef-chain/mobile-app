@@ -202,7 +202,7 @@ class _BuyPageState extends State<BuyPage> {
         _buy();
       } else {
         tradeResp = BcTradeResp.fromJson(tradeRespRaw);
-        print(tradeResp.toJson());
+        print("tradeResp === ${tradeResp.toJson()}");
         setState(() {
           tradeState = TradeState.requested;
         });
