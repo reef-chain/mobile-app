@@ -5,6 +5,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
+import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/size_config.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -142,7 +144,11 @@ List<StreamSubscription> listeners=[];
       backgroundColor: Styles.primaryBackgroundColor,
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       onPressed: () {
+        if(isConnected){
         ReefAppState.instance.navigationCtrl.navigate(NavigationPage.accounts);
+        }else{
+         showReconnectProviderModal("Connection Stats");
+        }
       });
   }
 }
