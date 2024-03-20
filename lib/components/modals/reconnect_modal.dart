@@ -63,58 +63,85 @@ class _AddAccountState extends State<AddAccount> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ...getDivider(),
+        Text('JS conn: ${jsConnState ?? "getting status"}'),
+        ...getDivider(),
+        Text('Indexer conn: ${indexerConnState ?? "getting indexer status"}'),
+        ...getDivider(),
+        Text('Provider conn: ${providerConnState ?? "getting provider status"}'),
+        ...getDivider(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ...getDivider(),
-            Text('JS conn: ${jsConnState ?? "getting status"}'),
-            ...getDivider(),
-            Text('Indexer conn: ${indexerConnState ?? "getting indexer status"}'),
-            ...getDivider(),
-            Text('Provider conn: ${providerConnState ?? "getting provider status"}'),
-            ...getDivider(),
             ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(34)),
-                    shadowColor: const Color(0x559d6cff),
-                    elevation: 0,
-                    backgroundColor:  const Color(0xffe6e2f1),
-                    padding: const EdgeInsets.all(0),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(34)),
+                shadowColor: const Color(0x559d6cff),
+                elevation: 0,
+                backgroundColor: const Color(0xffe6e2f1),
+                padding: const EdgeInsets.all(0),
+              ),
+              onPressed: (){
+                Restart.restartApp();
+              },
+              child: Ink(
+                width: 140, // Adjust width as needed
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xffe6e2f1),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xffae27a5), Color(0xff742cb2)],
                   ),
-                  onPressed: ()async{
-                    await ReefAppState.instance.networkCtrl.reconnectProvider();
-                    Navigator.of(context).pop();
-                  },
-                  child: Ink(
-                    width: double.infinity,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffe6e2f1),
-                      gradient:const LinearGradient(colors: [
-                              Color(0xffae27a5),
-                              Color(0xff742cb2),
-                            ]),
-                      borderRadius: const BorderRadius.all(Radius.circular(40.0)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "Reconnect Provider",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color:  Colors.white,
-                        ),
-                      ),
+                  borderRadius: const BorderRadius.all(Radius.circular(40.0)),
+                ),
+                child: Center(
+                  child: Text(
+                    "Restart App",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
                   ),
-                )
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style:  ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(34)),
+                shadowColor: const Color(0x559d6cff),
+                elevation: 0,
+                backgroundColor: Styles.greyColor,
+                padding: const EdgeInsets.all(0),
+              ),
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+              child: Padding(
+                padding:const EdgeInsets.symmetric(vertical: 10, horizontal: 22),
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Styles.textLightColor,
+                  ),
+                ),
+              ),
+            ),
           ],
-        ));
-  }
+        ),
+      ],
+    ),
+  );
+}
 }
 
 void showReconnectProviderModal(String title,
