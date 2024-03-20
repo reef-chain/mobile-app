@@ -17,9 +17,13 @@ class AddAccount extends StatefulWidget {
 }
 
 class _AddAccountState extends State<AddAccount> {
-   String? jsConnState;
-  String? indexerConnState;
-  String? providerConnState;
+  bool jsConn = false;
+  bool indexerConn = false;
+  bool providerConn = false;
+  String jsConnLabel = 'getting status';
+  String indexerConnLabel = 'getting status';
+  String providerConnLabel = 'getting status';
+
   StreamSubscription? jsConnStateSubs;
   StreamSubscription? providerConnStateSubs;
   StreamSubscription? indexerConnStateSubs;
@@ -37,126 +41,126 @@ class _AddAccountState extends State<AddAccount> {
     providerConnStateSubs =
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
       setState(() {
-        providerConnState = event != null && event.isConnected
-            ? 'connected'
-            : event?.toString();
+        providerConn = event != null && event.isConnected;
+        providerConnLabel =
+            providerConn ? 'connected' : providerConn.toString();
       });
     });
     indexerConnStateSubs =
         ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
       setState(() {
-        indexerConnState = event!=null && !!event
-            ? 'connected'
-            : event?.toString();
+        indexerConn = event != null && !!event;
+        indexerConnLabel = indexerConn ? 'connected' : indexerConn.toString();
       });
     });
     ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
-      jsConnStateSubs =
-          jsStream.listen((event) {
-            setState(() {
-              jsConnState = event != null && ! !event
-                  ? 'connected'
-                  : event?.toString();
-            });
-          });
+      jsConnStateSubs = jsStream.listen((event) {
+        setState(() {
+          jsConn = event != null && !!event;
+          jsConnLabel = jsConn ? 'connected' : jsConn.toString();
+        });
+      });
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        ...getDivider(),
-        Text('JS conn: ${jsConnState ?? "getting status"}'),
-        ...getDivider(),
-        Text('Indexer conn: ${indexerConnState ?? "getting indexer status"}'),
-        ...getDivider(),
-        Text('Provider conn: ${providerConnState ?? "getting provider status"}'),
-        ...getDivider(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(34)),
-                shadowColor: const Color(0x559d6cff),
-                elevation: 0,
-                backgroundColor: const Color(0xffe6e2f1),
-                padding: const EdgeInsets.all(0),
-              ),
-              onPressed: (){
-                Restart.restartApp();
-              },
-              child: Ink(
-                width: 140, // Adjust width as needed
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xffe6e2f1),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xffae27a5), Color(0xff742cb2)],
-                  ),
-                  borderRadius: const BorderRadius.all(Radius.circular(40.0)),
+    var allConnected = jsConn && indexerConn && providerConn;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ...getDivider(),
+          Text('JS conn: ${jsConnLabel}'),
+          ...getDivider(),
+          Text('Indexer conn: ${indexerConnLabel}'),
+          ...getDivider(),
+          Text('Provider conn: ${providerConnLabel}'),
+          ...getDivider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if(!allConnected)ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(34)),
+                  shadowColor: const Color(0x559d6cff),
+                  elevation: 0,
+                  backgroundColor: const Color(0xffe6e2f1),
+                  padding: const EdgeInsets.all(0),
                 ),
-                child: Center(
-                  child: Text(
-                    "Restart App",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                onPressed: () {
+                  Restart.restartApp();
+                },
+                child: Ink(
+                  width: 140, // Adjust width as needed
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Styles.purpleColor,
+                    gradient: Styles.buttonGradient,
+                    borderRadius: const BorderRadius.all(Radius.circular(40.0)),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Restart App",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            ElevatedButton(
-              style:  ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(34)),
-                shadowColor: const Color(0x559d6cff),
-                elevation: 0,
-                backgroundColor: Styles.greyColor,
-                padding: const EdgeInsets.all(0),
-              ),
-              onPressed: (){
-                Navigator.of(context).pop();
-              },
-              child: Padding(
-                padding:const EdgeInsets.symmetric(vertical: 10, horizontal: 22),
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Styles.textLightColor,
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(34)),
+                  shadowColor: const Color(0x559d6cff),
+                  elevation: 0,
+                  backgroundColor: Styles.greyColor,
+                  padding: const EdgeInsets.all(0),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 22),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Styles.textColor,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-void showReconnectProviderModal(String title,
-    {BuildContext? context}) {
+void showReconnectProviderModal(String title, {BuildContext? context}) {
   showModal(context ?? navigatorKey.currentContext,
       child: AddAccount(), headText: title);
 }
 
-List<Widget> getDivider(){
-  return [const Gap(7),
+List<Widget> getDivider() {
+  return [
+    const Gap(7),
     const Divider(
       color: Styles.textLightColor,
       thickness: 0.1,
     ),
-    const Gap(2)];
+    const Gap(2)
+  ];
 }
