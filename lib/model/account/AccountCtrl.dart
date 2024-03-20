@@ -159,6 +159,10 @@ Future<dynamic> listenBindActivity(String address) async {
         .jsPromise('window.account.resolveFromEvmAddress("$evmAddress")');
   }
 
+  Future<String> sanitizeEvmAddress(String evmAddress) async{
+    return await _jsApi.jsPromise('window.utils.sanitizeInput("$evmAddress")');
+  }
+
   Future<bool> isEvmAddressExist(String address) async {
     var res = await this.resolveToNativeAddress(address);
     return res != null;

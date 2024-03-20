@@ -6,6 +6,7 @@ import {Provider} from "@reef-chain/evm-provider";
 import {isAscii, u8aToString, u8aUnwrapBytes} from '@polkadot/util';
 import {ERC20} from "./abi/ERC20";
 import { fetchTxInfo } from './txInfoApi';
+import { addressUtils } from '@reef-chain/util-lib';
 
 function lagWhenDisconnected() {
     return status => {
@@ -57,6 +58,7 @@ export const initApi = () => {
 
                     const abi = ERC20;
                     const sentValue = '0';
+                    //@ts-ignore
                     return signatureUtils.decodePayloadMethod(provider, data, abi, sentValue, types);
 
                 }),
@@ -91,6 +93,16 @@ export const initApi = () => {
             console.log('reconnectProvider err=',e.message)
             });
         },
+
+        sanitizeInput:(evmAddress:string)=>{
+            try {
+                const result = addressUtils.removeReefSpecificStringFromAddress(evmAddress);
+                return result;
+            } catch (error) {
+                console.log("sanitizeInput ERR===",error);
+                return evmAddress;
+            }
+        }
 
     }
 }

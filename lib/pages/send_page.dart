@@ -478,9 +478,10 @@ class _SendPageState extends State<SendPage> {
                 readOnly: isFormDisabled,
                 controller: valueController,
                 onChanged: (text) async {
+                  var sanitizedAddress = await ReefAppState.instance.accountCtrl.sanitizeEvmAddress(text.trim());
                   setState(() {
-                    address = text
-                        .trim(); // update the address variable with the new value
+                    address = sanitizedAddress; // update the address variable with the new value
+                    valueController.text=sanitizedAddress;
                   });
 
                   var state = await _validate(address, selectedToken, amount);
