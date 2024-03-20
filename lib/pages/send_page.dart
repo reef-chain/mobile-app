@@ -673,14 +673,11 @@ class _SendPageState extends State<SendPage> {
             showValueIndicator: ShowValueIndicator.never,
             overlayShape: SliderComponentShape.noOverlay,
             valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-            valueIndicatorColor: Color(0xff742cb2),
-            thumbColor: const Color(0xff742cb2),
+            valueIndicatorColor: Styles.secondaryAccentColorDark,
+            thumbColor: Styles.secondaryAccentColorDark,
             inactiveTickMarkColor: Color(0xffc0b8dc),
-            trackShape: const GradientRectSliderTrackShape(
-                gradient: LinearGradient(colors: <Color>[
-                  Color(0xffae27a5),
-                  Color(0xff742cb2),
-                ]),
+            trackShape: GradientRectSliderTrackShape(
+                gradient: Styles.buttonGradient,
                 darkenInactive: true),
             activeTickMarkColor: const Color(0xffffffff),
             tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
@@ -771,10 +768,7 @@ class _SendPageState extends State<SendPage> {
                     decoration: BoxDecoration(
                       color: const Color(0xffe6e2f1),
                       gradient: (statusValue == SendStatus.READY)
-                          ? const LinearGradient(colors: [
-                              Color(0xffae27a5),
-                              Color(0xff742cb2),
-                            ])
+                          ? Styles.buttonGradient
                           : null,
                       borderRadius: const BorderRadius.all(Radius.circular(14.0)),
                     ),
@@ -827,10 +821,7 @@ class _SendPageState extends State<SendPage> {
                         const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
                     decoration: BoxDecoration(
                       color: const Color(0xffe6e2f1),
-                      gradient: const LinearGradient(colors: [
-                              Color(0xffae27a5),
-                              Color(0xff742cb2),
-                            ]),
+                      gradient: Styles.buttonGradient,
                       borderRadius: const BorderRadius.all(Radius.circular(14.0)),
                     ),
                     child: Center(

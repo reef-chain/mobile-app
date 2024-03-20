@@ -174,16 +174,16 @@ class _TokenViewState extends State<TokenView> {
                     Expanded(
                         child: Container(
                       decoration: BoxDecoration(
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
-                                color: Color(0xff742cb2),
+                                color: Styles.secondaryAccentColorDark,
                                 spreadRadius: -10,
                                 offset: Offset(0, 5),
                                 blurRadius: 20),
                           ],
                           borderRadius: BorderRadius.circular(80),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xffae27a5), Color(0xff742cb2)],
+                          gradient:LinearGradient(
+                            colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
                             begin: Alignment(-1, -1),
                             end: Alignment(1, 1),
                           )),
