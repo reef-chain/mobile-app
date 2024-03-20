@@ -102,7 +102,6 @@ export const initApi = () => {
                 console.log("sanitizeInput ERR===",error);
                 return evmAddress;
             }
-            // return addressUtils.removeReefSpecificStringFromAddress(evmAddress);
         }
 
     }
