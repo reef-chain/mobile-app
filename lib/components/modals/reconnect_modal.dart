@@ -50,13 +50,15 @@ class _AddAccountState extends State<AddAccount> {
             : event?.toString();
       });
     });
-    jsConnStateSubs =
-        ReefAppState.instance.metadataCtrl.getJsConnStream().listen((event) {
-      setState(() {
-        jsConnState = event!=null && !!event
-            ? 'connected'
-            : event?.toString();
-      });
+    ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
+      jsConnStateSubs =
+          jsStream.listen((event) {
+            setState(() {
+              jsConnState = event != null && ! !event
+                  ? 'connected'
+                  : event?.toString();
+            });
+          });
     });
     super.initState();
   }
