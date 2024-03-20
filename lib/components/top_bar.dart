@@ -107,11 +107,14 @@ List<StreamSubscription> listeners=[];
         this.indexerConn = event != null && event==true;
       });
     }));
-    listeners.add(ReefAppState.instance.metadataCtrl.getJsConnStream().listen((event) {
-      setState(() {
-        this.jsConn = event != null && event==true;
-      });
-    }));
+    ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
+      listeners.add(jsStream.listen((event) {
+        setState(() {
+          this.jsConn = event != null && event==true;
+        });
+      }));
+    });
+
     super.initState();
   }
 

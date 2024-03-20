@@ -34,7 +34,8 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                 const destroyFn = await reefState.initReefState({
                     network: AVAILABLE_NETWORKS[selNetwork],
                     jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey},
-                    ipfsHashResolverFn: getIpfsGatewayUrl
+                    ipfsHashResolverFn: getIpfsGatewayUrl,
+                    rpcConfig: { autoConnectMs:5000 }
                 });
                 // TODO check if it's really destroyed
                 /*setTimeout((  )=>{
