@@ -86,6 +86,7 @@ class _AddAccountState extends State<AddAccount> {
                   ),
                   onPressed: ()async{
                     await ReefAppState.instance.networkCtrl.reconnectProvider();
+                    Navigator.of(context).pop();
                   },
                   child: Ink(
                     width: double.infinity,
