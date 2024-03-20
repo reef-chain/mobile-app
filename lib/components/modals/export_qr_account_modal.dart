@@ -117,7 +117,9 @@ class _ExportQrAccountState extends State<ExportQrAccount> {
                           const VisualDensity(horizontal: -4, vertical: -4),
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       fillColor: MaterialStateProperty.all<Color>(
-                          Styles.primaryAccentColor),
+                          Styles.whiteColor),
+                          checkColor: Styles.purpleColor,
+                           side: BorderSide(color: Styles.textLightColor),
                       value: _exportWithDiffPass,
                       onChanged: (bool? value) {
                         setState(() {

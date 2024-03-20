@@ -112,7 +112,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       ReefAppState.instance.appConfigCtrl
                           .setNavigateOnAccountSwitch(newValue == true);
                     },
-                    activeColor: Styles.primaryAccentColor,
+                    fillColor: MaterialStateProperty.all<Color>(
+                          Styles.whiteColor),
+                    checkColor: Styles.purpleColor,
+                    side: BorderSide(color: Styles.textLightColor)
                   );
                 }),
                 Observer(builder: (_) {
@@ -136,7 +139,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       ReefAppState.instance.appConfigCtrl
                           .setBiometricAuth(newValue == true);
                     },
-                    activeColor: Styles.primaryAccentColor,
+                    fillColor: MaterialStateProperty.all<Color>(
+                          Styles.whiteColor),
+                    checkColor: Styles.purpleColor,
+                     side: BorderSide(color: Styles.textLightColor),
                   );
                 }),
                 const Gap(8),
