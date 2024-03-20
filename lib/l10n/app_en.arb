@@ -166,5 +166,6 @@
   "transaction_info":"Transaction Info",
   "send_tokens":"Send Tokens",
   "swap_tokens":"Swap Tokens",
-  "connecting":"connecting..."
+  "connecting":"connecting...",
+  "connection_stats":"Connection Stats"
 }
