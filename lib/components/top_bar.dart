@@ -147,7 +147,7 @@ List<StreamSubscription> listeners=[];
         if(isConnected){
         ReefAppState.instance.navigationCtrl.navigate(NavigationPage.accounts);
         }else{
-         showReconnectProviderModal("Connection Stats");
+         showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);
         }
       });
   }
