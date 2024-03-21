@@ -189,5 +189,7 @@
   "minimum_5_reef":"Minimum balance 5 REEF",
   "evm_not_connected":"EVM not connected",
   "confirm_send":"Confirm Send",
-  "not_valid":"Not Valid"
+  "not_valid":"Not Valid",
+  "allow_10_s":"Allow ~10s before restarting app.",
+  "restart_app":"Restart App."
 }

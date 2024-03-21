@@ -80,6 +80,9 @@ class _AddAccountState extends State<AddAccount> {
           ...getDivider(),
           Text('Provider conn: ${providerConnLabel}'),
           ...getDivider(),
+          Text(AppLocalizations.of(context)!.allow_10_s,
+            style: TextStyle(color: Styles.textLightColor),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -106,7 +109,7 @@ class _AddAccountState extends State<AddAccount> {
                   ),
                   child: Center(
                     child: Text(
-                      "Restart App",
+                      AppLocalizations.of(context)!.restart_app,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -132,7 +135,7 @@ class _AddAccountState extends State<AddAccount> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 22),
                   child: Text(
-                    "Cancel",
+                    AppLocalizations.of(context)!.cancel,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
