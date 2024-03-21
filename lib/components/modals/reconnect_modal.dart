@@ -87,8 +87,7 @@ class _ConnectionDetailsState extends State<ConnectionDetails> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // anukulpandey undo
-              if(allConnected)ElevatedButton(
+              if(!allConnected)ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(34)),
