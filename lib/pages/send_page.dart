@@ -340,31 +340,31 @@ class _SendPageState extends State<SendPage> {
   getSendBtnLabel(SendStatus validation) {
     switch (validation) {
       case SendStatus.NO_ADDRESS:
-        return "Missing destination address";
+        return AppLocalizations.of(context)!.missing_destination;
       case SendStatus.NO_AMT:
-        return "Insert amount";
+        return AppLocalizations.of(context)!.insert_amount;
       case SendStatus.AMT_TOO_HIGH:
-        return "Amount too high";
+        return AppLocalizations.of(context)!.amount_too_high;
       case SendStatus.NO_EVM_CONNECTED:
-        return "Target not EVM";
+        return AppLocalizations.of(context)!.target_not_evm;
       case SendStatus.ADDR_NOT_VALID:
-        return "Enter a valid address";
+        return AppLocalizations.of(context)!.enter_valid_address;
       case SendStatus.ADDR_NOT_EXIST:
-        return "Unknown address";
+        return AppLocalizations.of(context)!.unknown_address;
       case SendStatus.SIGNING:
-        return "Signing transaction ...";
+        return AppLocalizations.of(context)!.sending_tx;
       case SendStatus.SENDING:
-        return "Sending ...";
+        return AppLocalizations.of(context)!.sending;
       case SendStatus.LOW_REEF_EVM:
-        return "Minimum balance 80 REEF";
+        return AppLocalizations.of(context)!.minimum_80_reef;
       case SendStatus.LOW_REEF_NATIVE:
-        return "Minimum balance 5 REEF";
+        return AppLocalizations.of(context)!.minimum_5_reef;
       case SendStatus.EVM_NOT_BINDED:
-        return "EVM not connected";
+        return AppLocalizations.of(context)!.evm_not_connected;
       case SendStatus.READY:
-        return "Confirm Send";
+        return AppLocalizations.of(context)!.confirm_send;
       default:
-        return "Not Valid";
+        return AppLocalizations.of(context)!.not_valid;
     }
   }
 
@@ -581,7 +581,7 @@ class _SendPageState extends State<SendPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          selectedToken != null ? selectedToken.name : 'Select',
+                          selectedToken != null ? selectedToken.name : AppLocalizations.of(context)!.select,
                           style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 18,
@@ -652,7 +652,7 @@ class _SendPageState extends State<SendPage> {
                     textAlign: TextAlign.right,
                     validator: (String? value) {
                       if (value == null || value.isEmpty) {
-                        return 'Address cannot be empty';
+                        return AppLocalizations.of(context)!.address_can_not_be_empty;
                       }
                       return null;
                     },
@@ -794,7 +794,7 @@ class _SendPageState extends State<SendPage> {
                 )
               : Column(
                   children: [
-                    Text('Generating Signature'),
+                    Text(AppLocalizations.of(context)!.generating_signature),
                     Gap(12),
                     LinearProgressIndicator(
                       valueColor:
