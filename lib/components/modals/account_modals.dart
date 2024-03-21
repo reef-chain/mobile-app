@@ -346,8 +346,10 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
                 visualDensity:
                     const VisualDensity(horizontal: -4, vertical: -4),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                fillColor: MaterialStateProperty.all<Color>(Colors.grey[800]!),
+                fillColor: MaterialStateProperty.all<Color>(Styles.whiteColor),
+                checkColor: Styles.purpleColor,
                 value: _checkedValue,
+                side: BorderSide(color: Styles.textLightColor),
                 onChanged: (bool? value) {
                   setState(() {
                     _checkedValue = value ?? false;
@@ -567,7 +569,9 @@ class _AccountCreationConfirmContentState
                         const VisualDensity(horizontal: -4, vertical: -4),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     fillColor:
-                        MaterialStateProperty.all<Color>(Colors.grey[800]!),
+                        MaterialStateProperty.all<Color>(Styles.whiteColor),
+                    checkColor: Styles.purpleColor,
+                    side: BorderSide(color: Styles.textLightColor),
                     value: _hasBioAuth,
                     onChanged: (bool? value) {
                       setState(() {
