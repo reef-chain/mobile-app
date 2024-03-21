@@ -28,7 +28,7 @@ class MetadataCtrl {
         if (kDebugMode) {
           print('JS CONN=$value');
         }
-        return value == 'true';
+        return JsApiService.resolveBooleanValue(value);
       }).onError((error, stackTrace) => false);
 
   Future<Stream<bool>> getJsConnStream() async {

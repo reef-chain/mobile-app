@@ -9,6 +9,15 @@ import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class JsApiService {
+
+  static bool resolveBooleanValue(dynamic res){
+    return res == true ||
+        res == 'true' ||
+        res == 1 ||
+        res == '1' ||
+        res == '"true"';
+  }
+
   final flutterJsFilePath;
   final bool hiddenWidget;
   final LOG_STREAM_ID = '_console.log';
@@ -82,7 +91,7 @@ class JsApiService {
     try {
       dynamic res = await _controller
           .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
-      return T == bool ? _resolveBooleanValue(res) : res;
+      return T == bool ? resolveBooleanValue(res) : res;
     }catch(e){
       print('JS LOST ctrl ERROR=${e.toString()}');
       if(this.onJsConnectionError!=null) {
@@ -95,7 +104,7 @@ class JsApiService {
 
   Future jsPromise<T>(String jsObsRefName) async {
     dynamic res = await jsObservable(jsObsRefName).first;
-    return T == bool?_resolveBooleanValue(res) : res;
+    return T == bool?resolveBooleanValue(res) : res;
   }
 
   Stream jsObservable(String jsObsRefName) {
@@ -114,15 +123,6 @@ class JsApiService {
 
   void sendDappMsgResponse(String reqId, dynamic value) {
     jsCall('${DAPP_MSG_CONFIRMATION_JS_FN_NAME}(`$reqId`, `$value`)');
-  }
-
-  dynamic _resolveBooleanValue(dynamic res){
-      print(' CALL $res');
-      return res == true ||
-          res == 'true' ||
-          res == 1 ||
-          res == '1' ||
-          res == '"true"';
   }
 
   Future<String> _getFlutterJsHeaderTags(String assetsFilePath) async {
