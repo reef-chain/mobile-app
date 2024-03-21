@@ -81,6 +81,8 @@ class _SendPageState extends State<SendPage> {
         isTokenReef = true;
       });
     }
+
+    _disableInput();
   }
 
   void _onFocusChange() {
@@ -109,6 +111,25 @@ class _SendPageState extends State<SendPage> {
       selectedTokenAddress = tokenAddr;
     });
   }*/
+
+  Future<void> _disableInput() async {
+    var selectedToken = ReefAppState.instance.model.tokens.selectedErc20List.firstWhere((tkn) => tkn.address == selectedTokenAddress);
+    var balance = getSelectedTokenBalance(selectedToken);
+    var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
+            e.address == ReefAppState.instance.model.accounts.selectedAddress);
+    var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
+    if(getMaxTransferAmount(selectedToken, balance) < 5 &&
+          selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS){
+            setState(() {
+              statusValue=SendStatus.LOW_REEF_NATIVE;
+            });
+          }else if(selectedToken.address != Constants.REEF_TOKEN_ADDRESS &&
+        !hasEnoughForEvmTx){
+          setState(() {
+              statusValue=SendStatus.LOW_REEF_EVM;
+            });
+          }
+  }
 
   Future<bool> _isValidAddress(String address) async {
     //checking if selected address is not evm
