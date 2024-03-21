@@ -835,7 +835,7 @@ class _SendPageState extends State<SendPage> {
                     ),
                     child: Center(
                       child: Text(
-                        "Connect EVM",
+                        AppLocalizations.of(context)!.connect_evm,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -956,8 +956,8 @@ class _SendPageState extends State<SendPage> {
   List<ReefStep> steps(SendStatus stat, int index) => [
         ReefStep(
             state: getStepState(stat, 0, index),
-            title: const Text(
-              'Sending Transaction',
+            title: Text(
+              AppLocalizations.of(context)!.sending_transaction,
             ),
             content: Padding(
               padding: const EdgeInsets.all(20),
@@ -978,7 +978,7 @@ class _SendPageState extends State<SendPage> {
                   ),*/
                   Flexible(
                       child: Text(
-                    "Sending Transaction to the network ...",
+                    AppLocalizations.of(context)!.sending_tx_to_nw,
                     style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
                   )),
                 ],
@@ -986,8 +986,8 @@ class _SendPageState extends State<SendPage> {
             )),
         ReefStep(
             state: getStepState(stat, 1, index),
-            title: const Text(
-              'Adding to Chain',
+            title: Text(
+              AppLocalizations.of(context)!.adding_to_chain,
             ),
             content: Padding(
               padding: const EdgeInsets.all(20),
@@ -1008,7 +1008,7 @@ class _SendPageState extends State<SendPage> {
                   ),*/
                   Flexible(
                       child: Text(
-                    "Waiting to be included in next Block...",
+                    AppLocalizations.of(context)!.waiting_to_include_in_block,
                     style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
                   )),
                 ],
@@ -1016,8 +1016,8 @@ class _SendPageState extends State<SendPage> {
             )),
         ReefStep(
             state: getStepState(stat, 2, index),
-            title: const Text(
-              'Sealing the Block',
+            title: Text(
+              AppLocalizations.of(context)!.sealing_block,
             ),
             content: Padding(
               padding: const EdgeInsets.all(20),
@@ -1038,7 +1038,7 @@ class _SendPageState extends State<SendPage> {
                   ),*/
                   Flexible(
                       child: Text(
-                    "After this transaction has unreversible finality.",
+                    AppLocalizations.of(context)!.unreversible_finality,
                     style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
                   )),
                 ],
@@ -1046,8 +1046,8 @@ class _SendPageState extends State<SendPage> {
             )),
         ReefStep(
             state: getStepState(stat, 3, index),
-            title: const Text(
-              'Transaction Finalized',
+            title:  Text(
+              AppLocalizations.of(context)!.transaction_finalized,
             ),
             content: const SizedBox(),
             icon: Icons.lock),

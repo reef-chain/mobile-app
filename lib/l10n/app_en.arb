@@ -171,5 +171,8 @@
   "sending_tx_to_nw":"Sending Transaction to the network ...",
   "waiting_to_include_in_block":"Waiting to be included in next Block...",
   "unreversible_finality":"After this transaction has unreversible finality.",
-  "transaction_finalized":"Transaction Finalized"
+  "transaction_finalized":"Transaction Finalized",
+  "sending_transaction":"Sending Transaction",
+  "adding_to_chain":"Adding to Chain",
+  "sealing_block":"Sealing the Block"
 }
