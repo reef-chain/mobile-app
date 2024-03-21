@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -57,8 +59,9 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       if (this._fromHidden) {
         this._fromHidden = false;
-          Restart.restartApp();
+          if(!Platform.isIOS) Restart.restartApp();
       }
+      
       // await ReefAppState.instance.networkCtrl.reconnectProvider();
       // ReefAppState.instance.tokensCtrl.reload(false);
     }
