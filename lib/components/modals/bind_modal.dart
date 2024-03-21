@@ -412,27 +412,30 @@ class _BindEvmState extends State<BindEvm> {
 
 
   Widget buildBound() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Gap(16.0),
-           Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                color: Colors.purple,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Gap(16.0),
+             Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.purple,
+                ),
               ),
-            ),
-            SizedBox(width: 12),
-            Flexible(child: Text("Connecting to EVM address ..."))
-          ],
-        )],
-      ),
-    ]);
+              SizedBox(width: 12),
+              Flexible(child: Text("Connecting to EVM address ..."))
+            ],
+          )],
+        ),
+      ]),
+    );
   }
 
   Widget buildFundTransaction() {
