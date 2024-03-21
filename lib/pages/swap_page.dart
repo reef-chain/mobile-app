@@ -775,10 +775,7 @@ class _SwapPageState extends State<SwapPage> {
                                       selectedBottomToken!.amount <=
                                           BigInt.zero)
                                   ? null
-                                  : const LinearGradient(colors: [
-                                      Color(0xffae27a5),
-                                      Color(0xff742cb2),
-                                    ]),
+                                  : Styles.buttonGradient,
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(14.0)),
                             ),

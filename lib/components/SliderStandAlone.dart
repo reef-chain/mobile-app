@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
+import 'package:reef_mobile_app/utils/styles.dart';
 
 class SliderStandAlone extends StatefulWidget {
   final double rating;
@@ -33,14 +34,11 @@ class _SliderStandAloneState extends State<SliderStandAlone> {
         showValueIndicator: ShowValueIndicator.never,
         overlayShape: SliderComponentShape.noOverlay,
         valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-        valueIndicatorColor: Color(0xff742cb2),
-        thumbColor: const Color(0xff742cb2),
+        valueIndicatorColor: Styles.secondaryAccentColorDark,
+        thumbColor: Styles.secondaryAccentColorDark,
         inactiveTickMarkColor: Color(0xffc0b8dc),
-        trackShape: const GradientRectSliderTrackShape(
-            gradient: LinearGradient(colors: <Color>[
-              Color(0xffae27a5),
-              Color(0xff742cb2),
-            ]),
+        trackShape: GradientRectSliderTrackShape(
+            gradient: Styles.buttonGradient,
             darkenInactive: true),
         activeTickMarkColor: const Color(0xffffffff),
         tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),

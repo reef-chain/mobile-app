@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/components/home/WebviewPage.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
+import 'package:reef_mobile_app/utils/styles.dart';
 
 class InsufficientBalance extends StatelessWidget {
   const InsufficientBalance({super.key});
@@ -41,10 +42,7 @@ class InsufficientBalance extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
           decoration: BoxDecoration(
             color: const Color(0xffe6e2f1),
-            gradient: const LinearGradient(colors: [
-              Color(0xffae27a5),
-              Color(0xff742cb2),
-            ]),
+            gradient: Styles.buttonGradient,
             // image: DecorationImage(
             // image: AssetImage("./assets/images/buy-button.png"),
             // fit: BoxFit.fitWidth,
