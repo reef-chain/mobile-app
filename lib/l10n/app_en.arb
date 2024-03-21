@@ -167,5 +167,9 @@
   "send_tokens":"Send Tokens",
   "swap_tokens":"Swap Tokens",
   "connecting":"connecting...",
-  "connection_stats":"Connection Stats"
+  "connection_stats":"Connection Stats",
+  "sending_tx_to_nw":"Sending Transaction to the network ...",
+  "waiting_to_include_in_block":"Waiting to be included in next Block...",
+  "unreversible_finality":"After this transaction has unreversible finality.",
+  "transaction_finalized":"Transaction Finalized"
 }

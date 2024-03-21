@@ -63,6 +63,7 @@ class _BindEvmState extends State<BindEvm> {
   bool sendingFundTransaction = false;
   bool sendingBoundTransaction = false;
   bool recordingChanges = false;
+  String? nativeTxStatus;
 
   final FocusNode _focus = FocusNode();
   final FocusNode _focusSecond = FocusNode();
@@ -149,17 +150,20 @@ class _BindEvmState extends State<BindEvm> {
       if (txResponse['data']['status'] == 'broadcast') {
         setState(() {
           statusValue = SendStatus.SENT_TO_NETWORK;
+          nativeTxStatus = AppLocalizations.of(context)!.waiting_to_include_in_block;
         });
       }
       if (txResponse['data']['status'] == 'included-in-block') {
         setState(() {
           statusValue = SendStatus.INCLUDED_IN_BLOCK;
+          nativeTxStatus =AppLocalizations.of(context)!.unreversible_finality;
         });
       }
       if (txResponse['data']['status'] == 'finalized') {
         setState(() {
           statusValue = SendStatus.FINALIZED;
           currentStep += 1;
+          nativeTxStatus=AppLocalizations.of(context)!.transaction_finalized;
         });
       }
       return true;
@@ -455,7 +459,7 @@ class _BindEvmState extends State<BindEvm> {
                 child: Text((statusValue != SendStatus.CANCELED &&
                         statusValue != SendStatus.ERROR)
                     // ? "Waiting for fund transaction to complete..."
-                    ? AppLocalizations.of(context)!.waiting_for_tx_to_complete
+                    ? nativeTxStatus??AppLocalizations.of(context)!.sending_tx_to_nw
                     : AppLocalizations.of(context)!.fund_tx_failed))
           ],
         )
