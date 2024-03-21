@@ -122,11 +122,13 @@ class _SendPageState extends State<SendPage> {
           selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS){
             setState(() {
               statusValue=SendStatus.LOW_REEF_NATIVE;
+              isFormDisabled = true;
             });
           }else if(selectedToken.address != Constants.REEF_TOKEN_ADDRESS &&
         !hasEnoughForEvmTx){
           setState(() {
               statusValue=SendStatus.LOW_REEF_EVM;
+              isFormDisabled = true;
             });
           }
   }
