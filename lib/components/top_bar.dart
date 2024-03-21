@@ -147,7 +147,8 @@ List<StreamSubscription> listeners=[];
       backgroundColor: Styles.primaryBackgroundColor,
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       onPressed: () {
-        if(isConnected){
+        //todo anukulpandey undo
+        if(!isConnected){
         ReefAppState.instance.navigationCtrl.navigate(NavigationPage.accounts);
         }else{
          showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);
