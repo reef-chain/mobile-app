@@ -86,7 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   return InkWell(
                     onTap: (){
                       if(_userTapsCount<4){
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Tap ${4-_userTapsCount} more times to enable developer settings"),duration: Duration(milliseconds: 650),));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppLocalizations.of(context)!.tap} ${4-_userTapsCount} ${AppLocalizations.of(context)!.more_times_to_enable}"),duration: Duration(milliseconds: 650),));
                         setState(() {
                           _userTapsCount++;
                         });
@@ -95,7 +95,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         setState(() {
                           _isDevMenuHidden=false;
                         });
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("You are a developer now"),duration: Duration(milliseconds: 1500),));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.you_are_a_dev),duration: Duration(milliseconds: 1500),));
                       }
                       }
                     },
