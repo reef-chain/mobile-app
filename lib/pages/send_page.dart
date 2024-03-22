@@ -149,12 +149,13 @@ class _SendPageState extends State<SendPage> {
   }
 
   Future<SendStatus> _validate(String addr, TokenWithAmount token, String amt,
-      [bool skipAsync = false]) async {
+      [bool skipAsync = false,bool forceFetch=false]) async {
     var isValidAddr = await _isValidAddress(addr);
     var balance = getSelectedTokenBalance(token);
     var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
             e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
+    if(forceFetch)selectedAccount.isEvmClaimed=true;
 
     if (amt == '') {
       amt = '0';
@@ -836,7 +837,12 @@ class _SendPageState extends State<SendPage> {
                   ),
                   onPressed: () => {
                     showBindEvmModal(context, bindFor: ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress))
+            e.address == ReefAppState.instance.model.accounts.selectedAddress),callback: ()async{
+              var _statusValue = await _validate(address, selectedToken, amount,true,true);
+              setState(() {
+                statusValue=_statusValue;
+              });
+            })
                     },
                   child: Ink(
                     width: double.infinity,
