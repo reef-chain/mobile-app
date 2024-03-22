@@ -21,6 +21,9 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _showDeveloperSettings = false;
+  bool _isDevMenuHidden = true;
+  int _userTapsCount = 0;
+
   String? jsConnState;
   String? indexerConnState;
   String? providerConnState;
@@ -80,12 +83,29 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Builder(builder: (context) {
-                  return Text(
-                    AppLocalizations.of(context)!.settings,
-                    style: GoogleFonts.spaceGrotesk(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 32,
-                        color: Colors.grey[800]),
+                  return InkWell(
+                    onTap: (){
+                      if(_userTapsCount<4){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Tap ${4-_userTapsCount} more times to enable developer settings"),duration: Duration(milliseconds: 650),));
+                        setState(() {
+                          _userTapsCount++;
+                        });
+                      }else{
+                      if(_isDevMenuHidden){
+                        setState(() {
+                          _isDevMenuHidden=false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("You are a developer now"),duration: Duration(milliseconds: 1500),));
+                      }
+                      }
+                    },
+                    child: Text(
+                      AppLocalizations.of(context)!.settings,
+                      style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 32,
+                          color: Colors.grey[800]),
+                    ),
                   );
                 }),
                 const Gap(24),
@@ -191,13 +211,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                 ),
-                const Gap(12),
+                if(!_isDevMenuHidden)
+                Column(
+                  children: [
+                    const Gap(12),
                 const Divider(
                   color: Styles.textLightColor,
                   thickness: 1,
                 ),
                 const Gap(24),
-                InkWell(
+                 InkWell(
                   onTap: () {
                     setState(() {
                       _showDeveloperSettings = !_showDeveloperSettings;
@@ -220,12 +243,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                 ),
-                if (_showDeveloperSettings)
+                  ],
+                ),
+               if (_showDeveloperSettings)
                   Padding(
                     padding: const EdgeInsets.only(left: 12.0, bottom: 4.0),
                     child: Column(
                       children: [
-
                         const Gap(12),
                         MaterialButton(
                           materialTapTargetSize:
