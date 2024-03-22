@@ -443,7 +443,6 @@ class _SendPageState extends State<SendPage> {
       case SendStatus.READY:
         return AppLocalizations.of(context)!.confirm_send;
       default:
-        print("validation== $validation");
         return AppLocalizations.of(context)!.not_valid;
     }
   }
