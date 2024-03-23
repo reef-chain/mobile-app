@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
@@ -9,14 +10,14 @@ import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:restart_app/restart_app.dart';
 
-class AddAccount extends StatefulWidget {
-  const AddAccount({Key? key}) : super(key: key);
+class ConnectionDetails extends StatefulWidget {
+  const ConnectionDetails({Key? key}) : super(key: key);
 
   @override
-  State<AddAccount> createState() => _AddAccountState();
+  State<ConnectionDetails> createState() => _ConnectionDetailsState();
 }
 
-class _AddAccountState extends State<AddAccount> {
+class _ConnectionDetailsState extends State<ConnectionDetails> {
   bool jsConn = false;
   bool indexerConn = false;
   bool providerConn = false;
@@ -108,13 +109,20 @@ class _AddAccountState extends State<AddAccount> {
                     borderRadius: const BorderRadius.all(Radius.circular(40.0)),
                   ),
                   child: Center(
-                    child: Text(
-                      AppLocalizations.of(context)!.restart_app,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularCountDown(countdownMs: 10000),
+                        Gap(8.0),
+                        Text(
+                          AppLocalizations.of(context)!.restart_app,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -154,7 +162,7 @@ class _AddAccountState extends State<AddAccount> {
 
 void showReconnectProviderModal(String title, {BuildContext? context}) {
   showModal(context ?? navigatorKey.currentContext,
-      child: AddAccount(), headText: title);
+      child: ConnectionDetails(), headText: title);
 }
 
 List<Widget> getDivider() {
