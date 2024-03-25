@@ -65,6 +65,7 @@ dependencies:
   video_player: ^2.5.1
   barcode_finder:
   file_picker:
+  sentry_flutter: ^7.18.0
   #freezed: ^2.0.3+1 #immutable classes
 
 dev_dependencies:

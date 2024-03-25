@@ -200,6 +200,9 @@ class _SplashAppState extends State<SplashApp> {
     }
     //TODO: Initialise the widget back
 
+    const appVer = String.fromEnvironment("APP_VER", defaultValue: "");
+    const dsn = String.fromEnvironment("SENTRY_DSN", defaultValue: "");
+
     return Stack(children: <Widget>[
       widget.reefJsApiService.widget,
       if ( (appReady == false || _isAuthenticated == false) ||
@@ -239,7 +242,7 @@ class _SplashAppState extends State<SplashApp> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Starting app",
+                      "Starting app v$appVer ",
                       style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w400,
                           fontSize: 16,
@@ -266,7 +269,7 @@ class _SplashAppState extends State<SplashApp> {
                                 decoration: TextDecoration.none),);
                     }),
                     const Gap(4),
-                    const SizedBox(
+                    if(dsn.isNotEmpty)const SizedBox(
                       height: 12,
                       width: 12,
                       child: CircularProgressIndicator.adaptive(
