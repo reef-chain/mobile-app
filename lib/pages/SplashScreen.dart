@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ import 'package:reef_mobile_app/pages/introduction_page.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../firebase_options.dart';
 import '../main.dart';
 import '../model/ReefAppState.dart';
 import '../service/JsApiService.dart';
@@ -143,6 +146,8 @@ class _SplashAppState extends State<SplashApp> {
         _isGifFinished = true;
       });
     });
+
+    Firebase.initializeApp(options:DefaultFirebaseOptions.currentPlatform).then((value) => FirebaseAnalytics.instance.logAppOpen());
 
     super.initState();
   }

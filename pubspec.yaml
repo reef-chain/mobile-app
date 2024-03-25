@@ -65,6 +65,8 @@ dependencies:
   video_player: ^2.5.1
   barcode_finder:
   file_picker:
+  firebase_core: ^2.27.1
+  firebase_analytics: ^10.8.10
   #freezed: ^2.0.3+1 #immutable classes
 
 dev_dependencies:
