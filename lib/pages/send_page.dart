@@ -56,6 +56,8 @@ class _SendPageState extends State<SendPage> {
 
   dynamic transactionData;
 
+  var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>e.address == ReefAppState.instance.model.accounts.selectedAddress);
+
   @override
   void initState() {
     super.initState();
@@ -115,8 +117,6 @@ class _SendPageState extends State<SendPage> {
   Future<void> _disableInput() async {
     var selectedToken = ReefAppState.instance.model.tokens.selectedErc20List.firstWhere((tkn) => tkn.address == selectedTokenAddress);
     var balance = getSelectedTokenBalance(selectedToken);
-    var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
     if(getMaxTransferAmount(selectedToken, balance) < 5 &&
           selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS){
@@ -149,13 +149,12 @@ class _SendPageState extends State<SendPage> {
   }
 
   Future<SendStatus> _validate(String addr, TokenWithAmount token, String amt,
-      [bool skipAsync = false,bool forceFetch=false]) async {
+      [bool skipAsync = false]) async {
     var isValidAddr = await _isValidAddress(addr);
     var balance = getSelectedTokenBalance(token);
     var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
             e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
-    if(forceFetch)selectedAccount.isEvmClaimed=true;
 
     if (amt == '') {
       amt = '0';
@@ -836,9 +835,8 @@ class _SendPageState extends State<SendPage> {
                     padding: const EdgeInsets.all(0),
                   ),
                   onPressed: () => {
-                    showBindEvmModal(context, bindFor: ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress),callback: ()async{
-              var _statusValue = await _validate(address, selectedToken, amount,true,true);
+                    showBindEvmModal(context, bindFor: selectedAccount,callback: ()async{
+              var _statusValue = await _validate(address, selectedToken, amount);
               setState(() {
                 statusValue=_statusValue;
               });
