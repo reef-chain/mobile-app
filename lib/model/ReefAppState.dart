@@ -75,9 +75,9 @@ class ReefAppState {
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("starting state...");
     Network currentNetwork =
-        await storage.getValue(StorageKey.network.name) == Network.testnet.name
-            ? Network.testnet
-            : Network.mainnet;
+        await storage.getValue(StorageKey.network.name) == Network.mainnet.name
+            ? Network.mainnet
+            : Network.testnet;
     try {
       await _initReefState(jsApi, currentNetwork);
     } catch (e){
