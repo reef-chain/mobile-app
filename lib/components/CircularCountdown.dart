@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'dart:math' as math;
 
 import 'package:reef_mobile_app/utils/styles.dart';
@@ -55,6 +56,7 @@ class CircularCountDownState extends State<CircularCountDown>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _countDownAnimation;
+  bool _isCompleted = false;
 
   @override
   void initState() {
@@ -67,12 +69,18 @@ class CircularCountDownState extends State<CircularCountDown>
     _countDownAnimation =
         Tween<double>(begin: 1, end: 0).animate(_controller);
 
+    Future.delayed(Duration(milliseconds: widget.countdownMs), () {
+      setState(() {
+        _isCompleted = true;
+      });
+    });
+
     _controller.reverse(from: 1);
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return _isCompleted ? Gap(2):SizedBox(
       width: 15,
       height: 15,
       child: AnimatedBuilder(
@@ -84,8 +92,8 @@ class CircularCountDownState extends State<CircularCountDown>
                 child: CustomPaint(
                   painter: CustomTimerPainter(
                     animation: _countDownAnimation,
-                    fillColor: Styles.whiteColor,
-                    ringColor: Colors.transparent,
+                    fillColor: Styles.primaryAccentColor,
+                    ringColor: Styles.whiteColor,
                     strokeWidth: 1.5,
                     strokeCap: StrokeCap.round,
                   ),
