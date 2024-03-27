@@ -7,7 +7,7 @@ This mobile app uses Flutter framework. Run it with "flutter run". For any issue
 
 Js libraries are used for interaction with the chain inside "lib/js/packages/reef-mobile-js" directory. Install dependencies running "yarn" in "lib/js" directory. Run them with "yarn start".
 
-For linking with Firebase, run this 
+For linking with 🔥 Firebase, run this 
 
 ```
 dart pub global activate flutterfire_cli
@@ -21,7 +21,7 @@ To run it with env variables, use the following
 flutter run --dart-define-from-file=<FILE_NAME>.json
 ```
 
-NOTE: The filetype should be json & must have the following syntax
+⚠️ NOTE: The filetype should be json & must have the following syntax
 
 ```
 {
