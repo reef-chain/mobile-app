@@ -7,6 +7,33 @@ This mobile app uses Flutter framework. Run it with "flutter run". For any issue
 
 Js libraries are used for interaction with the chain inside "lib/js/packages/reef-mobile-js" directory. Install dependencies running "yarn" in "lib/js" directory. Run them with "yarn start".
 
+For linking with Firebase, run this 
+
+```
+dart pub global activate flutterfire_cli
+flutterfire configure
+```
+
+To run it with env variables, use the following
+
+```
+flutter run --dart-define-from-file=<FILE_NAME>.json
+```
+
+NOTE: The filetype should be json & must have the following syntax
+
+```
+{
+    "FIREBASE_API_KEY": "",
+    "FIREBASE_APP_ID_ANDROID":"",
+    "FIREBASE_APP_ID_IOS":"",
+    "FIREBASE_MESSAGING_SENDER_ID": 0,
+    "FIREBASE_PROJECT_ID":"",
+    "FIREBASE_STORAGE_BUCKET":"",
+    "FIREBASE_IOS_BUNDLE_ID":""
+}
+```
+
 Mobx is used for Flutter state management. If updating its classes run "flutter pub run build_runner watch"
 
 🌍 Internationalization : This app uses the Internationalization library to provide support for multiple languages. To use this library, you will need to run the following command "flutter gen-l10n"
