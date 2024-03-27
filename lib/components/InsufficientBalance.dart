@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/components/home/WebviewPage.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -23,7 +24,13 @@ class InsufficientBalance extends StatelessWidget {
           backgroundColor: const Color(0xffe6e2f1),
           padding: const EdgeInsets.all(0),
         ),
-        onPressed: () => {
+        onPressed: () {
+          FirebaseAnalytics.instance.logEvent(
+          name: 'buy',
+          parameters: <String, String>{
+        'navigated-to': "${isMainnet? 'buy-reef':'discord-faucet'}",
+          },
+        );
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -35,7 +42,7 @@ class InsufficientBalance extends StatelessWidget {
                       : "https://discord.com/channels/793946260171259904/1087737503550816396");
               },
             ),
-          )
+          );
         },
         child: Ink(
           width: double.infinity,

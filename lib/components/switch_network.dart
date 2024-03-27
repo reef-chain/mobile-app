@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:reef_mobile_app/components/modal.dart';
@@ -42,6 +43,12 @@ class _SwitchNetworkState extends State<SwitchNetwork> {
               value: ReefAppState.instance.model.network.selectedNetworkName ==
                   Network.mainnet.name,
               onChanged: (value) {
+                FirebaseAnalytics.instance.logEvent(
+        name: 'switch_network',
+        parameters: <String, String>{
+      'network_to': value ? Network.mainnet.name : Network.testnet.name,
+        },
+      );
                 setState(() {
                   var currentNetwork =
                       value ? Network.mainnet : Network.testnet;

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -268,12 +269,30 @@ class _SendPageState extends State<SendPage> {
     transferTransactionFeedbackStream.listen((txResponse) {
       print('TRANSACTION RESPONSE=$txResponse');
       if (handleExceptionResponse(txResponse)) {
+        FirebaseAnalytics.instance.logEvent(
+        name: 'send_tokens',
+        parameters: <String, String>{
+      'type': 'exception',
+        },
+      );
         return;
       }
       if (handleNativeTransferResponse(txResponse)) {
+        FirebaseAnalytics.instance.logEvent(
+        name: 'send_tokens',
+        parameters: <String, String>{
+      'type': 'native',
+        },
+      );
         return;
       }
       if (handleEvmTransactionResponse(txResponse)) {
+        FirebaseAnalytics.instance.logEvent(
+        name: 'send_tokens',
+        parameters: <String, String>{
+      'type': 'evm',
+        },
+      );
         return;
       }
     });
