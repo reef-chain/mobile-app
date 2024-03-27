@@ -147,7 +147,6 @@ class _SplashAppState extends State<SplashApp> {
       });
     });
     Firebase.initializeApp(options:DefaultFirebaseOptions.currentPlatform).then((val){
-      FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
       FirebaseAnalytics.instance.logAppOpen();
       });
 
