@@ -61,8 +61,8 @@ app.*.map.json
 /lib/js/packages/dApp-js/node_modules/
 
 # Firebase Analytics
-# GoogleService-Info.plist
-# android/app/google-services.json
-# ios/firebase_app_id_file.json
+GoogleService-Info.plist
+android/app/google-services.json
+ios/firebase_app_id_file.json
 
 config.json
