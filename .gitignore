@@ -59,3 +59,10 @@ app.*.map.json
 /lib/js/packages/dApp-js/node_modules/.bin/esbuild.cmd
 /lib/js/packages/dApp-test-html-js/node_modules/.bin/esbuild.cmd
 /lib/js/packages/dApp-js/node_modules/
+
+# Firebase Analytics
+# GoogleService-Info.plist
+# android/app/google-services.json
+# ios/firebase_app_id_file.json
+
+config.json

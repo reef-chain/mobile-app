@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:reef_mobile_app/components/introduction_page/hero_video.dart';
+import 'package:reef_mobile_app/firebase_options.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/locale/LocaleCtrl.dart';
 import 'package:reef_mobile_app/model/locale/locale_model.dart';
@@ -20,6 +22,7 @@ import '../service/JsApiService.dart';
 import '../service/StorageService.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 typedef WidgetCallback = Widget Function();
 
@@ -143,6 +146,10 @@ class _SplashAppState extends State<SplashApp> {
         _isGifFinished = true;
       });
     });
+    Firebase.initializeApp(options:DefaultFirebaseOptions.currentPlatform).then((val){
+      FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+      FirebaseAnalytics.instance.logAppOpen();
+      });
 
     super.initState();
   }

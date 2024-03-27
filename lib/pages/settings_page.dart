@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -95,6 +96,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         setState(() {
                           _isDevMenuHidden=false;
                         });
+                        FirebaseAnalytics.instance.logEvent(
+                          name: 'enabled_dev_settings'
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.you_are_a_dev),duration: Duration(milliseconds: 1500),));
                       }
                       }
@@ -254,9 +258,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         MaterialButton(
                           materialTapTargetSize:
                           MaterialTapTargetSize.shrinkWrap,
-                          onPressed: () => showSwitchNetworkModal(
+                          onPressed: () => {showSwitchNetworkModal(
                               AppLocalizations.of(context)!.switch_network,
-                              context: context),
+                              context: context)},
                           padding: const EdgeInsets.all(2),
                           child: Row(
                             children: [

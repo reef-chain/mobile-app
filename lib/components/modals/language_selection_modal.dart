@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
@@ -66,6 +67,12 @@ class _SelectLanguageState extends State<SelectLanguage> {
                   ))
               .toList(),
           onChanged: (String? value) {
+            FirebaseAnalytics.instance.logEvent(
+        name: 'language_change',
+        parameters: <String, String>{
+      'selected_language': value??'en',
+        },
+      );
             setState(() {
               _selectedLanguage = value;
             });

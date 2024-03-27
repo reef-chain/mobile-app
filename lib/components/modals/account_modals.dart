@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -823,18 +824,36 @@ class _CurrentScreenState extends State<CurrentScreen> {
   void generateAccount() async {
     var response = await widget.reefState.accountCtrl.generateAccount();
     var generatedAccount = StoredAccount.fromString(response);
+      FirebaseAnalytics.instance.logEvent(
+        name: 'account_actions',
+        parameters: <String, String>{
+      'action': 'account-created',
+        },
+      );
     setState(() {
       account = generatedAccount;
     });
   }
 
   void importAccount(StoredAccount importedAccount) {
+    FirebaseAnalytics.instance.logEvent(
+        name: 'account_actions',
+        parameters: <String, String>{
+      'action': 'account-imported',
+        },
+      );
     setState(() {
       account = importedAccount;
     });
   }
 
   Future saveAccount(StoredAccount account) async {
+    FirebaseAnalytics.instance.logEvent(
+        name: 'account_actions',
+        parameters: <String, String>{
+      'action': 'account-save',
+        },
+      );
     await ReefAppState.instance.accountCtrl.saveAccount(account);
   }
 

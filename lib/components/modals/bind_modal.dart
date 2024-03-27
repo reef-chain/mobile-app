@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -581,9 +582,21 @@ class _BindEvmState extends State<BindEvm> {
                     setState(() {
                     currentStep += 1;
                   });
+                  FirebaseAnalytics.instance.logEvent(
+        name: 'bind_modal',
+        parameters: <String, bool>{
+      'is_evm_bounded_failed': false,
+        },
+      );
                 }
                 } catch (e) {
                   print("boundEVM ERR=$e");
+                  FirebaseAnalytics.instance.logEvent(
+        name: 'bind_modal',
+        parameters: <String, bool>{
+      'is_evm_bounded_failed': true,
+        },
+      );
                 }
               }
             },
