@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,11 +58,37 @@ class _SendPageState extends State<SendPage> {
 
   dynamic transactionData;
 
-  var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>e.address == ReefAppState.instance.model.accounts.selectedAddress);
+  bool jsConn = false;
+  bool indexerConn = false;
+  bool providerConn = false;
+
+  StreamSubscription? jsConnStateSubs;
+  StreamSubscription? providerConnStateSubs;
+  StreamSubscription? indexerConnStateSubs;
 
   @override
   void initState() {
     super.initState();
+
+    providerConnStateSubs =
+        ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+      setState(() {
+        providerConn = event != null && event.isConnected;
+      });
+    });
+    indexerConnStateSubs =
+        ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+      setState(() {
+        indexerConn = event != null && !!event;
+      });
+    });
+    ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
+      jsConnStateSubs = jsStream.listen((event) {
+        setState(() {
+          jsConn = event != null && !!event;
+        });
+      });
+    });
 
     _focus.addListener(_onFocusChange);
     _focusSecond.addListener(_onFocusSecondChange);
@@ -106,6 +134,9 @@ class _SendPageState extends State<SendPage> {
     _focusSecond.removeListener(_onFocusSecondChange);
     _focus.dispose();
     _focusSecond.dispose();
+    jsConnStateSubs?.cancel();
+    providerConnStateSubs?.cancel();
+    indexerConnStateSubs?.cancel();
   }
 
   /*void _changeSelectedToken(String tokenAddr) {
@@ -204,12 +235,20 @@ class _SendPageState extends State<SendPage> {
     return SendStatus.READY;
   }
 
-  Future<void> _onConfirmSend(TokenWithAmount sendToken) async {
+ Future<void> _onConfirmSend(TokenWithAmount sendToken) async {
     if (address.isEmpty ||
         sendToken.balance <= BigInt.zero ||
         statusValue != SendStatus.READY) {
       return;
     }
+    if(!(jsConn && indexerConn && providerConn)){
+      setState(() {
+        statusValue=SendStatus.CONNECTING;
+      });
+      await _waitForConnections(sendToken);
+      return;
+    }
+
     setState(() {
       isFormDisabled = true;
       statusValue = SendStatus.SIGNING;
@@ -235,6 +274,18 @@ class _SendPageState extends State<SendPage> {
         return;
       }
     });
+  }
+
+  Future<void> _waitForConnections(TokenWithAmount sendToken) async {
+    if(!(jsConn && indexerConn && providerConn)){
+      setState(() {
+        statusValue=SendStatus.CONNECTING;
+      });
+      await Future.delayed(Duration(seconds: 1));
+      await _waitForConnections(sendToken);
+    } else {
+      await _onConfirmSend(sendToken);
+    }
   }
 
   Future<Stream<dynamic>> executeTransferTransaction(
@@ -384,6 +435,8 @@ class _SendPageState extends State<SendPage> {
         return AppLocalizations.of(context)!.minimum_5_reef;
       case SendStatus.EVM_NOT_BINDED:
         return AppLocalizations.of(context)!.evm_not_connected;
+      case SendStatus.CONNECTING:
+        return  AppLocalizations.of(context)!.connecting.capitalize();
       case SendStatus.READY:
         return AppLocalizations.of(context)!.confirm_send;
       default:
@@ -1130,4 +1183,5 @@ enum SendStatus {
   FINALIZED,
   NOT_FINALIZED,
   EVM_NOT_BINDED,
+  CONNECTING
 }
