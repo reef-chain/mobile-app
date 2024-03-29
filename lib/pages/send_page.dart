@@ -66,6 +66,9 @@ class _SendPageState extends State<SendPage> {
   StreamSubscription? providerConnStateSubs;
   StreamSubscription? indexerConnStateSubs;
 
+  ReefAccount selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
+  e.address == ReefAppState.instance.model.accounts.selectedAddress);
+
   @override
   void initState() {
     super.initState();
@@ -183,8 +186,6 @@ class _SendPageState extends State<SendPage> {
       [bool skipAsync = false]) async {
     var isValidAddr = await _isValidAddress(addr);
     var balance = getSelectedTokenBalance(token);
-    var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
 
     if (amt == '') {
@@ -350,7 +351,6 @@ class _SendPageState extends State<SendPage> {
       if (txResponse['data']['status'] == 'included-in-block') {
         setState(() {
           transactionData = txResponse['data'];
-          print('TRANSSSSSS $transactionData');
           statusValue = SendStatus.INCLUDED_IN_BLOCK;
         });
       }
