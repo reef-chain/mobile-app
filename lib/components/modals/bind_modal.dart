@@ -280,6 +280,7 @@ class _BindEvmState extends State<BindEvm> {
         ),
         onPressed: () async {
           await func();
+          
         },
         child: Text(
           AppLocalizations.of(context)!.continue_,
@@ -582,7 +583,7 @@ class _BindEvmState extends State<BindEvm> {
                     setState(() {
                     currentStep += 1;
                   });
-                if(widget.callback!=null)widget.callback!();
+                  if(widget.callback!=null)widget.callback!();
                 }
                 } catch (e) {
                   print("boundEVM ERR=$e");
@@ -644,6 +645,7 @@ class _BindEvmState extends State<BindEvm> {
                       ),
                       onPressed: () async {
                         details.onStepContinue!();
+                        if(widget.callback!=null)widget.callback!();
                       },
                     );
             },
