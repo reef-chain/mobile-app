@@ -66,6 +66,8 @@ class _SendPageState extends State<SendPage> {
   StreamSubscription? providerConnStateSubs;
   StreamSubscription? indexerConnStateSubs;
 
+  ReefAccount selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
+  e.address == ReefAppState.instance.model.accounts.selectedAddress);
 
   @override
   void initState() {
@@ -149,8 +151,6 @@ class _SendPageState extends State<SendPage> {
   Future<void> _disableInput() async {
     var selectedToken = ReefAppState.instance.model.tokens.selectedErc20List.firstWhere((tkn) => tkn.address == selectedTokenAddress);
     var balance = getSelectedTokenBalance(selectedToken);
-    var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
     if(getMaxTransferAmount(selectedToken, balance) < 5 &&
           selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS){
@@ -186,8 +186,6 @@ class _SendPageState extends State<SendPage> {
       [bool skipAsync = false]) async {
     var isValidAddr = await _isValidAddress(addr);
     var balance = getSelectedTokenBalance(token);
-    var selectedAccount = ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress);
     var hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
 
     if (amt == '') {
@@ -231,7 +229,7 @@ class _SendPageState extends State<SendPage> {
           if(!(await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr))){
           return SendStatus.ADDR_NOT_EXIST;
           }
-          else if(!selectedAccount.isEvmClaimed) {
+          else if(!selectedAccount.isEvmClaimed && !(await ReefAppState.instance.accountCtrl.isEvmAddressExist(await ReefAppState.instance.accountCtrl.resolveEvmAddress(selectedAccount.address)))) {
             return SendStatus.EVM_NOT_BINDED;
           }
     }
@@ -247,7 +245,7 @@ class _SendPageState extends State<SendPage> {
     if(!(jsConn && indexerConn && providerConn)){
       setState(() {
         statusValue=SendStatus.CONNECTING;
-      }); 
+      });
       await _waitForConnections(sendToken);
       return;
     }
@@ -283,7 +281,7 @@ class _SendPageState extends State<SendPage> {
     if(!(jsConn && indexerConn && providerConn)){
       setState(() {
         statusValue=SendStatus.CONNECTING;
-      }); 
+      });
       await Future.delayed(Duration(seconds: 1));
       await _waitForConnections(sendToken);
     } else {
@@ -353,7 +351,6 @@ class _SendPageState extends State<SendPage> {
       if (txResponse['data']['status'] == 'included-in-block') {
         setState(() {
           transactionData = txResponse['data'];
-          print('TRANSSSSSS $transactionData');
           statusValue = SendStatus.INCLUDED_IN_BLOCK;
         });
       }
@@ -891,8 +888,12 @@ class _SendPageState extends State<SendPage> {
                     padding: const EdgeInsets.all(0),
                   ),
                   onPressed: () => {
-                    showBindEvmModal(context, bindFor: ReefAppState.instance.model.accounts.accountsList.singleWhere((e) =>
-            e.address == ReefAppState.instance.model.accounts.selectedAddress))
+                    showBindEvmModal(context, bindFor: selectedAccount,callback: ()async{
+              var _statusValue = await _validate(address, selectedToken, amount);
+              setState(() {
+                statusValue=_statusValue;
+              });
+            })
                     },
                   child: Ink(
                     width: double.infinity,

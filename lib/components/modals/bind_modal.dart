@@ -41,8 +41,9 @@ enum SendStatus {
 
 class BindEvm extends StatefulWidget {
   final ReefAccount bindFor;
+  final VoidCallback? callback;
 
-  const BindEvm({Key? key, required this.bindFor}) : super(key: key);
+  const BindEvm({Key? key, required this.bindFor,this.callback}) : super(key: key);
 
   @override
   State<BindEvm> createState() => _BindEvmState();
@@ -279,6 +280,7 @@ class _BindEvmState extends State<BindEvm> {
         ),
         onPressed: () async {
           await func();
+
         },
         child: Text(
           AppLocalizations.of(context)!.continue_,
@@ -580,6 +582,7 @@ class _BindEvmState extends State<BindEvm> {
                     setState(() {
                     currentStep += 1;
                   });
+                  if(widget.callback!=null)widget.callback!();
                 }
                 } catch (e) {
                   print("boundEVM ERR=$e");
@@ -641,6 +644,7 @@ class _BindEvmState extends State<BindEvm> {
                       ),
                       onPressed: () async {
                         details.onStepContinue!();
+                        if(widget.callback!=null)widget.callback!();
                       },
                     );
             },
@@ -681,7 +685,7 @@ class _BindEvmState extends State<BindEvm> {
   }
 }
 
-void showBindEvmModal(BuildContext context, {required bindFor}) {
+void showBindEvmModal(BuildContext context, {required bindFor,callback}) {
   Navigator.of(context).push(MaterialPageRoute(
     builder: (context) => Scaffold(
         appBar: AppBar(
@@ -701,6 +705,6 @@ void showBindEvmModal(BuildContext context, {required bindFor}) {
           title: Text(AppLocalizations.of(context)!.connect_evm,style: TextStyle(color: Styles.whiteColor),),
           backgroundColor: Colors.purple,
         ),
-        body: BindEvm(bindFor: bindFor)),
+        body: BindEvm(bindFor: bindFor,callback: callback,)),
   ));
 }
