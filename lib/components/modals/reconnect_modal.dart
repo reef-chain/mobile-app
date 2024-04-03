@@ -81,9 +81,9 @@ class _ConnectionDetailsState extends State<ConnectionDetails> {
           ...getDivider(),
           Text('Provider conn: ${providerConnLabel}'),
           ...getDivider(),
-          Text(AppLocalizations.of(context)!.allow_10_s,
-            style: TextStyle(color: Styles.textLightColor),
-          ),
+          if(!allConnected)Text(AppLocalizations.of(context)!.allow_10_s,
+            style: TextStyle(color: Styles.textLightColor)),
+          if(!allConnected) ...getDivider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
