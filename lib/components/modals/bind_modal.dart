@@ -280,7 +280,7 @@ class _BindEvmState extends State<BindEvm> {
         ),
         onPressed: () async {
           await func();
-          
+
         },
         child: Text(
           AppLocalizations.of(context)!.continue_,
@@ -368,7 +368,6 @@ class _BindEvmState extends State<BindEvm> {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(AppLocalizations.of(context)!.bind_modal_connected + ':',
           style: const TextStyle(fontWeight: FontWeight.bold)),
-      // Text('\nReef EVM Address:',style: const TextStyle(fontWeight: FontWeight.bold)),
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -681,17 +680,6 @@ class _BindEvmState extends State<BindEvm> {
                   title: Text(AppLocalizations.of(context)!.changes_recorded),
                   content: buildRecordedChanges()),
             ]),
-        // child: Column(
-        //   crossAxisAlignment: CrossAxisAlignment.start,
-        //   children: [
-        //     if (selectAccount)
-        //       buildSelectAccount()
-        //     else if (widget.bindFor.isEvmClaimed)
-        //       buildBound()
-        //     else
-        //       buildBind(),
-        //   ],
-        // ),
       ),
     );
   }
@@ -701,14 +689,22 @@ void showBindEvmModal(BuildContext context, {required bindFor,callback}) {
   Navigator.of(context).push(MaterialPageRoute(
     builder: (context) => Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: (() {
+              var pendingSignatures = ReefAppState.instance.model.signatureRequests.list;
+              if(pendingSignatures.length>0){
+                ReefAppState.instance.signingCtrl
+          .rejectSignature(pendingSignatures[0].signatureIdent);
+              }else{
+                Navigator.pop(context);
+              }
+            }),
+          ),
           title: Text(AppLocalizations.of(context)!.connect_evm,style: TextStyle(color: Styles.whiteColor),),
           backgroundColor: Colors.purple,
         ),
         body: BindEvm(bindFor: bindFor,callback: callback,)),
-    fullscreenDialog: true,
   ));
-  // showModal(context,
-  //     child: BindEvm(bindFor: bindFor),
-  //     dismissible: true,
-  //     headText: "Connect EVM");
 }
