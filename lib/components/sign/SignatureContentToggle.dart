@@ -65,17 +65,6 @@ class SignatureContentToggle extends StatelessObserverWidget {
             child: Image.asset('assets/images/reef.png')),
         backgroundColor: Styles.primaryBackgroundColor,
         elevation: 0.0,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.close,
-              color: Styles.textColor,
-            ),
-            onPressed: () {
-              _cancel(signatureRequest);
-            },
-          ),
-        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
