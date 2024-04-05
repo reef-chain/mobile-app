@@ -7,6 +7,7 @@ import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
+import 'package:reef_mobile_app/utils/ipfs.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -160,7 +161,7 @@ class _ActivityViewState extends State<ActivityView> {
                     const SizedBox(width: 4),
                     if (mimetype != 'video/mp4')
                       IconFromUrl(
-                        iconUrl,
+                        IpfsUtils.resolveIpfsHash(iconUrl!),
                         size: isTokenNFT! ? 45 : 18,
                       ),
                     if (mimetype == 'video/mp4')
@@ -203,7 +204,7 @@ class _ActivityViewState extends State<ActivityView> {
       String? message = getFdmListMessage(
           txHistory,
           AppLocalizations.of(context)!.activity,
-          AppLocalizations.of(context)!.loading);
+          AppLocalizations.of(context)!.loading,context);
 
       return SliverList(
         delegate: SliverChildListDelegate([

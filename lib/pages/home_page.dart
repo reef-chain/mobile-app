@@ -53,7 +53,6 @@ class _HomePageState extends State<HomePage> {
 
   WsConnState? providerConn;
   WsConnState? gqlConn;
-  StreamSubscription? gqlConnStateSubs;
   StreamSubscription? providerConnStateSubs;
 
   @override
@@ -63,18 +62,12 @@ class _HomePageState extends State<HomePage> {
         providerConn = event;
       });
     });
-    gqlConnStateSubs = ReefAppState.instance.networkCtrl.getGqlConnLogs().listen((event) {
-      setState(() {
-        gqlConn = event;
-      });
-    });
     super.initState();
   }
 
   @override
   void dispose() {
     providerConnStateSubs?.cancel();
-    gqlConnStateSubs?.cancel();
     super.dispose();
   }
 
@@ -287,15 +280,18 @@ class _HomePageState extends State<HomePage> {
           Builder(builder: (context) {
             return ElevatedButton.icon(
                 style: ButtonStyle(
+                  iconColor: MaterialStateProperty.resolveWith(
+                        (states) => Styles.whiteColor),
                     backgroundColor: MaterialStateProperty.resolveWith(
                         (states) => Styles.purpleColor)),
+                        
                 onPressed: () {
                   showAddAccountModal(
                       AppLocalizations.of(context)!.add_account, openModal,
                       parentContext: context);
                 },
                 icon: const Icon(Icons.account_balance_wallet_outlined),
-                label: Text(AppLocalizations.of(context)!.create_new_account));
+                label: Text(AppLocalizations.of(context)!.add_account,style: TextStyle(color: Styles.whiteColor),));
           }),
         ],
       );

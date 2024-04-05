@@ -1,4 +1,4 @@
-import {reefState, graphql} from "@reef-chain/util-lib";
+import {reefState} from "@reef-chain/util-lib";
 import {map} from "rxjs/operators";
 import {interval} from "rxjs/dist/types";
 
@@ -16,12 +16,6 @@ export function testMethods() {
 }
 
 export function testReefObservables() {
-    graphql.apolloClientInstance$.subscribe(
-        {
-            next: (v) =>
-                console.log('APOLLO ', v),
-            error: (e) => console.log('APOLLO ERR', e.message)
-        });
     reefState.accounts$.subscribe(
         {
             next: (v) =>

@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
+import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/size_config.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../model/navigation/navigation_model.dart';
 import '../model/network/NetworkCtrl.dart';
@@ -31,7 +36,7 @@ Widget topBar(BuildContext context) {
                   children: [
                     SvgPicture.asset(
                       'assets/images/reef-logo-light.svg',
-                      semanticsLabel: "Reef Logo",
+                      semanticsLabel: "Reef Chain Logo",
                       height: 46,
                     ),
                     Observer(builder: (_) {
@@ -61,7 +66,7 @@ Widget topBar(BuildContext context) {
                       child: Wrap(
                         alignment: WrapAlignment.end,
                         children: [
-                          accountPill(context, selSignerList.first.name)
+                          AccountPill(selSignerList.first.name)
                         ],
                       ),
                     )
@@ -75,12 +80,60 @@ Widget topBar(BuildContext context) {
   );
 }
 
-Widget accountPill(BuildContext context, String title) {
-  return ActionChip(
-      avatar: Icon(
-        Icons.wallet,
-        color: Styles.textColor,
-      ),
+class AccountPill extends StatefulWidget {
+  final String title;
+  const AccountPill(this.title,{super.key});
+
+  @override
+  State<AccountPill> createState() => _AccountPillState();
+}
+
+class _AccountPillState extends State<AccountPill> {
+var color = Styles.textColor;
+var indexerConn = false;
+var providerConn = false;
+var jsConn = false;
+List<StreamSubscription> listeners=[];
+
+  @override
+  void initState() {
+    listeners.add(ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+      setState(() {
+        this.providerConn = event != null && event.isConnected;
+      });
+    }));
+    listeners.add(ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+      setState(() {
+        this.indexerConn = event != null && event==true;
+      });
+    }));
+    ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
+      listeners.add(jsStream.listen((event) {
+        setState(() {
+          this.jsConn = event != null && event==true;
+        });
+      }));
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    listeners.forEach((element) => element.cancel());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var isConnected = jsConn&&indexerConn&&providerConn;
+    var icon = Icon(
+      isConnected?Icons.wallet: Icons.error_outline,
+      color: isConnected?Styles.textColor:Styles.primaryAccentColor,
+    );
+    var title = isConnected?widget.title:AppLocalizations.of(context)!.connecting;
+    return ActionChip(
+      avatar: icon,
       label: Text(
         title,
         style: GoogleFonts.spaceGrotesk(
@@ -94,6 +147,11 @@ Widget accountPill(BuildContext context, String title) {
       backgroundColor: Styles.primaryBackgroundColor,
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       onPressed: () {
+        if(isConnected){
         ReefAppState.instance.navigationCtrl.navigate(NavigationPage.accounts);
+        }else{
+         showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);
+        }
       });
+  }
 }

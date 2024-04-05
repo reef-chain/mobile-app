@@ -1,11 +1,11 @@
 import {reefState, ReefAccount, network, tokenUtil, getAccountSigner} from '@reef-chain/util-lib';
 import {catchError, combineLatest, map, switchMap, take, tap} from "rxjs/operators";
 import {Contract} from "ethers";
-import {Provider, Signer as EvmSigner} from "@reef-defi/evm-provider";
+import {Provider, Signer as EvmSigner} from "@reef-chain/evm-provider";
 import {ERC20} from "./abi/ERC20";
 import {firstValueFrom, Observable, of, Subject} from "rxjs";
 import {findAccount} from "./signApi";
-import Signer from "@reef-defi/extension-base/page/Signer";
+import Signer from "./background/Signer";
 import { nftTxAbi, sendNft } from './utils/nftTxUtils';
 
 const nativeTransfer = async (amount: string, destinationAddress: string, provider: Provider, signer: ReefAccount, signingKey: Signer): Promise<any> => {
@@ -207,7 +207,7 @@ export const initApi = (signingKey: Signer) => {
                         const tokenContract = new Contract(nftContractAddress, nftTxAbi, evmSigner as EvmSigner);
                         console.log('transfering NFT');
                         try {
-                        
+
                             // tokenContract.safeTransferFrom(from,to,nftId,nftAmount,[]).then(res=>console.log(`anuna ${res}`));
                             return nftTransfer$(from,to,nftId,nftAmount,provider,tokenContract).pipe(
                                 map(data => ({

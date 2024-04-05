@@ -21,29 +21,26 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _showDeveloperSettings = false;
-  String? gqlConnState;
-  StreamSubscription? gqlConnStateSubs;
+  bool _isDevMenuHidden = true;
+  int _userTapsCount = 0;
+
+  String? jsConnState;
+  String? indexerConnState;
   String? providerConnState;
+  StreamSubscription? jsConnStateSubs;
   StreamSubscription? providerConnStateSubs;
+  StreamSubscription? indexerConnStateSubs;
 
   @override
   void dispose() {
-    gqlConnStateSubs?.cancel();
+    jsConnStateSubs?.cancel();
     providerConnStateSubs?.cancel();
+    indexerConnStateSubs?.cancel();
     super.dispose();
   }
 
   @override
   void initState() {
-    gqlConnStateSubs =
-        ReefAppState.instance.networkCtrl.getGqlConnLogs().listen((event) {
-      setState(() {
-        gqlConnState = event != null && event.isConnected
-            ? 'connected'
-            : event?.toString();
-      });
-    });
-
     providerConnStateSubs =
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
       setState(() {
@@ -52,6 +49,25 @@ class _SettingsPageState extends State<SettingsPage> {
             : event?.toString();
       });
     });
+    indexerConnStateSubs =
+        ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+      setState(() {
+        indexerConnState = event!=null && !!event
+            ? 'connected'
+            : event?.toString();
+      });
+    });
+    ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
+      jsConnStateSubs =
+          jsStream.listen((event) {
+            setState(() {
+              jsConnState = event!=null && !!event
+                  ? 'connected'
+                  : event?.toString();
+            });
+          });
+    });
+
     super.initState();
   }
 
@@ -67,12 +83,29 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Builder(builder: (context) {
-                  return Text(
-                    AppLocalizations.of(context)!.settings,
-                    style: GoogleFonts.spaceGrotesk(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 32,
-                        color: Colors.grey[800]),
+                  return InkWell(
+                    onTap: (){
+                      if(_userTapsCount<4){
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${AppLocalizations.of(context)!.tap} ${4-_userTapsCount} ${AppLocalizations.of(context)!.more_times_to_enable}"),duration: Duration(milliseconds: 650),));
+                        setState(() {
+                          _userTapsCount++;
+                        });
+                      }else{
+                      if(_isDevMenuHidden){
+                        setState(() {
+                          _isDevMenuHidden=false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.you_are_a_dev),duration: Duration(milliseconds: 1500),));
+                      }
+                      }
+                    },
+                    child: Text(
+                      AppLocalizations.of(context)!.settings,
+                      style: GoogleFonts.spaceGrotesk(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 32,
+                          color: Colors.grey[800]),
+                    ),
                   );
                 }),
                 const Gap(24),
@@ -99,11 +132,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       ReefAppState.instance.appConfigCtrl
                           .setNavigateOnAccountSwitch(newValue == true);
                     },
-                    activeColor: Styles.primaryAccentColor,
+                    fillColor: MaterialStateProperty.all<Color>(
+                          Styles.whiteColor),
+                    checkColor: Styles.purpleColor,
+                    side: BorderSide(color: Styles.textLightColor)
                   );
                 }),
                 Observer(builder: (_) {
-                  var navigateOnAccountSwitchVal = ReefAppState
+                  var isBiometricAuthEnabled = ReefAppState
                       .instance.model.appConfig.isBiometricAuthEnabled;
 
                   return CheckboxListTile(
@@ -118,12 +154,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       Text(AppLocalizations.of(context)!.biometric_auth,
                           style: Theme.of(context).textTheme.bodyLarge)
                     ]),
-                    value: navigateOnAccountSwitchVal,
+                    value: isBiometricAuthEnabled,
                     onChanged: (newValue) {
                       ReefAppState.instance.appConfigCtrl
                           .setBiometricAuth(newValue == true);
                     },
-                    activeColor: Styles.primaryAccentColor,
+                    fillColor: MaterialStateProperty.all<Color>(
+                          Styles.whiteColor),
+                    checkColor: Styles.purpleColor,
+                     side: BorderSide(color: Styles.textLightColor),
                   );
                 }),
                 const Gap(8),
@@ -172,13 +211,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                 ),
-                const Gap(12),
+                if(!_isDevMenuHidden)
+                Column(
+                  children: [
+                    const Gap(12),
                 const Divider(
                   color: Styles.textLightColor,
                   thickness: 1,
                 ),
                 const Gap(24),
-                InkWell(
+                 InkWell(
                   onTap: () {
                     setState(() {
                       _showDeveloperSettings = !_showDeveloperSettings;
@@ -201,31 +243,17 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                 ),
-                if (_showDeveloperSettings)
+                  ],
+                ),
+               if (_showDeveloperSettings)
                   Padding(
                     padding: const EdgeInsets.only(left: 12.0, bottom: 4.0),
                     child: Column(
                       children: [
-                        FutureBuilder<dynamic>(
-                            future: ReefAppState.instance.metadataCtrl
-                                .getJsVersions(),
-                            builder:
-                                (context, AsyncSnapshot<dynamic> snapshot) {
-                              if (snapshot.hasData) {
-                                return Text(snapshot.data);
-                              }
-                              return const Text('getting version...');
-                            }),
-                        const Gap(12),
-                        Text(
-                            'GQL conn: ${gqlConnState ?? "getting gql status"}'),
-                        const Gap(12),
-                        Text(
-                            'Provider conn: ${providerConnState ?? "getting provider status"}'),
                         const Gap(12),
                         MaterialButton(
                           materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                          MaterialTapTargetSize.shrinkWrap,
                           onPressed: () => showSwitchNetworkModal(
                               AppLocalizations.of(context)!.switch_network,
                               context: context),
@@ -243,6 +271,25 @@ class _SettingsPageState extends State<SettingsPage> {
                             ],
                           ),
                         ),
+                        FutureBuilder<dynamic>(
+                            future: ReefAppState.instance.metadataCtrl
+                                .getJsVersions(),
+                            builder:
+                                (context, AsyncSnapshot<dynamic> snapshot) {
+                              if (snapshot.hasData) {
+                                return Text(snapshot.data);
+                              }
+                              return const Text('getting version...');
+                            }),
+                        const Gap(12),
+                        Text(
+                            'JS conn: ${jsConnState ?? "getting status"}'),
+                        const Gap(12),
+                        Text(
+                            'Indexer conn: ${indexerConnState ?? "getting indexer status"}'),
+                        const Gap(12),
+                        Text(
+                            'Provider conn: ${providerConnState ?? "getting provider status"}'),
                       ],
                     ),
                   ),

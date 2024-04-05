@@ -1,14 +1,14 @@
-import {graphql, network, reefState, signatureUtils, tokenUtil} from '@reef-chain/util-lib';
-import {debounceTime, map, shareReplay, switchMap, take} from "rxjs/operators";
-import {combineLatest, firstValueFrom, Observable} from "rxjs";
+import { graphql, network, reefState, signatureUtils, tokenUtil} from '@reef-chain/util-lib';
+import {debounceTime, map, shareReplay, startWith, switchMap, take} from "rxjs/operators";
+import {combineLatest, firstValueFrom, Observable, of} from "rxjs";
 import {fetchTokenData} from './utils/tokenUtils';
-import {Provider} from "@reef-defi/evm-provider";
-import {isAscii, u8aToString, u8aUnwrapBytes} from '@reef-defi/util';
+import {Provider} from "@reef-chain/evm-provider";
+import {isAscii, u8aToString, u8aUnwrapBytes} from '@polkadot/util';
 import {ERC20} from "./abi/ERC20";
-import { gql } from '@apollo/client';
 import { fetchTxInfo } from './txInfoApi';
 import { fetchNFTinfo } from './nftInfoApi';
 import { sendNft } from './utils/nftTxUtils';
+import { addressUtils } from '@reef-chain/util-lib';
 
 function lagWhenDisconnected() {
     return status => {
@@ -30,10 +30,10 @@ export const initApi = () => {
                 map((value => value.data))
             );
             return firstValueFrom(
-                combineLatest([graphql.apolloClientInstance$, reefState.selectedNetwork$, reefState.selectedProvider$, price$]).pipe(
+                combineLatest([graphql.httpClientInstance$, reefState.selectedNetwork$, reefState.selectedProvider$, price$]).pipe(
                     take(1),
-                    switchMap(async ([apolloInstance, net, provider, reefPrice]: [any, network.Network, Provider, number]) => {
-                        return await fetchTokenData(apolloInstance, tokenAddress, provider, network.getReefswapNetworkConfig(net).factoryAddress, reefPrice);
+                    switchMap(async ([httpClientInstance, net, provider, reefPrice]: [any, network.Network, Provider, number]) => {
+                        return await fetchTokenData(httpClientInstance, tokenAddress, provider, network.getReefswapNetworkConfig(net).factoryAddress, reefPrice);
                     }),
                     take(1)
                 )
@@ -41,10 +41,10 @@ export const initApi = () => {
         },
         getTxInfo: async (timestamp: string) => {
             return firstValueFrom(
-                combineLatest([graphql.apolloClientInstance$,timestamp]).pipe(
+                combineLatest([graphql.httpClientInstance$]).pipe(
                     take(1),
-                    switchMap(async ([apolloInstance, abc]:[any, string]) => {
-                        return await fetchTxInfo(apolloInstance, timestamp);
+                    switchMap(async ([httpClientInstance]:[any]) => {
+                        return await fetchTxInfo(httpClientInstance, timestamp);
                     }),
                     take(1)
                 )
@@ -70,13 +70,13 @@ export const initApi = () => {
                     await api.isReady;
 
                     const sentValue = '0';
-                    return signatureUtils.decodePayloadMethod(provider, data, null, sentValue, types);
+                    //@ts-ignore
+                    return signatureUtils.decodePayloadMethod(provider, data, abi, sentValue, types);
+
                 }),
                 take(1)
             ));
         },
-
-
 
         setSelectedNetwork: (networkName: string) => {
             const net: network.Network = network.AVAILABLE_NETWORKS[networkName] || network.AVAILABLE_NETWORKS.mainnet;
@@ -88,14 +88,33 @@ export const initApi = () => {
             return isAscii(bytes) ? u8aToString(u8aUnwrapBytes(bytes)) : bytes;
         },
 
-        apolloClientWsConnState$: graphql.apolloClientWsConnState$.pipe(
-            switchMap(lagWhenDisconnected()),
-            shareReplay(1)
-        ),
-
         providerConnState$: reefState.providerConnState$.pipe(
             switchMap(lagWhenDisconnected()),
             shareReplay(1)
         ),
+
+        indexerConnState$: reefState.getIndexerConnState$().pipe(
+            map(v=>!!v.isConnected),
+            shareReplay(1)
+        ),
+
+        reconnectProvider: () => {
+            network.reconnectProvider().then((v)=>{
+            console.log('provider reconnected=',v)
+            }).catch((e)=>{
+            console.log('reconnectProvider err=',e.message)
+            });
+        },
+
+        sanitizeInput:(evmAddress:string)=>{
+            try {
+                const result = addressUtils.removeReefSpecificStringFromAddress(evmAddress);
+                return result;
+            } catch (error) {
+                console.log("sanitizeInput ERR===",error);
+                return evmAddress;
+            }
+        }
+
     }
 }

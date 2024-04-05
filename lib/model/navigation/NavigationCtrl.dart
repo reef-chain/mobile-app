@@ -10,6 +10,7 @@ import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/swap_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../components/sign/SignatureContentToggle.dart';
 
@@ -61,10 +62,11 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text("Send Tokens",
+                title: Text(AppLocalizations.of(context)!.send_tokens,
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w500,
                       fontSize: 24,
+                      color: Styles.whiteColor,
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
@@ -114,10 +116,11 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text("Transaction Info",
+                title: Text(AppLocalizations.of(context)!.transaction_info,
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w500,
                       fontSize: 24,
+                      color: Styles.whiteColor
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
@@ -135,7 +138,7 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: const Text("Swap Tokens"),
+                title: Text(AppLocalizations.of(context)!.swap_tokens),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
               body: Padding(

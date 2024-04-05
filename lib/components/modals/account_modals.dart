@@ -10,6 +10,7 @@ import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/ensureVisibleWhenFocused.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -204,6 +205,7 @@ class _AccountImportContentState extends State<AccountImportContent> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
+                        color: Styles.whiteColor
                       ),
                     );
                   }),
@@ -344,8 +346,10 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
                 visualDensity:
                     const VisualDensity(horizontal: -4, vertical: -4),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                fillColor: MaterialStateProperty.all<Color>(Colors.grey[800]!),
+                fillColor: MaterialStateProperty.all<Color>(Styles.whiteColor),
+                checkColor: Styles.purpleColor,
                 value: _checkedValue,
+                side: BorderSide(color: Styles.textLightColor),
                 onChanged: (bool? value) {
                   setState(() {
                     _checkedValue = value ?? false;
@@ -395,6 +399,7 @@ class _AccountCreationContentState extends State<AccountCreationContent> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
+                        color: Styles.whiteColor
                       ),
                     );
                   }),
@@ -564,7 +569,9 @@ class _AccountCreationConfirmContentState
                         const VisualDensity(horizontal: -4, vertical: -4),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     fillColor:
-                        MaterialStateProperty.all<Color>(Colors.grey[800]!),
+                        MaterialStateProperty.all<Color>(Styles.whiteColor),
+                    checkColor: Styles.purpleColor,
+                    side: BorderSide(color: Styles.textLightColor),
                     value: _hasBioAuth,
                     onChanged: (bool? value) {
                       setState(() {
@@ -769,7 +776,9 @@ class _AccountCreationConfirmContentState
                                   isEvmClaimed: false,
                                   iconSVG: widget.account!.svg,
                                 );
+                                if(anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)) && ReefAppState.instance.model.accounts.accountsList.length!=0){
                                 showBindEvmModal(context, bindFor: signer);
+                                }
                               }
                             }
                           }
@@ -779,9 +788,10 @@ class _AccountCreationConfirmContentState
                           ? AppLocalizations.of(context)!.import_the_account
                           : AppLocalizations.of(context)!.add_the_account,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        color: Styles.whiteColor
                       ),
                     ),
                   ),

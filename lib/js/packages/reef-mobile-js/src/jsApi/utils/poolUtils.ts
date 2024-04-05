@@ -1,4 +1,4 @@
-import { Signer as EvmProviderSigner, Provider } from "@reef-defi/evm-provider";
+import { Signer as EvmProviderSigner, Provider } from "@reef-chain/evm-provider";
 import { Contract } from "ethers";
 import { ReefswapFactory } from "../abi/ReefswapFactory";
 import { ReefswapPair } from "../abi/ReefswapPair";

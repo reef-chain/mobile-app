@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
-import 'package:reef_mobile_app/components/modals/signing_modals.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/gradient_text.dart';
@@ -14,33 +13,29 @@ class MethodDataDisplay extends StatelessWidget {
   final SignatureRequest? signatureReq;
 
   @override
-  Widget build(BuildContext context) =>
-      Expanded(child: Observer(builder: (_) {
+  Widget build(BuildContext context) => Expanded(child: Observer(builder: (_) {
         if (signatureReq != null && signatureReq!.hasResults) {
           var evmMethodData = signatureReq?.decodedMethod['vm']['evm'];
-          var isEVM = evmMethodData != null;
+          var isEVM = evmMethodData != null && !evmMethodData.isEmpty;
           var dataWidget;
           if (isEVM == true) {
+            var fragmentData = evmMethodData['decodedData']['functionFragment'];
+            var args = List.from(fragmentData['inputs']).asMap().map((i, val) =>
+                MapEntry(val['name'],
+                    _getValue(evmMethodData['decodedData']['args'][i])));
+            List<String> argsList =
+                args.entries.map((e) => e.key).join(',').split(',');
+            List<String> argsValuesList = args.entries
+                .map((e) => e.value.toString())
+                .join(',')
+                .split(',');
             Map<String, String> decodedData = {
               "Contract Address":
-              toShortDisplay(evmMethodData['contractAddress'])
+                  toShortDisplay(evmMethodData['contractAddress']),
+              "Method Name": fragmentData['name']
             };
-            if (evmMethodData['decodedData'] != null) {
-              var fragmentData = evmMethodData['decodedData']['functionFragment'];
-              var args = List.from(fragmentData['inputs']).asMap().map((i,
-                  val) =>
-                  MapEntry(val['name'],
-                      _getValue(evmMethodData['decodedData']['args'][i])));
-              List<String> argsList =
-              args.entries.map((e) => e.key).join(',').split(',');
-              List<String> argsValuesList = args.entries
-                  .map((e) => e.value.toString())
-                  .join(',')
-                  .split(',');
-              decodedData["Method Name"] = fragmentData['name'];
-              for (var i = 0; i < argsList.length; i++) {
-                decodedData[argsList[i]] = argsValuesList[i];
-              }
+            for (var i = 0; i < argsList.length; i++) {
+              decodedData[argsList[i]] = argsValuesList[i];
             }
             final decodedDetails = createDecodedDataTable(decodedData);
 
@@ -49,18 +44,29 @@ class MethodDataDisplay extends StatelessWidget {
               1: FlexColumnWidth(4),
             });
           } else {
-            final List<dynamic>? argsList = signatureReq?.decodedMethod['args'];
+            final List<dynamic>? argsList = [
+              signatureReq?.decodedMethod['args']
+            ];
             final String args = argsList?.join(', ').toString() ?? "";
-            final String paramValues = args.length > 1
-                ? "${args.split(':')[1].split('}')[0]},${args.split(',')[1]}"
-                : "empty";
             var methodName =
-            signatureReq?.decodedMethod['methodName'].split('(')[0];
-            var params = signatureReq?.decodedMethod['methodName']
-                .split('(')[1]
-                .split(')')[0];
-            List<String> paramsList = params.split(',');
-            List<String> paramValuesList = paramValues.trim().split(',');
+                signatureReq?.decodedMethod['methodName'].split('(')[0];
+
+            String input = args.substring(1, args.length - 1);
+            List<String> pairs = input.length > 0 ? input.split(", ") : [];
+            Map<String, dynamic> resultMap = {};
+            pairs.forEach((pair) {
+              List<String> keyValue = pair.split(": ");
+              String key = keyValue[0].trim();
+              String value = keyValue[1].trim();
+              resultMap[key] = value;
+            });
+            List<String> paramsList = [];
+            List<String> paramValuesList = [];
+            pairs.forEach((pair) {
+              paramsList.add(pair.substring(0, pair.indexOf(":")));
+              paramValuesList.add(pair.substring(pair.indexOf(":") + 1));
+            });
+
             Map<String, String> decodedData = {"Method Name": methodName};
             for (var i = 0; i < paramsList.length; i++) {
               decodedData[paramsList[i]] = paramValuesList[i];
@@ -71,17 +77,19 @@ class MethodDataDisplay extends StatelessWidget {
               1: FlexColumnWidth(4),
             });
           }
-          return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
-              child: Column(
-                children: [
-                  Text(isEVM ? 'EVM Contract Call' : 'Method Call ',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold)),
-                  Gap(12),
-                  dataWidget
-                ],
-              ));
+          return SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+                child: Column(
+                  children: [
+                    Text(isEVM ? 'EVM Contract Call' : 'Method Call ',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    Gap(12),
+                    dataWidget
+                  ],
+                )),
+          );
         }
         return Container();
       }));

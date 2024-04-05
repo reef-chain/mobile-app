@@ -19,6 +19,7 @@
   "new_password":"नया पासवर्ड",
   "add_account":"खाता जोड़ें",
   "create_new_account":"नया खाता बनाएँ",
+  "add_account":"नया खाता बनाएँ",
   "import_account_from_pre_existing_seed":"पहले से मौजूद बीज से आयात खाता",
   "copy_to_clipboard":"क्लिपबोर्ड पर कॉपी करें",
   "please_write_down":"कृपया अपने बटुए के स्मरक बीज को लिख लें और इसे सुरक्षित स्थान पर रखें। आपके बटुए को पुनर्स्थापित करने के लिए स्मरक का उपयोग किया जा सकता है। अपनी संपत्ति खोने के लिए इसे सावधानी से रखें।",
@@ -123,8 +124,8 @@
   "delete_website_url":"क्या आप वाकई URL वाली वेबसाइट को हटाना चाहते हैं",
   "waiting_for_tx_to_complete":"लेन-देन पूरा होने की प्रतीक्षा कर रहा है",
   "fund_tx_failed":"निधि लेन-देन विफल रहा",
-  "bind_transaction":"बंधन लेनदेन",
-  "evm_is_bound":"EVM बंधी हुई है",
+  "evm_connect_transaction":"बंधन लेनदेन",
+  "evm_is_connected":"EVM बंधी हुई है",
   "select_account_for_funding":"फंडिंग के लिए खाते का चयन करें",
   "go_back_to_home_page":"होम पेज पर वापस जाएं",
   "incorrect_password_entered":"गलत पासवर्ड डाला गया!",
@@ -152,5 +153,6 @@
   "completed_binance_purchase":"यदि आपने बिनेंस कनेक्ट पर अपनी खरीदारी पूरी कर ली है, तो आपके रीफ बैलेंस को चेन पर लेन-देन की पुष्टि होने के बाद अपडेट किया जाएगा।",
   "go_to_binance":"बिनेंस कनेक्ट पर जाएं",
   "biometric_auth":"बायोमेट्रिक प्रमाणीकरण",
-  "dont_send_funds_here":"यहां पैसे मत भेजो"
+  "dont_send_funds_here":"यहां पैसे मत भेजो",
+  "account_imported_successfully":"अपर्याप्त धन! कृपया अपना रीफ वॉलेट भरें"
 }

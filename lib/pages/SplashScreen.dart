@@ -26,7 +26,9 @@ typedef WidgetCallback = Widget Function();
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class SplashApp extends StatefulWidget {
-  final JsApiService reefJsApiService = JsApiService.reefAppJsApi();
+  final JsApiService reefJsApiService = JsApiService.reefAppJsApi(onErrorCb: (){
+    print('JS CONNECTION ERRORORRRRR - RESET');
+  });
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
@@ -65,7 +67,7 @@ class _SplashAppState extends State<SplashApp> {
   bool? _isFirstLaunch;
   Widget? onInitWidget;
 
-  var loaded = false;
+  var appReady = false;
   final TextEditingController _passwordController = TextEditingController();
   String password = "";
   static final LocalAuthentication localAuth = LocalAuthentication();
@@ -79,7 +81,7 @@ class _SplashAppState extends State<SplashApp> {
   return isAvailable && isDeviceSupported && isEnrolled;
 }
 
-  Future<bool> _checkRequiresAuth() async {
+  Future<bool> _checkRequiresPasswordAuth() async {
     final storedPassword =
         await ReefAppState.instance.storage.getValue(StorageKey.password.name);
     return storedPassword != null && storedPassword != "";
@@ -91,46 +93,58 @@ class _SplashAppState extends State<SplashApp> {
     return languageCode;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getLocale().then((value) => setLocale(value));
-
-    _initializeAsyncDependencies();
-    _checkIfFirstLaunch().then((value) {
-      setState(() {
-        _isFirstLaunch = value;
-      });
+  Future<void> initAuthentication() async{
+    var isFirstLaunch = await _checkIfFirstLaunch();
+    setState(() {
+        _isFirstLaunch = isFirstLaunch;
     });
-    Timer(const Duration(milliseconds: 3830), () {
-      setState(() {
-        _isGifFinished = true;
-      });
-    });
-    _passwordController.addListener(() {
-      setState(() {
-        password = _passwordController.text;
-      });
-    });
-    if (kDebugMode) {
+    //if firstLaunch or debugMode set authenticated to true
+    if(isFirstLaunch || kDebugMode){
       setState(() {
         _requiresAuth = false;
         _isAuthenticated = true;
       });
       return;
     }
-    _checkRequiresAuth().then((value) {
+    // check for bio auth
+    var supportsBioAuth = await _checkBiometricsSupport();
+    if(supportsBioAuth){
+      // check if user enabled biometrics auth
+      var hasUserEnabledBioAuth = await ReefAppState.instance.storage.getValue("biometricAuth");
+      if(hasUserEnabledBioAuth){
+        authenticateWithBiometrics();
+        setState(() {
+          _biometricsIsAvailable = true;
+        });
+        return;
+      }
+    }
+    // check for password authentication
+      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
       setState(() {
-        _requiresAuth = value;
-        _isAuthenticated = !value;
+          _requiresAuth = requiresPasswordAuth;
+          _isAuthenticated = !requiresPasswordAuth;
+      });
+  }
+
+  @override
+  void initState() {
+    getLocale().then((value) => setLocale(value));
+
+    _initializeAsyncDependencies();
+    initAuthentication();
+    _passwordController.addListener(() {
+        setState(() {
+          password = _passwordController.text;
+        });
+      });
+    Timer(const Duration(milliseconds: 3830), () {
+      setState(() {
+        _isGifFinished = true;
       });
     });
-    _checkBiometricsSupport().then((value) {
-      if (value) authenticateWithBiometrics();
-      setState(() {
-        _biometricsIsAvailable = value;
-      });
-    });
+
+    super.initState();
   }
 
   @override
@@ -149,7 +163,7 @@ class _SplashAppState extends State<SplashApp> {
     final storageService = StorageService();
     await ReefAppState.instance.init(widget.reefJsApiService, storageService);
     setState(() {
-      loaded = true;
+      appReady = true;
     });
   }
 
@@ -188,7 +202,7 @@ class _SplashAppState extends State<SplashApp> {
 
     return Stack(children: <Widget>[
       widget.reefJsApiService.widget,
-      if ((loaded == false || _isAuthenticated == false) ||
+      if ( (appReady == false || _isAuthenticated == false) ||
           _isFirstLaunch == null)
         Stack(
           children: [
@@ -220,18 +234,37 @@ class _SplashAppState extends State<SplashApp> {
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOutCirc,
-                opacity: _isGifFinished && _isAuthenticated ? 1 : 0,
+                opacity: 1,//_isGifFinished && _isAuthenticated ? 1 : 0,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Loading App",
+                      "Starting app",
                       style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w400,
                           fontSize: 16,
                           color: Styles.textLightColor,
                           decoration: TextDecoration.none),
                     ),
+                    const Gap(4),
+                    StreamBuilder<String>(stream: ReefAppState.instance.initStatusStream.stream,
+                        initialData: ".",
+                        builder: (BuildContext context,AsyncSnapshot<String> snapshot) {
+                          if(snapshot.hasData) {
+                            return Text(snapshot.data??"...",
+                              style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16,
+                                  color: Styles.textLightColor,
+                                  decoration: TextDecoration.none),);
+                          }
+                          return Text("..",
+                            style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Styles.textLightColor,
+                                decoration: TextDecoration.none),);
+                    }),
                     const Gap(4),
                     const SizedBox(
                       height: 12,
@@ -248,7 +281,7 @@ class _SplashAppState extends State<SplashApp> {
           ],
         )
       else if (_isFirstLaunch == true &&
-          loaded == true &&
+          appReady == true &&
           _isAuthenticated == true)
         IntroductionPage(
           heroVideo: widget.heroVideo,
@@ -289,6 +322,19 @@ class _SplashAppState extends State<SplashApp> {
         _wrongPassword = false;
         _isAuthenticated = true;
       });
+    }
+    else{
+      // if password set by user , show password screen
+      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
+      if(requiresPasswordAuth){
+        setState(() {
+          _requiresAuth = true;
+          _isAuthenticated = false;
+        });
+      }else{
+      // else recursive call
+      authenticateWithBiometrics();
+      }
     }
   }
 
@@ -374,10 +420,11 @@ class _SplashAppState extends State<SplashApp> {
                           authenticateWithPassword(password);
                         }
                       },
-                      child: const Text(
+                      child: Text(
                         'Send',
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
+                          color: Styles.whiteColor,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),

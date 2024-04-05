@@ -9,6 +9,15 @@ import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class JsApiService {
+
+  static bool resolveBooleanValue(dynamic res){
+    return res == true ||
+        res == 'true' ||
+        res == 1 ||
+        res == '1' ||
+        res == '"true"';
+  }
+
   final flutterJsFilePath;
   final bool hiddenWidget;
   final LOG_STREAM_ID = '_console.log';
@@ -32,6 +41,7 @@ class JsApiService {
   final jsMessageUnknownSubj = BehaviorSubject<JsApiMessage>();
 
   late Widget _wdg;
+  late Function()? onJsConnectionError;
 
   get widget {
     // print('JS API SERVICE GET WIDGET $flutterJsFilePath');
@@ -46,18 +56,19 @@ class JsApiService {
   Future<WebViewController> get _controller => jsApiReady.future;
 
   JsApiService._(bool this.hiddenWidget, String this.flutterJsFilePath,
-      {String? url, String? html}) {
+      {String? url, String? html, Function()? onErrorCb}) {
+    this.onJsConnectionError = onErrorCb;
     // print('JS API SERVICE CREATE $flutterJsFilePath');
     _renderWithFlutterJS(flutterJsFilePath, html, url);
   }
 
-  JsApiService.reefAppJsApi()
+  JsApiService.reefAppJsApi({Function()? onErrorCb })
       : this._(true, 'lib/js/packages/reef-mobile-js/dist/index.js',
-            url: 'https://app.reef.io');
+            url: 'https://app.reef.io', onErrorCb: onErrorCb);
 
-  JsApiService.dAppInjectedHtml(String html, String? baseUrl)
+  JsApiService.dAppInjectedHtml(String html, String? baseUrl, Function()? onErrorCb)
       : this._(false, 'lib/js/packages/dApp-js/dist/index.js',
-            html: html, url: baseUrl);
+            html: html, url: baseUrl, onErrorCb: onErrorCb);
 
   void _renderWithFlutterJS(
       String fJsFilePath, String? htmlString, String? baseUrl) {
@@ -77,14 +88,23 @@ class JsApiService {
   }
 
   Future<dynamic> jsCall<T>(String executeJs) async {
-    dynamic res = await _controller
-        .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
-    return T == bool?_resolveBooleanValue(res) : res;
+    try {
+      dynamic res = await _controller
+          .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
+      return T == bool ? resolveBooleanValue(res) : res;
+    }catch(e){
+      print('JS LOST ctrl ERROR=${e.toString()}');
+      if(this.onJsConnectionError!=null) {
+        this.onJsConnectionError!();
+      }
+      throw e;
+    }
+    return null;
   }
 
   Future jsPromise<T>(String jsObsRefName) async {
     dynamic res = await jsObservable(jsObsRefName).first;
-    return T == bool?_resolveBooleanValue(res) : res;
+    return T == bool?resolveBooleanValue(res) : res;
   }
 
   Stream jsObservable(String jsObsRefName) {
@@ -103,15 +123,6 @@ class JsApiService {
 
   void sendDappMsgResponse(String reqId, dynamic value) {
     jsCall('${DAPP_MSG_CONFIRMATION_JS_FN_NAME}(`$reqId`, `$value`)');
-  }
-
-  dynamic _resolveBooleanValue(dynamic res){
-      print(' CALL $res');
-      return res == true ||
-          res == 'true' ||
-          res == 1 ||
-          res == '1' ||
-          res == '"true"';
   }
 
   Future<String> _getFlutterJsHeaderTags(String assetsFilePath) async {

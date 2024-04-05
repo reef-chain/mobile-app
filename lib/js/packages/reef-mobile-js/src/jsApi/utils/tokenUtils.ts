@@ -1,10 +1,9 @@
 import { Contract } from "ethers";
-import { Signer as EvmProviderSigner, Provider} from "@reef-defi/evm-provider";
+import { Signer as EvmProviderSigner, Provider} from "@reef-chain/evm-provider";
 import { ERC20 } from "../abi/ERC20";
-import { gql } from '@apollo/client';
-import { tokenUtil } from "@reef-chain/util-lib";
+import {graphql, tokenUtil,} from "@reef-chain/util-lib";
 import { getPoolReserves } from "./poolUtils";
-import {reefTokenWithAmount} from "../../../../../../../../reef-util-lib/lib/token";
+import {firstValueFrom} from "rxjs";
 
 export const getREEF20Contract = async (address: string, signerOrProvider: EvmProviderSigner): Promise<Contract> => {
     try {
@@ -33,42 +32,37 @@ export const approveTokenAmount = async (
   throw new Error(`Token contract does not exist addr=${tokenAddress}`);
 }
 
+// @ts-ignore
 export const fetchTokenData = (
-    apollo: any,
+    httpClient: any,
     searchAddress: string,
     provider: Provider,
     factoryAddress: string,
     reefPrice: number
-  ): Promise<TokenWithAmount> => apollo
+  ): Promise<TokenWithAmount> => /*apollo
     .query({
       query: CONTRACT_DATA_GQL,
       variables: { address: searchAddress },
-    })
+    })*/
+    firstValueFrom(
+      graphql.queryGql$(httpClient, graphql.getContractDataQuery([searchAddress])
+      )
+      )
     .then((verContracts: any) => {
-        const vContract = verContracts.data.verified_contract[0];
+        const vContract = verContracts.data.verifiedContracts[0];
         if (!vContract) return null;
 
         const token: Token = {
-          address: vContract.address,
-          iconUrl: vContract.contract_data.token_icon_url,
-          decimals: vContract.contract_data.decimals,
-          name: vContract.contract_data.name,
-          symbol: vContract.contract_data.symbol,
+          address: vContract.id,
+          iconUrl: vContract.contractData.token_icon_url,
+          decimals: vContract.contractData.decimals,
+          name: vContract.contractData.name,
+          symbol: vContract.contractData.symbol,
         } as Token;
 
         return toTokenWithPrice(token, reefPrice, provider, factoryAddress);
     })
     .then((tokenWithPrice: TokenWithAmount[]) => tokenWithPrice);
-
-
-const CONTRACT_DATA_GQL = gql`
-  query contract_data_query($address: String!) {
-    verified_contract(where: { address: { _eq: $address } }) {
-      address
-      contract_data
-    }
-  }
-`;
 
 const toTokenWithPrice = async (token: Token, reefPrice: number, provider: Provider, factoryAddress: string): Promise<TokenWithAmount> => {
     return {

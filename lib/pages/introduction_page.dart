@@ -57,7 +57,7 @@ class IntroView extends StatelessWidget {
         children: <Widget>[
           const LiquidCarouselWrapper(),
           IntroductionSlide(
-              isFirst: true,
+              done: onDone,
               liquidCarouselKey: carouselKey,
               color: Styles.splashBackgroundColor,
               buttonColor: Colors.deepPurpleAccent,
@@ -116,63 +116,6 @@ class IntroView extends StatelessWidget {
                           )),
                     ],
                   )))
-                ],
-              )),
-          IntroductionSlide(
-              isLast: true,
-              liquidCarouselKey: carouselKey,
-              color: Colors.deepPurple.shade900,
-              buttonColor: Colors.amberAccent,
-              title: "Second View",
-              done: onDone,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                direction: Axis.vertical,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Image.asset(
-                      "assets/images/reef.png",
-                      height: 20.0,
-                      width: 240.0,
-                    ),
-                  ),
-                  Expanded(
-                      flex: 5,
-                      child: Flex(
-                        direction: Axis.vertical,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Text(
-                              AppLocalizations.of(context)!
-                                  .introducing_reef_chain,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  fontSize: 30, color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(height: 35),
-                          Flexible(
-                              child: Scrollbar(
-                                  child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 4),
-                                      child: SizedBox(
-                                          child: (SingleChildScrollView(
-                                        child: Text(
-                                          AppLocalizations.of(context)!
-                                              .reef_chain_desc,
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              height: 2,
-                                              color: Colors.white),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      )))))),
-                        ],
-                      ))
                 ],
               )),
           const LiquidCarouselWrapper()

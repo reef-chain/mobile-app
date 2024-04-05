@@ -11,6 +11,7 @@ import 'package:reef_mobile_app/components/modals/export_qr_account_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
 import '../utils/styles.dart';
@@ -186,6 +187,7 @@ class _AccountBoxState extends State<AccountBox> {
       StatusDataObject<ReefAccount> reefAccount, bool lightTheme) {
     var textColor1 = lightTheme ? Styles.textColor : Colors.white;
     var textColor2 = lightTheme ? Colors.black38 : Styles.textLightColor;
+
     return Flex(
         direction: Axis.vertical,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -273,6 +275,22 @@ class _AccountBoxState extends State<AccountBox> {
                         borderRadius: BorderRadius.circular(12)),
                     child: TextButton(
                         onPressed: () {
+                          var availableAccounts = getSignersWithEnoughBalance(
+                              widget.reefAccountFDM.data);
+
+                          var hasBalance =
+                              hasBalanceForBinding(widget.reefAccountFDM.data);
+
+                          if (!hasBalance && availableAccounts.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(AppLocalizations.of(context)!
+                                    .insufficient_funds_fill_up),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                            return;
+                          }
                           showBindEvmModal(context,
                               bindFor: widget.reefAccountFDM.data);
                         },
@@ -366,14 +384,14 @@ showAlertDialog(BuildContext context, ReefAccount signer) {
                 ),
               ),
               TextSpan(
-                text: "lose",
+                text: AppLocalizations.of(context)!.permanently_lose,
                 style: TextStyle(
                   color: Styles.errorColor,
                   fontSize: 16,
                 ),
               ),
               TextSpan(
-                text: " all balance for ",
+                text: " ${AppLocalizations.of(context)!.access_to} ",
                 style: TextStyle(
                   color: Styles.textColor,
                   fontSize: 16,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -49,6 +50,31 @@ class AccountCtrl {
     return await _jsApi.jsPromise(
         'window.keyring.restoreJson(${jsonEncode(file)},"$password")');
   }
+
+  Future<String> formatBalance(
+      String value, double price) async {
+        try {   
+    return await _jsApi.jsPromise(
+        'window.keyring.formatBalance("$value",$price)');
+        } catch (e) {
+          print('window.keyring.formatBalance ERR=$e');
+          return "";
+        }
+  }
+
+Future<dynamic> listenBindActivity(String address) async {
+  StreamController<dynamic> controller = StreamController<dynamic>();
+
+  StreamSubscription<dynamic> subscription;
+  subscription = _jsApi.jsObservable('window.account.listenBindActivity("$address")')
+    .listen((event) {
+      controller.add(event);
+      controller.close();
+    });
+
+  return controller.stream.first;
+}
+
 
   Future<dynamic> exportAccountQr(String address, String password) async {
     return await _jsApi
@@ -131,6 +157,10 @@ class AccountCtrl {
   Future<String?> resolveToNativeAddress(String evmAddress) async {
     return await _jsApi
         .jsPromise('window.account.resolveFromEvmAddress("$evmAddress")');
+  }
+
+  Future<String> sanitizeEvmAddress(String evmAddress) async{
+    return await _jsApi.jsPromise('window.utils.sanitizeInput("$evmAddress")');
   }
 
   Future<bool> isEvmAddressExist(String address) async {

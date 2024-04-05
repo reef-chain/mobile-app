@@ -5,10 +5,12 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:reef_mobile_app/components/BlurableContent.dart';
+import 'package:reef_mobile_app/components/InsufficientBalance.dart';
 import 'package:reef_mobile_app/components/jumping_dots.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/gradient_text.dart';
@@ -103,23 +105,28 @@ class _TokenViewState extends State<TokenView> {
                                 innerPadding: 2,
                               )
                             : Observer(builder: (context) {
-                                return BlurableContent(
-                                    GradientText(
-                                        price != 0
-                                            ? '\$'+(NumberFormat.compactLong()
-                                                .format(getBalanceValueBI(
-                                                    balance, price))
-                                                .toString())
-                                            : "NA",
-                                        gradient: textGradient(),
-                                        style: GoogleFonts.poppins(
-                                          color: Styles.textColor,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w900,
-                                        )),
-                                    ReefAppState.instance.model.appConfig
-                                        .displayBalance);
-                              }),
+  return FutureBuilder<String>(
+    future: ReefAppState.instance.accountCtrl.formatBalance(balance.toString(), price),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text("");
+      } else {
+        return BlurableContent(
+          GradientText(
+            price != 0 ? (snapshot.data ?? "") : "NA",
+            gradient: textGradient(),
+            style: GoogleFonts.poppins(
+              color: Styles.textColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          ReefAppState.instance.model.appConfig.displayBalance,
+        );
+      }
+    },
+  );
+}),
                         Observer(builder: (context) {
                           return BlurableContent(
                               Text(
@@ -167,16 +174,16 @@ class _TokenViewState extends State<TokenView> {
                     Expanded(
                         child: Container(
                       decoration: BoxDecoration(
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
-                                color: Color(0xff742cb2),
+                                color: Styles.secondaryAccentColorDark,
                                 spreadRadius: -10,
                                 offset: Offset(0, 5),
                                 blurRadius: 20),
                           ],
                           borderRadius: BorderRadius.circular(80),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xffae27a5), Color(0xff742cb2)],
+                          gradient:LinearGradient(
+                            colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
                             begin: Alignment(-1, -1),
                             end: Alignment(1, 1),
                           )),
@@ -219,7 +226,7 @@ class _TokenViewState extends State<TokenView> {
         String? message = getFdmListMessage(
             selectedERC20s,
             AppLocalizations.of(context)!.balance,
-            AppLocalizations.of(context)!.loading);
+            AppLocalizations.of(context)!.loading,context);
 
         return MultiSliver(
           pushPinnedChildren: false,
@@ -228,6 +235,15 @@ class _TokenViewState extends State<TokenView> {
             //     child: ElevatedButton(
             //         onPressed: ReefAppState.instance.tokensCtrl.reload,
             //         child: const Text("ReloadTEST"))),
+            if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
+              Column(
+                children: [
+                  Container(
+                      margin:
+                          EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
+                      child: InsufficientBalance()),
+                ],
+              ),
             if (message != null)
               SliverToBoxAdapter(
                 child: Padding(

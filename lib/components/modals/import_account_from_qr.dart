@@ -166,6 +166,7 @@ class _ImportAccountQrState extends State<ImportAccountQr> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
+                                  color: Styles.whiteColor
                                 ),
                               );
                             }),

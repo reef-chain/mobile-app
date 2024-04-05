@@ -7,15 +7,20 @@ import * as utilsApi from "./utilsApi";
 import * as metadataApi from "./metadataApi";
 import {reefState, network} from "@reef-chain/util-lib";
 import {FlutterJS} from "flutter-js-bridge/src/FlutterJS";
-import type {InjectedAccountWithMeta} from "@reef-defi/extension-inject/types";
-import Signer from "@reef-defi/extension-base/page/Signer";
+import {InjectedAccountWithMeta} from '@reef-chain/util-lib/dist/dts/extension'
+import Signer from "./background/Signer";
 import {getSignatureSendRequest} from "flutter-js-bridge/src/sendRequestSignature";
 
 const {AVAILABLE_NETWORKS } = network;
 
+const getIpfsGatewayUrl = (hash: string): string => {
+    const ret = `https://reef.infura-ipfs.io/ipfs/${hash}`
+    return ret;
+};
+
 export const initFlutterApi = async (flutterJS: FlutterJS) => {
     try {
-        console.log("INIT FLUTTER JS API");
+        console.log("INIT FLUTTER JS API util-lib v1.0.0-rc1");
         const signingKey = getFlutterSigningKey(flutterJS);
 
         (window as any).jsApi = {
@@ -28,7 +33,9 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                 console.log("INIT REEF ACCOUNTS len=",accountsWithMeta.length);
                 const destroyFn = await reefState.initReefState({
                     network: AVAILABLE_NETWORKS[selNetwork],
-                    jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey}
+                    jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey},
+                    ipfsHashResolverFn: getIpfsGatewayUrl,
+                    rpcConfig: { autoConnectMs:5000 }
                 });
                 // TODO check if it's really destroyed
                 /*setTimeout((  )=>{

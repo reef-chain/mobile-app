@@ -1,8 +1,7 @@
 import { reefState, tokenUtil, network } from '@reef-chain/util-lib';
 import { map, take } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
-import { ethers } from 'ethers';
-import { Provider } from "@reef-defi/evm-provider";
+import { Provider } from "@reef-chain/evm-provider";
 import { base64Encode } from "@polkadot/util-crypto";
 import { getSpecTypes } from "@polkadot/types-known";
 

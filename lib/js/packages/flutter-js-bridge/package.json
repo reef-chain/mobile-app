@@ -7,16 +7,17 @@
   "dependencies": {
     "@polkadot/keyring": "^9.4.1",
     "@polkadot/ui-shared": "^2.4.1",
-    "@reef-defi/extension-base": "^1.0.15",
+    "@reef-chain/util-lib": "^2.4.12",
     "crypto-browserify": "^3.12.0",
     "events": "^3.3.0",
-    "stream": "^0.0.2",
-    "rxjs": "^7.5.6"
+    "rxjs": "^7.5.6",
+    "stream": "^0.0.2"
   },
   "devDependencies": {
     "esbuild": "^0.14.42"
   },
   "scripts": {
+    "clean": "rm -rf node_modules && rm -rf dist",
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --tsconfig=tsconfig.json",
     "start": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --watch --tsconfig=tsconfig.json"
   }

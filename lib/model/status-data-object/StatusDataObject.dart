@@ -1,3 +1,7 @@
+import 'dart:ffi';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+
 enum StatusCode {
   _,
   loading,
@@ -38,10 +42,13 @@ class FeedbackStatus {
         if(e is Map && e.isEmpty) {
           return FeedbackStatus(StatusCode.completeData, '');
         }
-      return FeedbackStatus(toStatusCode(e['code']), e['message'],
+        if(e is Map && e['code'] is List && e['code'].isEmpty) {
+          return FeedbackStatus(StatusCode.completeData, '');
+        }
+        return FeedbackStatus(toStatusCode(e['code']), e['message'],
           propertyName: e['propertyName']);
       }catch(err){
-        print("StatusDataObject ERROR PARSING JSON=${e['code']} v=${e['message']}");
+        print("StatusDataObject ERROR PARSING JSON=${e['code']} v=${e['message']} e=${err}");
         return FeedbackStatus(StatusCode.completeData, 'failed to parse');
       }
     }).toList();
@@ -63,17 +70,23 @@ ParseListFn<StatusDataObject<T>> getParsableListFn<T>(ParseFn<T> fn) {
   return parsableFn;
 }
 
+// helper function to return plural in error 
+String getPlural(String singular,BuildContext context){
+  if(singular == AppLocalizations.of(context)!.activity)return AppLocalizations.of(context)!.activities;
+  return singular.padRight(2,'s');
+}
+
 String? getFdmListMessage(
-    StatusDataObject<List> list, String itemName, String loading) {
+    StatusDataObject<List> list, String itemName, String loading,BuildContext context) {
   String? message;
   if (list.hasStatus(StatusCode.completeData) && list.data.isEmpty) {
-    message = 'No ${itemName}s found.';
+    message = 'No ${itemName} found.';
   }
   if (list.hasStatus(StatusCode.loading)) {
     message = '${loading} ${itemName}...';
   }
   if (list.hasStatus(StatusCode.error)) {
-    message = 'Error ${loading} ${itemName}s (${list.statusList[0].message})';
+    message = 'Error ${loading} ${getPlural(itemName,context)} (${list.statusList[0].message})';
   }
   return message;
 }

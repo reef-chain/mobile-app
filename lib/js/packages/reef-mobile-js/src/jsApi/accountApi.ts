@@ -1,12 +1,14 @@
-import {AddressName, getAccountSigner, ReefAccount, reefState, addressUtils} from '@reef-chain/util-lib';
+import {AddressName, getAccountSigner, ReefAccount, reefState, addressUtils, network} from '@reef-chain/util-lib';
 import {combineLatest, map, switchMap, take} from "rxjs/operators";
-import type {InjectedAccountWithMeta} from "@reef-defi/extension-inject/types";
 import {firstValueFrom} from 'rxjs';
-import {REEF_EXTENSION_IDENT} from "@reef-defi/extension-inject";
-import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-defi/evm-provider/utils";
-import {Provider} from "@reef-defi/evm-provider";
-import Signer from "@reef-defi/extension-base/page/Signer";
+import { extension } from '@reef-chain/util-lib';
+import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-chain/evm-provider/utils";
+import {Provider} from "@reef-chain/evm-provider";
+import Signer from "./background/Signer";
 import {ethers} from 'ethers';
+import type { InjectedAccountWithMeta } from '@reef-chain/util-lib/dist/dts/extension';
+
+const {REEF_EXTENSION_IDENT} = extension;
 
 export const buildAccountWithMeta = async (name: string, address: string): Promise<InjectedAccountWithMeta> => {
     const acountWithMeta: InjectedAccountWithMeta = {
@@ -65,13 +67,22 @@ export const innitApi = (signingKey: Signer) => {
                     }
 
                     try {
-
-                        const evmSigner = await getAccountSigner(signer.address, provider, signingKey);
+                        let address = signer.address;
+                        const evmSigner = await getAccountSigner(address, provider, signingKey);
                         await evmSigner.claimDefaultAccount();
-                        console.log("account binded:", signer.address, signer.isEvmClaimed, signer.evmAddress);
+                        let updateActions: reefState.UpdateAction[] = [];
+                        updateActions.push({
+                            address,
+                            type: reefState.UpdateDataType.ACCOUNT_EVM_BINDING,
+                        } as reefState.UpdateAction);
+                        updateActions.push({
+                            address,
+                            type: reefState.UpdateDataType.ACCOUNT_NATIVE_BALANCE,
+                        } as reefState.UpdateAction);
+                        reefState.onTxUpdateResetSigners({isInBlock: true, txTypeEvm: false}, updateActions);
                         return true;
                     } catch (e) {
-                        console.log(' account.claimEvmAccount() - ', e);
+                        console.log('account.claimEvmAccount() - ', e.message);
                         return null;
                     }
                 }),
@@ -100,6 +111,10 @@ export const innitApi = (signingKey: Signer) => {
         isValidEvmAddress: (address: string) =>  ethers.utils.isAddress(address),
 
         isValidSubstrateAddress: (address: string) => isSubstrateAddress(address),
+
+        listenBindActivity: (address: string) => {
+            return network.getLatestBlockAccountUpdates$([address])
+        }        
     };
 }
 

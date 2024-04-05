@@ -1,4 +1,4 @@
-import type {MessageTypes, RequestTypes, ResponseTypes,} from '@reef-defi/extension-base/background/types';
+import type {MessageTypes, RequestTypes, ResponseTypes} from "reef-mobile-js/src/jsApi/background/types";
 import {FlutterJS} from "./FlutterJS";
 
 export interface Handler {

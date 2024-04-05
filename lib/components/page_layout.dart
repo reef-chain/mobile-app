@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +18,7 @@ import 'package:reef_mobile_app/pages/swap_page.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
+import 'package:restart_app/restart_app.dart';
 
 import 'sign/SignatureContentToggle.dart';
 
@@ -29,6 +32,7 @@ class BottomNav extends StatefulWidget {
 class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   final _liquidCarouselKey = GlobalKey<LiquidCarouselState>();
   bool _swiping = false;
+  bool _fromHidden = false;
 
   @override
   void initState() {
@@ -39,18 +43,27 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (kDebugMode) {
       print('APP STATE=$state');
     }
-    if(state==AppLifecycleState.resumed) {
-      ReefAppState.instance.tokensCtrl.reload(false);
+    if (state == AppLifecycleState.hidden) {
+      this._fromHidden = true;
+    }
+    if (state == AppLifecycleState.resumed) {
+      if (this._fromHidden) {
+        this._fromHidden = false;
+          if(!Platform.isIOS) Restart.restartApp();
+      }
+      
+      // await ReefAppState.instance.networkCtrl.reconnectProvider();
+      // ReefAppState.instance.tokensCtrl.reload(false);
     }
   }
 
@@ -83,9 +96,6 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }*/
 
   void _onItemTapped(int index) async {
-    // print(index);
-    // print(bottomNavigationBarItems[index].page);
-    // print(bottomNavigationBarItems[index].label);
     ReefAppState.instance.navigationCtrl
         .navigate(bottomNavigationBarItems[index].page);
   }

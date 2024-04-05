@@ -14,13 +14,12 @@ class _HeroVideoState extends State<HeroVideo> {
   @override
   void initState() {
     _controller = VideoPlayerController.asset('assets/video/hero-r-loop.mp4');
-
     _controller.setLooping(true);
-    _controller.initialize().then((_) {
+    _controller.initialize().then((_)async {
       setState(() {});
+      await Future.delayed(Duration(milliseconds: 1000));
+      _controller.play();
     });
-    _controller.play();
-
     super.initState();
   }
 
@@ -32,15 +31,16 @@ class _HeroVideoState extends State<HeroVideo> {
 
   @override
   Widget build(BuildContext context) {
+    var fixedWidth = _controller.value.size.width<_controller.value.size.height?_controller.value.size.width:_controller.value.size.height;
     return Stack(
       children: <Widget>[
         SizedBox.expand(
           child: FittedBox(
             fit: BoxFit.cover,
             child: SizedBox(
-              width: _controller.value.size.width,
-              height: _controller.value.size.height,
-              child: VideoPlayer(_controller),
+              width: fixedWidth,
+              height:fixedWidth,
+                  child: VideoPlayer(_controller),
             ),
           ),
         ),

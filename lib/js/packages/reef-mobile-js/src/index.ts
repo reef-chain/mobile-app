@@ -12,4 +12,5 @@ window['reefState'] = reefState;
 window['tokenUtil'] = tokenUtil;
 window['keyring'] = Keyring;
 window['signer'] = Signer;
-window['getReefJsVer'] = ()=>({reefAppJs:'0 .0.1', utilLib:version});
+window['getReefJsVer'] = ()=>({reefAppJs:'0.0.1', utilLib:version});
+window['isJsConn'] = ()=>{return true};

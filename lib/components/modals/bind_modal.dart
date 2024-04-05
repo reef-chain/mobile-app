@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:mobx/mobx.dart';
 import 'package:reef_mobile_app/components/modals/signing_modals.dart';
+import 'package:reef_mobile_app/utils/bind_evm.dart';
 import '../sign/SignatureContentToggle.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
@@ -19,8 +20,6 @@ import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-const MIN_BALANCE = 5;
 
 enum SendStatus {
   READY,
@@ -42,8 +41,9 @@ enum SendStatus {
 
 class BindEvm extends StatefulWidget {
   final ReefAccount bindFor;
+  final VoidCallback? callback;
 
-  const BindEvm({Key? key, required this.bindFor}) : super(key: key);
+  const BindEvm({Key? key, required this.bindFor,this.callback}) : super(key: key);
 
   @override
   State<BindEvm> createState() => _BindEvmState();
@@ -63,6 +63,8 @@ class _BindEvmState extends State<BindEvm> {
   bool boundComplete = false;
   bool sendingFundTransaction = false;
   bool sendingBoundTransaction = false;
+  bool recordingChanges = false;
+  String? nativeTxStatus;
 
   final FocusNode _focus = FocusNode();
   final FocusNode _focusSecond = FocusNode();
@@ -80,24 +82,6 @@ class _BindEvmState extends State<BindEvm> {
     if (availableTxAccounts.isNotEmpty) {
       transferBalanceFrom = availableTxAccounts[0];
     }
-  }
-
-  bool hasBalanceForBinding(ReefAccount reefSigner) {
-    return reefSigner.balance >= BigInt.from(MIN_BALANCE * 1e18);
-  }
-
-  bool hasBalanceForFunding(ReefAccount reefSigner) {
-    return reefSigner.balance >= BigInt.from(MIN_BALANCE * 1e18 * 2);
-  }
-
-  List<ReefAccount> getSignersWithEnoughBalance(ReefAccount bindFor) {
-    List<ReefAccount> _availableTxAccounts = ReefAppState
-        .instance.model.accounts.accountsList
-        .where((signer) =>
-            signer.address != bindFor.address && hasBalanceForFunding(signer))
-        .toList();
-    _availableTxAccounts.sort((a, b) => b.balance.compareTo(a.balance));
-    return _availableTxAccounts;
   }
 
   Future<void> startFunding() async {
@@ -167,17 +151,20 @@ class _BindEvmState extends State<BindEvm> {
       if (txResponse['data']['status'] == 'broadcast') {
         setState(() {
           statusValue = SendStatus.SENT_TO_NETWORK;
+          nativeTxStatus = AppLocalizations.of(context)!.waiting_to_include_in_block;
         });
       }
       if (txResponse['data']['status'] == 'included-in-block') {
         setState(() {
           statusValue = SendStatus.INCLUDED_IN_BLOCK;
+          nativeTxStatus =AppLocalizations.of(context)!.unreversible_finality;
         });
       }
       if (txResponse['data']['status'] == 'finalized') {
         setState(() {
           statusValue = SendStatus.FINALIZED;
           currentStep += 1;
+          nativeTxStatus=AppLocalizations.of(context)!.transaction_finalized;
         });
       }
       return true;
@@ -293,6 +280,7 @@ class _BindEvmState extends State<BindEvm> {
         ),
         onPressed: () async {
           await func();
+
         },
         child: Text(
           AppLocalizations.of(context)!.continue_,
@@ -375,11 +363,11 @@ class _BindEvmState extends State<BindEvm> {
     ]);
   }
 
-  Widget buildBound() {
+
+  Widget buildRecordedChanges() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(AppLocalizations.of(context)!.bind_modal_connected + ':',
           style: const TextStyle(fontWeight: FontWeight.bold)),
-      // Text('\nReef EVM Address:',style: const TextStyle(fontWeight: FontWeight.bold)),
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -422,6 +410,35 @@ class _BindEvmState extends State<BindEvm> {
     ]);
   }
 
+
+
+  Widget buildBound() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Gap(16.0),
+             Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.purple,
+                ),
+              ),
+              SizedBox(width: 12),
+              Flexible(child: Text("Connecting to EVM address ..."))
+            ],
+          )],
+        ),
+      ]),
+    );
+  }
+
   Widget buildFundTransaction() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -446,7 +463,7 @@ class _BindEvmState extends State<BindEvm> {
                 child: Text((statusValue != SendStatus.CANCELED &&
                         statusValue != SendStatus.ERROR)
                     // ? "Waiting for fund transaction to complete..."
-                    ? AppLocalizations.of(context)!.waiting_for_tx_to_complete
+                    ? nativeTxStatus??AppLocalizations.of(context)!.sending_tx_to_nw
                     : AppLocalizations.of(context)!.fund_tx_failed))
           ],
         )
@@ -542,12 +559,13 @@ class _BindEvmState extends State<BindEvm> {
                     resolvedEvmAddress = resolvedEvmAdr;
                   });
                   if (value == null) {
+                    sendingBoundTransaction=false;
                     return;
                   } else {
                     boundComplete = true;
                   }
                   break;
-                case 2:
+                case 3:
                   Navigator.of(context).pop();
                   return;
                 default:
@@ -556,7 +574,19 @@ class _BindEvmState extends State<BindEvm> {
               if (currentStep <= 2) {
                 setState(() {
                   currentStep += 1;
+                  recordingChanges = true;
                 });
+                try {
+                var isEvmBounded = await ReefAppState.instance.accountCtrl.listenBindActivity(widget.bindFor.address);
+                if(isEvmBounded['updatedAccounts']['boundEvm'].length>0){
+                    setState(() {
+                    currentStep += 1;
+                  });
+                  if(widget.callback!=null)widget.callback!();
+                }
+                } catch (e) {
+                  print("boundEVM ERR=$e");
+                }
               }
             },
             onStepCancel: () {
@@ -588,39 +618,18 @@ class _BindEvmState extends State<BindEvm> {
                   EdgeInsets.symmetric(horizontal: 16.0);
 
               return ((currentStep == 0 && sendingFundTransaction) ||
-                      (currentStep == 1 && sendingBoundTransaction))
+                      (currentStep == 1 && sendingBoundTransaction)) || (currentStep == 2 && recordingChanges)
                   ? const SizedBox()
-                  // : Container(
-                  //     margin: const EdgeInsets.only(top: 16.0),
-                  //     child: ConstrainedBox(
-                  //       constraints:
-                  //           const BoxConstraints.tightFor(height: 48.0),
-                  //       child: Row(
-                  //         children: <Widget>[
-                  //           TextButton(
-                  //             onPressed: () {
-                  //               details.onStepContinue!();
-                  //             },
-                  //             child: Text(details.isActive &&
-                  //                     details.currentStep == 3
-                  //                 ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
-                  //                     .toUpperCase()
-                  //                 : localizations.continueButtonLabel
-                  //                     .toUpperCase()),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   );
                   : ElevatedButton(
                       child: Text(
-                        details.isActive && details.currentStep == 3
+                        details.isActive && details.currentStep >= 3
                             ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
                                 .toUpperCase()
                             : localizations.continueButtonLabel,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
+                          color: Styles.whiteColor
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -635,6 +644,7 @@ class _BindEvmState extends State<BindEvm> {
                       ),
                       onPressed: () async {
                         details.onStepContinue!();
+                        if(widget.callback!=null)widget.callback!();
                       },
                     );
             },
@@ -655,43 +665,46 @@ class _BindEvmState extends State<BindEvm> {
                   state: currentStep > 1
                       ? ReefStepState.complete
                       : ReefStepState.indexed,
-                  title: Text(AppLocalizations.of(context)!.bind_transaction),
+                  title: Text(AppLocalizations.of(context)!.evm_connect_transaction),
                   content: buildBind()),
               ReefStep(
-                  state: (currentStep == 2)
+                  state: (currentStep > 2)
                       ? ReefStepState.complete
                       : ReefStepState.indexed,
-                  title: Text(AppLocalizations.of(context)!.evm_is_bound),
+                  title: Text(AppLocalizations.of(context)!.evm_is_connected),
                   content: buildBound()),
+              ReefStep(
+                  state: (currentStep == 3)
+                      ? ReefStepState.complete
+                      : ReefStepState.indexed,
+                  title: Text(AppLocalizations.of(context)!.changes_recorded),
+                  content: buildRecordedChanges()),
             ]),
-        // child: Column(
-        //   crossAxisAlignment: CrossAxisAlignment.start,
-        //   children: [
-        //     if (selectAccount)
-        //       buildSelectAccount()
-        //     else if (widget.bindFor.isEvmClaimed)
-        //       buildBound()
-        //     else
-        //       buildBind(),
-        //   ],
-        // ),
       ),
     );
   }
 }
 
-void showBindEvmModal(BuildContext context, {required bindFor}) {
+void showBindEvmModal(BuildContext context, {required bindFor,callback}) {
   Navigator.of(context).push(MaterialPageRoute(
     builder: (context) => Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.connect_evm),
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: (() {
+              var pendingSignatures = ReefAppState.instance.model.signatureRequests.list;
+              if(pendingSignatures.length>0){
+                ReefAppState.instance.signingCtrl
+          .rejectSignature(pendingSignatures[0].signatureIdent);
+              }else{
+                Navigator.pop(context);
+              }
+            }),
+          ),
+          title: Text(AppLocalizations.of(context)!.connect_evm,style: TextStyle(color: Styles.whiteColor),),
           backgroundColor: Colors.purple,
         ),
-        body: BindEvm(bindFor: bindFor)),
-    fullscreenDialog: true,
+        body: BindEvm(bindFor: bindFor,callback: callback,)),
   ));
-  // showModal(context,
-  //     child: BindEvm(bindFor: bindFor),
-  //     dismissible: true,
-  //     headText: "Connect EVM");
 }
