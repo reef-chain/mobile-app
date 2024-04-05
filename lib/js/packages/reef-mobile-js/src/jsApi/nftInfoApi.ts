@@ -1,16 +1,16 @@
-import { gql } from '@apollo/client';
-
+import {graphql} from "@reef-chain/util-lib";
+import { firstValueFrom } from "rxjs";
 
 export const fetchNFTinfo = (
-    apollo: any,
+    httpClient: any,
     nftId: string,
     ownerAddress: string,
-  ): Promise<any> => apollo
-    .query({
-      query: FETCH_NFT_INFO_ANUKUL,
-      variables: { nftId: nftId,ownerAddress:ownerAddress },
-    })
-    .then((verContracts: any) => {
+  ): Promise<any> => firstValueFrom(graphql.queryGql$(
+                        httpClient, {
+                         query: FETCH_NFT_INFO,
+                         variables: {nftId, ownerAddress}
+                       }))
+    .then((verContracts: any)=> {
         const vContract = verContracts.data.tokenHolders[0];
         if (!vContract) return null;
 
@@ -18,12 +18,10 @@ export const fetchNFTinfo = (
          contractAddress:vContract.token.contract.id,
         } as any;
         return nftInfo;
-    })
+    });
 
-
-
-const FETCH_NFT_INFO_ANUKUL = gql`
-query FETCH_NFT_Info_anukul($nftId: BigInt!,$ownerAddress: String!) {
+const FETCH_NFT_INFO = `
+query FETCH_NFT_INFO($nftId: BigInt!,$ownerAddress: String!) {
     tokenHolders(where: {nftId_eq: $nftId , id_contains:$ownerAddress }, limit: 1) {
         token {
           contract {

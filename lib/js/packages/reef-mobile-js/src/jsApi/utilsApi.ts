@@ -52,10 +52,10 @@ export const initApi = () => {
         },
         getNftInfo: async (nftId:string,ownerAddress:string) => {
             return firstValueFrom(
-                combineLatest([graphql.apolloClientInstance$,nftId,ownerAddress]).pipe(
+                combineLatest([graphql.httpClientInstance$,nftId,ownerAddress]).pipe(
                     take(1),
-                    switchMap(async ([apolloInstance, abc]:[any, string]) => {
-                        return await fetchNFTinfo(apolloInstance, nftId,ownerAddress);
+                    switchMap(async ([httpClientInstance, abc]:[any, string]) => {
+                        return await fetchNFTinfo(httpClientInstance, nftId,ownerAddress);
                     }),
                     take(1)
                 )
