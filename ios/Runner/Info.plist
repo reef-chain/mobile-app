@@ -64,7 +64,7 @@
 		<key>CFBundleTypeRole</key>
 		<string>Editor</string>
 		<key>CFBundleURLName</key>
-		<string>com.example.reefMobileApp</string>
+		<string>io.reef.reefMobileApp</string>
 		<key>CFBundleURLSchemes</key>
 		<array>
 		<string>example</string>
