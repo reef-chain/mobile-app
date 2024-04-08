@@ -448,8 +448,7 @@ class _BindEvmState extends State<BindEvm> {
           children: [
             SizedBox(
               height: 20,
-              width: (statusValue != SendStatus.CANCELED &&
-                        statusValue != SendStatus.ERROR)?20:84,
+              width: 20,
               child: (statusValue != SendStatus.CANCELED &&
                       statusValue != SendStatus.ERROR)
                   ? const CircularProgressIndicator(
@@ -463,7 +462,6 @@ class _BindEvmState extends State<BindEvm> {
             Flexible(
                 child: Text((statusValue != SendStatus.CANCELED &&
                         statusValue != SendStatus.ERROR)
-                    // ? "Waiting for fund transaction to complete..."
                     ? nativeTxStatus??AppLocalizations.of(context)!.sending_tx_to_nw
                     : AppLocalizations.of(context)!.fund_tx_failed))
           ],
@@ -653,13 +651,11 @@ class _BindEvmState extends State<BindEvm> {
               ReefStep(
                   state: currentStep > 0
                       ? ReefStepState.complete
-                      : ((statusValue != SendStatus.CANCELED &&
-                              statusValue != SendStatus.ERROR)
-                          ? ReefStepState.indexed
-                          : ReefStepState.error),
+                      : ReefStepState.indexed,
                   title: Text(
                       AppLocalizations.of(context)!.select_account_for_funding),
-                  content: sendingFundTransaction
+                  content: sendingFundTransaction && (statusValue != SendStatus.CANCELED &&
+                        statusValue != SendStatus.ERROR)
                       ? buildFundTransaction()
                       : buildFund()),
               ReefStep(
