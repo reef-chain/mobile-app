@@ -449,21 +449,13 @@ class _BindEvmState extends State<BindEvm> {
             SizedBox(
               height: 20,
               width: 20,
-              child: (statusValue != SendStatus.CANCELED &&
-                      statusValue != SendStatus.ERROR)
-                  ? const CircularProgressIndicator(
+              child: const CircularProgressIndicator(
                       color: Colors.purple,
-                    )
-                  : const CircleAvatar(
-                      child: Icon(Icons.error),
                     ),
             ),
             const SizedBox(width: 12),
             Flexible(
-                child: Text((statusValue != SendStatus.CANCELED &&
-                        statusValue != SendStatus.ERROR)
-                    ? nativeTxStatus??AppLocalizations.of(context)!.sending_tx_to_nw
-                    : AppLocalizations.of(context)!.fund_tx_failed))
+                child: Text(nativeTxStatus??AppLocalizations.of(context)!.sending_tx_to_nw))
           ],
         )
       ],
@@ -616,7 +608,8 @@ class _BindEvmState extends State<BindEvm> {
               const EdgeInsets buttonPadding =
                   EdgeInsets.symmetric(horizontal: 16.0);
 
-              return ((currentStep == 0 && sendingFundTransaction) ||
+              return ((currentStep == 0 && sendingFundTransaction && (statusValue != SendStatus.CANCELED &&
+                        statusValue != SendStatus.ERROR)) ||
                       (currentStep == 1 && sendingBoundTransaction)) || (currentStep == 2 && recordingChanges)
                   ? const SizedBox()
                   : ElevatedButton(
@@ -654,7 +647,8 @@ class _BindEvmState extends State<BindEvm> {
                       : ReefStepState.indexed,
                   title: Text(
                       AppLocalizations.of(context)!.select_account_for_funding),
-                  content: sendingFundTransaction && (statusValue != SendStatus.CANCELED &&
+                  content: sendingFundTransaction 
+                  && (statusValue != SendStatus.CANCELED &&
                         statusValue != SendStatus.ERROR)
                       ? buildFundTransaction()
                       : buildFund()),
