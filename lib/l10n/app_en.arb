@@ -190,7 +190,7 @@
   "confirm_send":"Confirm Send",
   "not_valid":"Not Valid",
   "allow_10_s":"Allow ~10s before restarting app.",
-  "restart_app":"Restart App.",
+  "restart_app":"Restart App",
   "you_are_a_dev":"You are a developer now",
   "more_times_to_enable":"more times to enable developer settings",
   "tap":"Tap"
