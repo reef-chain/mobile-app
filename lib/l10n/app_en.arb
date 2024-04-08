@@ -128,7 +128,6 @@
   "evm_connect_transaction":"EVM connect transaction",
   "evm_is_connected":"EVM is connected",
   "select_account_for_funding":"Select account for funding",
-  "go_back_to_home_page":"Continue",
   "incorrect_password_entered":"Incorrect Password Entered!",
   "export_custom_pass":"exporting with custom password!",
   "export_app_pass":"exporting with app password!",

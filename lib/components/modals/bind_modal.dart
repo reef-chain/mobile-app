@@ -623,8 +623,7 @@ class _BindEvmState extends State<BindEvm> {
                   : ElevatedButton(
                       child: Text(
                         details.isActive && details.currentStep >= 3
-                            ? "${AppLocalizations.of(context)!.go_back_to_home_page}"
-                                .toUpperCase()
+                            ? AppLocalizations.of(context)!.continue_
                             : localizations.continueButtonLabel,
                         style: TextStyle(
                           fontSize: 16,

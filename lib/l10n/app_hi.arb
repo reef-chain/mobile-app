@@ -127,7 +127,6 @@
   "evm_connect_transaction":"बंधन लेनदेन",
   "evm_is_connected":"EVM बंधी हुई है",
   "select_account_for_funding":"फंडिंग के लिए खाते का चयन करें",
-  "go_back_to_home_page":"होम पेज पर वापस जाएं",
   "incorrect_password_entered":"गलत पासवर्ड डाला गया!",
   "export_custom_pass":"कस्टम पासवर्ड के साथ निर्यात!",
   "export_app_pass":"ऐप पासवर्ड के साथ निर्यात करना!",
