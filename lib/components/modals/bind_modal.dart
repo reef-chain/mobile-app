@@ -448,7 +448,8 @@ class _BindEvmState extends State<BindEvm> {
           children: [
             SizedBox(
               height: 20,
-              width: 20,
+              width: (statusValue != SendStatus.CANCELED &&
+                        statusValue != SendStatus.ERROR)?20:84,
               child: (statusValue != SendStatus.CANCELED &&
                       statusValue != SendStatus.ERROR)
                   ? const CircularProgressIndicator(
