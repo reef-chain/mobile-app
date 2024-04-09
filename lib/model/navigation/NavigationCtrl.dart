@@ -81,6 +81,33 @@ class NavigationCtrl with NavSwipeCompute {
             ))));
   }
 
+
+  void navigateToSendNFTPage(
+      {required BuildContext context,
+      required String nftUrl,
+      required String name,
+      required int balance,
+      required String nftId,
+      required String mimetype}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => SignatureContentToggle(Scaffold(
+              appBar: AppBar(
+                title: Text("Send NFT",
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 24,
+                    )),
+                backgroundColor: Colors.deepPurple.shade700,
+              ),
+              body: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  child: Text("send page")
+                  // SendNFT(nftUrl, name, balance, nftId, mimetype)
+                  ),
+              backgroundColor: Styles.greyColor,
+            ))));
+  }
   void navigateToTxInfo(
       {required BuildContext context,
       required String unparsedTimestamp,
