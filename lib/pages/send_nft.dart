@@ -164,19 +164,34 @@ class _SendNFTState extends State<SendNFT> {
   @override
   Widget build(BuildContext context) {
     List<Widget> buildInputElements() {
-      void onSelectAccount(String selectedAddress) async {
-        bool isValidAddr = await _isValidAddress(selectedAddress);
-        setState(() {
-          address = selectedAddress.trim();
-          valueController.text = address;
-          if (isValidAddr) {
-            statusValue = SendStatus.NO_AMT;
-            isValidAddress = true;
-            setAmountState();
-          } else {
-            statusValue = SendStatus.ADDR_NOT_VALID;
+      void _validateAddressInput(String value)async{
+          bool isValidAddr = await _isValidAddress(value);
+          String? resolvedEvmAddress;
+          if(isValidAddr){
+              resolvedEvmAddress = (await ReefAppState.instance.accountCtrl.resolveEvmAddress(value));
           }
+          setState(() {
+            if (isValidAddr) {
+              if(resolvedEvmAddress==null || resolvedEvmAddress==""){
+              statusValue = SendStatus.NO_EVM_CONNECTED;
+              isValidAddress = false;
+            }else{
+              statusValue = SendStatus.NO_AMT;
+              isValidAddress = true;
+            }
+            } else {
+              statusValue = SendStatus.ADDR_NOT_VALID;
+              isValidAddress = false;
+            }
+          });
+      }
+
+      void onSelectAccount(String selectedAddress) async {
+        setState(() {
+          address=selectedAddress;
+          valueController.text=selectedAddress;
         });
+        _validateAddressInput(selectedAddress);
       }
 
       return [
@@ -251,25 +266,7 @@ class _SendNFTState extends State<SendNFT> {
                       setState(() {
                         address = value;
                       });
-                      bool isValidAddr = await _isValidAddress(value);
-                      String? resolvedEvmAddress;
-                      if(isValidAddr){
-                         resolvedEvmAddress = (await ReefAppState.instance.accountCtrl.resolveEvmAddress(value));
-                      }
-                      setState(() {
-                        if (isValidAddr) {
-                          if(resolvedEvmAddress==null || resolvedEvmAddress==""){
-                          statusValue = SendStatus.NO_EVM_CONNECTED;
-                          isValidAddress = false;
-                        }else{
-                          statusValue = SendStatus.NO_AMT;
-                          isValidAddress = true;
-                        }
-                        } else {
-                          statusValue = SendStatus.ADDR_NOT_VALID;
-                          isValidAddress = false;
-                        }
-                      });
+                      _validateAddressInput(value);
                     }),
               ),
               SizedBox(
