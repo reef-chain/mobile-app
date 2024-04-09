@@ -250,7 +250,6 @@ class _SendNFTState extends State<SendNFT> {
                         hintStyle: TextStyle(color: Styles.textLightColor)),
                     onChanged: (value) async {
                       setState(() {
-                        print("anuna $value");
                         address = value;
                       });
                       bool isValidAddr = await _isValidAddress(value);
