@@ -1,6 +1,37 @@
 import {graphql} from "@reef-chain/util-lib";
 import { firstValueFrom } from "rxjs";
 
+export const nftTxAbi = [
+    {
+      "name": "safeTransferFrom",
+      "type": "function",
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    }
+]
+
 export const fetchNFTinfo = (
     httpClient: any,
     nftId: string,
