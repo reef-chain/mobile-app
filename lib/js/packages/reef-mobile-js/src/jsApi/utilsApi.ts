@@ -40,10 +40,11 @@ export const initApi = () => {
         },
         getNftInfo: async (nftId:string,ownerAddress:string) => {
             return firstValueFrom(
-                combineLatest([graphql.httpClientInstance$,nftId,ownerAddress]).pipe(
+                combineLatest([graphql.httpClientInstance$]).pipe(
                     take(1),
-                    switchMap(async ([httpClientInstance, nftId,ownerAddress]:[any, string,string]) => {
-                        return await fetchNFTinfo(httpClientInstance, nftId,ownerAddress);
+                    switchMap(async ([httpClientInstance]:[any]) => {
+                        const response =  await fetchNFTinfo(httpClientInstance, nftId,ownerAddress)
+                        return response;
                     }),
                     take(1)
                 )

@@ -97,11 +97,13 @@ function reef20Transfer$(to: string, provider, tokenAmount: string, tokenContrac
                 console.log('transfer ERROR=',err.message)
                 observer.error(err)});
         })();
+
     });
 }
 
 function nftTransfer$(from,to,nftId,nftAmount,provider,nftContract) {
     const STORAGE_LIMIT = 2000;
+
     return new Observable( (observer) => {
         (async()=>{
             const ARGS = [from,to,nftId,nftAmount,[]];
@@ -109,8 +111,7 @@ function nftTransfer$(from,to,nftId,nftAmount,provider,nftContract) {
                 customData: {
                     storageLimit: STORAGE_LIMIT
                 }
-            }
-            ).then((tx) => {
+            }).then((tx) => {
                 observer.next({status: 'broadcast', transactionResponse: tx});
                 console.log('tx in progress =', tx.hash);
                 tx.wait().then(async (receipt) => {
@@ -151,7 +152,6 @@ export const initApi = (signingKey: Signer) => {
                 take(1),
                 map(([sgnrs, addr]: [ReefAccount[], string]) => findAccount(sgnrs, addr)),
                 combineLatest([reefState.selectedProvider$]),
-                //@ts-ignore
                 switchMap(([signer, provider]: [ReefAccount | undefined, Provider]) => {
                     if (!signer) {
                         console.log(" transfer.send() - NO SIGNER FOUND",);
@@ -194,7 +194,6 @@ export const initApi = (signingKey: Signer) => {
                 take(1),
                 map(([sgnrs, addr]: [ReefAccount[], string]) => findAccount(sgnrs, addr)),
                 combineLatest([reefState.selectedProvider$]),
-                //@ts-ignore
                 switchMap(([signer, provider]: [ReefAccount | undefined, Provider]) => {
                     if (!signer) {
                         console.log(" nft.send() - NO SIGNER FOUND",);
@@ -202,14 +201,14 @@ export const initApi = (signingKey: Signer) => {
                     }
                     return getAccountSigner(signer.address, provider, signingKey).then((evmSigner) => [signer, provider, evmSigner]);
                 }),
-                //@ts-ignore
                 switchMap(([signer, provider, evmSigner]: [ReefAccount | undefined, Provider, EvmSigner]) => {
                     if (!evmSigner) {
                         throw new Error('Signer not created');
                     }
                         const tokenContract = new Contract(nftContractAddress, nftTxAbi, evmSigner as EvmSigner);
-                        console.log('transfering NFT');
+                        console.log('transfering NFT ',nftContractAddress);
                         try {
+                            // tokenContract.safeTransferFrom(from,to,nftId,nftAmount,[]).then(res=>console.log(`anuna ${res}`));
                             return nftTransfer$(from,to,nftId,nftAmount,provider,tokenContract).pipe(
                                 map(data => ({
                                     success: true,
@@ -221,9 +220,7 @@ export const initApi = (signingKey: Signer) => {
                             console.log(`encountered error in nft tx ${error}`);
                         }
                 }),
-                catchError(err => {
-                    console.log("error===",err.message)
-                    return of({success: false, data: err.message})})
+                catchError(err => of({success: false, data: err.message}))
             );
         },
         sendPromise: async (from: string, to: string, tokenAmount: string, tokenDecimals: number, tokenAddress: string) => {
