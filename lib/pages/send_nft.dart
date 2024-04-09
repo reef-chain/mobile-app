@@ -923,16 +923,26 @@ buildFeedbackUI(BuildContext context, SendStatus stat, void Function() onNew,
                     children: <Widget>[
                       Container(
                         margin: const EdgeInsets.only(top: 20),
-                        child: ElevatedButton(
-                          style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.resolveWith(
-                                      (states) => Colors.deepPurple)),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text("Go Back to Homepage"),
+                        child:  ElevatedButton(
+                           style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40),
                         ),
+                        shadowColor: const Color(0x559d6cff),
+                        elevation: 5,
+                        backgroundColor: Styles.primaryAccentColor,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
+                      ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Styles.whiteColor
+                        ),),
+                          ),
                       )
                     ],
                   ));
