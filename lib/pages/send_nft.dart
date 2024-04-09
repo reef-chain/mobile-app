@@ -252,10 +252,19 @@ class _SendNFTState extends State<SendNFT> {
                         address = value;
                       });
                       bool isValidAddr = await _isValidAddress(value);
+                      String? resolvedEvmAddress;
+                      if(isValidAddr){
+                         resolvedEvmAddress = (await ReefAppState.instance.accountCtrl.resolveEvmAddress(value));
+                      }
                       setState(() {
                         if (isValidAddr) {
+                          if(resolvedEvmAddress==null || resolvedEvmAddress==""){
+                          statusValue = SendStatus.NO_EVM_CONNECTED;
+                          isValidAddress = false;
+                        }else{
                           statusValue = SendStatus.NO_AMT;
                           isValidAddress = true;
+                        }
                         } else {
                           statusValue = SendStatus.ADDR_NOT_VALID;
                           isValidAddress = false;
