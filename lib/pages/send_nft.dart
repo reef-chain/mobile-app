@@ -56,12 +56,11 @@ class _SendNFTState extends State<SendNFT> {
 
   void getContractAddress() async {
     String? ownerAddress = ReefAppState.instance.model.accounts.selectedAddress;
-    //todo anukulpandey fix it
-    // var fetchedContractAddress = await ReefAppState.instance.tokensCtrl
-    //     .getNftInfo(widget.nftId, ownerAddress!);
+    var fetchedContractAddress = await ReefAppState.instance.tokensCtrl
+        .getNftInfo(widget.nftId, ownerAddress!);
+        print(fetchedContractAddress);
     setState(() {
-      // contractAddress = fetchedContractAddress["contractAddress"];
-      contractAddress = "0x9FdEb478A27E216f80DaEE0967dc426338eD02f2";
+      contractAddress = fetchedContractAddress["contractAddress"];
     });
   }
 

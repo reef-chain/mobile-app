@@ -88,4 +88,7 @@ class TokenCtrl {
       jsApi.jsCallVoidReturn('window.reefState.reloadTokens()');
     }
   }
+  Future<dynamic> getNftInfo(String nftId, String ownerAddress) async {
+    return jsApi.jsPromise('window.utils.getNftInfo("$nftId","$ownerAddress")');
+  }
 }
