@@ -233,7 +233,7 @@ class _SendNFTState extends State<SendNFT> {
                     showSelectAccountModal(
                       AppLocalizations.of(context)!.select_address,
                       onSelectAccount,
-                      true,
+                      false,
                     );
                   },
                   //color: const Color(0xffDFDAED),
