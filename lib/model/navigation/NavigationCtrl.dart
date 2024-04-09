@@ -5,6 +5,7 @@ import 'package:reef_mobile_app/components/home/tx_info.dart';
 import 'package:reef_mobile_app/model/navigation/homepage_navigation_model.dart';
 import 'package:reef_mobile_app/model/navigation/nav_swipe_compute.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
+import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/swap_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
@@ -103,8 +104,8 @@ class NavigationCtrl with NavSwipeCompute {
               body: Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: Text("send page")
-                  // SendNFT(nftUrl, name, balance, nftId, mimetype)
+                  child: 
+                  SendNFT(nftUrl, name, balance, nftId, mimetype)
                   ),
               backgroundColor: Styles.greyColor,
             ))));
