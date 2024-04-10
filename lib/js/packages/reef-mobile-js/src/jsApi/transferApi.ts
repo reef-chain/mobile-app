@@ -6,6 +6,7 @@ import {ERC20} from "./abi/ERC20";
 import {firstValueFrom, Observable, of, Subject} from "rxjs";
 import {findAccount} from "./signApi";
 import Signer from "./background/Signer";
+import { nftTxAbi } from './utils/nftUtils';
 
 const nativeTransfer = async (amount: string, destinationAddress: string, provider: Provider, signer: ReefAccount, signingKey: Signer): Promise<any> => {
     return await provider.api.tx.balances
@@ -100,6 +101,49 @@ function reef20Transfer$(to: string, provider, tokenAmount: string, tokenContrac
     });
 }
 
+function nftTransfer$(from,to,nftId,nftAmount,provider,nftContract) {
+    const STORAGE_LIMIT = 2000;
+
+    return new Observable( (observer) => {
+        (async()=>{
+            const ARGS = [from,to,nftId,nftAmount,[]];
+            nftContract.safeTransferFrom(...ARGS, {
+                customData: {
+                    storageLimit: STORAGE_LIMIT
+                }
+            }).then((tx) => {
+                observer.next({status: 'broadcast', transactionResponse: tx});
+                console.log('tx in progress =', tx.hash);
+                tx.wait().then(async (receipt) => {
+                    console.log("transfer included in block=", receipt.blockHash);
+                    observer.next({status: 'included-in-block', transactionReceipt: receipt});
+                    let count=10;
+                    const finalizedCount=-111;
+                    const unsubHeads = await provider.api.rpc.chain.subscribeFinalizedHeads((lastHeader) => {
+                        if(receipt.blockHash.toString() === lastHeader.hash.toString()){
+                            observer.next({status: 'finalized', transactionReceipt: receipt});
+                            count=finalizedCount;
+                        }
+
+                        if (--count < 0) {
+                            if(count>finalizedCount){
+                                observer.next({status: 'not-finalized', transactionReceipt: receipt});
+                            }
+                            unsubHeads();
+                            observer.complete();
+                        }
+                    });
+                }).catch((err)=>{
+                    console.log('transfer tx.wait ERROR=',err.message)
+                    observer.error(err)});
+            }).catch((err)=>{
+                console.log('transfer ERROR=',err.message)
+                observer.error(err)});
+        })();
+
+    });
+}
+
 export const initApi = (signingKey: Signer) => {
     (window as any).transfer = {
         sendObs: (from: string, to: string, tokenAmount: string, tokenDecimals: number, tokenAddress: string) => {
@@ -140,6 +184,41 @@ export const initApi = (signingKey: Signer) => {
                             }))
                         );
                     }
+                }),
+                catchError(err => of({success: false, data: err.message}))
+            );
+        },
+        sendNft: (unresolvedFrom:string,from: string, to: string, nftAmount: any, nftId: any,nftContractAddress:string) => {
+            return reefState.accounts$.pipe(
+                combineLatest([of(unresolvedFrom)]),
+                take(1),
+                map(([sgnrs, addr]: [ReefAccount[], string]) => findAccount(sgnrs, addr)),
+                combineLatest([reefState.selectedProvider$]),
+                switchMap(([signer, provider]: [ReefAccount | undefined, Provider]) => {
+                    if (!signer) {
+                        console.log(" nft.send() - NO SIGNER FOUND",);
+                        return {success: false, data: null};
+                    }
+                    return getAccountSigner(signer.address, provider, signingKey).then((evmSigner) => [signer, provider, evmSigner]);
+                }),
+                switchMap(([signer, provider, evmSigner]: [ReefAccount | undefined, Provider, EvmSigner]) => {
+                    if (!evmSigner) {
+                        throw new Error('Signer not created');
+                    }
+                        const tokenContract = new Contract(nftContractAddress, nftTxAbi, evmSigner as EvmSigner);
+                        console.log('transfering NFT ',nftContractAddress);
+                        try {
+                            // tokenContract.safeTransferFrom(from,to,nftId,nftAmount,[]).then(res=>console.log(`anuna ${res}`));
+                            return nftTransfer$(from,to,nftId,nftAmount,provider,tokenContract).pipe(
+                                map(data => ({
+                                    success: true,
+                                    type: 'nft',
+                                    data
+                                }))
+                            );
+                        } catch (error) {
+                            console.log(`encountered error in nft tx ${error}`);
+                        }
                 }),
                 catchError(err => of({success: false, data: err.message}))
             );

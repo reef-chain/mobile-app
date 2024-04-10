@@ -73,6 +73,12 @@ class SigningCtrl {
     jsApi.confirmTxSignature(sigConfirmationIdent, account.mnemonic);
   }
 
+  Future<dynamic> sendNFT(String unresolvedFrom, String nftContractAddress,
+      String from, String to, int nftAmount, int nftId) async {
+    return jsApi.jsObservable(
+        'window.transfer.sendNft("${unresolvedFrom}","${from}","${to}",${nftAmount},${nftId},"${nftContractAddress}")');
+  }
+
   Future<dynamic> getTypes(String genesisHash, String specVersion)async{
     dynamic types;
     var metadata = await storage

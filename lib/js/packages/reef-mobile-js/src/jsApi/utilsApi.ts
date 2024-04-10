@@ -7,6 +7,7 @@ import {isAscii, u8aToString, u8aUnwrapBytes} from '@polkadot/util';
 import {ERC20} from "./abi/ERC20";
 import { fetchTxInfo } from './txInfoApi';
 import { addressUtils } from '@reef-chain/util-lib';
+import { fetchNFTinfo } from './utils/nftUtils';
 
 function lagWhenDisconnected() {
     return status => {
@@ -32,6 +33,18 @@ export const initApi = () => {
                     take(1),
                     switchMap(async ([httpClientInstance, net, provider, reefPrice]: [any, network.Network, Provider, number]) => {
                         return await fetchTokenData(httpClientInstance, tokenAddress, provider, network.getReefswapNetworkConfig(net).factoryAddress, reefPrice);
+                    }),
+                    take(1)
+                )
+            );
+        },
+        getNftInfo: async (nftId:string,ownerAddress:string) => {
+            return firstValueFrom(
+                combineLatest([graphql.httpClientInstance$]).pipe(
+                    take(1),
+                    switchMap(async ([httpClientInstance]:[any]) => {
+                        const response =  await fetchNFTinfo(httpClientInstance, nftId,ownerAddress)
+                        return response;
                     }),
                     take(1)
                 )
