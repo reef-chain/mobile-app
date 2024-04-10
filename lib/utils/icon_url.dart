@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jovial_svg/jovial_svg.dart';
-import 'package:shimmer/shimmer.dart';
 
 class IconFromUrl extends StatelessWidget {
   final dynamic iconUrl;
@@ -43,16 +42,11 @@ class IconFromUrl extends StatelessWidget {
         imageUrl: iconUrl,
         width: size,
         height: size,
-        placeholder: (context, url) => Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[350]!,
-              child: Container(
-                width: size,
-                height: size,
-                decoration: ShapeDecoration(
-                  color: Colors.grey[350]!,
-                  shape: const CircleBorder(),
-                ),
+        placeholder: (context, url) => Container(
+              width: size,
+              height: size,
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
             ),
         errorWidget: (context, url, error) {
