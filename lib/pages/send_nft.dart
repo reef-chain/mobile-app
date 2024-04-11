@@ -675,7 +675,6 @@ class _SendNFTState extends State<SendNFT> {
                                  onPressed: () {
                                    setState(() {
                                      if (amountToSend >=2) {
-                                    print("e");
                                        amountToSend -= 1;
                                        _amountController!.text =
                                            amountToSend.toString();
