@@ -193,5 +193,9 @@
   "restart_app":"Restart App",
   "you_are_a_dev":"You are a developer now",
   "more_times_to_enable":"more times to enable developer settings",
-  "tap":"Tap"
+  "tap":"Tap",
+  "show_nft_info":"Show NFT info",
+  "contract_address":"Contract Address : ",
+  "nft_id":"NFT ID : ",
+  "fetching_nft_details":"Fetching NFT details..."
 }

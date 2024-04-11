@@ -31,7 +31,7 @@ class SendNFT extends StatefulWidget {
 class _SendNFTState extends State<SendNFT> {
   TextEditingController? _amountController;
   bool _isValueEditing = false;
-  int amountToSend = 0;
+  int amountToSend = 1;
   bool isFormDisabled = false;
   bool isMinBtnEnabled = false;
   bool isMaxBtnEnabled = true;
@@ -381,7 +381,7 @@ class _SendNFTState extends State<SendNFT> {
               )
             : Column(
                 children: [
-                  Text('Generating Signature'),
+                  Text(AppLocalizations.of(context)!.generating_signature),
                   Gap(12),
                   LinearProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -435,7 +435,7 @@ class _SendNFTState extends State<SendNFT> {
                        color: Styles.primaryAccentColor,
                      ),
                      Gap(24.0),
-                     Text("Fetching NFT details...")
+                     Text(AppLocalizations.of(context)!.fetching_nft_details)
                    ],
                  ),
                )
@@ -444,21 +444,11 @@ class _SendNFTState extends State<SendNFT> {
                    child: Column(
                      crossAxisAlignment: CrossAxisAlignment.center,
                      children: [
-                       Text(
-                         widget.name,
-                         style: TextStyle(
-                           fontSize: 28,
-                           fontWeight: FontWeight.bold,
-                           color: Styles.textColor,
-                         ),
-                       ),
-                       Gap(16.0),
                        if (widget.mimetype != "video/mp4")
                          Container(
                            decoration: BoxDecoration(
                              borderRadius: BorderRadius.circular(15),
                              color: Styles.primaryBackgroundColor,
-                            
                            ),
                            padding: const EdgeInsets.all(8.0),
                            child: ClipRRect(
@@ -474,7 +464,7 @@ class _SendNFTState extends State<SendNFT> {
                            widget.nftUrl,
                            displayChild: false,
                          ),
-                       Gap(18.0),
+                       //Gap(18.0),
                        InkWell(
                          onTap: () {
                            setState(() {
@@ -488,8 +478,11 @@ class _SendNFTState extends State<SendNFT> {
                              const Gap(8),
                              Builder(builder: (context) {
                                return Text(
-                                 "Show NFT info",
-                                 style: Theme.of(context).textTheme.bodyLarge,
+                                 widget.name,
+                                 style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 20
+                                 )
                                );
                              }),
                              Expanded(child: Container()),
@@ -510,7 +503,7 @@ class _SendNFTState extends State<SendNFT> {
                                  mainAxisAlignment: MainAxisAlignment.start,
                                  children: [
                                    Text(
-                                     "Your Balance : ",
+                                     AppLocalizations.of(context)!.balance+" : ",
                                      style: TextStyle(
                                        fontSize: 14,
                                        fontWeight: FontWeight.bold,
@@ -520,8 +513,8 @@ class _SendNFTState extends State<SendNFT> {
                                    Text(
                                      "${widget.balance}",
                                      style: TextStyle(
-                                       fontSize: 16,
-                                       fontWeight: FontWeight.bold,
+                                       fontSize: 14,
+                                       fontWeight: FontWeight.w700,
                                        color: Styles.primaryAccentColor,
                                      ),
                                    ),
@@ -532,7 +525,7 @@ class _SendNFTState extends State<SendNFT> {
                                  mainAxisAlignment: MainAxisAlignment.start,
                                  children: [
                                    Text(
-                                     "NFT ID : ",
+                                     AppLocalizations.of(context)!.nft_id,
                                      style: TextStyle(
                                        fontSize: 14,
                                        fontWeight: FontWeight.bold,
@@ -542,8 +535,8 @@ class _SendNFTState extends State<SendNFT> {
                                    Text(
                                      "${widget.nftId}",
                                      style: TextStyle(
-                                       fontSize: 16,
-                                       fontWeight: FontWeight.bold,
+                                       fontSize: 14,
+                                       fontWeight: FontWeight.w700,
                                        color: Styles.primaryAccentColor,
                                      ),
                                    ),
@@ -555,7 +548,7 @@ class _SendNFTState extends State<SendNFT> {
                                  crossAxisAlignment: CrossAxisAlignment.start,
                                  children: [
                                    Text(
-                                     "Contract Address ",
+                                     AppLocalizations.of(context)!.contract_address,
                                      style: TextStyle(
                                        fontSize: 14,
                                        fontWeight: FontWeight.bold,
@@ -582,11 +575,10 @@ class _SendNFTState extends State<SendNFT> {
                                              "${contractAddress}",
                                              softWrap: true,
                                              style: TextStyle(
-                                               fontSize: 16,
-                                               fontWeight: FontWeight.bold,
-                                               color:
-                                                   Styles.primaryAccentColor,
-                                             ),
+                                       fontSize: 14,
+                                       fontWeight: FontWeight.w700,
+                                       color: Styles.primaryAccentColor,
+                                     ),
                                            ),
                                    ),
                                  ],
@@ -672,13 +664,13 @@ class _SendNFTState extends State<SendNFT> {
                                  ),
                                  onPressed: () {
                                    setState(() {
-                                     if (amountToSend > 0) {
+                                     if (amountToSend >=2) {
                                        amountToSend -= 1;
                                        _amountController!.text =
                                            amountToSend.toString();
                                        isMaxBtnEnabled = true;
                                      }
-                                     if (amountToSend == 0) {
+                                     if (amountToSend == 1) {
                                        isMinBtnEnabled = false;
                                        isMaxBtnEnabled = true;
                                      }
@@ -694,7 +686,7 @@ class _SendNFTState extends State<SendNFT> {
                                  TextButton(
                                      onPressed: () {
                                        setState(() {
-                                         amountToSend = 0;
+                                         amountToSend = 1;
                                          _amountController!.text =
                                              amountToSend.toString();
                                          isMinBtnEnabled = false;
