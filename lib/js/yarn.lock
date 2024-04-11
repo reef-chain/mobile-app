@@ -1124,7 +1124,7 @@
   resolved "https://registry.yarnpkg.com/@babel/regjsgen/-/regjsgen-0.8.0.tgz#f0ba69b075e1f05fb2825b7fad991e7adbb18310"
   integrity sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==
 
-"@babel/runtime@^7.16.3", "@babel/runtime@^7.17.2", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.6", "@babel/runtime@^7.20.13", "@babel/runtime@^7.23.8", "@babel/runtime@^7.24.1", "@babel/runtime@^7.8.4":
+"@babel/runtime@^7.16.3", "@babel/runtime@^7.17.2", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.6", "@babel/runtime@^7.20.13", "@babel/runtime@^7.23.8", "@babel/runtime@^7.24.4", "@babel/runtime@^7.8.4":
   version "7.24.4"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.24.4.tgz#de795accd698007a66ba44add6cc86542aff1edd"
   integrity sha512-dkxf7+hn8mFBwKjs9bvBlArzLVxVbS8usaPUDd5p2a9JCL9tB8OaOVN1isD4+Xyk4ns89/xeOmbQvgdK7IIVdA==
@@ -3077,10 +3077,10 @@
     blakejs "~1.2.1"
     ethers "~5.5.0"
 
-"@reef-chain/util-lib@^2.4.12":
-  version "2.4.14"
-  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.4.14.tgz#c00349079dfb51ec5af371da173bd1a72f21520e"
-  integrity sha512-PysesQaVczdb//VHCKbKSe3Z2BMDMcB7Ch2vq2H5gJ8RN3eb+6ii9HKCX0BU007yV5ZeGLO38Qh6YbTr9B0f2Q==
+"@reef-chain/util-lib@^2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.5.0.tgz#775482ae3159e70e32108dfdc87bab17a7a62833"
+  integrity sha512-QQoUBE3zPDWszJYoW1yA4D0ME0rOSREY155VDh57I+7Ih71YzKGawSeFDJHIBlwWNlu98jX4tPui4CQGKVpy0Q==
   dependencies:
     "@metamask/providers" "^14.0.2"
     "@polkadot/api" "^10.11.2"
@@ -3094,9 +3094,9 @@
     mqtt "^5.3.5"
 
 "@rushstack/eslint-patch@^1.1.1":
-  version "1.10.1"
-  resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.10.1.tgz#7ca168b6937818e9a74b47ac4e2112b2e1a024cf"
-  integrity sha512-S3Kq8e7LqxkA9s7HKLqXGTGck1uwis5vAXan3FnU5yw1Ec5hsSGnq4s/UCaSqABPOnOTg7zASLyst7+ohgWexg==
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.10.2.tgz#053f1540703faa81dea2966b768ee5581c66aeda"
+  integrity sha512-hw437iINopmQuxWPSUEvqE56NCPsiU8N4AYtfHmJFckclktzK9YQJieD3XkDCDH4OjL+C7zgPUh73R/nrcHrqw==
 
 "@scure/base@1.1.1":
   version "1.1.1"
@@ -3150,9 +3150,9 @@
   integrity sha512-nKu8pDrE3LNCEgJjZe1iGXzaD6OSIDD4Xzz/yo4KO9mQ6LBvf49BVrt4qxBFGL6++NneLiWUZGoh+VSd4PyVIg==
 
 "@substrate/connect-known-chains@^1.1.1":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@substrate/connect-known-chains/-/connect-known-chains-1.1.2.tgz#987952dd46a87485285b4fd74a3d3051efe90181"
-  integrity sha512-XvyemTVqon+6EF2G7QL0fEXxjuz3nUNFgFV0TSWhSVpPb+Sfs+vfipbEZxGNouxvjCoJdr6CF0rwgGsrrKOnAA==
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@substrate/connect-known-chains/-/connect-known-chains-1.1.3.tgz#befb4fcf6acf1b1616b56d57c713bd5acb34b151"
+  integrity sha512-anL/gwl/kkfMvr+XFDpNOhcQDXBPF0KkaTKveIExs0bJ8AEjUrpsnaUgyQTjeMNTRcMR87fu+CVslc5ga6su2Q==
 
 "@substrate/connect@0.8.8":
   version "0.8.8"
@@ -3290,9 +3290,9 @@
   integrity sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==
 
 "@types/node@*":
-  version "20.12.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.4.tgz#af5921bd75ccdf3a3d8b3fa75bf3d3359268cd11"
-  integrity sha512-E+Fa9z3wSQpzgYQdYmme5X3OTuejnnTx88A6p6vkkJosR3KBz+HpE3kqNm98VE6cfLFcISx7zW7MsJkH6KwbTw==
+  version "20.12.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.7.tgz#04080362fa3dd6c5822061aa3124f5c152cff384"
+  integrity sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==
   dependencies:
     undici-types "~5.26.4"
 
@@ -4226,9 +4226,9 @@ camelcase@^6.2.0, camelcase@^6.2.1:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001587:
-  version "1.0.30001606"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001606.tgz#b4d5f67ab0746a3b8b5b6d1f06e39c51beb39a9e"
-  integrity sha512-LPbwnW4vfpJId225pwjZJOgX1m9sGfbw/RKJvw/t0QhYOOaTXHvkjVGFGPpvwEzufrjvTlsULnVTxdy4/6cqkg==
+  version "1.0.30001608"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001608.tgz#7ae6e92ffb300e4b4ec2f795e0abab456ec06cc0"
+  integrity sha512-cjUJTQkk9fQlJR2s4HMuPMvTiRggl0rAVMtthQuyOlDWuqHXqN8azLq+pi8B2TjwKJ32diHjUqRIKeFX4z1FoA==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -4987,9 +4987,9 @@ ed2curve@^0.3.0:
     tweetnacl "1.x.x"
 
 electron-to-chromium@^1.4.668:
-  version "1.4.728"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.728.tgz#ac54d9d1b38752b920ec737a48c83dec2bf45ea1"
-  integrity sha512-Ud1v7hJJYIqehlUJGqR6PF1Ek8l80zWwxA6nGxigBsGJ9f9M2fciHyrIiNMerSHSH3p+0/Ia7jIlnDkt41h5cw==
+  version "1.4.733"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.733.tgz#708d51ce01a7ed3b401d5ced85e9f5d504fd4217"
+  integrity sha512-gUI9nhI2iBGF0OaYYLKOaOtliFMl+Bt1rY7VmEjwxOxqoYLub/D9xmduPEhbw2imE6gYkJKhIE5it+KE2ulVxQ==
 
 elliptic@6.5.4:
   version "6.5.4"
@@ -8086,9 +8086,9 @@ mqtt-packet@^9.0.0:
     process-nextick-args "^2.0.1"
 
 mqtt@^5.2.0, mqtt@^5.3.5:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-5.5.0.tgz#a1c76592f47ce348fca8d11f0240824c829213d9"
-  integrity sha512-8WGQpjEzABcCh/UwLj7XaEoLsSLHJrJK3YLu57fJoLUBdz6zPGFdxWK3i1YYdPqKDu0sU6YHt+tly/qdLsLiyg==
+  version "5.5.1"
+  resolved "https://registry.yarnpkg.com/mqtt/-/mqtt-5.5.1.tgz#30e65eceacee6549897c58acc6c56a10b29bc1cb"
+  integrity sha512-jVRUzzI68aNVxi8Jas861AF01Ycw7NCngsvur8VEopdvGI+Temo9BUGRI6lRTkQhZH+fF/88XRJ9a5FJL9e1JA==
   dependencies:
     "@types/readable-stream" "^4.0.5"
     "@types/ws" "^8.5.9"
@@ -10251,33 +10251,33 @@ wordwrap@^1.0.0:
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
   integrity sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==
 
-worker-timers-broker@^6.1.6:
-  version "6.1.6"
-  resolved "https://registry.yarnpkg.com/worker-timers-broker/-/worker-timers-broker-6.1.6.tgz#5779ddcb6b7395e99e89391d7b2e33e1fac0250a"
-  integrity sha512-ZRRjoIVU3vHJlDur51qHRY0hNExyXfmP9vEVu9FIlTNtsL/bYBreryFMD/NUBSyDE7IHTEc1PUG9J0q9OB4E5w==
+worker-timers-broker@^6.1.7:
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/worker-timers-broker/-/worker-timers-broker-6.1.7.tgz#c570552f1576f81226dbeb0dc14bb64144c9597c"
+  integrity sha512-8hb4lSMAijDY/Dp/MOw9Hc2x6uU59XWFYjcWQgC4bai+sxcLXjeexd9aYKdYMFZPiPoieGzMYIs9WGpv2Co3eA==
   dependencies:
-    "@babel/runtime" "^7.24.1"
+    "@babel/runtime" "^7.24.4"
     fast-unique-numbers "^8.0.13"
     tslib "^2.6.2"
-    worker-timers-worker "^7.0.69"
+    worker-timers-worker "^7.0.70"
 
-worker-timers-worker@^7.0.69:
-  version "7.0.69"
-  resolved "https://registry.yarnpkg.com/worker-timers-worker/-/worker-timers-worker-7.0.69.tgz#8d1fd408f8fb9a74c46f619a2dbd68bca9765657"
-  integrity sha512-ykpImmLGYw/l9IuM6gklY0wd7WBXfNyQgzR2jEb8uMPHZhM5i8KWHTy3xb0Kr2QVwooU5eE0xAG6FiFYHPOssQ==
+worker-timers-worker@^7.0.70:
+  version "7.0.70"
+  resolved "https://registry.yarnpkg.com/worker-timers-worker/-/worker-timers-worker-7.0.70.tgz#064758e1ca3bed908950d152e3e3006595dd9600"
+  integrity sha512-lemWEME0RHB78hzGkkQcKfF6L82gqVhV3T9iY14jHBhbLxLq9t1RRCLmPDBZV7sdnUoW6Khkfn6coqPjgEK6cw==
   dependencies:
-    "@babel/runtime" "^7.24.1"
+    "@babel/runtime" "^7.24.4"
     tslib "^2.6.2"
 
 worker-timers@^7.1.4:
-  version "7.1.6"
-  resolved "https://registry.yarnpkg.com/worker-timers/-/worker-timers-7.1.6.tgz#235f9a7ec421bfe25755b2b64b98ffdcd7316291"
-  integrity sha512-yNd+WSL5T8fyKTM3iIxrH4VQkB0EhQJAVsOQCyAbb56bNHc70ADLAMFi4g2m7dD4S0jcSoJxmiy7FB9fy1e4JA==
+  version "7.1.7"
+  resolved "https://registry.yarnpkg.com/worker-timers/-/worker-timers-7.1.7.tgz#1119f6454cb7c8653097ffb66f592115fb6693ea"
+  integrity sha512-Dr4La61d94SjOA8P57h2LN8W3MXOVe/m1P7jER8cmuIy+JaDMqPttSwo6QRJFSK6YnG9cD6SU7J8m7CVlu8jlw==
   dependencies:
-    "@babel/runtime" "^7.24.1"
+    "@babel/runtime" "^7.24.4"
     tslib "^2.6.2"
-    worker-timers-broker "^6.1.6"
-    worker-timers-worker "^7.0.69"
+    worker-timers-broker "^6.1.7"
+    worker-timers-worker "^7.0.70"
 
 wrap-ansi@^6.0.1:
   version "6.2.0"
