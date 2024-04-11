@@ -444,21 +444,11 @@ class _SendNFTState extends State<SendNFT> {
                    child: Column(
                      crossAxisAlignment: CrossAxisAlignment.center,
                      children: [
-                       Text(
-                         widget.name,
-                         style: TextStyle(
-                           fontSize: 28,
-                           fontWeight: FontWeight.bold,
-                           color: Styles.textColor,
-                         ),
-                       ),
-                       Gap(16.0),
                        if (widget.mimetype != "video/mp4")
                          Container(
                            decoration: BoxDecoration(
                              borderRadius: BorderRadius.circular(15),
                              color: Styles.primaryBackgroundColor,
-                            
                            ),
                            padding: const EdgeInsets.all(8.0),
                            child: ClipRRect(
@@ -474,7 +464,7 @@ class _SendNFTState extends State<SendNFT> {
                            widget.nftUrl,
                            displayChild: false,
                          ),
-                       Gap(18.0),
+                       //Gap(18.0),
                        InkWell(
                          onTap: () {
                            setState(() {
