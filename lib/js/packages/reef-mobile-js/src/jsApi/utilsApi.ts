@@ -69,11 +69,9 @@ export const initApi = () => {
                     const api = provider.api;
                     await api.isReady;
 
-                    const abi = ERC20;
-                    const sentValue = '0';
+                    const abi = null;//ERC20;
                     //@ts-ignore
-                    return signatureUtils.decodePayloadMethod(provider, data, abi, sentValue, types);
-
+                    return signatureUtils.decodePayloadMethod(provider, data, abi, types);
                 }),
                 take(1)
             ));
