@@ -31,7 +31,7 @@ class SendNFT extends StatefulWidget {
 class _SendNFTState extends State<SendNFT> {
   TextEditingController? _amountController;
   bool _isValueEditing = false;
-  int amountToSend = 0;
+  int amountToSend = 1;
   bool isFormDisabled = false;
   bool isMinBtnEnabled = false;
   bool isMaxBtnEnabled = true;
@@ -674,13 +674,14 @@ class _SendNFTState extends State<SendNFT> {
                                  ),
                                  onPressed: () {
                                    setState(() {
-                                     if (amountToSend > 0) {
+                                     if (amountToSend >=2) {
+                                    print("e");
                                        amountToSend -= 1;
                                        _amountController!.text =
                                            amountToSend.toString();
                                        isMaxBtnEnabled = true;
                                      }
-                                     if (amountToSend == 0) {
+                                     if (amountToSend == 1) {
                                        isMinBtnEnabled = false;
                                        isMaxBtnEnabled = true;
                                      }
@@ -696,7 +697,7 @@ class _SendNFTState extends State<SendNFT> {
                                  TextButton(
                                      onPressed: () {
                                        setState(() {
-                                         amountToSend = 0;
+                                         amountToSend = 1;
                                          _amountController!.text =
                                              amountToSend.toString();
                                          isMinBtnEnabled = false;
