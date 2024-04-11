@@ -105,28 +105,32 @@ class _TokenViewState extends State<TokenView> {
                                 innerPadding: 2,
                               )
                             : Observer(builder: (context) {
-  return FutureBuilder<String>(
-    future: ReefAppState.instance.accountCtrl.formatBalance(balance.toString(), price),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Text("");
-      } else {
-        return BlurableContent(
-          GradientText(
-            price != 0 ? (snapshot.data ?? "") : "NA",
-            gradient: textGradient(),
-            style: GoogleFonts.poppins(
-              color: Styles.textColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
+  final displayBalance = ReefAppState.instance.model.appConfig.displayBalance;
+  return Observer(builder: (context) {
+    return FutureBuilder<String>(
+      future: ReefAppState.instance.accountCtrl.formatBalance(balance.toString(), price),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text("");
+        } else {
+          return BlurableContent(
+            GradientText(
+              price != 0 ? (snapshot.data ?? "") : "NA",
+              gradient: textGradient(),
+              style: GoogleFonts.poppins(
+                color: Styles.textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+              ),
             ),
-          ),
-          ReefAppState.instance.model.appConfig.displayBalance,
-        );
-      }
-    },
-  );
+            displayBalance,
+          );
+        }
+      },
+    );
+  });
 }),
+
                         Observer(builder: (context) {
                           return BlurableContent(
                               Text(
@@ -235,6 +239,7 @@ class _TokenViewState extends State<TokenView> {
             //     child: ElevatedButton(
             //         onPressed: ReefAppState.instance.tokensCtrl.reload,
             //         child: const Text("ReloadTEST"))),
+
             if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
               Column(
                 children: [
