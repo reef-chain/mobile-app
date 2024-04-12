@@ -98,14 +98,17 @@ class NavigationCtrl with NavSwipeCompute {
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
-              body: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: 
+              backgroundColor: Styles.greyColor,
+              body: 
+              // Padding(
+              //     padding:
+              //         const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+              //     child: 
                   SendNFT(nftUrl, name, balance, nftId, mimetype)
                   ),
-              backgroundColor: Styles.greyColor,
-            ))));
+            // )
+            )
+            ));
   }
   void navigateToTxInfo(
       {required BuildContext context,
