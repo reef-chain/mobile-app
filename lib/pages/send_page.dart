@@ -457,6 +457,7 @@ class _SendPageState extends State<SendPage> {
     return transferStatusUI ??
         Column(
           children: [
+            if(!(jsConn && indexerConn && providerConn))
             GestureDetector(
               onTap: (){showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);},
               child: Text("connecting...",style: Theme.of(context).textTheme.bodyLarge,)),
