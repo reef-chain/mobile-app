@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import 'package:mobx/mobx.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
+import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -453,13 +455,16 @@ class _SendPageState extends State<SendPage> {
       // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
     return transferStatusUI ??
-        Padding(
+        Column(
+          children: [
+            GestureDetector(
+              onTap: (){showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);},
+              child: Text("connecting...",style: Theme.of(context).textTheme.bodyLarge,)),
+            Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 child: Column(
           children: [
-
-            // Gap(16),
             Observer(builder: (_) {
               var tokens = ReefAppState.instance.model.tokens.selectedErc20List;
               var selectedToken = tokens
@@ -489,9 +494,10 @@ class _SendPageState extends State<SendPage> {
             }),
           ],
         ),
-        
-            );
-  }
+            )
+          ],
+        );
+        }
 
   List<Widget> buildInputElements(TokenWithAmount selectedToken) {
     return [
