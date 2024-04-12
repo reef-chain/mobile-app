@@ -90,7 +90,7 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text("Send NFT",
+                title: Text(AppLocalizations.of(context)!.send_nft,
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w500,
                       fontSize: 24,
