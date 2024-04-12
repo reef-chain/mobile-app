@@ -70,16 +70,13 @@ class NavigationCtrl with NavSwipeCompute {
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
-              body: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: SendPage(
+              body: SendPage(
                   preselected,
                   preSelectedTransferAddress: preSelectedTransferAddress,
                 ),
+               backgroundColor: Styles.greyColor,
               ),
-              backgroundColor: Styles.greyColor,
-            ))));
+             )));
   }
 
 

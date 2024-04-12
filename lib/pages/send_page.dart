@@ -453,8 +453,12 @@ class _SendPageState extends State<SendPage> {
       // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
     return transferStatusUI ??
-        Column(
+        Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                child: Column(
           children: [
+
             // Gap(16),
             Observer(builder: (_) {
               var tokens = ReefAppState.instance.model.tokens.selectedErc20List;
@@ -484,7 +488,9 @@ class _SendPageState extends State<SendPage> {
               );
             }),
           ],
-        );
+        ),
+        
+            );
   }
 
   List<Widget> buildInputElements(TokenWithAmount selectedToken) {
@@ -979,59 +985,62 @@ class _SendPageState extends State<SendPage> {
       return null;
     }
 
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        child: SingleChildScrollView(
-          child: ReefStepper(
-            currentStep: index,
-            steps: steps(stat, index),
-            displayStepProgressIndicator: true,
-            controlsBuilder: (context, details) {
-              if ((index ?? 0) >= 3) {
-                return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Flex(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      direction: Axis.horizontal,
-                      children: <Widget>[
-                        Container(
-                          margin: const EdgeInsets.only(top: 20),
-                          child: ElevatedButton(
-                           style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(40),
-                        ),
-                        shadowColor: const Color(0x559d6cff),
-                        elevation: 5,
-                        backgroundColor: Styles.primaryAccentColor,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                      ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Styles.whiteColor
-                        ),),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: Container(
+          margin: const EdgeInsets.only(top: 20),
+          child: SingleChildScrollView(
+            child: ReefStepper(
+              currentStep: index,
+              steps: steps(stat, index),
+              displayStepProgressIndicator: true,
+              controlsBuilder: (context, details) {
+                if ((index ?? 0) >= 3) {
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Flex(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            child: ElevatedButton(
+                             style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40),
                           ),
-                        )
-                      ],
-                    ));
-              }
-              return const Flex(
-                direction: Axis.horizontal,
-                children: <Widget>[
-                  Expanded(
-                      child: SizedBox(
-                    height: 0,
-                  ))
-                ],
-              );
-            },
-          ),
-        ));
+                          shadowColor: const Color(0x559d6cff),
+                          elevation: 5,
+                          backgroundColor: Styles.primaryAccentColor,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
+                        ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Styles.whiteColor
+                          ),),
+                            ),
+                          )
+                        ],
+                      ));
+                }
+                return const Flex(
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Expanded(
+                        child: SizedBox(
+                      height: 0,
+                    ))
+                  ],
+                );
+              },
+            ),
+          )),
+    );
   }
 
   List<ReefStep> steps(SendStatus stat, int index) => [
