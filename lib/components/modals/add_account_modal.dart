@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/components/modal.dart';
+import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -22,6 +23,7 @@ class AddAccount extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 callback('addAccount');
+                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("create-new-account");
               },
               padding: const EdgeInsets.all(2),
               child: Row(
@@ -46,6 +48,7 @@ class AddAccount extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 callback('importAccount');
+                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("import-account");
               },
               padding: const EdgeInsets.all(2),
               child: Row(
@@ -73,6 +76,7 @@ class AddAccount extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 callback('restoreJSON');
+                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("restore-account-json");
               },
               padding: const EdgeInsets.all(2),
               child: Row(
@@ -100,6 +104,7 @@ class AddAccount extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 callback('importFromQR');
+                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("import-account-qr");
               },
               padding: const EdgeInsets.all(2),
               child: Row(

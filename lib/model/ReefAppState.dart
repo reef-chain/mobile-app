@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/ViewModel.dart';
+import 'package:reef_mobile_app/model/analytics/firebaseAnalyticsCtrl.dart';
 import 'package:reef_mobile_app/model/appConfig/AppConfigCtrl.dart';
 import 'package:reef_mobile_app/model/locale/LocaleCtrl.dart';
 import 'package:reef_mobile_app/model/metadata/MetadataCtrl.dart';
@@ -37,6 +38,7 @@ class ReefAppState {
   late LocaleCtrl localeCtrl;
   late AppConfigCtrl appConfigCtrl;
   late StorageCtrl storageCtrl;
+  late FirebaseAnalyticsCtrl firebaseAnalyticsCtrl;
   StreamController<String> initStatusStream = StreamController<String>();
 
   ReefAppState._();
@@ -50,6 +52,7 @@ class ReefAppState {
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("starting network...");
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
+    firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("starting tokens...");
     tokensCtrl = TokenCtrl(jsApi, model.tokens);

@@ -69,6 +69,7 @@ class _SelectLanguageState extends State<SelectLanguage> {
             setState(() {
               _selectedLanguage = value;
             });
+            ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("language-switched-to-${value}");
           },
         ),
         const Gap(30),

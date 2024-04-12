@@ -574,9 +574,11 @@ class _BindEvmState extends State<BindEvm> {
                     currentStep += 1;
                   });
                   if(widget.callback!=null)widget.callback!();
+                  ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("evm-bind-success");
                 }
                 } catch (e) {
                   print("boundEVM ERR=$e");
+                  ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("evm-bind-failed");
                 }
               }
             },
