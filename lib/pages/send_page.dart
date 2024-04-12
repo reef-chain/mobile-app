@@ -460,7 +460,7 @@ class _SendPageState extends State<SendPage> {
             if(!(jsConn && indexerConn && providerConn))
             GestureDetector(
               onTap: (){showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);},
-              child: Text("connecting...",style: Theme.of(context).textTheme.bodyLarge,)),
+              child: Text(AppLocalizations.of(context)!.connecting,style: Theme.of(context).textTheme.bodyLarge,)),
             Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
