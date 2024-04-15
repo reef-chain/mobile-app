@@ -70,16 +70,13 @@ class NavigationCtrl with NavSwipeCompute {
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
-              body: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: SendPage(
+              body: SendPage(
                   preselected,
                   preSelectedTransferAddress: preSelectedTransferAddress,
                 ),
+               backgroundColor: Styles.greyColor,
               ),
-              backgroundColor: Styles.greyColor,
-            ))));
+             )));
   }
 
 
@@ -93,7 +90,7 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text("Send NFT",
+                title: Text(AppLocalizations.of(context)!.send_nft,
                     style: GoogleFonts.spaceGrotesk(
                       fontWeight: FontWeight.w500,
                       fontSize: 24,
@@ -101,14 +98,17 @@ class NavigationCtrl with NavSwipeCompute {
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
-              body: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  child: 
+              backgroundColor: Styles.greyColor,
+              body: 
+              // Padding(
+              //     padding:
+              //         const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+              //     child: 
                   SendNFT(nftUrl, name, balance, nftId, mimetype)
                   ),
-              backgroundColor: Styles.greyColor,
-            ))));
+            // )
+            )
+            ));
   }
   void navigateToTxInfo(
       {required BuildContext context,

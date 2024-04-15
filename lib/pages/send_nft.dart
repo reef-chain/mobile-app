@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mobx/mobx.dart';
 import 'package:reef_mobile_app/components/NFT_videoplayer.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
+import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -40,8 +43,30 @@ class _SendNFTState extends State<SendNFT> {
   String contractAddress = "";
   bool isValidAddress = false;
 
+  var indexerConn = false;
+  var providerConn = false;
+  var jsConn = false;
+  List<StreamSubscription> listeners=[];
+
   @override
   void initState() {
+    listeners.add(ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
+      setState(() {
+        this.providerConn = event != null && event.isConnected;
+      });
+    }));
+    listeners.add(ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+      setState(() {
+        this.indexerConn = event != null && event==true;
+      });
+    }));
+    ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
+      listeners.add(jsStream.listen((event) {
+        setState(() {
+          this.jsConn = event != null && event==true;
+        });
+      }));
+    });
     super.initState();
     _amountController = TextEditingController();
     _amountController!.text = amountToSend.toString();
@@ -50,6 +75,7 @@ class _SendNFTState extends State<SendNFT> {
 
   @override
   void dispose() {
+    listeners.forEach((element) => element.cancel());
     _amountController!.dispose();
     super.dispose();
   }
@@ -418,213 +444,381 @@ class _SendNFTState extends State<SendNFT> {
       // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
     return transferStatusUI ??
-       Container(
-         decoration: BoxDecoration(
-           borderRadius: BorderRadius.circular(15),
-            boxShadow: neumorphicShadow(),
-           color: Styles.primaryBackgroundColor,
-         ),
-         padding: const EdgeInsets.all(24.0),
-         child: contractAddress == ""
-             ? Center(
-                 child: Column(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   crossAxisAlignment: CrossAxisAlignment.center,
-                   children: [
-                     CircularProgressIndicator(
-                       color: Styles.primaryAccentColor,
-                     ),
-                     Gap(24.0),
-                     Text(AppLocalizations.of(context)!.fetching_nft_details)
-                   ],
-                 ),
-               )
-             : Center(
-                 child: SingleChildScrollView(
+    SingleChildScrollView(
+      child:  Column(
+      children: [
+        if(!(jsConn && indexerConn && providerConn))
+            GestureDetector(
+              onTap: (){showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);},
+              child: Text(AppLocalizations.of(context)!.connecting,style: Theme.of(context).textTheme.bodyLarge,)),
+       Padding(
+         padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+         child: Container(
+           decoration: BoxDecoration(
+             borderRadius: BorderRadius.circular(15),
+              boxShadow: neumorphicShadow(),
+             color: Styles.primaryBackgroundColor,
+           ),
+           padding: const EdgeInsets.all(24.0),
+           child: contractAddress == ""
+               ? Center(
                    child: Column(
+                     mainAxisAlignment: MainAxisAlignment.center,
                      crossAxisAlignment: CrossAxisAlignment.center,
                      children: [
-                       if (widget.mimetype != "video/mp4")
-                         Container(
-                           decoration: BoxDecoration(
-                             borderRadius: BorderRadius.circular(15),
-                             color: Styles.primaryBackgroundColor,
-                           ),
-                           padding: const EdgeInsets.all(8.0),
-                           child: ClipRRect(
-                             borderRadius: BorderRadius.circular(10),
-                             child: IconFromUrl(
-                               widget.nftUrl,
-                               size: 320,
+                       CircularProgressIndicator(
+                         color: Styles.primaryAccentColor,
+                       ),
+                       Gap(24.0),
+                       Text(AppLocalizations.of(context)!.fetching_nft_details)
+                     ],
+                   ),
+                 )
+               : Center(
+                   child: SingleChildScrollView(
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.center,
+                       children: [
+                         if (widget.mimetype != "video/mp4")
+                           Container(
+                             decoration: BoxDecoration(
+                               borderRadius: BorderRadius.circular(15),
+                               color: Styles.primaryBackgroundColor,
+                             ),
+                             padding: const EdgeInsets.all(8.0),
+                             child: ClipRRect(
+                               borderRadius: BorderRadius.circular(10),
+                               child: IconFromUrl(
+                                 widget.nftUrl,
+                                 size: 320,
+                               ),
                              ),
                            ),
-                         ),
-                       if (widget.mimetype == "video/mp4")
-                         NFTsVideoPlayer(
-                           widget.nftUrl,
-                           displayChild: false,
-                         ),
-                       //Gap(18.0),
-                       InkWell(
-                         onTap: () {
-                           setState(() {
-                             _showNFTinfo = !_showNFTinfo;
-                           });
-                         },
-                         child: Row(
-                           children: [
-                             const Icon(Icons.info,
-                                 color: Styles.textLightColor),
-                             const Gap(8),
-                             Builder(builder: (context) {
-                               return Text(
-                                 widget.name,
-                                 style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20
-                                 )
-                               );
-                             }),
-                             Expanded(child: Container()),
-                             Icon(_showNFTinfo
-                                 ? Icons.keyboard_arrow_up
-                                 : Icons.keyboard_arrow_down),
-                           ],
-                         ),
-                       ),
-                       if (_showNFTinfo)
-                         Padding(
-                           padding:
-                               const EdgeInsets.only(left: 12.0, bottom: 4.0),
-                           child: Column(
+                         if (widget.mimetype == "video/mp4")
+                           NFTsVideoPlayer(
+                             widget.nftUrl,
+                             displayChild: false,
+                           ),
+                         //Gap(18.0),
+                         InkWell(
+                           onTap: () {
+                             setState(() {
+                               _showNFTinfo = !_showNFTinfo;
+                             });
+                           },
+                           child: Row(
                              children: [
-                               Gap(4.0),
-                               Row(
-                                 mainAxisAlignment: MainAxisAlignment.start,
-                                 children: [
-                                   Text(
-                                     AppLocalizations.of(context)!.balance+" : ",
-                                     style: TextStyle(
-                                       fontSize: 14,
-                                       fontWeight: FontWeight.bold,
-                                       color: Styles.textLightColor,
-                                     ),
-                                   ),
-                                   Text(
-                                     "${widget.balance}",
-                                     style: TextStyle(
-                                       fontSize: 14,
-                                       fontWeight: FontWeight.w700,
-                                       color: Styles.primaryAccentColor,
-                                     ),
-                                   ),
-                                 ],
-                               ),
-                               Gap(4.0),
-                               Row(
-                                 mainAxisAlignment: MainAxisAlignment.start,
-                                 children: [
-                                   Text(
-                                     AppLocalizations.of(context)!.nft_id,
-                                     style: TextStyle(
-                                       fontSize: 14,
-                                       fontWeight: FontWeight.bold,
-                                       color: Styles.textLightColor,
-                                     ),
-                                   ),
-                                   Text(
-                                     "${widget.nftId}",
-                                     style: TextStyle(
-                                       fontSize: 14,
-                                       fontWeight: FontWeight.w700,
-                                       color: Styles.primaryAccentColor,
-                                     ),
-                                   ),
-                                 ],
-                               ),
-                               Gap(4.0),
-                               Row(
-                                 mainAxisAlignment: MainAxisAlignment.start,
-                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                 children: [
-                                   Text(
-                                     AppLocalizations.of(context)!.contract_address,
-                                     style: TextStyle(
-                                       fontSize: 14,
-                                       fontWeight: FontWeight.bold,
-                                       color: Styles.textLightColor,
-                                     ),
-                                   ),
-                                   Expanded(
-                                     child: contractAddress == ""
-                                         ? Column(
-                                             children: [
-                                               Gap(8.0),
-                                               Center(
-                                                 child:
-                                                     LinearProgressIndicator(
-                                                   color: Styles
-                                                       .primaryAccentColor,
-                                                   backgroundColor:
-                                                       Styles.greyColor,
-                                                 ),
-                                               ),
-                                             ],
-                                           )
-                                         : Text(
-                                             "${contractAddress}",
-                                             softWrap: true,
-                                             style: TextStyle(
-                                       fontSize: 14,
-                                       fontWeight: FontWeight.w700,
-                                       color: Styles.primaryAccentColor,
-                                     ),
-                                           ),
-                                   ),
-                                 ],
-                               ),
+                               const Icon(Icons.info,
+                                   color: Styles.textLightColor),
+                               const Gap(8),
+                               Builder(builder: (context) {
+                                 return Text(
+                                   widget.name,
+                                   style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 20
+                                   )
+                                 );
+                               }),
+                               Expanded(child: Container()),
+                               Icon(_showNFTinfo
+                                   ? Icons.keyboard_arrow_up
+                                   : Icons.keyboard_arrow_down),
                              ],
                            ),
                          ),
-                       Gap(18.0),
-                       Column(
-                         children: buildInputElements(),
-                       ),
-                       Gap(8.0),
-                       if (isValidAddress)
-                         Column(
-                           children: [
-                             Row(
-                                 mainAxisAlignment: MainAxisAlignment.center,
-                                 children: [
-                                   Icon(Icons.check_circle_outline,
-                                       color: Styles.greenColor, size: 16),
-                                   const Gap(5),
-                                   Text(
-                                     address.shorten(),
-                                     style: const TextStyle(
+                         if (_showNFTinfo)
+                           Padding(
+                             padding:
+                                 const EdgeInsets.only(left: 12.0, bottom: 4.0),
+                             child: Column(
+                               children: [
+                                 Gap(4.0),
+                                 Row(
+                                   mainAxisAlignment: MainAxisAlignment.start,
+                                   children: [
+                                     Text(
+                                       AppLocalizations.of(context)!.balance+" : ",
+                                       style: TextStyle(
+                                         fontSize: 14,
+                                         fontWeight: FontWeight.bold,
                                          color: Styles.textLightColor,
-                                         fontSize: 12),
-                                   )
-                                 ]),
-                             const Gap(10),
-                           ],
+                                       ),
+                                     ),
+                                     Text(
+                                       "${widget.balance}",
+                                       style: TextStyle(
+                                         fontSize: 14,
+                                         fontWeight: FontWeight.w700,
+                                         color: Styles.primaryAccentColor,
+                                       ),
+                                     ),
+                                   ],
+                                 ),
+                                 Gap(4.0),
+                                 Row(
+                                   mainAxisAlignment: MainAxisAlignment.start,
+                                   children: [
+                                     Text(
+                                       AppLocalizations.of(context)!.nft_id,
+                                       style: TextStyle(
+                                         fontSize: 14,
+                                         fontWeight: FontWeight.bold,
+                                         color: Styles.textLightColor,
+                                       ),
+                                     ),
+                                     Text(
+                                       "${widget.nftId}",
+                                       style: TextStyle(
+                                         fontSize: 14,
+                                         fontWeight: FontWeight.w700,
+                                         color: Styles.primaryAccentColor,
+                                       ),
+                                     ),
+                                   ],
+                                 ),
+                                 Gap(4.0),
+                                 Row(
+                                   mainAxisAlignment: MainAxisAlignment.start,
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                     Text(
+                                       AppLocalizations.of(context)!.contract_address,
+                                       style: TextStyle(
+                                         fontSize: 14,
+                                         fontWeight: FontWeight.bold,
+                                         color: Styles.textLightColor,
+                                       ),
+                                     ),
+                                     Expanded(
+                                       child: contractAddress == ""
+                                           ? Column(
+                                               children: [
+                                                 Gap(8.0),
+                                                 Center(
+                                                   child:
+                                                       LinearProgressIndicator(
+                                                     color: Styles
+                                                         .primaryAccentColor,
+                                                     backgroundColor:
+                                                         Styles.greyColor,
+                                                   ),
+                                                 ),
+                                               ],
+                                             )
+                                           : Text(
+                                               "${contractAddress}",
+                                               softWrap: true,
+                                               style: TextStyle(
+                                         fontSize: 14,
+                                         fontWeight: FontWeight.w700,
+                                         color: Styles.primaryAccentColor,
+                                       ),
+                                             ),
+                                     ),
+                                   ],
+                                 ),
+                               ],
+                             ),
+                           ),
+                         Gap(18.0),
+                         Column(
+                           children: buildInputElements(),
                          ),
-                       Gap(4.0),
-                       Container(
-                         decoration: BoxDecoration(
-                           color: const Color(0xffe6e2f1),
-                           borderRadius:
-                               const BorderRadius.all(Radius.circular(14.0)),
-                         ),
-                         padding: EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
-                         child: Row(
-                           mainAxisAlignment: MainAxisAlignment.center,
-                           children: [
-                             Container(
-                               height: 32,
-                               width: 32,
-                               decoration: BoxDecoration(
+                         Gap(8.0),
+                         if (isValidAddress)
+                           Column(
+                             children: [
+                               Row(
+                                   mainAxisAlignment: MainAxisAlignment.center,
+                                   children: [
+                                     Icon(Icons.check_circle_outline,
+                                         color: Styles.greenColor, size: 16),
+                                     const Gap(5),
+                                     Text(
+                                       address.shorten(),
+                                       style: const TextStyle(
+                                           color: Styles.textLightColor,
+                                           fontSize: 12),
+                                     )
+                                   ]),
+                               const Gap(10),
+                             ],
+                           ),
+                         Gap(4.0),
+                         Container(
+                           decoration: BoxDecoration(
+                             color: const Color(0xffe6e2f1),
+                             borderRadius:
+                                 const BorderRadius.all(Radius.circular(14.0)),
+                           ),
+                           padding: EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0),
+                           child: Row(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               Container(
+                                 height: 32,
+                                 width: 32,
+                                 decoration: BoxDecoration(
+                                     boxShadow: const [
+                                       BoxShadow(
+                                         color: Color(0xff742cb2),
+                                         spreadRadius: -10,
+                                         offset: Offset(0, 5),
+                                         blurRadius: 20,
+                                       ),
+                                     ],
+                                     borderRadius: BorderRadius.circular(80),
+                                     gradient: isMinBtnEnabled
+                                         ? const LinearGradient(
+                                             colors: [
+                                               Color(0xffae27a5),
+                                               Color(0xff742cb2)
+                                             ],
+                                             begin: Alignment(-1, -1),
+                                             end: Alignment(1, 1),
+                                           )
+                                         : const LinearGradient(colors: [
+                                             Color.fromARGB(76, 174, 174, 174),
+                                             Color.fromARGB(86, 136, 144, 171),
+                                           ])),
+                                 child: IconButton(
+                                   icon: Icon(
+                                     Icons.remove,
+                                     color: isMinBtnEnabled
+                                         ? Colors.white
+                                         : Colors.black,
+                                     size: 16.0,
+                                   ),
+                                   style: ElevatedButton.styleFrom(
+                                     tapTargetSize:
+                                         MaterialTapTargetSize.shrinkWrap,
+                                     backgroundColor: Colors.transparent,
+                                     shape: const StadiumBorder(),
+                                     elevation: 0,
+                                   ),
+                                   onPressed: () {
+                                     setState(() {
+                                       if (amountToSend >=2) {
+                                         amountToSend -= 1;
+                                         _amountController!.text =
+                                             amountToSend.toString();
+                                         isMaxBtnEnabled = true;
+                                       }
+                                       if (amountToSend == 1) {
+                                         isMinBtnEnabled = false;
+                                         isMaxBtnEnabled = true;
+                                       }
+                                     });
+                                     setAmountState();
+                                   },
+                                 ),
+                               ),
+                               Gap(8.0),
+                               Column(
+                                 children: [
+                                   Gap(8.0),
+                                   TextButton(
+                                       onPressed: () {
+                                         setState(() {
+                                           amountToSend = 1;
+                                           _amountController!.text =
+                                               amountToSend.toString();
+                                           isMinBtnEnabled = false;
+                                           isMaxBtnEnabled = true;
+                                         });
+                                         setAmountState();
+                                       },
+                                       child: Text(
+                                         'Min',
+                                         style: TextStyle(
+                                             color: isMinBtnEnabled
+                                                 ? Styles.primaryAccentColor
+                                                 : Styles.textLightColor),
+                                       )),
+                                 ],
+                               ),
+                               Expanded(
+                                 child: Container(
+                                   child: TextField(
+                                     controller: _amountController,
+                                     keyboardType: TextInputType.number,
+                                     style: TextStyle(
+                                       fontSize: 22,
+                                       fontWeight: FontWeight.bold,
+                                       color: Styles.primaryAccentColor,
+                                     ),
+                                     decoration: InputDecoration(
+                                       border: InputBorder.none,
+                                     ),
+                                     textAlign: TextAlign.center,
+                                     onChanged: (value) {
+                                       setState(() {
+                                         if (value.isEmpty) {
+                                           amountToSend = 0;
+                                           isMinBtnEnabled = false;
+                                           isMaxBtnEnabled = true;
+                                         } else {
+                                           int enteredValue =
+                                               int.tryParse(value) ?? 0;
+                                           if (enteredValue < 0) {
+                                             statusValue = SendStatus.NO_AMT;
+                                             _amountController!.text =
+                                                 enteredValue.toString();
+                                             amountToSend = enteredValue;
+                                             isMinBtnEnabled = false;
+                                             isMaxBtnEnabled = true;
+                                           } else if (enteredValue >
+                                               widget.balance) {
+                                             statusValue =
+                                                 SendStatus.AMT_TOO_HIGH;
+                                             _amountController!.text =
+                                                 enteredValue.toString();
+                                             amountToSend = enteredValue;
+                                             isMinBtnEnabled = true;
+                                             isMaxBtnEnabled = false;
+                                           } else {
+                                             amountToSend = enteredValue;
+                                             isMinBtnEnabled = true;
+                                             if (enteredValue ==
+                                                 widget.balance) {
+                                               isMaxBtnEnabled = false;
+                                             }
+                                           }
+                                         }
+                                       });
+                                     },
+                                   ),
+                                 ),
+                               ),
+                               Column(
+                                 children: [
+                                   Gap(8.0),
+                                   TextButton(
+                                       onPressed: () {
+                                         setState(() {
+                                           amountToSend = widget.balance;
+                                           _amountController!.text =
+                                               amountToSend.toString();
+                                           isMinBtnEnabled = true;
+                                           isMaxBtnEnabled = false;
+                                         });
+                                         setAmountState();
+                                       },
+                                       child: Text(
+                                         'Max',
+                                         style: TextStyle(
+                                             color: isMaxBtnEnabled
+                                                 ? Styles.primaryAccentColor
+                                                 : Styles.textLightColor),
+                                       )),
+                                 ],
+                               ),
+                               Gap(8.0),
+                               Container(
+                                 height: 32,
+                                 width: 32,
+                                 decoration: BoxDecoration(
                                    boxShadow: const [
                                      BoxShadow(
                                        color: Color(0xff742cb2),
@@ -634,7 +828,7 @@ class _SendNFTState extends State<SendNFT> {
                                      ),
                                    ],
                                    borderRadius: BorderRadius.circular(80),
-                                   gradient: isMinBtnEnabled
+                                   gradient: isMaxBtnEnabled
                                        ? const LinearGradient(
                                            colors: [
                                              Color(0xffae27a5),
@@ -646,211 +840,56 @@ class _SendNFTState extends State<SendNFT> {
                                        : const LinearGradient(colors: [
                                            Color.fromARGB(76, 174, 174, 174),
                                            Color.fromARGB(86, 136, 144, 171),
-                                         ])),
-                               child: IconButton(
-                                 icon: Icon(
-                                   Icons.remove,
-                                   color: isMinBtnEnabled
-                                       ? Colors.white
-                                       : Colors.black,
-                                   size: 16.0,
+                                         ]),
                                  ),
-                                 style: ElevatedButton.styleFrom(
-                                   tapTargetSize:
-                                       MaterialTapTargetSize.shrinkWrap,
-                                   backgroundColor: Colors.transparent,
-                                   shape: const StadiumBorder(),
-                                   elevation: 0,
-                                 ),
-                                 onPressed: () {
-                                   setState(() {
-                                     if (amountToSend >=2) {
-                                       amountToSend -= 1;
-                                       _amountController!.text =
-                                           amountToSend.toString();
-                                       isMaxBtnEnabled = true;
-                                     }
-                                     if (amountToSend == 1) {
-                                       isMinBtnEnabled = false;
-                                       isMaxBtnEnabled = true;
-                                     }
-                                   });
-                                   setAmountState();
-                                 },
-                               ),
-                             ),
-                             Gap(8.0),
-                             Column(
-                               children: [
-                                 Gap(8.0),
-                                 TextButton(
-                                     onPressed: () {
-                                       setState(() {
-                                         amountToSend = 1;
+                                 child: IconButton(
+                                   icon: Icon(
+                                     Icons.add,
+                                     color: isMaxBtnEnabled
+                                         ? Colors.white
+                                         : Colors.black,
+                                     size: 16.0,
+                                   ),
+                                   style: ElevatedButton.styleFrom(
+                                     tapTargetSize:
+                                         MaterialTapTargetSize.shrinkWrap,
+                                     backgroundColor: Colors.transparent,
+                                     shape: const StadiumBorder(),
+                                     elevation: 0,
+                                   ),
+                                   onPressed: () {
+                                     setState(() {
+                                       if (amountToSend < widget.balance) {
+                                         amountToSend += 1;
                                          _amountController!.text =
                                              amountToSend.toString();
-                                         isMinBtnEnabled = false;
                                          isMaxBtnEnabled = true;
-                                       });
-                                       setAmountState();
-                                     },
-                                     child: Text(
-                                       'Min',
-                                       style: TextStyle(
-                                           color: isMinBtnEnabled
-                                               ? Styles.primaryAccentColor
-                                               : Styles.textLightColor),
-                                     )),
-                               ],
-                             ),
-                             Expanded(
-                               child: Container(
-                                 child: TextField(
-                                   controller: _amountController,
-                                   keyboardType: TextInputType.number,
-                                   style: TextStyle(
-                                     fontSize: 22,
-                                     fontWeight: FontWeight.bold,
-                                     color: Styles.primaryAccentColor,
-                                   ),
-                                   decoration: InputDecoration(
-                                     border: InputBorder.none,
-                                   ),
-                                   textAlign: TextAlign.center,
-                                   onChanged: (value) {
-                                     setState(() {
-                                       if (value.isEmpty) {
-                                         amountToSend = 0;
-                                         isMinBtnEnabled = false;
-                                         isMaxBtnEnabled = true;
-                                       } else {
-                                         int enteredValue =
-                                             int.tryParse(value) ?? 0;
-                                         if (enteredValue < 0) {
-                                           statusValue = SendStatus.NO_AMT;
-                                           _amountController!.text =
-                                               enteredValue.toString();
-                                           amountToSend = enteredValue;
-                                           isMinBtnEnabled = false;
-                                           isMaxBtnEnabled = true;
-                                         } else if (enteredValue >
-                                             widget.balance) {
-                                           statusValue =
-                                               SendStatus.AMT_TOO_HIGH;
-                                           _amountController!.text =
-                                               enteredValue.toString();
-                                           amountToSend = enteredValue;
-                                           isMinBtnEnabled = true;
-                                           isMaxBtnEnabled = false;
-                                         } else {
-                                           amountToSend = enteredValue;
-                                           isMinBtnEnabled = true;
-                                           if (enteredValue ==
-                                               widget.balance) {
-                                             isMaxBtnEnabled = false;
-                                           }
-                                         }
+                                         isMinBtnEnabled = true;
                                        }
+                                       if (amountToSend == widget.balance) {
+                                         isMaxBtnEnabled = false;
+                                         isMinBtnEnabled = true;
+                                       }
+                                       setAmountState();
                                      });
                                    },
                                  ),
                                ),
-                             ),
-                             Column(
-                               children: [
-                                 Gap(8.0),
-                                 TextButton(
-                                     onPressed: () {
-                                       setState(() {
-                                         amountToSend = widget.balance;
-                                         _amountController!.text =
-                                             amountToSend.toString();
-                                         isMinBtnEnabled = true;
-                                         isMaxBtnEnabled = false;
-                                       });
-                                       setAmountState();
-                                     },
-                                     child: Text(
-                                       'Max',
-                                       style: TextStyle(
-                                           color: isMaxBtnEnabled
-                                               ? Styles.primaryAccentColor
-                                               : Styles.textLightColor),
-                                     )),
-                               ],
-                             ),
-                             Gap(8.0),
-                             Container(
-                               height: 32,
-                               width: 32,
-                               decoration: BoxDecoration(
-                                 boxShadow: const [
-                                   BoxShadow(
-                                     color: Color(0xff742cb2),
-                                     spreadRadius: -10,
-                                     offset: Offset(0, 5),
-                                     blurRadius: 20,
-                                   ),
-                                 ],
-                                 borderRadius: BorderRadius.circular(80),
-                                 gradient: isMaxBtnEnabled
-                                     ? const LinearGradient(
-                                         colors: [
-                                           Color(0xffae27a5),
-                                           Color(0xff742cb2)
-                                         ],
-                                         begin: Alignment(-1, -1),
-                                         end: Alignment(1, 1),
-                                       )
-                                     : const LinearGradient(colors: [
-                                         Color.fromARGB(76, 174, 174, 174),
-                                         Color.fromARGB(86, 136, 144, 171),
-                                       ]),
-                               ),
-                               child: IconButton(
-                                 icon: Icon(
-                                   Icons.add,
-                                   color: isMaxBtnEnabled
-                                       ? Colors.white
-                                       : Colors.black,
-                                   size: 16.0,
-                                 ),
-                                 style: ElevatedButton.styleFrom(
-                                   tapTargetSize:
-                                       MaterialTapTargetSize.shrinkWrap,
-                                   backgroundColor: Colors.transparent,
-                                   shape: const StadiumBorder(),
-                                   elevation: 0,
-                                 ),
-                                 onPressed: () {
-                                   setState(() {
-                                     if (amountToSend < widget.balance) {
-                                       amountToSend += 1;
-                                       _amountController!.text =
-                                           amountToSend.toString();
-                                       isMaxBtnEnabled = true;
-                                       isMinBtnEnabled = true;
-                                     }
-                                     if (amountToSend == widget.balance) {
-                                       isMaxBtnEnabled = false;
-                                       isMinBtnEnabled = true;
-                                     }
-                                     setAmountState();
-                                   });
-                                 },
-                               ),
-                             ),
-                           ],
+                             ],
+                           ),
                          ),
-                       ),
-                       Gap(24.0),
-                       buildSendStatusButton()
-                     ],
+                         Gap(24.0),
+                         buildSendStatusButton()
+                       ],
+                     ),
                    ),
                  ),
-               ),
-       );
-  }
+         ),
+       )
+      ],
+    )
+    );
+    }
 }
 
 enum SendStatus {
@@ -904,59 +943,62 @@ buildFeedbackUI(BuildContext context, SendStatus stat, void Function() onNew,
     return null;
   }
 
-  return Container(
-      margin: const EdgeInsets.only(top: 20),
-      child: SingleChildScrollView(
-        child: ReefStepper(
-          currentStep: index,
-          steps: steps(stat, index),
-          displayStepProgressIndicator: true,
-          controlsBuilder: (context, details) {
-            if ((index ?? 0) >= 3) {
-              return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Flex(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    direction: Axis.horizontal,
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.only(top: 20),
-                        child:  ElevatedButton(
-                           style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(40),
-                        ),
-                        shadowColor: const Color(0x559d6cff),
-                        elevation: 5,
-                        backgroundColor: Styles.primaryAccentColor,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                      ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Styles.whiteColor
-                        ),),
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+    child: Container(
+        margin: const EdgeInsets.only(top: 20),
+        child: SingleChildScrollView(
+          child: ReefStepper(
+            currentStep: index,
+            steps: steps(stat, index),
+            displayStepProgressIndicator: true,
+            controlsBuilder: (context, details) {
+              if ((index ?? 0) >= 3) {
+                return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Flex(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      direction: Axis.horizontal,
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.only(top: 20),
+                          child:  ElevatedButton(
+                             style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40),
                           ),
-                      )
-                    ],
-                  ));
-            }
-            return const Flex(
-              direction: Axis.horizontal,
-              children: <Widget>[
-                Expanded(
-                    child: SizedBox(
-                  height: 0,
-                ))
-              ],
-            );
-          },
-        ),
-      ));
+                          shadowColor: const Color(0x559d6cff),
+                          elevation: 5,
+                          backgroundColor: Styles.primaryAccentColor,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
+                        ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Styles.whiteColor
+                          ),),
+                            ),
+                        )
+                      ],
+                    ));
+              }
+              return const Flex(
+                direction: Axis.horizontal,
+                children: <Widget>[
+                  Expanded(
+                      child: SizedBox(
+                    height: 0,
+                  ))
+                ],
+              );
+            },
+          ),
+        )),
+  );
 }
 
 List<ReefStep> steps(SendStatus stat, int index) => [
