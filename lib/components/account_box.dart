@@ -293,6 +293,7 @@ class _AccountBoxState extends State<AccountBox> {
                           }
                           showBindEvmModal(context,
                               bindFor: widget.reefAccountFDM.data);
+                          ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("bind-evm-btn-click");
                         },
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.black12,

@@ -268,12 +268,15 @@ class _SendPageState extends State<SendPage> {
     transferTransactionFeedbackStream.listen((txResponse) {
       print('TRANSACTION RESPONSE=$txResponse');
       if (handleExceptionResponse(txResponse)) {
+        ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("send-tx-error");
         return;
       }
       if (handleNativeTransferResponse(txResponse)) {
+        ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("native-send-tx-success");
         return;
       }
       if (handleEvmTransactionResponse(txResponse)) {
+        ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("evm-send-tx-success");
         return;
       }
     });
@@ -929,6 +932,7 @@ class _SendPageState extends State<SendPage> {
                     ),
                   ),
                 )
+                
         ),
       ],
     );

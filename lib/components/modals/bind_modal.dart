@@ -597,7 +597,7 @@ class _BindEvmState extends State<BindEvm> {
                         return;
                       default:
                     }
-            
+
                     if (currentStep <= 2) {
                       setState(() {
                         currentStep += 1;
@@ -610,9 +610,11 @@ class _BindEvmState extends State<BindEvm> {
                           currentStep += 1;
                         });
                         if(widget.callback!=null)widget.callback!();
+                        ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("evm-bind-success");
                       }
                       } catch (e) {
                         print("boundEVM ERR=$e");
+                        ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("evm-bind-failed");
                       }
                     }
                   },
@@ -633,17 +635,17 @@ class _BindEvmState extends State<BindEvm> {
                         cancelColor = Colors.white70;
                         break;
                     }
-            
+
                     final ThemeData themeData = Theme.of(context);
                     final ColorScheme colorScheme = themeData.colorScheme;
                     final MaterialLocalizations localizations =
                         MaterialLocalizations.of(context);
-            
+
                     const OutlinedBorder buttonShape = RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(2)));
                     const EdgeInsets buttonPadding =
                         EdgeInsets.symmetric(horizontal: 16.0);
-            
+
                     return ((currentStep == 0 && sendingFundTransaction && (statusValue != SendStatus.CANCELED &&
                               statusValue != SendStatus.ERROR)) ||
                             (currentStep == 1 && sendingBoundTransaction)) || (currentStep == 2 && recordingChanges)
@@ -682,7 +684,7 @@ class _BindEvmState extends State<BindEvm> {
                             : ReefStepState.indexed,
                         title: Text(
                             AppLocalizations.of(context)!.select_account_for_funding),
-                        content: sendingFundTransaction 
+                        content: sendingFundTransaction
                         && (statusValue != SendStatus.CANCELED &&
                               statusValue != SendStatus.ERROR)
                             ? buildFundTransaction()

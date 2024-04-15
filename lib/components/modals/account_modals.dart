@@ -577,6 +577,7 @@ class _AccountCreationConfirmContentState
                       setState(() {
                         _hasBioAuth = value ?? false;
                       });
+                      ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("bio-auth-${value!=null && value==true?"enabled":"disabled"}");
                       ReefAppState.instance.appConfigCtrl
                           .setBiometricAuth(value == true);
                     },
