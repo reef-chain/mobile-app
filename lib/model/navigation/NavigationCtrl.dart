@@ -12,7 +12,9 @@ import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../components/modals/reconnect_modal.dart';
 import '../../components/sign/SignatureContentToggle.dart';
+import '../ReefAppState.dart';
 
 class NavigationCtrl with NavSwipeCompute {
   final NavigationModel _navigationModel;
@@ -62,12 +64,19 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.send_tokens,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 24,
-                      color: Styles.whiteColor,
-                    )),
+                title: FutureBuilder(future: ReefAppState.instance.metadataCtrl.getJsConnStream(),
+                builder: ((context, snapshot) => StreamBuilder(stream: snapshot.data as Stream,
+                 builder: ((context, snapshot) => GestureDetector(
+                    onTap: (){showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);},
+                  child: Text(snapshot.data != null&&snapshot.data==true?snapshot.data.toString():'ssss',
+                  // child: Text(snapshot.data != null&&snapshot.data==true?AppLocalizations.of(context)!.send_tokens:'ssss',
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 24,
+                        color: Styles.whiteColor,
+                      )),
+                )))))
+                ,
                 backgroundColor: Colors.deepPurple.shade700,
               ),
               body: SendPage(
