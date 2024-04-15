@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import 'package:mobx/mobx.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
+import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -455,7 +457,15 @@ class _SendPageState extends State<SendPage> {
     return transferStatusUI ??
         Column(
           children: [
-            // Gap(16),
+            if(!(jsConn && indexerConn && providerConn))
+            GestureDetector(
+              onTap: (){showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);},
+              child: Text(AppLocalizations.of(context)!.connecting,style: Theme.of(context).textTheme.bodyLarge,)),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                child: Column(
+          children: [
             Observer(builder: (_) {
               var tokens = ReefAppState.instance.model.tokens.selectedErc20List;
               var selectedToken = tokens
@@ -484,8 +494,11 @@ class _SendPageState extends State<SendPage> {
               );
             }),
           ],
+        ),
+            )
+          ],
         );
-  }
+        }
 
   List<Widget> buildInputElements(TokenWithAmount selectedToken) {
     return [
@@ -979,59 +992,62 @@ class _SendPageState extends State<SendPage> {
       return null;
     }
 
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        child: SingleChildScrollView(
-          child: ReefStepper(
-            currentStep: index,
-            steps: steps(stat, index),
-            displayStepProgressIndicator: true,
-            controlsBuilder: (context, details) {
-              if ((index ?? 0) >= 3) {
-                return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Flex(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      direction: Axis.horizontal,
-                      children: <Widget>[
-                        Container(
-                          margin: const EdgeInsets.only(top: 20),
-                          child: ElevatedButton(
-                           style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(40),
-                        ),
-                        shadowColor: const Color(0x559d6cff),
-                        elevation: 5,
-                        backgroundColor: Styles.primaryAccentColor,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                      ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Styles.whiteColor
-                        ),),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: Container(
+          margin: const EdgeInsets.only(top: 20),
+          child: SingleChildScrollView(
+            child: ReefStepper(
+              currentStep: index,
+              steps: steps(stat, index),
+              displayStepProgressIndicator: true,
+              controlsBuilder: (context, details) {
+                if ((index ?? 0) >= 3) {
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Flex(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            child: ElevatedButton(
+                             style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40),
                           ),
-                        )
-                      ],
-                    ));
-              }
-              return const Flex(
-                direction: Axis.horizontal,
-                children: <Widget>[
-                  Expanded(
-                      child: SizedBox(
-                    height: 0,
-                  ))
-                ],
-              );
-            },
-          ),
-        ));
+                          shadowColor: const Color(0x559d6cff),
+                          elevation: 5,
+                          backgroundColor: Styles.primaryAccentColor,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
+                        ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(AppLocalizations.of(context)!.continue_,style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Styles.whiteColor
+                          ),),
+                            ),
+                          )
+                        ],
+                      ));
+                }
+                return const Flex(
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Expanded(
+                        child: SizedBox(
+                      height: 0,
+                    ))
+                  ],
+                );
+              },
+            ),
+          )),
+    );
   }
 
   List<ReefStep> steps(SendStatus stat, int index) => [
