@@ -202,7 +202,7 @@ class _SendNFTState extends State<SendNFT> {
               statusValue = SendStatus.NO_EVM_CONNECTED;
               isValidAddress = false;
             }else{
-              statusValue = SendStatus.NO_AMT;
+              setAmountState();
               isValidAddress = true;
             }
             } else {
