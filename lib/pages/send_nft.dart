@@ -202,7 +202,7 @@ class _SendNFTState extends State<SendNFT> {
               statusValue = SendStatus.NO_EVM_CONNECTED;
               isValidAddress = false;
             }else{
-              statusValue = SendStatus.NO_AMT;
+              setAmountState();
               isValidAddress = true;
             }
             } else {
@@ -211,7 +211,7 @@ class _SendNFTState extends State<SendNFT> {
             }
           });
       }
-
+      
       void onSelectAccount(String selectedAddress) async {
         setState(() {
           address=selectedAddress;
@@ -289,10 +289,12 @@ class _SendNFTState extends State<SendNFT> {
                         hintText: AppLocalizations.of(context)!.send_to_address,
                         hintStyle: TextStyle(color: Styles.textLightColor)),
                     onChanged: (value) async {
+                      var sanitizedAddress = await ReefAppState.instance.accountCtrl.sanitizeEvmAddress(value.trim());
                       setState(() {
-                        address = value;
+                        address = sanitizedAddress;
+                        valueController.text=sanitizedAddress;
                       });
-                      _validateAddressInput(value);
+                      _validateAddressInput(sanitizedAddress);
                     }),
               ),
               SizedBox(
