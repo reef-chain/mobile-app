@@ -11,6 +11,7 @@ import 'package:reef_mobile_app/components/sign/SignatureControls.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/signing/signature_request.dart';
+import 'package:reef_mobile_app/model/signing/signer_payload_json.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
@@ -90,10 +91,11 @@ class SignatureContentToggle extends StatelessObserverWidget {
           Expanded(
               child: Column(children: [
             const Gap(48),
-            Text(
-                "Transaction on ${isMainnet(signatureRequest?.payload.genesisHash) ? 'Reef Mainnet' : toShortDisplay(signatureRequest?.payload.genesisHash?.toString())}",
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            if (signatureRequest?.payload is SignerPayloadJSON)
+              Text(
+                  "Transaction on ${isMainnet(signatureRequest?.payload.genesisHash) ? 'Reef Mainnet' : toShortDisplay(signatureRequest?.payload.genesisHash?.toString())}",
+                  style:
+                      const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const Gap(24),
             MethodDataLoadingIndicator(signatureRequest),
             signatureRequest?.payload.type == "bytes"

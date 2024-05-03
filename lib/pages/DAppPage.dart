@@ -31,7 +31,7 @@ class _DAppPageState extends State<DAppPage> {
 print('TODO dapp injection not working check js build !!!!!!!!');
     widget._getHtml(widget.url).then((html) {
       setState(() {
-        dappJsApi = JsApiService.dAppInjectedHtml(html, widget.url);
+        dappJsApi = JsApiService.dAppInjectedHtml(html, widget.url, null);
         dappJsApi?.jsDAppMsgSubj.listen((value) {
           widget.dAppRequestService
               .handleDAppMsgRequest(value, dappJsApi!.sendDappMsgResponse);

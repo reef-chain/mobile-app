@@ -28,7 +28,9 @@ class SigningCtrl {
   SigningCtrl(this.jsApi, this.storage, this.signatureRequests, this.accountModel) {
     jsApi.jsTxSignatureConfirmationMessageSubj.listen((jsApiMessage) {
       var signatureRequest = _buildSignatureRequest(jsApiMessage);
-      signatureRequest.decodeMethod();
+      if (signatureRequest.payload is SignerPayloadJSON) {
+        signatureRequest.decodeMethod();
+      }
       signatureRequests.add(signatureRequest);
     });
   }

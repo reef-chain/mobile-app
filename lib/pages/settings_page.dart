@@ -21,7 +21,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _showDeveloperSettings = false;
-  bool _isDevMenuHidden = true;
+  bool _isDevMenuHidden = false;
   int _userTapsCount = 0;
 
   String? jsConnState;
@@ -206,6 +206,32 @@ class _SettingsPageState extends State<SettingsPage> {
                       Builder(builder: (context) {
                         return Text(
                             AppLocalizations.of(context)!.select_language,
+                            style: Theme.of(context).textTheme.bodyLarge);
+                      }),
+                    ],
+                  ),
+                ),
+                const Gap(12),
+                const Divider(
+                  color: Styles.textLightColor,
+                  thickness: 1,
+                ),
+                const Gap(12),
+                MaterialButton(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onPressed: () => ReefAppState.instance.navigationCtrl
+                    .navigateToWalletConnectPage(context: context),
+                  padding: const EdgeInsets.all(2),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        CupertinoIcons.qrcode,
+                        color: Styles.textLightColor,
+                        size: 22,
+                      ),
+                      const Gap(8),
+                      Builder(builder: (context) {
+                        return Text("WalletConnect",
                             style: Theme.of(context).textTheme.bodyLarge);
                       }),
                     ],

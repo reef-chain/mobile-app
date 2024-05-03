@@ -46,10 +46,4 @@ export default class Signer implements SignerInterface {
       return Promise.reject(new Error('_canceled'));
     }
   }
-
-  // NOTE We don't listen to updates at all, if we do we can interpret the
-  // resuklt as provided by the API here
-  // public update (id: number, status: Hash | SubmittableResult): void {
-  //   // ignore
-  // }
 }

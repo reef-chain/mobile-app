@@ -5,6 +5,8 @@ class Constants {
       "0x0000000000000000000000000000000001000000";
   static const REEF_MAINNET_GENESIS_HASH =
       "0x7834781d38e4798d548e34ec947d19deea29df148a7bf32484b7b24dacf8d4b7";
+  static const REEF_TESTNET_GENESIS_HASH =
+      "0xb414a8602b2251fa538d38a9322391500bd0324bc7ac6048845d57c37dd83fe6";
   static const BINANCE_CONNECT_PROXY_URL =
       "http://10.0.2.2:8080"; // TODO change to production url
   static final REEF_TOKEN = TokenWithAmount(

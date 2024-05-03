@@ -57,7 +57,7 @@ dependencies:
   permission_handler: ^10.0.0
   path_provider: ^2.0.11
   flutter_secure_storage: ^9.0.0
-  http: ^0.13.5
+  http: ^1.2.0
   local_auth: ^2.1.2
   sliver_tools: ^0.2.12
   flutter_localizations:
@@ -65,6 +65,7 @@ dependencies:
   video_player: ^2.5.1
   barcode_finder:
   file_picker:
+  walletconnect_flutter_v2: ^2.2.3
   #freezed: ^2.0.3+1 #immutable classes
 
 dev_dependencies:
