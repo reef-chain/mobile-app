@@ -118,7 +118,7 @@ class JsApiService {
   }
 
   void confirmTxSignature(String reqId, String? mnemonic) {
-    jsCall('${TX_SIGN_CONFIRMATION_JS_FN_NAME}("$reqId", "${mnemonic ?? ''}")');
+    jsCallVoidReturn('${TX_SIGN_CONFIRMATION_JS_FN_NAME}("$reqId", "${mnemonic ?? ''}")');
   }
 
   void sendDappMsgResponse(String reqId, dynamic value) {

@@ -256,7 +256,7 @@ class _StakingViewState extends State<StakingView> {
                                       borderRadius: BorderRadius.circular(40)),
                                   shadowColor: const Color(0x559d6cff),
                                   elevation: 5,
-                                  primary: _isInputEmpty
+                                  backgroundColor: _isInputEmpty
                                       ? const Color(0xff9d6cff)
                                       : Styles.secondaryAccentColor,
                                   padding:
