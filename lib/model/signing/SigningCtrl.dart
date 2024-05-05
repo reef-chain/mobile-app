@@ -19,6 +19,8 @@ import '../StorageKey.dart';
 import '../account/account_model.dart';
 
 class SigningCtrl {
+  static final SIGN_ERR_CANCELED = "_canceled";
+  static final SIGN_ERR_EMPTY_MNEMONIC = "_empty-mnemonic-value";
   final SignatureRequests signatureRequests;
   final JsApiService jsApi;
   final StorageService storage;
