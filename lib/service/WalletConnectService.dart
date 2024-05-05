@@ -254,10 +254,8 @@ class WalletConnectService {
     String address = parameters["address"];
     Map<String, dynamic> payload = parameters["transactionPayload"];
 
-    dynamic signature;
-    try {
-      signature = await ReefAppState.instance.signingCtrl.signPayload(address, payload);
-    } catch (e) {
+    dynamic signature = await ReefAppState.instance.signingCtrl.signPayload(address, payload);
+    if (signature['error']!=null) {
       throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
     }
 
@@ -281,10 +279,8 @@ class WalletConnectService {
     String address = parameters["address"];
     String message = parameters["message"];
 
-    dynamic signature;
-    try {
-      signature = await ReefAppState.instance.signingCtrl.signRaw(address, message);
-    } catch (e) {
+    dynamic signature = await ReefAppState.instance.signingCtrl.signRaw(address, message);
+    if (signature['error']!=null) {
       throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
     }
 
