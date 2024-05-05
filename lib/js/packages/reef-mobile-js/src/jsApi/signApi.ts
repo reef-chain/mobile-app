@@ -1,5 +1,5 @@
 import {ReefAccount, reefState} from '@reef-chain/util-lib';
-import {map, switchMap, take} from "rxjs/operators";
+import {map, switchMap, take, catchError} from "rxjs/operators";
 import {firstValueFrom} from "rxjs";
 import {stringToHex} from "@polkadot/util";
 import type {SignerPayloadJSON} from "@polkadot/types/types";
@@ -12,25 +12,31 @@ export const findAccount = (signers: ReefAccount[], address: string) => {
 
 export const initApi = (signingKey: Signer) => {
     (window as any).signApi = {
-        signRawPromise: (address: string, message: string | HexString) => {
+        signRawPromise: async (address: string, message: string | HexString) => {
             // TODO getting account is in many places - create method
-            return firstValueFrom(reefState.accounts$.pipe(
+            try{
+            return await firstValueFrom(reefState.accounts$.pipe(
                 take(1),
                 map((sgnrs: ReefAccount[]) => findAccount(sgnrs, address)),
                 switchMap(async (signer: ReefAccount | undefined) => {
                     if (!signer) {
                         throw Error('signer not found addr=' + address);
                     }
-                    return signingKey.signRaw({
+
+                    return await signingKey.signRaw({
                         address: signer.address,
                         data: message.startsWith('0x') ? message : stringToHex(message),
                         type: 'bytes'
                     });
                 })
             ));
+            }catch(e){
+                return {error: e.message}
+            }
         },
-        signPayloadPromise: (address: string, payload: SignerPayloadJSON) => {
-            return firstValueFrom(reefState.accounts$.pipe(
+        signPayloadPromise: async (address: string, payload: SignerPayloadJSON) => {
+            try{
+            return await firstValueFrom(reefState.accounts$.pipe(
                 take(1),
                 map((sgnrs: ReefAccount[]) => findAccount(sgnrs, address)),
                 switchMap((signer: ReefAccount | undefined) => {
@@ -40,6 +46,9 @@ export const initApi = (signingKey: Signer) => {
                     return signingKey.signPayload(payload);
                 })
             ));
+            }catch(e){
+                return {error: e.message}
+            }
         }
     }
 }
