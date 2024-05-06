@@ -18,7 +18,7 @@ import 'package:barcode_finder/barcode_finder.dart';
 class QrDataDisplay extends StatefulWidget {
   ReefQrCodeType? expectedType;
 
-  QrDataDisplay(@required this.expectedType, {Key? key}) : super(key: key);
+  QrDataDisplay(this.expectedType, {Key? key}) : super(key: key);
 
   @override
   State<QrDataDisplay> createState() => _QrDataDisplayState();
@@ -37,6 +37,8 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
         return "This is Account Address , You can send funds here by scanning this QR Code";
       case ReefQrCodeType.accountJson:
         return "You can import this Account by scanning this QR code and entering the password.";
+      case ReefQrCodeType.walletConnect:
+        return "This is WalletConnect QR Code.";
       default:
         return "Not Reef QR Code.";
     }
@@ -67,6 +69,13 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
               ));
         }
         break;
+      case ReefQrCodeType.walletConnect:
+        Navigator.pop(context);
+          final Uri uriData = Uri.parse(qrCode.data);
+          await ReefAppState.instance.walletConnect.getWeb3Wallet().pair(
+            uri: uriData,
+          );
+        break;
 
       default:
         break;
@@ -75,15 +84,21 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
 
   Future<void> handleQrCodeData(String qrCodeData) async {
     ReefQrCode? qrCode;
-    try {
-      var decoded = jsonDecode(qrCodeData);
-      var qrCodeType = ReefQrCodeType.values.byName(decoded["type"]);
-      qrCode = ReefQrCode(qrCodeType, decoded["data"]);
-    } on FormatException catch (e) {
-      var isAddr = await ReefAppState.instance.accountCtrl
-          .isValidSubstrateAddress(qrCodeData);
-      if (isAddr && isReefAddrPrefix(qrCodeData)) {
-        qrCode = ReefQrCode(ReefQrCodeType.address, qrCodeData);
+
+    // TODO: Test `reefApp:` deep link with web3Modal once Reef app is added to explorer
+    if (qrCodeData.startsWith("wc:") || qrCodeData.startsWith("reefApp:")) {
+      qrCode = ReefQrCode(ReefQrCodeType.walletConnect, qrCodeData);
+    } else {
+      try {
+        var decoded = jsonDecode(qrCodeData);
+        var qrCodeType = ReefQrCodeType.values.byName(decoded["type"]);
+        qrCode = ReefQrCode(qrCodeType, decoded["data"]);
+      } on FormatException catch (e) {
+        var isAddr = await ReefAppState.instance.accountCtrl
+            .isValidSubstrateAddress(qrCodeData);
+        if (isAddr && isReefAddrPrefix(qrCodeData)) {
+          qrCode = ReefQrCode(ReefQrCodeType.address, qrCodeData);
+        }
       }
     }
 
@@ -251,4 +266,4 @@ Future<String?> scanFile() async {
   }
 }
 
-enum ReefQrCodeType { address, accountJson, info, invalid }
+enum ReefQrCodeType { address, accountJson, info, walletConnect, invalid }

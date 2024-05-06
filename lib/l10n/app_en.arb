@@ -198,5 +198,8 @@
   "contract_address":"Contract Address : ",
   "nft_id":"NFT ID : ",
   "fetching_nft_details":"Fetching NFT details...",
-  "send_nft":"Send NFT"
+  "send_nft":"Send NFT",
+  "scan_qr_code":"Scan QR Code",
+  "create_new_connection": "Create new connection",
+  "no_active_sessions": "No active sessions"
 }

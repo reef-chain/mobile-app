@@ -8,6 +8,7 @@ import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/swap_page.dart';
+import 'package:reef_mobile_app/pages/wallet_connect_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -148,6 +149,23 @@ class NavigationCtrl with NavSwipeCompute {
                 padding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                 child: SwapPage(preselected),
+              ),
+              backgroundColor: Styles.greyColor,
+            ))));
+  }
+
+  void navigateToWalletConnectPage(
+      {required BuildContext context}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => SignatureContentToggle(Scaffold(
+              appBar: AppBar(
+                title: const Text("WalletConnect"),
+                backgroundColor: Colors.deepPurple.shade700,
+              ),
+              body: const Padding(
+                padding:
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                child: WalletConnectPage(),
               ),
               backgroundColor: Styles.greyColor,
             ))));

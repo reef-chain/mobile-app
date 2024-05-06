@@ -11,8 +11,10 @@ import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/locale/LocaleCtrl.dart';
 import 'package:reef_mobile_app/model/locale/locale_model.dart';
 import 'package:reef_mobile_app/pages/introduction_page.dart';
+import 'package:reef_mobile_app/service/WalletConnectService.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
 
 import '../main.dart';
 import '../model/ReefAppState.dart';
@@ -161,7 +163,8 @@ class _SplashAppState extends State<SplashApp> {
 
   Future<void> _initializeAsyncDependencies() async {
     final storageService = StorageService();
-    await ReefAppState.instance.init(widget.reefJsApiService, storageService);
+    final walletConnectService = WalletConnectService();
+    await ReefAppState.instance.init(widget.reefJsApiService, storageService, walletConnectService);
     setState(() {
       appReady = true;
     });
