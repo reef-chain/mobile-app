@@ -114,7 +114,6 @@ class _WalletConnectSessionState extends State<WalletConnectSession> {
 Future<dynamic> showWalletConnectSessionModal({
   required address, required name, required url, icon}
 ) {
-  print("=> icon $icon");
   return showModal(navigatorKey.currentContext,
       child: WalletConnectSession(
         address: address,

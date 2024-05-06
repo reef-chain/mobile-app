@@ -48,6 +48,7 @@ class WalletConnectService {
     _web3Wallet!.onSessionProposalError.subscribe(_onSessionProposalError);
     _web3Wallet!.onSessionProposal.subscribe(_onSessionProposal);
     _web3Wallet!.onSessionConnect.subscribe(_onSessionConnect);
+    _web3Wallet!.onSessionRequest.subscribe(_onSessionRequest);
     _web3Wallet!.onSessionDelete.subscribe(_onSessionDelete);
     _web3Wallet!.onSessionExpire.subscribe(_onSessionExpire);
 
@@ -56,28 +57,6 @@ class WalletConnectService {
     await _web3Wallet!.init();
 
     sessions.value = _web3Wallet!.sessions.getAll();
-
-    // Register method handlers
-    _web3Wallet!.registerRequestHandler(
-      chainId: MAINNET_CHAIN_ID,
-      method: SIGN_TX_METHOD,
-      handler: signTxRequestHandler,
-    );
-    _web3Wallet!.registerRequestHandler(
-      chainId: TESTNET_CHAIN_ID,
-      method: SIGN_TX_METHOD,
-      handler: signTxRequestHandler,
-    );
-    _web3Wallet!.registerRequestHandler(
-      chainId: MAINNET_CHAIN_ID,
-      method: SIGN_MSG_METHOD,
-      handler: signMessageRequestHandler,
-    );
-    _web3Wallet!.registerRequestHandler(
-      chainId: TESTNET_CHAIN_ID,
-      method: SIGN_MSG_METHOD,
-      handler: signMessageRequestHandler,
-    );
   }
 
   FutureOr onDispose() {
@@ -88,6 +67,7 @@ class WalletConnectService {
     _web3Wallet!.onSessionProposalError.unsubscribe(_onSessionProposalError);
     _web3Wallet!.onSessionProposal.unsubscribe(_onSessionProposal);
     _web3Wallet!.onSessionConnect.unsubscribe(_onSessionConnect);
+    _web3Wallet!.onSessionRequest.unsubscribe(_onSessionRequest);
     _web3Wallet!.onSessionDelete.unsubscribe(_onSessionDelete);
     _web3Wallet!.onSessionExpire.unsubscribe(_onSessionExpire);
   }
@@ -223,6 +203,52 @@ class WalletConnectService {
     }
   }
 
+  void _onSessionRequest(SessionRequestEvent? event) async {
+    if (_web3Wallet == null) return;
+    if (event == null) return;
+
+    final chainId = event.chainId;
+    if (chainId != MAINNET_CHAIN_ID && chainId != TESTNET_CHAIN_ID) return;
+
+    final method = event.method;
+    final id = event.id;
+    final topic = event.topic;
+    final params = event.params;
+    dynamic signature;
+
+    if (method == SIGN_TX_METHOD) {
+      String address = params["address"];
+      Map<String, dynamic> payload = params["transactionPayload"];
+      signature = await ReefAppState.instance.signingCtrl.signPayload(address, payload);
+    } else if (event.method == SIGN_MSG_METHOD) {
+      String address = params["address"];
+      String message = params["message"];
+      signature = await ReefAppState.instance.signingCtrl.signRaw(address, message);
+    } else {
+      throw Errors.getSdkError(Errors.UNSUPPORTED_METHODS);
+    }
+
+    if (signature['error'] != null) {
+      return _web3Wallet!.respondSessionRequest(
+        topic: topic,
+        response: JsonRpcResponse(
+          id: id,
+          jsonrpc: '2.0',
+          error: const JsonRpcError(code: 5001, message: Errors.USER_REJECTED_SIGN),
+        ),
+      );
+    }
+
+    return _web3Wallet!.respondSessionRequest(
+      topic: topic,
+      response: JsonRpcResponse(
+        id: id,
+        jsonrpc: '2.0',
+        result: signature,
+      ),
+    );
+  }
+
   void _onSessionDelete(SessionDelete? args) {
     if (args != null) {
       sessions.value = List.from(sessions.value)
@@ -241,56 +267,6 @@ class WalletConnectService {
     await _web3Wallet!.disconnectSession(
       topic: topic,
       reason: Errors.getSdkError(Errors.USER_DISCONNECTED),
-    );
-  }
-
-  Future<dynamic> signTxRequestHandler(String topic, dynamic parameters) async {
-    if (_web3Wallet == null) {
-      throw Errors.getSdkError(Errors.NOT_INITIALIZED);
-    }
-
-    final id = _web3Wallet!.pendingRequests.getAll().first.id;
-
-    String address = parameters["address"];
-    Map<String, dynamic> payload = parameters["transactionPayload"];
-
-    dynamic signature = await ReefAppState.instance.signingCtrl.signPayload(address, payload);
-    if (signature['error']!=null) {
-      throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
-    }
-
-    return _web3Wallet!.respondSessionRequest(
-      topic: topic,
-      response: JsonRpcResponse(
-        id: id,
-        jsonrpc: '2.0',
-        result: signature,
-      ),
-    );
-  }
-
-  Future<dynamic> signMessageRequestHandler(String topic, dynamic parameters) async {
-    if (_web3Wallet == null) {
-      throw Errors.getSdkError(Errors.NOT_INITIALIZED);
-    }
-
-    final id = _web3Wallet!.pendingRequests.getAll().first.id;
-
-    String address = parameters["address"];
-    String message = parameters["message"];
-
-    dynamic signature = await ReefAppState.instance.signingCtrl.signRaw(address, message);
-    if (signature['error']!=null) {
-      throw Errors.getSdkError(Errors.USER_REJECTED_SIGN);
-    }
-
-    return _web3Wallet!.respondSessionRequest(
-      topic: topic,
-      response: JsonRpcResponse(
-        id: id,
-        jsonrpc: '2.0',
-        result: signature,
-      ),
     );
   }
 }
