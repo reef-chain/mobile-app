@@ -31,14 +31,15 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                   Expanded(
                     child: ElevatedButton(
                       style:  ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(40)),
-                                shadowColor: const Color(0x559d6cff),
-                                elevation: 5,
-                                backgroundColor: const Color(0xff9d6cff),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40),
                               ),
+                              shadowColor: const Color(0x559d6cff),
+                              elevation: 5,
+                              backgroundColor: Styles.primaryAccentColor,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 28),
+                            ),
                       onPressed: () => showQrTypeDataModal(
                         AppLocalizations.of(context)!.scan_qr_code, context,
                         expectedType: ReefQrCodeType.walletConnect),
@@ -65,7 +66,6 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
-                
                 children: [Expanded(
                   child: ValueListenableBuilder<List<SessionData>>(
                   valueListenable: ReefAppState.instance.walletConnect.sessions, 
