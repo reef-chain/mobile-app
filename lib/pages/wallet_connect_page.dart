@@ -91,9 +91,13 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                     }
                     return ListView.separated(
                       itemCount: sessionList.length,
-                      separatorBuilder: (context, index) => Divider(),
+                      separatorBuilder: (context, index) => const Gap(10),
                       itemBuilder: (context, index) {
                         final session = sessionList[index];
+                        var wcIcon = "https://avatars.githubusercontent.com/u/37784886";
+                        var iconSrc = session.peer.metadata.icons.isNotEmpty
+                                  ? session.peer.metadata.icons[0]
+                                  : wcIcon;
                         return Container(
                           decoration: BoxDecoration(
                             color: Styles.whiteColor,
@@ -111,9 +115,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                             ),
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(session.peer.metadata.icons.isNotEmpty 
-                                  ? session.peer.metadata.icons[0] 
-                                  : "https://avatars.githubusercontent.com/u/37784886",
+                              child: Image.network(iconSrc,
                                 height: 80),
                             ),
                             trailing: IconButton(
