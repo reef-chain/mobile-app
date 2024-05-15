@@ -49,11 +49,26 @@ class _WalletConnectSessionState extends State<WalletConnectSession> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'URL: ${widget.url}',
-                                style: const TextStyle(
-                                    fontSize: 16, color: Styles.textColor),
-                                textAlign: TextAlign.justify,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Styles.boxBackgroundColor,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: Row(
+                                    children: [
+                                      Gap(4.0),
+                                      Text('URL: ',style: TextStyle(fontWeight: FontWeight.bold),),
+                                      Text(
+                                        '${widget.url}',
+                                        style: const TextStyle(
+                                            fontSize: 16, color: Styles.textColor),
+                                        textAlign: TextAlign.justify,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 20),
                               Text(
@@ -85,9 +100,10 @@ class _WalletConnectSessionState extends State<WalletConnectSession> {
                     },
                     child: Text(
                       "Approve",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
+                        color: Styles.whiteColor
                       ),
                     ),
                   ),
@@ -98,8 +114,7 @@ class _WalletConnectSessionState extends State<WalletConnectSession> {
                     },
                     child: Text(AppLocalizations.of(context)!.auth_reject,
                         style: TextStyle(
-                          color: Styles.primaryAccentColorDark,
-                          decoration: TextDecoration.underline,
+                          color: Styles.errorColor,
                           fontSize: 16,
                         ))),
               ]),

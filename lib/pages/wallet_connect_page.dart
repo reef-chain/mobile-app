@@ -18,93 +18,104 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+  children: [
+    Container(
+      padding: const EdgeInsets.fromLTRB(12, 24, 12, 32),
+      child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 24, 12, 32),
-            child: Column(children: [
-              // Text(AppLocalizations.of(context)!.get_qr_information, 
-              //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)
-              // ),
-              const Gap(16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style:  ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(40),
-                              ),
-                              shadowColor: const Color(0x559d6cff),
-                              elevation: 5,
-                              backgroundColor: Styles.primaryAccentColor,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 28),
-                            ),
-                      onPressed: () => showQrTypeDataModal(
-                        AppLocalizations.of(context)!.scan_qr_code, context,
-                        expectedType: ReefQrCodeType.walletConnect),
-                      child: Text(
-                        AppLocalizations.of(context)!.create_new_connection,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Styles.whiteColor
-                        ),
-                      ),
+          const Gap(16),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    shadowColor: const Color(0x559d6cff),
+                    elevation: 5,
+                    backgroundColor: Styles.primaryAccentColor,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12, horizontal: 28),
+                  ),
+                  onPressed: () => showQrTypeDataModal(
+                    AppLocalizations.of(context)!.scan_qr_code, context,
+                    expectedType: ReefQrCodeType.walletConnect),
+                  child: Text(
+                    AppLocalizations.of(context)!.create_new_connection,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Styles.whiteColor
                     ),
                   ),
-                ],
+                ),
               ),
-            ],)
+            ],
           ),
-          Container(
-             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              color: Styles.whiteColor
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [Expanded(
-                  child: ValueListenableBuilder<List<SessionData>>(
-                  valueListenable: ReefAppState.instance.walletConnect.sessions, 
+        ],
+      ),
+    ),
+    Expanded(
+      child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ValueListenableBuilder<List<SessionData>>(
+                  valueListenable: ReefAppState.instance.walletConnect.sessions,
                   builder: (context, sessionList, child) {
                     if (sessionList.isEmpty) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Icon(Icons.error,color: Styles.errorColor,),
-                          ),
-                          Gap(4.0),
-                          Text(
-                            AppLocalizations.of(context)!.no_active_sessions, 
-                            style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Styles.errorColor)
-                          ),
-                        ],
+                      return Container(
+                        decoration: BoxDecoration(color: Styles.whiteColor,borderRadius: BorderRadius.circular(10.0)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Icon(Icons.error,color: Styles.errorColor,),
+                            ),
+                            Gap(4.0),
+                            Text(
+                              AppLocalizations.of(context)!.no_active_sessions, 
+                              style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Styles.errorColor)
+                            ),
+                          ],
+                        ),
                       );
                     }
-                    return Expanded(
-                      child: ListView.builder(
-                        itemCount: sessionList.length,
-                        itemBuilder: (context, index) {
-                          final session = sessionList[index];
-                          return ListTile(
+                    return ListView.separated(
+                      itemCount: sessionList.length,
+                      separatorBuilder: (context, index) => const Gap(10),
+                      itemBuilder: (context, index) {
+                        final session = sessionList[index];
+                        var wcIcon = "https://avatars.githubusercontent.com/u/37784886";
+                        var iconSrc = session.peer.metadata.icons.isNotEmpty
+                                  ? session.peer.metadata.icons[0]
+                                  : wcIcon;
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Styles.whiteColor,
+                            borderRadius: BorderRadius.circular(10.0)
+                          ),
+                          child: ListTile(
+                            
                             title: Text(session.peer.metadata.name,style: TextStyle(fontWeight: FontWeight.w600)),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(session.peer.metadata.url),
                                 Text("${AppLocalizations.of(context)!.address}: ${session.namespaces["reef"]?.accounts[0].substring(5).shorten() ?? "???"}"),
-                            ]),
+                              ],
+                            ),
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(session.peer.metadata.icons.isNotEmpty 
-                                  ? session.peer.metadata.icons[0] 
-                                  : "https://avatars.githubusercontent.com/u/37784886",
+                              child: Image.network(iconSrc,
                                 height: 80),
                             ),
                             trailing: IconButton(
@@ -113,19 +124,20 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                                 ReefAppState.instance.walletConnect.disconnectSession(session.topic);
                               },
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     );
-                  }
-                            ),
+                  },
                 ),
-                      ],
               ),
-            ),
-          )
-           ],
-      );
+            ],
+          ),
+        ),
+      ),
+    ),
+  ],
+);
   }
 
 }
