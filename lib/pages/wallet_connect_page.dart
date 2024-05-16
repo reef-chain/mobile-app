@@ -79,7 +79,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.all(4.0),
+                              padding: const EdgeInsets.all(18.0),
                               child: Icon(Icons.error,color: Styles.errorColor,),
                             ),
                             Gap(4.0),
