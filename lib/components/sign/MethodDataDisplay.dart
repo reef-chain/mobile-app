@@ -69,7 +69,12 @@ class MethodDataDisplay extends StatelessWidget {
 
             Map<String, String> decodedData = {"Method Name": methodName};
             for (var i = 0; i < paramsList.length; i++) {
-              decodedData[paramsList[i]] = paramValuesList[i];
+              if(paramValuesList[i].startsWith(" {")){
+                for(var entry in parseStringToMap(paramValuesList[i]).entries)
+                 decodedData["${paramsList[i]}.${entry.key}"] = entry.value.toString();
+              }else{
+                 decodedData[paramsList[i]] = paramValuesList[i];
+              }
             }
             final decodedDetails = createDecodedDataTable(decodedData);
             dataWidget = Table(children: decodedDetails, columnWidths: const {
@@ -117,6 +122,18 @@ class MethodDataDisplay extends StatelessWidget {
     return createTable(keyTexts: keyTexts, valueTexts: valueTexts);
   }
 
+Map<String, String> parseStringToMap(String input) {
+  RegExp regExp = RegExp(r'\{(\w+):\s*(\w+)\}');
+  RegExpMatch? match = regExp.firstMatch(input);
+
+  if (match != null) {
+    String key = match.group(1)!;
+    String value = match.group(2)!;
+    return {key: value};
+  }
+  
+  return {};
+}
   List<TableRow> createTable({required keyTexts, required valueTexts}) {
     List<TableRow> rows = [];
     for (int i = 0; i < keyTexts.length; ++i) {
