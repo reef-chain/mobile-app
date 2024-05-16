@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -114,6 +115,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                               children: [
                                 Text(session.peer.metadata.url),
                                 Text("${AppLocalizations.of(context)!.address}: ${session.namespaces["reef"]?.accounts[0].substring(5).shorten() ?? "???"}"),
+                                Text("Expiry: ${DateFormat('dd/MM/yy HH:mm').format(DateTime.fromMillisecondsSinceEpoch(session.expiry * 1000).toLocal())}",style: TextStyle(fontSize: 12.0),),
                               ],
                             ),
                             leading: ClipRRect(
