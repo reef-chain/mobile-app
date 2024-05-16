@@ -124,6 +124,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                             trailing: IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Disconnected ${session.peer.metadata.name} connection")));
                                 ReefAppState.instance.walletConnect.disconnectSession(session.topic);
                               },
                             ),
