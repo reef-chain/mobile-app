@@ -15,6 +15,8 @@ class WalletConnectPage extends StatefulWidget {
 }
 
 class _WalletConnectPageState extends State<WalletConnectPage> {
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -89,6 +91,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                         ),
                       );
                     }
+                          
                     return ListView.separated(
                       itemCount: sessionList.length,
                       separatorBuilder: (context, index) => const Gap(10),

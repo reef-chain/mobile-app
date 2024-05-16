@@ -56,7 +56,22 @@ class WalletConnectService {
     print('web3wallet init');
     await _web3Wallet!.init();
 
-    sessions.value = _web3Wallet!.sessions.getAll();
+    List<SessionData> allSessions = _web3Wallet!.sessions.getAll();
+    List uniqueSessionUrls = [];
+    List<SessionData> modifiedSessions = [];
+    for(var i=allSessions.length-1;i>=0;i--){
+      // check if url exists in modified sessions
+      if(uniqueSessionUrls.indexOf(allSessions[i].peer.metadata.url)>=0){
+        disconnectSession(allSessions[i].topic);
+      }else{
+      // add session to modifiedSessions
+      modifiedSessions.add(allSessions[i]);
+      uniqueSessionUrls.add(allSessions[i].peer.metadata.url);
+      }
+
+    }
+
+    sessions.value = modifiedSessions.reversed.toList();
   }
 
   FutureOr onDispose() {
