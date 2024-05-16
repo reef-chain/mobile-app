@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/components/modals/alert_modal.dart';
 import 'package:reef_mobile_app/components/modals/wallet_connect_session_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -56,7 +57,11 @@ class WalletConnectService {
     print('web3wallet init');
     await _web3Wallet!.init();
 
-    List<SessionData> allSessions = _web3Wallet!.sessions.getAll();
+    sessions.value = removeRedundantSessions(_web3Wallet!.sessions.getAll());
+  }
+
+  List<SessionData> removeRedundantSessions(List<SessionData> allSessions){
+    print("wallet connect sessions count: ${allSessions.length}");
     List uniqueSessionUrls = [];
     List<SessionData> modifiedSessions = [];
     for(var i=allSessions.length-1;i>=0;i--){
@@ -68,10 +73,9 @@ class WalletConnectService {
       modifiedSessions.add(allSessions[i]);
       uniqueSessionUrls.add(allSessions[i].peer.metadata.url);
       }
-
     }
-
-    sessions.value = modifiedSessions.reversed.toList();
+    print("wallet connect sessions count post processing: ${modifiedSessions.length}");
+    return modifiedSessions.reversed.toList();
   }
 
   FutureOr onDispose() {
@@ -213,8 +217,8 @@ class WalletConnectService {
 
   void _onSessionConnect(SessionConnect? args) {
     if (args != null) {
-      sessions.value = List.from(sessions.value)
-        ..add(args.session);
+      sessions.value = removeRedundantSessions(List.from(sessions.value)
+        ..add(args.session));
     }
   }
 
