@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -15,6 +16,8 @@ class WalletConnectPage extends StatefulWidget {
 }
 
 class _WalletConnectPageState extends State<WalletConnectPage> {
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -77,7 +80,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.all(4.0),
+                              padding: const EdgeInsets.all(18.0),
                               child: Icon(Icons.error,color: Styles.errorColor,),
                             ),
                             Gap(4.0),
@@ -89,6 +92,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                         ),
                       );
                     }
+                          
                     return ListView.separated(
                       itemCount: sessionList.length,
                       separatorBuilder: (context, index) => const Gap(10),
@@ -111,6 +115,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                               children: [
                                 Text(session.peer.metadata.url),
                                 Text("${AppLocalizations.of(context)!.address}: ${session.namespaces["reef"]?.accounts[0].substring(5).shorten() ?? "???"}"),
+                                Text("Expiry: ${DateFormat('dd/MM/yy HH:mm').format(DateTime.fromMillisecondsSinceEpoch(session.expiry * 1000).toLocal())}",style: TextStyle(fontSize: 12.0),),
                               ],
                             ),
                             leading: ClipRRect(
@@ -121,6 +126,7 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                             trailing: IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Disconnected ${session.peer.metadata.name} connection")));
                                 ReefAppState.instance.walletConnect.disconnectSession(session.topic);
                               },
                             ),
