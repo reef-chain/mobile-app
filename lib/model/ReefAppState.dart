@@ -50,36 +50,36 @@ class ReefAppState {
   init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
     this.storage = storage;
     this.walletConnect = walletConnect;
-    this.initStatusStream.add("starting observables...");
+    this.initStatusStream.add("observables...");
     await _initReefObservables(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting network...");
+    this.initStatusStream.add("network...");
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
     firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting tokens...");
+    this.initStatusStream.add("tokens...");
     tokensCtrl = TokenCtrl(jsApi, model.tokens);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting account...");
+    this.initStatusStream.add("account...");
     accountCtrl = AccountCtrl(jsApi, storage, model.accounts);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting signer...");
+    this.initStatusStream.add("signer...");
     signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting transfers...");
+    this.initStatusStream.add("transfers...");
     transferCtrl = TransferCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting swap...");
+    this.initStatusStream.add("swap...");
     swapCtrl = SwapCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting metadata...");
+    this.initStatusStream.add("metadata...");
     metadataCtrl = MetadataCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting navigation...");
+    this.initStatusStream.add("navigation...");
     navigationCtrl =
         NavigationCtrl(model.navigationModel, model.homeNavigationModel);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting state...");
+    this.initStatusStream.add("state...");
     Network currentNetwork =
         await storage.getValue(StorageKey.network.name) == Network.mainnet.name
             ? Network.mainnet
@@ -89,13 +89,13 @@ class ReefAppState {
     } catch (e){
       this.initStatusStream.add("error state= ${e.toString()}");
     }
-    this.initStatusStream.add("starting config...");
+    this.initStatusStream.add("config...");
     appConfigCtrl = AppConfigCtrl(storage, model.appConfig);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting locale...");
+    this.initStatusStream.add("locale...");
     localeCtrl = LocaleCtrl(storage, model.locale);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("starting storage...");
+    this.initStatusStream.add("storage...");
     storageCtrl = StorageCtrl(storage);
     await Future.delayed(Duration(milliseconds: 200));
     this.initStatusStream.add("complete");

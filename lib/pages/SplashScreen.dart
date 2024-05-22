@@ -242,7 +242,7 @@ class _SplashAppState extends State<SplashApp> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "Starting app",
+                      "Initializing app",
                       style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w400,
                           fontSize: 16,
