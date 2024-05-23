@@ -31,6 +31,19 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
   String? qrTypeLabel;
   var numOfTrials = 3;
 
+  String getHumanReadableQrType(ReefQrCodeType? type){
+    switch(type){
+       case ReefQrCodeType.address:
+        return "Account Address QR Code";
+      case ReefQrCodeType.accountJson:
+        return "JSON File QR Code";
+      case ReefQrCodeType.walletConnect:
+        return "WalletConnect QR Code";
+      default:
+        return "Not a Reef QR Code";
+    }
+  }
+
   String getQrDataTypeMessage(ReefQrCodeType? type) {
     switch (type) {
       case ReefQrCodeType.address:
@@ -107,6 +120,11 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
       if (widget.expectedType != null &&
           widget.expectedType == qrCodeValue?.type) {
         actOnQrCodeValue(qrCodeValue!);
+        return;
+      }
+      // when account qr code is captured in camera frame
+      if(widget.expectedType==ReefQrCodeType.walletConnect && widget.expectedType!=qrCodeValue?.type){
+        qrTypeLabel = "Please place device correctly, detected ${getHumanReadableQrType(qrCodeValue?.type)} instead of WalletConnect.";
         return;
       }
       qrTypeLabel = getQrDataTypeMessage(qrCodeValue?.type);
@@ -195,6 +213,32 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
                       children: [
                         Text(qrTypeLabel ?? ''),
                         Gap(16.0),
+                        ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    shadowColor: const Color(0x559d6cff),
+                    elevation: 5,
+                    backgroundColor: Styles.primaryAccentColor,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12, horizontal: 28),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    showQrTypeDataModal(
+                    AppLocalizations.of(context)!.scan_qr_code, context,
+                    expectedType: ReefQrCodeType.walletConnect);},
+                  child: Text(
+                    "Scan again",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Styles.whiteColor
+                    ),
+                  ),
+                ),
                         if (qrCodeValue?.type != ReefQrCodeType.invalid &&
                             widget.expectedType == ReefQrCodeType.info)
                           Container(

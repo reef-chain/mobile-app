@@ -57,7 +57,7 @@ class WalletConnectService {
     print('web3wallet init');
     await _web3Wallet!.init();
 
-    sessions.value = removeRedundantSessions(_web3Wallet!.sessions.getAll());
+    sessions.value = _web3Wallet!.sessions.getAll();
   }
 
   List<SessionData> removeRedundantSessions(List<SessionData> allSessions){
@@ -181,8 +181,12 @@ class WalletConnectService {
     String proposerUrl = args.params.proposer.metadata.url;
     String? proposerIcon = args.params.proposer.metadata.icons.isEmpty
       ? null : args.params.proposer.metadata.icons.first;
+    bool sessionExists = false;
+    List.from(sessions.value).forEach((_session) {
+      if(_session.peer.metadata.url==proposerUrl)sessionExists=true;
+    });
     final approved = await showWalletConnectSessionModal(
-      address: selectedAddress, name: proposerName, url: proposerUrl, icon: proposerIcon);
+      address: selectedAddress, name: proposerName, url: proposerUrl, icon: proposerIcon,sessionExists:sessionExists);
 
     // Handle user response
     if (approved != null && approved) {
@@ -217,7 +221,7 @@ class WalletConnectService {
 
   void _onSessionConnect(SessionConnect? args) {
     if (args != null) {
-      sessions.value = removeRedundantSessions(List.from(sessions.value)
+   sessions.value = removeRedundantSessions(List.from(sessions.value)
         ..add(args.session));
     }
   }
