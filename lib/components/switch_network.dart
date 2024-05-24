@@ -35,7 +35,7 @@ class _SwitchNetworkState extends State<SwitchNetwork> {
           return Row(children: [
             Builder(builder: (context) {
               return Text(AppLocalizations.of(context)!.testnet,
-                  style: Theme.of(context).textTheme.bodyText1);
+                  style: Theme.of(context).textTheme.bodyMedium);
             }),
             Switch(
               // TODO listen to currentNetwork from mobx model
@@ -52,7 +52,7 @@ class _SwitchNetworkState extends State<SwitchNetwork> {
             ),
             Builder(builder: (context) {
               return Text(AppLocalizations.of(context)!.mainnet,
-                  style: Theme.of(context).textTheme.bodyText1);
+                  style: Theme.of(context).textTheme.bodyMedium);
             })
           ]);
         }),

@@ -37,7 +37,7 @@ class AddAccount extends StatelessWidget {
                   Builder(builder: (context) {
                     return Text(
                         AppLocalizations.of(context)!.create_new_account,
-                        style: Theme.of(context).textTheme.bodyText1);
+                        style: Theme.of(context).textTheme.bodyMedium);
                   }),
                 ],
               ),
@@ -64,7 +64,7 @@ class AddAccount extends StatelessWidget {
                       return Text(
                           AppLocalizations.of(context)!
                               .import_account_from_pre_existing_seed,
-                          style: Theme.of(context).textTheme.bodyText1);
+                          style: Theme.of(context).textTheme.bodyMedium);
                     }),
                   ),
                 ],
@@ -91,7 +91,7 @@ class AddAccount extends StatelessWidget {
                     child: Builder(
                       builder: (context) {
                         return Text(AppLocalizations.of(context)!.restore_from_json,
-                            style: Theme.of(context).textTheme.bodyText1);
+                            style: Theme.of(context).textTheme.bodyMedium);
                       }
                     ),
                   ),
@@ -119,7 +119,7 @@ class AddAccount extends StatelessWidget {
                     child: Builder(
                       builder: (context) {
                         return Text(AppLocalizations.of(context)!.import_from_qr_code,
-                            style: Theme.of(context).textTheme.bodyText1);
+                            style: Theme.of(context).textTheme.bodyMedium);
                       }
                     ),
                   ),
