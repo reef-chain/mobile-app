@@ -92,7 +92,6 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
                         ),
                       );
                     }
-                          
                     return ListView.separated(
                       itemCount: sessionList.length,
                       separatorBuilder: (context, index) => const Gap(10),

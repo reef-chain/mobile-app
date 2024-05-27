@@ -11,9 +11,10 @@ class WalletConnectSession extends StatefulWidget {
   final String name;
   final String url;
   final String? icon;
+  final bool? sessionExists;
 
   const WalletConnectSession(
-      {Key? key, required this.address, required this.name, required this.url, this.icon})
+      {Key? key, required this.address, required this.name, required this.url, this.icon,this.sessionExists})
       : super(key: key);
 
   @override
@@ -32,6 +33,15 @@ class _WalletConnectSessionState extends State<WalletConnectSession> {
             "${widget.name} wants to connect to your Reef wallet",
             style: const TextStyle(fontSize: 20),
           ),
+          if(widget.sessionExists!)
+          Column(children: [
+
+          Gap(4.0),
+          Text(
+            "A session is already active, connecting this will disconnect old session!",
+            style: const TextStyle(fontSize: 16,color: Styles.errorColor),
+          ),
+          ],),
           const Gap(16),
           ViewBoxContainer(
             color: Colors.white,
@@ -127,7 +137,7 @@ class _WalletConnectSessionState extends State<WalletConnectSession> {
 }
 
 Future<dynamic> showWalletConnectSessionModal({
-  required address, required name, required url, icon}
+  required address, required name, required url, icon,sessionExists}
 ) {
   return showModal(navigatorKey.currentContext,
       child: WalletConnectSession(
@@ -135,6 +145,7 @@ Future<dynamic> showWalletConnectSessionModal({
         name: name,
         url: url,
         icon: icon,
+        sessionExists:sessionExists,
       ),
       dismissible: false,
       headText: "WalletConnect Session");
