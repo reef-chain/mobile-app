@@ -148,9 +148,23 @@ class CustomSessionTile extends StatelessWidget {
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: Image.network(iconSrc, height: 80),
-          ),
+  borderRadius: BorderRadius.circular(10.0),
+  child: Image.network(
+    iconSrc,
+    height: 80,
+    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+      if (loadingProgress == null) {
+        return child;
+      } else {
+        return CircularProgressIndicator();
+      }
+    },
+    errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+      return Icon(Icons.error,color: Styles.greyColor,);
+    },
+  ),
+),
+
           const Gap(12.0),
           Expanded(
             child: Column(
