@@ -28,7 +28,9 @@ class _WalletConnectSessionState extends State<WalletConnectSession> {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 32.0),
       child: Column(
         children: [
-          if (widget.icon != null) Image.network(widget.icon!, height: 80),
+          if (widget.icon != null) Image.network(widget.icon!, height: 80, errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+            return Icon(Icons.error,color: Styles.greyColor,);
+          }),
           Text(
             "${widget.name} wants to connect to your Reef wallet",
             style: const TextStyle(fontSize: 20),
