@@ -66,6 +66,7 @@ dependencies:
   barcode_finder:
   file_picker:
   walletconnect_flutter_v2: ^2.2.3
+  flutter_local_notifications: ^13.0.0
   #freezed: ^2.0.3+1 #immutable classes
 
 dev_dependencies:

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'dart:math' as math;
-
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
 class CustomTimerPainter extends CustomPainter {
   CustomTimerPainter({
     required this.animation,
-    required this.fillColor,
+    this.fillColor,
     required this.ringColor,
-    required this.strokeWidth,
+    this.strokeWidth = 1.5,
     required this.strokeCap,
   }) : super(repaint: animation);
 
   final Animation<double> animation;
-  final Color fillColor, ringColor;
+  final Color? fillColor;
+  final Color ringColor;
   final double strokeWidth;
   final StrokeCap strokeCap;
 
@@ -31,7 +32,7 @@ class CustomTimerPainter extends CustomPainter {
     double startAngle = math.pi * 1.5;
 
     if (fillColor != null) {
-      paint.color = fillColor;
+      paint.color = fillColor!;
     }
 
     canvas.drawArc(Offset.zero & size, startAngle, progress, false, paint);
@@ -46,12 +47,26 @@ class CustomTimerPainter extends CustomPainter {
 }
 
 class CircularCountDown extends StatefulWidget {
-  const CircularCountDown({required this.countdownMs});
+  const CircularCountDown({
+    required this.countdownMs,
+    this.width = 15.0,
+    this.height = 15.0,
+    this.strokeWidth = 1.5,
+    this.fillColor,
+    this.svgAssetPath,
+  });
+
   final int countdownMs;
+  final double width;
+  final double height;
+  final double strokeWidth;
+  final Color? fillColor;
+  final String? svgAssetPath;
 
   @override
   CircularCountDownState createState() => CircularCountDownState();
 }
+
 class CircularCountDownState extends State<CircularCountDown>
     with TickerProviderStateMixin {
   late AnimationController _controller;
@@ -66,8 +81,7 @@ class CircularCountDownState extends State<CircularCountDown>
       duration: Duration(milliseconds: widget.countdownMs),
     );
 
-    _countDownAnimation =
-        Tween<double>(begin: 1, end: 0).animate(_controller);
+    _countDownAnimation = Tween<double>(begin: 1, end: 0).animate(_controller);
 
     Future.delayed(Duration(milliseconds: widget.countdownMs), () {
       setState(() {
@@ -80,28 +94,45 @@ class CircularCountDownState extends State<CircularCountDown>
 
   @override
   Widget build(BuildContext context) {
-    return _isCompleted ? Gap(2):SizedBox(
-      width: 15,
-      height: 15,
-      child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Align(
-              child: AspectRatio(
-                aspectRatio: 1.0,
-                child: CustomPaint(
-                  painter: CustomTimerPainter(
-                    animation: _countDownAnimation,
-                    fillColor: Styles.primaryAccentColor,
-                    ringColor: Styles.whiteColor,
-                    strokeWidth: 1.5,
-                    strokeCap: StrokeCap.round,
-                  ),
+    return _isCompleted
+        ? Gap(2)
+        : SizedBox(
+            width: widget.width,
+            height: widget.height,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Align(
+                      child: AspectRatio(
+                        aspectRatio: 1.0,
+                        child: CustomPaint(
+                          painter: CustomTimerPainter(
+                            animation: _countDownAnimation,
+                            fillColor: widget.fillColor ?? Styles.primaryAccentColor,
+                            ringColor: Styles.whiteColor,
+                            strokeWidth: widget.strokeWidth,
+                            strokeCap: StrokeCap.round,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            );
-          }),
-    );
+                if (widget.svgAssetPath != null)
+                  SizedBox(
+                    width: widget.width * 0.5,
+                    height: widget.height * 0.5,
+                    child: SvgPicture.asset(
+                      widget.svgAssetPath!,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+              ],
+            ),
+          );
   }
 
   @override
