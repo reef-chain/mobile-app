@@ -6,6 +6,7 @@ import 'package:reef_mobile_app/components/modals/alert_modal.dart';
 import 'package:reef_mobile_app/components/modals/wallet_connect_session_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
+import 'package:reef_mobile_app/service/LocalNotificationService.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
 
@@ -229,6 +230,8 @@ class WalletConnectService {
   void _onSessionRequest(SessionRequestEvent? event) async {
     if (_web3Wallet == null) return;
     if (event == null) return;
+    NotificationService()
+              .showNotification(title: 'WalletConnect Request', body: 'Approve the transaction using WalletConnect');
 
     final chainId = event.chainId;
     if (chainId != MAINNET_CHAIN_ID && chainId != TESTNET_CHAIN_ID) return;
@@ -251,6 +254,9 @@ class WalletConnectService {
       throw Errors.getSdkError(Errors.UNSUPPORTED_METHODS);
     }
 
+    ReefAppState.instance.navigationCtrl
+                      .navigateToWalletConnectSignaturePage();
+    
     if (signature['error'] != null) {
       return _web3Wallet!.respondSessionRequest(
         topic: topic,

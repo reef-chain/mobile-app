@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/home/tx_info.dart';
 import 'package:reef_mobile_app/model/navigation/homepage_navigation_model.dart';
 import 'package:reef_mobile_app/model/navigation/nav_swipe_compute.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
+import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/swap_page.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_page.dart';
+import 'package:reef_mobile_app/pages/wallet_connect_tx_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -149,6 +152,23 @@ class NavigationCtrl with NavSwipeCompute {
                 padding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                 child: SwapPage(preselected),
+              ),
+              backgroundColor: Styles.greyColor,
+            ))));
+  }
+
+  void  navigateToWalletConnectSignaturePage() {
+    Navigator.of(navigatorKey.currentContext!).push(MaterialPageRoute(
+        builder: (context) => SignatureContentToggle(Scaffold(
+              appBar: AppBar(
+                title: Text("WalletConnect",style: TextStyle(color: Styles.whiteColor),),
+                backgroundColor: Colors.deepPurple.shade700,
+                leading: SvgPicture.asset('assets/images/walletconnect.svg'),
+              ),
+              body: const Padding(
+                padding:
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                child: WalletConnectTxPage(),
               ),
               backgroundColor: Styles.greyColor,
             ))));

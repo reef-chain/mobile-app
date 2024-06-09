@@ -66,7 +66,37 @@ Widget topBar(BuildContext context) {
                       child: Wrap(
                         alignment: WrapAlignment.end,
                         children: [
-                          AccountPill(selSignerList.first.name)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              AccountPill(selSignerList.first.name),
+                              Gap(2.0),
+                             Material(
+  elevation: 4,
+  borderRadius: BorderRadius.circular(22.0),
+  child: InkWell(
+    onTap: () {
+      ReefAppState.instance.navigationCtrl
+                      .navigateToWalletConnectPage(context: context);
+    },
+    child: Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        color: Styles.whiteColor,
+        borderRadius: BorderRadius.circular(22.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: SvgPicture.asset('assets/images/walletconnect.svg', width: 30,),
+      ),
+    ),
+  ),
+),
+
+                            ],
+                          ),
+                           
                         ],
                       ),
                     )

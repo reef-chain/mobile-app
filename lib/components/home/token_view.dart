@@ -171,9 +171,9 @@ class _TokenViewState extends State<TokenView> {
                       ),
                       onPressed: () {
                         ReefAppState.instance.navigationCtrl
-                            .navigateToSwapPage(context: context);
+                            .navigateToSwapPage(context: context,preselected: address);
                       },
-                    )),
+                    ),
                     const SizedBox(width: 15),*/
                     Expanded(
                         child: Container(

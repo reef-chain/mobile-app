@@ -59,7 +59,6 @@ class _SwapPageState extends State<SwapPage> {
   void initState() {
     super.initState();
     _focus.addListener(_onFocusChange);
-    
     //If token is not REEF - set target to reef
     if (widget.preselected != Constants.REEF_TOKEN_ADDRESS) {
      setState(() {
@@ -67,6 +66,9 @@ class _SwapPageState extends State<SwapPage> {
        selectedBottomToken = ReefAppState
       .instance.model.tokens.selectedErc20List
       .firstWhere((token) => token.address == Constants.REEF_TOKEN_ADDRESS);
+      selectedTopToken=ReefAppState
+      .instance.model.tokens.selectedErc20List
+      .firstWhere((token) => token.address == widget.preselected);
      });
     }else{
       setState(() {
