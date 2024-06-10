@@ -523,12 +523,12 @@ class _SwapPageState extends State<SwapPage> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: _isValueEditing
+                          border: _isValueSecondEditing
                               ? Border.all(color: const Color(0xffa328ab))
                               : Border.all(color: const Color(0x00d7d1e9)),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
-                            if (_isValueEditing)
+                            if (_isValueSecondEditing)
                               const BoxShadow(
                                   blurRadius: 15,
                                   spreadRadius: -8,
