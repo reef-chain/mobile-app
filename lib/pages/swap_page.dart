@@ -275,7 +275,7 @@ class _SwapPageState extends State<SwapPage> {
   @override
   Widget build(BuildContext context) {
     return SignatureContentToggle(Column(children: [
-      const Gap(64),
+      const Gap(32),
       Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
