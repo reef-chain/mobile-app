@@ -284,7 +284,7 @@ class _SwapPageState extends State<SwapPage> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const Gap(24),
+            // const Gap(24),
             Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
