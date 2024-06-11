@@ -78,6 +78,10 @@ class TokenCtrl {
     return jsApi.jsPromise('window.utils.getTxInfo("$timestamp")');
   }
 
+  Future<dynamic> getPools() async {
+    return jsApi.jsPromise('window.utils.getPools()');
+  }
+
   void reload(bool force) async {
     var isProvConn =
         await ReefAppState.instance.networkCtrl.getProviderConnLogs().first;

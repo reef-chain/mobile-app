@@ -8,6 +8,7 @@ import {ERC20} from "./abi/ERC20";
 import { fetchTxInfo } from './txInfoApi';
 import { addressUtils } from '@reef-chain/util-lib';
 import { fetchNFTinfo } from './utils/nftUtils';
+import { fetchAllPools } from './poolsApi';
 
 function lagWhenDisconnected() {
     return status => {
@@ -61,7 +62,17 @@ export const initApi = () => {
                 )
             );
         },
-
+        getPools: async () => {
+            return firstValueFrom(
+                combineLatest([graphql.httpClientInstance$]).pipe(
+                    take(1),
+                    switchMap(async ([httpClientInstance]:[any]) => {
+                        return await fetchAllPools(httpClientInstance);
+                    }),
+                    take(1)
+                )
+            );
+        },
         decodeMethod: (data: string, types?: any) => {
             return firstValueFrom(reefState.selectedProvider$.pipe(
                 take(1),
