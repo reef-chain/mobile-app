@@ -29,11 +29,7 @@ class _PoolsPageState extends State<PoolsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Pools'),
-      ),
-      body: FutureBuilder<List<dynamic>>(
+    return FutureBuilder<List<dynamic>>(
         future: _pools,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -56,17 +52,14 @@ class _PoolsPageState extends State<PoolsPage> {
                       ],
                     ),
                     title: Text('${pool['name1']} - ${pool['name2']}'),
-                    subtitle: Text('Address: ${pool['address']}'),
-                    trailing: Text('${pool['symbol1']} / ${pool['symbol2']}'),
                   ),
                 );
               },
             );
           } else {
-            return Center(child: Text('No data found'));
+            return Center(child: CircularProgressIndicator());
           }
         },
-      ),
     );
   }
 }
