@@ -1,4 +1,5 @@
 import { graphql} from '@reef-chain/util-lib';
+import { getIconUrl } from './utils/poolUtils';
 
 type PoolQueryObject = {query: string, variables: any};
 
@@ -45,8 +46,8 @@ export const fetchAllPools = async ()=>{
           const {data} = await response.json();
           const pools = data.allPools.map((pool) => ({
             ...pool,
-            iconUrl1: pool.iconUrl1 === '' ? "https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png" : pool.iconUrl1,
-            iconUrl2: pool.iconUrl2 === '' ? "https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png" : pool.iconUrl2,
+            iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
+            iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
           }));
           console.log("data===",pools);
           return pools;
