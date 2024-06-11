@@ -15,8 +15,10 @@ class PoolsPage extends StatefulWidget {
 }
 
 class _PoolsPageState extends State<PoolsPage> {
-  Future<List<dynamic>>? _pools;
+  List<dynamic> _pools = [];
   Map<String, dynamic> tokenBalances = {};
+  int offset = 0;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -25,99 +27,98 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   void _fetchTokensAndPools() async {
+    if (isLoading) return;
+    isLoading = true;
+
     var selectedTokens = ReefAppState.instance.model.tokens.selectedErc20List;
     for (var token in selectedTokens) {
       tokenBalances[token.address] = token.balance;
     }
 
-    final pools = await ReefAppState.instance.tokensCtrl.getPools();
+    final pools = await ReefAppState.instance.tokensCtrl.getPools(offset);
     if (pools is List<dynamic>) {
       setState(() {
-        _pools = Future.value(pools);
+        _pools.addAll(pools);
+        offset += 10;
+        isLoading = false;
       });
     }
   }
 
-  bool hasBalance(String addr){
-    if(tokenBalances.containsKey(addr) && tokenBalances[addr]>BigInt.from(0))return true;
+  bool hasBalance(String addr) {
+    if (tokenBalances.containsKey(addr) && tokenBalances[addr] > BigInt.from(0)) return true;
     return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
-      future: _pools,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error.toString()}'));
-        } else if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              var pool = snapshot.data![index];
-              return Card(
-                child: ListTile(
-                  leading: Container(
-                    width: 44,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.centerLeft,
-                      children: [
-                        buildIcon(pool['iconUrl1'], 0),
-                        Positioned(left: 14, child: buildIcon(pool['iconUrl2'], 14)),
-                      ],
-                    ),
-                  ),
-                  title: Text('${pool['symbol1']} - ${pool['symbol2']}'),
-                  trailing: hasBalance(pool['token1'])||hasBalance(pool['token2']) ?  Expanded(
-                        child: Container(
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Styles.secondaryAccentColorDark,
-                                spreadRadius: -10,
-                                offset: Offset(0, 5),
-                                blurRadius: 20),
-                          ],
-                          borderRadius: BorderRadius.circular(80),
-                          gradient:LinearGradient(
-                            colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
-                            begin: Alignment(-1, -1),
-                            end: Alignment(1, 1),
-                          )),
-                      child: ElevatedButton.icon(
-                        icon: const Icon(
-                          CupertinoIcons.repeat,
-                          color: Colors.white,
-                          size: 16.0,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            backgroundColor: Colors.transparent,
-                            shape: const StadiumBorder(),
-                            elevation: 0),
-                        label: Text(
-                          "Swap",
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.w700),
-                        ),
-                        onPressed: () async {
-                          ReefAppState.instance.navigationCtrl
-                              .navigateToSwapPage(
-                                  context: context, preselected: pool['token1']);
-                        },
-                      ),
-                    )) : null,
-                ),
-              );
-            },
-          );
-        } else {
-          return Center(child: CircularProgressIndicator());
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+          _fetchTokensAndPools();
         }
+        return true;
       },
+      child: ListView.builder(
+        itemCount: _pools.length,
+        itemBuilder: (context, index) {
+          var pool = _pools[index];
+          return Card(
+            child: ListTile(
+              leading: Container(
+                width: 44,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    buildIcon(pool['iconUrl1'], 0),
+                    Positioned(left: 14, child: buildIcon(pool['iconUrl2'], 14)),
+                  ],
+                ),
+              ),
+              title: Text('${pool['symbol1']} - ${pool['symbol2']}'),
+              trailing: hasBalance(pool['token1']) || hasBalance(pool['token2']) ? Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Styles.secondaryAccentColorDark,
+                        spreadRadius: -10,
+                        offset: Offset(0, 5),
+                        blurRadius: 20),
+                    ],
+                    borderRadius: BorderRadius.circular(80),
+                    gradient: LinearGradient(
+                      colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
+                      begin: Alignment(-1, -1),
+                      end: Alignment(1, 1),
+                    )),
+                  child: ElevatedButton.icon(
+                    icon: const Icon(
+                      CupertinoIcons.repeat,
+                      color: Colors.white,
+                      size: 16.0,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      backgroundColor: Colors.transparent,
+                      shape: const StadiumBorder(),
+                      elevation: 0),
+                    label: Text(
+                      "Swap",
+                      style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () async {
+                      ReefAppState.instance.navigationCtrl.navigateToSwapPage(
+                        context: context, preselected: pool['token1']);
+                    },
+                  ),
+                )) : null,
+            ),
+          );
+        },
+      ),
     );
   }
 

@@ -1,34 +1,37 @@
 import { graphql} from '@reef-chain/util-lib';
 import { getIconUrl } from './utils/poolUtils';
 
-type PoolQueryObject = {query: string, variables: any};
 
-const ALL_POOLS = `
-  query allPools {
-    allPools {
-      address
-      decimals1
-      decimals2
-      reserved1
-      reserved2
-      symbol1
-      symbol2
-      token1
-      token2
-      name1
-      name2
-      iconUrl1
-      iconUrl2
+const getAllPoolsQuery = (limit:number,offset:number,search:string,signerAddress:string) => {
+  return {
+    query: `
+    query allPoolsList {
+      allPoolsList(limit: ${limit}, offset: ${offset}, search: "${search}", signerAddress: "${signerAddress}") {
+        id
+        iconUrl1
+        iconUrl2
+        name1
+        name2
+        prevDayVolume1
+        prevDayVolume2
+        reserved1
+        symbol1
+        dayVolume1
+        dayVolume2
+        decimals1
+        decimals2
+        reserved2
+        symbol2
+        token1
+        token2
+        userLockedAmount1
+        userLockedAmount2
+      }
     }
-  }
-`;
+    `
+}};
 
-const getAllPoolsQuery = (): PoolQueryObject => ({
-    query: ALL_POOLS,
-    variables: {},
-});
-
-export const fetchAllPools = async ()=>{
+export const fetchAllPools = async (limit:number,offset:number,search:string,signerAddress:string)=>{
     try {
 
         const response = await fetch('https://squid.subsquid.io/reef-swap-testnet/graphql', {
@@ -36,7 +39,7 @@ export const fetchAllPools = async ()=>{
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(getAllPoolsQuery()),
+            body: JSON.stringify(getAllPoolsQuery(limit,offset,search,signerAddress)),
           });
       
           if (!response.ok) {
@@ -44,12 +47,11 @@ export const fetchAllPools = async ()=>{
           }
       
           const {data} = await response.json();
-          const pools = data.allPools.map((pool) => ({
+          const pools = data.allPoolsList.map((pool) => ({
             ...pool,
             iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
             iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
           }));
-          console.log("data===",pools);
           return pools;
     } catch (error) {
         console.log(error);

@@ -78,8 +78,8 @@ class TokenCtrl {
     return jsApi.jsPromise('window.utils.getTxInfo("$timestamp")');
   }
 
-  Future<dynamic> getPools() async {
-    return jsApi.jsPromise('window.utils.getPools()');
+  Future<dynamic> getPools(dynamic offset) async {
+    return jsApi.jsPromise('window.utils.getPools(10,${offset},"","5FxjoWsqFzTLSF8m9osTywz8ENKLrDv34qRf1EtdpW8kxc7n")');
   }
 
   void reload(bool force) async {

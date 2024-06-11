@@ -62,8 +62,8 @@ export const initApi = () => {
                 )
             );
         },
-        getPools: async () => {
-            return await fetchAllPools();
+        getPools: async (limit:number,offset:number,search:string,signerAddress:string) => {
+            return await fetchAllPools(limit,offset,search,signerAddress);
         },
         decodeMethod: (data: string, types?: any) => {
             return firstValueFrom(reefState.selectedProvider$.pipe(
