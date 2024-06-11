@@ -63,15 +63,7 @@ export const initApi = () => {
             );
         },
         getPools: async () => {
-            return firstValueFrom(
-                combineLatest([graphql.httpClientInstance$]).pipe(
-                    take(1),
-                    switchMap(async ([httpClientInstance]:[any]) => {
-                        return await fetchAllPools(httpClientInstance);
-                    }),
-                    take(1)
-                )
-            );
+            return await fetchAllPools();
         },
         decodeMethod: (data: string, types?: any) => {
             return firstValueFrom(reefState.selectedProvider$.pipe(

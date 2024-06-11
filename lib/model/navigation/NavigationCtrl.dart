@@ -7,6 +7,7 @@ import 'package:reef_mobile_app/model/navigation/homepage_navigation_model.dart'
 import 'package:reef_mobile_app/model/navigation/nav_swipe_compute.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
+import 'package:reef_mobile_app/pages/pools_page.dart';
 import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/swap_page.dart';
@@ -186,6 +187,22 @@ class NavigationCtrl with NavSwipeCompute {
                 padding:
                     EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                 child: WalletConnectPage(),
+              ),
+              backgroundColor: Styles.greyColor,
+            ))));
+  }
+  void navigateToPoolsPage(
+      {required BuildContext context}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => SignatureContentToggle(Scaffold(
+              appBar: AppBar(
+                title: Text("Pools",style: TextStyle(color: Styles.whiteColor),),
+                backgroundColor: Colors.deepPurple.shade700,
+              ),
+              body: const Padding(
+                padding:
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                child: PoolsPage(),
               ),
               backgroundColor: Styles.greyColor,
             ))));

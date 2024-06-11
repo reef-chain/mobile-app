@@ -27,7 +27,7 @@ const getAllPoolsQuery = (): PoolQueryObject => ({
     variables: {},
 });
 
-export const fetchAllPools = async (httpClient: any)=>{
+export const fetchAllPools = async ()=>{
     try {
 
         const response = await fetch('https://squid.subsquid.io/reef-swap-testnet/graphql', {
@@ -43,8 +43,15 @@ export const fetchAllPools = async (httpClient: any)=>{
           }
       
           const {data} = await response.json();
-          console.log('Pools:', data);
+          const pools = data.allPools.map((pool) => ({
+            ...pool,
+            iconUrl1: pool.iconUrl1 === '' ? "https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png" : pool.iconUrl1,
+            iconUrl2: pool.iconUrl2 === '' ? "https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png" : pool.iconUrl2,
+          }));
+          console.log("data===",pools);
+          return pools;
     } catch (error) {
         console.log(error);
+        return [];
     }
 }
