@@ -28,7 +28,10 @@ class _PoolsPageState extends State<PoolsPage> {
 
   void _fetchTokensAndPools() async {
     if (isLoading) return;
+    setState(() {
     isLoading = true;
+    });
+    
 
     var selectedTokens = ReefAppState.instance.model.tokens.selectedErc20List;
     for (var token in selectedTokens) {
@@ -59,6 +62,10 @@ class _PoolsPageState extends State<PoolsPage> {
         }
         return true;
       },
+     child: Stack(
+  children: [
+    Positioned.fill(
+      bottom: 14.0,
       child: ListView.builder(
         itemCount: _pools.length,
         itemBuilder: (context, index) {
@@ -77,48 +84,69 @@ class _PoolsPageState extends State<PoolsPage> {
                 ),
               ),
               title: Text('${pool['symbol1']} - ${pool['symbol2']}'),
-              trailing: hasBalance(pool['token1']) || hasBalance(pool['token2']) ? Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Styles.secondaryAccentColorDark,
-                        spreadRadius: -10,
-                        offset: Offset(0, 5),
-                        blurRadius: 20),
-                    ],
-                    borderRadius: BorderRadius.circular(80),
-                    gradient: LinearGradient(
-                      colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
-                      begin: Alignment(-1, -1),
-                      end: Alignment(1, 1),
-                    )),
-                  child: ElevatedButton.icon(
-                    icon: const Icon(
-                      CupertinoIcons.repeat,
-                      color: Colors.white,
-                      size: 16.0,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor: Colors.transparent,
-                      shape: const StadiumBorder(),
-                      elevation: 0),
-                    label: Text(
-                      "Swap",
-                      style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w700),
-                    ),
-                    onPressed: () async {
-                      ReefAppState.instance.navigationCtrl.navigateToSwapPage(
-                        context: context, preselected: pool['token1']);
-                    },
-                  ),
-                )) : null,
+              trailing: hasBalance(pool['token1']) || hasBalance(pool['token2'])
+                  ? Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Styles.secondaryAccentColorDark,
+                                spreadRadius: -10,
+                                offset: Offset(0, 5),
+                                blurRadius: 20),
+                          ],
+                          borderRadius: BorderRadius.circular(80),
+                          gradient: LinearGradient(
+                            colors: [
+                              Styles.purpleColorLight,
+                              Styles.secondaryAccentColorDark
+                            ],
+                            begin: Alignment(-1, -1),
+                            end: Alignment(1, 1),
+                          ),
+                        ),
+                        child: ElevatedButton.icon(
+                          icon: const Icon(
+                            CupertinoIcons.repeat,
+                            color: Colors.white,
+                            size: 16.0,
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              backgroundColor: Colors.transparent,
+                              shape: const StadiumBorder(),
+                              elevation: 0),
+                          label: Text(
+                            "Swap",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700),
+                          ),
+                          onPressed: () async {
+                            ReefAppState.instance.navigationCtrl
+                                .navigateToSwapPage(
+                                    context: context,
+                                    preselected: pool['token1']);
+                          },
+                        ),
+                      ),
+                    )
+                  : null,
             ),
           );
         },
       ),
+    ),
+    if (isLoading)
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+  ],
+),
     );
   }
 
