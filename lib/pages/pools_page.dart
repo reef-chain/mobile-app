@@ -84,6 +84,24 @@ class _PoolsPageState extends State<PoolsPage> {
                 ),
               ),
               title: Text('${pool['symbol1']} - ${pool['symbol2']}'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('TVL : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12.0),),
+                        Text('312',style: TextStyle(fontSize: 12.0),),
+                      ],
+                    ),
+                     Row(
+                      children: [
+                        Text('24h Vol. : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12.0),),
+                         Text('312',style: TextStyle(fontSize: 12.0),),
+                         Text(' +12 % ',style: TextStyle(fontSize: 12.0,color: Styles.greenColor,fontWeight: FontWeight.bold),),
+                      ],
+                    ),
+                  ],
+              ),
               trailing: hasBalance(pool['token1']) || hasBalance(pool['token2'])
                   ? Expanded(
                       child: Container(
