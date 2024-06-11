@@ -43,14 +43,25 @@ class _PoolsPageState extends State<PoolsPage> {
                 var pool = snapshot.data![index];
                 return Card(
                   child: ListTile(
-                    leading: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.network(pool['iconUrl1'], width: 24, height: 24),
-                        SizedBox(width: 8),
-                        Image.network(pool['iconUrl2'], width: 24, height: 24),
-                      ],
-                    ),
+                    leading: Container(
+  width: 44,
+  child: Stack(
+    clipBehavior: Clip.none,
+    alignment: Alignment.centerLeft,
+    children: [
+      ClipOval(
+        child: Image.network(pool['iconUrl1'], width: 24, height: 24, fit: BoxFit.cover),
+      ),
+      Positioned(
+        left: 14,
+        child: ClipOval(
+          child: Image.network(pool['iconUrl2'], width: 24, height: 24, fit: BoxFit.cover),
+        ),
+      ),
+    ],
+  ),
+),
+
                     title: Text('${pool['name1']} - ${pool['name2']}'),
                   ),
                 );
