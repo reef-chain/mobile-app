@@ -156,7 +156,7 @@ class _PoolsPageState extends State<PoolsPage> {
               },
             ),
           ),
-          if (isLoading)
+          if (isLoading && _pools.length>0)
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
@@ -164,6 +164,10 @@ class _PoolsPageState extends State<PoolsPage> {
                 child: CircularProgressIndicator(),
               ),
             ),
+            if (isLoading && !(_pools.length>0))
+            Center(
+              child: CircularProgressIndicator(),
+            )
         ],
       ),
     );
