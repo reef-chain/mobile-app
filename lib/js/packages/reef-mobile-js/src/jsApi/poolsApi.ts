@@ -2,6 +2,7 @@ import { graphql, reefState} from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
 import { firstValueFrom, skip } from 'rxjs';
+import { getDexUrl } from './utils/networkUtils';
 
 
 const getAllPoolsQuery = (limit:number,offset:number,search:string,signerAddress:string) => {
@@ -91,8 +92,11 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
 
 export const fetchAllPools = async (limit:number,offset:number,search:string,signerAddress:string)=>{
     try {
+        let selectedNw;
+        reefState.selectedNetwork$.subscribe((val)=>selectedNw=val);
+
         let tokenPrices = {};
-        const response = await fetch('https://squid.subsquid.io/reef-swap-testnet/graphql', {
+        const response = await fetch(getDexUrl(selectedNw.name), {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
