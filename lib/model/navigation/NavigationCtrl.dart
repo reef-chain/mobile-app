@@ -146,7 +146,7 @@ class NavigationCtrl with NavSwipeCompute {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.swap_tokens),
+                title: Text(AppLocalizations.of(context)!.swap_tokens,style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
               body: Padding(

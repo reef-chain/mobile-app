@@ -275,7 +275,7 @@ class _SwapPageState extends State<SwapPage> {
   @override
   Widget build(BuildContext context) {
     return SignatureContentToggle(Column(children: [
-      const Gap(64),
+      const Gap(32),
       Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
@@ -284,7 +284,7 @@ class _SwapPageState extends State<SwapPage> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const Gap(24),
+            // const Gap(24),
             Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
@@ -523,12 +523,12 @@ class _SwapPageState extends State<SwapPage> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          border: _isValueEditing
+                          border: _isValueSecondEditing
                               ? Border.all(color: const Color(0xffa328ab))
                               : Border.all(color: const Color(0x00d7d1e9)),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
-                            if (_isValueEditing)
+                            if (_isValueSecondEditing)
                               const BoxShadow(
                                   blurRadius: 15,
                                   spreadRadius: -8,
