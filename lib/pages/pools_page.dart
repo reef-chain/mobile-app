@@ -29,9 +29,8 @@ class _PoolsPageState extends State<PoolsPage> {
   void _fetchTokensAndPools() async {
     if (isLoading) return;
     setState(() {
-    isLoading = true;
+      isLoading = true;
     });
-    
 
     var selectedTokens = ReefAppState.instance.model.tokens.selectedErc20List;
     for (var token in selectedTokens) {
@@ -49,8 +48,7 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   bool hasBalance(String addr) {
-    if (tokenBalances.containsKey(addr) && tokenBalances[addr] > BigInt.from(0)) return true;
-    return false;
+    return tokenBalances.containsKey(addr) && tokenBalances[addr] > BigInt.from(0);
   }
 
   @override
@@ -62,109 +60,112 @@ class _PoolsPageState extends State<PoolsPage> {
         }
         return true;
       },
-     child: Stack(
-  children: [
-    Positioned.fill(
-      bottom: 14.0,
-      child: ListView.builder(
-        itemCount: _pools.length,
-        itemBuilder: (context, index) {
-          var pool = _pools[index];
-          return Card(
-            child: ListTile(
-              leading: Container(
-                width: 44,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    buildIcon(pool['iconUrl1'], 0),
-                    Positioned(left: 14, child: buildIcon(pool['iconUrl2'], 14)),
-                  ],
-                ),
-              ),
-              title: Text('${pool['symbol1']} - ${pool['symbol2']}'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text('TVL : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12.0),),
-                        Text('312',style: TextStyle(fontSize: 12.0),),
-                      ],
-                    ),
-                     Row(
-                      children: [
-                        Text('24h Vol. : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12.0),),
-                         Text('312',style: TextStyle(fontSize: 12.0),),
-                         Text(' +12 % ',style: TextStyle(fontSize: 12.0,color: Styles.greenColor,fontWeight: FontWeight.bold),),
-                      ],
-                    ),
-                  ],
-              ),
-              trailing: hasBalance(pool['token1']) || hasBalance(pool['token2'])
-                  ? Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Styles.secondaryAccentColorDark,
-                                spreadRadius: -10,
-                                offset: Offset(0, 5),
-                                blurRadius: 20),
-                          ],
-                          borderRadius: BorderRadius.circular(80),
-                          gradient: LinearGradient(
-                            colors: [
-                              Styles.purpleColorLight,
-                              Styles.secondaryAccentColorDark
+      child: Stack(
+        children: [
+          Positioned.fill(
+            bottom: 14.0,
+            child: ListView.builder(
+              itemCount: _pools.length,
+              itemBuilder: (context, index) {
+                var pool = _pools[index];
+                return Card(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ListTile(
+                        leading: Container(
+                          width: 44,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.centerLeft,
+                            children: [
+                              buildIcon(pool['iconUrl1'], 0),
+                              Positioned(left: 14, child: buildIcon(pool['iconUrl2'], 14)),
                             ],
-                            begin: Alignment(-1, -1),
-                            end: Alignment(1, 1),
                           ),
                         ),
-                        child: ElevatedButton.icon(
-                          icon: const Icon(
-                            CupertinoIcons.repeat,
-                            color: Colors.white,
-                            size: 16.0,
-                          ),
-                          style: ElevatedButton.styleFrom(
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              backgroundColor: Colors.transparent,
-                              shape: const StadiumBorder(),
-                              elevation: 0),
-                          label: Text(
-                            "Swap",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700),
-                          ),
-                          onPressed: () async {
-                            ReefAppState.instance.navigationCtrl
-                                .navigateToSwapPage(
-                                    context: context,
-                                    preselected: pool['token1']);
-                          },
+                        title: Text('${pool['name1']} - ${pool['name2']}'),
+                        trailing:Text('${pool['symbol1']}/${pool['symbol2']}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text('TVL : ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
+                                Text('\$${pool["tvl"]}', style: TextStyle(fontSize: 12.0)),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text('24h Vol. : ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
+                                Text('\$ ${pool['volume24h']}', style: TextStyle(fontSize: 12.0)),
+                                Text(' ${pool['volumeChange24h']} %', style: TextStyle(fontSize: 12.0, color: Styles.greenColor, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                    )
-                  : null,
+                      if (hasBalance(pool['token1']) || hasBalance(pool['token2']))
+                        Container(
+                          margin: EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Styles.secondaryAccentColorDark,
+                                  spreadRadius: -10,
+                                  offset: Offset(0, 5),
+                                  blurRadius: 20),
+                            ],
+                            borderRadius: BorderRadius.circular(80),
+                            gradient: LinearGradient(
+                              colors: [
+                                Styles.purpleColorLight,
+                                Styles.secondaryAccentColorDark
+                              ],
+                              begin: Alignment(-1, -1),
+                              end: Alignment(1, 1),
+                            ),
+                          ),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(
+                              CupertinoIcons.repeat,
+                              color: Colors.white,
+                              size: 16.0,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                backgroundColor: Colors.transparent,
+                                shape: const StadiumBorder(),
+                                elevation: 0),
+                            label: Text(
+                              "Swap",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                            onPressed: () async {
+                              ReefAppState.instance.navigationCtrl.navigateToSwapPage(
+                                  context: context,
+                                  preselected: pool['token1']); //anukulpandey also preselect token2 
+                            },
+                          ),
+                        )
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          if (isLoading)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
-    ),
-    if (isLoading)
-      Align(
-        alignment: Alignment.bottomCenter,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: CircularProgressIndicator(),
-        ),
-      ),
-  ],
-),
     );
   }
 
@@ -173,8 +174,8 @@ class _PoolsPageState extends State<PoolsPage> {
       child: isValidSVG(dataUrl)
           ? SvgPicture.string(
               utf8.decode(base64.decode(dataUrl.split('data:image/svg+xml;base64,')[1])),
-              width: 24, height: 24)
-          : Image.network(dataUrl, width: 24, height: 24, fit: BoxFit.cover),
+              width: 30, height: 30)
+          : Image.network(dataUrl, width: 30, height: 30, fit: BoxFit.cover),
     );
   }
 
