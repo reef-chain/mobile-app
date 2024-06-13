@@ -54,11 +54,9 @@ export const initApi = (signingKey: Signer) => {
                             ReefswapRouter,
                             signer,
                         );
-                        console.log("here i am swapRouter",swapRouter.address,signer.getAddress());
 
                         try {
                             // Approve token1
-                            console.log("Waiting for confirmation of token approval...");
                             await approveTokenAmount(
                                 token1.address,
                                 sellAmount,
