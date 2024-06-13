@@ -340,7 +340,7 @@ class _SwapPageState extends State<SwapPage> {
                 child: TextField(
                   focusNode: focusNode,
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
+                    FilteringTextInputFormatter.allow(RegExp(r'^(0|[1-9]\d*)(\.\d+)?$'))
                   ],
                   keyboardType: TextInputType.number,
                   controller: amountController,
@@ -484,7 +484,6 @@ class _SwapPageState extends State<SwapPage> {
             getToken(_isValueBottomEditing,_changeSelectedBottomToken,selectedBottomToken,_focusBottom,amountBottomController,_amountBottomUpdated),
             Gap(16),
             getSwapBtn(),
-            Text("${selectedTopToken?.amount}-${selectedBottomToken?.amount}")
           ],
         ),
       ),
