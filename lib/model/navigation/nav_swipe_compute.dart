@@ -9,7 +9,7 @@ mixin NavSwipeCompute {
     var diff = targetIndex - currIndex;
     return diff;
 
-    if (currentPage == NavigationPage.home && page == NavigationPage.settings) {
+    /*if (currentPage == NavigationPage.home && page == NavigationPage.settings) {
       return 3;
     } else if ((currentPage == NavigationPage.pools &&
             page == NavigationPage.home) ||
@@ -30,6 +30,6 @@ mixin NavSwipeCompute {
             page == NavigationPage.settings)) {
       return 1;
     }
-    return 0;
+    return 0;*/
   }
 }
