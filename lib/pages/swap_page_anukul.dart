@@ -37,6 +37,9 @@ class _SwapPageState extends State<SwapPage> {
   TextEditingController amountTopController = TextEditingController();
   TextEditingController amountBottomController = TextEditingController();
 
+  //slider
+  double rating = 0;
+
   // focus
   FocusNode _focusTop = FocusNode();
   FocusNode _focusBottom = FocusNode();
@@ -59,7 +62,6 @@ class _SwapPageState extends State<SwapPage> {
       selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
           .firstWhere((token) => token.address == widget.preselected);
 
-      // Initialize the controller with the current amount of the selected token
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
     });
     super.initState();
@@ -292,7 +294,13 @@ class _SwapPageState extends State<SwapPage> {
         hintStyle: TextStyle(color: Styles.textLightColor));
   }
 
-  Container getToken(bool isEditing,dynamic callback,TokenWithAmount? selectedTokenWithAmount,FocusNode focusNode,TextEditingController amountController,dynamic amountUpdated) {
+  Container getToken(
+      bool isEditing,
+      dynamic callback,
+      TokenWithAmount? selectedTokenWithAmount,
+      FocusNode focusNode,
+      TextEditingController amountController,
+      dynamic amountUpdated) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -340,7 +348,8 @@ class _SwapPageState extends State<SwapPage> {
                 child: TextField(
                   focusNode: focusNode,
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^(0|[1-9]\d*)(\.\d+)?$'))
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^(0|[1-9]\d*)(\.\d+)?$'))
                   ],
                   keyboardType: TextInputType.number,
                   controller: amountController,
@@ -384,78 +393,70 @@ class _SwapPageState extends State<SwapPage> {
     );
   }
 
-
-  SizedBox getSwapBtn(){
-     return SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
-                            shadowColor: const Color(0x559d6cff),
-                            elevation: 0,
-                            backgroundColor: (selectedTopToken == null ||
-                                    selectedTopToken!.amount <= BigInt.zero ||
-                                    selectedBottomToken == null ||
-                                    selectedBottomToken!.amount <= BigInt.zero)
-                                ? Color.fromARGB(255, 125, 125, 125)
-                                : Color.fromARGB(0, 215, 31, 31),
-                            padding: const EdgeInsets.all(0),
-                          ),
-                          onPressed: () {
-                            if (selectedTopToken == null ||
-                                selectedTopToken!.amount <= BigInt.zero ||
-                                selectedBottomToken == null ||
-                                selectedBottomToken!.amount <= BigInt.zero) {
-                              return;
-                            }
-                            _executeSwap();
-                          },
-                          child: Ink(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 22),
-                            decoration: BoxDecoration(
-                              color: const Color(0xffe6e2f1),
-                              gradient: (selectedTopToken == null ||
-                                      selectedTopToken!.amount <= BigInt.zero ||
-                                      selectedBottomToken == null ||
-                                      selectedBottomToken!.amount <=
-                                          BigInt.zero)
-                                  ? null
-                                  : Styles.buttonGradient,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(14.0)),
-                            ),
-                            child: Center(
-                              child: Text(
-                                (selectedTopToken == null
-                                    ? "Select sell token"
-                                    : selectedBottomToken == null
-                                        ? "Select buy token"
-                                        : selectedTopToken!.amount <=
-                                                    BigInt.zero ||
-                                                selectedBottomToken!.amount <=
-                                                    BigInt.zero
-                                            ? "Insert amount"
-                                            : "Swap"),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: (selectedTopToken == null ||
-                                          selectedBottomToken == null ||
-                                          selectedTopToken!.amount <=
-                                              BigInt.zero ||
-                                          selectedBottomToken!.amount <=
-                                              BigInt.zero)
-                                      ? const Color(0x65898e9c)
-                                      : Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
+  SizedBox getSwapBtn() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shadowColor: const Color(0x559d6cff),
+          elevation: 0,
+          backgroundColor: (selectedTopToken == null ||
+                  selectedTopToken!.amount <= BigInt.zero ||
+                  selectedBottomToken == null ||
+                  selectedBottomToken!.amount <= BigInt.zero)
+              ? Color.fromARGB(255, 125, 125, 125)
+              : Color.fromARGB(0, 215, 31, 31),
+          padding: const EdgeInsets.all(0),
+        ),
+        onPressed: () {
+          if (selectedTopToken == null ||
+              selectedTopToken!.amount <= BigInt.zero ||
+              selectedBottomToken == null ||
+              selectedBottomToken!.amount <= BigInt.zero) {
+            return;
+          }
+          _executeSwap();
+        },
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+          decoration: BoxDecoration(
+            color: const Color(0xffe6e2f1),
+            gradient: (selectedTopToken == null ||
+                    selectedTopToken!.amount <= BigInt.zero ||
+                    selectedBottomToken == null ||
+                    selectedBottomToken!.amount <= BigInt.zero)
+                ? null
+                : Styles.buttonGradient,
+            borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+          ),
+          child: Center(
+            child: Text(
+              (selectedTopToken == null
+                  ? "Select sell token"
+                  : selectedBottomToken == null
+                      ? "Select buy token"
+                      : selectedTopToken!.amount <= BigInt.zero ||
+                              selectedBottomToken!.amount <= BigInt.zero
+                          ? "Insert amount"
+                          : "Swap"),
+              style: TextStyle(
+                fontSize: 16,
+                color: (selectedTopToken == null ||
+                        selectedBottomToken == null ||
+                        selectedTopToken!.amount <= BigInt.zero ||
+                        selectedBottomToken!.amount <= BigInt.zero)
+                    ? const Color(0x65898e9c)
+                    : Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // dispose
@@ -479,9 +480,35 @@ class _SwapPageState extends State<SwapPage> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            getToken(_isValueTopEditing,_changeSelectedTopToken,selectedTopToken,_focusTop,amountTopController,_amountTopUpdated),
+            getToken(
+                _isValueTopEditing,
+                _changeSelectedTopToken,
+                selectedTopToken,
+                _focusTop,
+                amountTopController,
+                _amountTopUpdated),
             Gap(16),
-            getToken(_isValueBottomEditing,_changeSelectedBottomToken,selectedBottomToken,_focusBottom,amountBottomController,_amountBottomUpdated),
+            getToken(
+                _isValueBottomEditing,
+                _changeSelectedBottomToken,
+                selectedBottomToken,
+                _focusBottom,
+                amountBottomController,
+                _amountBottomUpdated),
+            Gap(16),
+            SliderStandAlone(
+                rating: rating,
+                onChanged: (newRating) async {
+                  setState(() {
+                    rating = newRating;
+                    String amountValue = (double.parse(toAmountDisplayBigInt(
+                                selectedTopToken!.balance)) *
+                            rating)
+                        .toStringAsFixed(2);
+                    amountTopController.text = amountValue;
+                    _amountTopUpdated(amountValue);
+                  });
+                }),
             Gap(16),
             getSwapBtn(),
           ],
