@@ -107,7 +107,6 @@ class _SwapPageState extends State<SwapPage> {
         .getValue(StorageKey.selected_address.name);
     var res = await ReefAppState.instance.swapCtrl.swapTokens(
         signerAddress, selectedTopToken!, selectedBottomToken!, settings);
-    print("here i am ${res}");
     _getPoolReserves();
     print("SWAP TOKEN RESPONSE === $res");
   }
@@ -293,15 +292,15 @@ class _SwapPageState extends State<SwapPage> {
         hintStyle: TextStyle(color: Styles.textLightColor));
   }
 
-  Container getTopToken() {
+  Container getToken(bool isEditing,dynamic callback,TokenWithAmount? selectedTokenWithAmount,FocusNode focusNode,TextEditingController amountController,dynamic amountUpdated) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: getBorder(_isValueTopEditing),
+        border: getBorder(isEditing),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: getBoxShadow(_isValueTopEditing),
-        color: getColor(_isValueTopEditing),
+        boxShadow: getBoxShadow(isEditing),
+        color: getColor(isEditing),
       ),
       child: Column(
         children: [
@@ -310,7 +309,7 @@ class _SwapPageState extends State<SwapPage> {
               MaterialButton(
                 onPressed: () {
                   showTokenSelectionModal(context,
-                      callback: _changeSelectedTopToken,
+                      callback: callback,
                       selectedToken: selectedTopToken?.address);
                 },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -324,12 +323,12 @@ class _SwapPageState extends State<SwapPage> {
                     side: const BorderSide(color: Colors.black26)),
                 child: Row(
                   children: [
-                    if (selectedTopToken == null)
+                    if (selectedTokenWithAmount == null)
                       const Text("Select token")
                     else ...[
-                      IconFromUrl(selectedTopToken!.iconUrl),
+                      IconFromUrl(selectedTokenWithAmount!.iconUrl),
                       const Gap(4),
-                      Text(selectedTopToken!.symbol),
+                      Text(selectedTokenWithAmount!.symbol),
                     ],
                     const Gap(4),
                     Icon(CupertinoIcons.chevron_down,
@@ -339,14 +338,14 @@ class _SwapPageState extends State<SwapPage> {
               ),
               Expanded(
                 child: TextField(
-                  focusNode: _focusTop,
+                  focusNode: focusNode,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
                   ],
                   keyboardType: TextInputType.number,
-                  controller: amountTopController,
+                  controller: amountController,
                   onChanged: (text) async {
-                    await _amountTopUpdated(amountTopController.text);
+                    await amountUpdated(amountController.text);
                   },
                   decoration: getInputDecoration(),
                   textAlign: TextAlign.right,
@@ -359,21 +358,21 @@ class _SwapPageState extends State<SwapPage> {
             width: double.infinity,
             child: Row(
               children: [
-                if (selectedTopToken != null) ...[
+                if (selectedTokenWithAmount != null) ...[
                   Text(
-                    "Balance: ${toAmountDisplayBigInt(selectedTopToken!.balance, decimals: selectedTopToken!.decimals)} ${selectedTopToken!.symbol}",
+                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount!.balance, decimals: selectedTokenWithAmount!.decimals)} ${selectedTokenWithAmount!.symbol}",
                     style:
                         TextStyle(color: Styles.textLightColor, fontSize: 12),
                   ),
                   MaxAmountButton(
                     onPressed: () async {
                       //TODO: anukul -  set slider to max
-                      var topTokenBalance = toAmountDisplayBigInt(
-                          selectedTopToken!.balance,
-                          decimals: selectedTopToken!.decimals,
-                          fractionDigits: selectedTopToken!.decimals);
-                      await _amountTopUpdated(topTokenBalance);
-                      amountTopController.text = topTokenBalance;
+                      var tokenBalance = toAmountDisplayBigInt(
+                          selectedTokenWithAmount!.balance,
+                          decimals: selectedTokenWithAmount!.decimals,
+                          fractionDigits: selectedTokenWithAmount!.decimals);
+                      await amountUpdated(selectedTokenWithAmount);
+                      amountBottomController.text = tokenBalance;
                     },
                   )
                 ]
@@ -385,97 +384,6 @@ class _SwapPageState extends State<SwapPage> {
     );
   }
 
-  Container getBottomToken() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: getBorder(_isValueBottomEditing),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: getBoxShadow(_isValueBottomEditing),
-        color: getColor(_isValueBottomEditing),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              MaterialButton(
-                onPressed: () {
-                  showTokenSelectionModal(context,
-                      callback: _changeSelectedBottomToken,
-                      selectedToken: selectedTopToken?.address);
-                },
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                minWidth: 0,
-                height: 36,
-                elevation: 0,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: Colors.black26)),
-                child: Row(
-                  children: [
-                    if (selectedBottomToken == null)
-                      const Text("Select token")
-                    else ...[
-                      IconFromUrl(selectedBottomToken!.iconUrl),
-                      const Gap(4),
-                      Text(selectedBottomToken!.symbol),
-                    ],
-                    const Gap(4),
-                    Icon(CupertinoIcons.chevron_down,
-                        size: 16, color: Styles.textLightColor)
-                  ],
-                ),
-              ),
-              Expanded(
-                child: TextField(
-                  focusNode: _focusBottom,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
-                  ],
-                  keyboardType: TextInputType.number,
-                  controller: amountBottomController,
-                  onChanged: (text) async {
-                    await _amountBottomUpdated(amountBottomController.text);
-                  },
-                  decoration: getInputDecoration(),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-          const Gap(8),
-          SizedBox(
-            width: double.infinity,
-            child: Row(
-              children: [
-                if (selectedBottomToken != null) ...[
-                  Text(
-                    "Balance: ${toAmountDisplayBigInt(selectedBottomToken!.balance, decimals: selectedBottomToken!.decimals)} ${selectedBottomToken!.symbol}",
-                    style:
-                        TextStyle(color: Styles.textLightColor, fontSize: 12),
-                  ),
-                  MaxAmountButton(
-                    onPressed: () async {
-                      //TODO: anukul -  set slider to max
-                      var bottomTokenBalance = toAmountDisplayBigInt(
-                          selectedBottomToken!.balance,
-                          decimals: selectedBottomToken!.decimals,
-                          fractionDigits: selectedBottomToken!.decimals);
-                      await _amountBottomUpdated(bottomTokenBalance);
-                      amountBottomController.text = bottomTokenBalance;
-                    },
-                  )
-                ]
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
 
   SizedBox getSwapBtn(){
      return SizedBox(
@@ -571,9 +479,9 @@ class _SwapPageState extends State<SwapPage> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            getTopToken(),
+            getToken(_isValueTopEditing,_changeSelectedTopToken,selectedTopToken,_focusTop,amountTopController,_amountTopUpdated),
             Gap(16),
-            getBottomToken(),
+            getToken(_isValueBottomEditing,_changeSelectedBottomToken,selectedBottomToken,_focusBottom,amountBottomController,_amountBottomUpdated),
             Gap(16),
             getSwapBtn(),
             Text("${selectedTopToken?.amount}-${selectedBottomToken?.amount}")
