@@ -7,7 +7,7 @@ mixin NavSwipeCompute {
     var currIndex = bottomNavigationBarItems.indexWhere((itm){return itm.page==currentPage;});
     var targetIndex = bottomNavigationBarItems.indexWhere((itm){return itm.page==page;});
     var diff = targetIndex - currIndex;
-    return diff+1;
+    return diff;
 
     if (currentPage == NavigationPage.home && page == NavigationPage.settings) {
       return 3;

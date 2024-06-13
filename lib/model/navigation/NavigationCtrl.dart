@@ -53,11 +53,11 @@ class NavigationCtrl with NavSwipeCompute {
 
     if (i.abs() > 1) {
       HapticFeedback.selectionClick();
-      _swipeComplete = _computeSwipeAnimation(
-          currentPage: _navigationModel.currentPage, page: navigationPage);
+      _swipeComplete = _computeSwipeAnimationNr(
+          nr: i);
     } else {
-      _swipeComplete = _computeSwipeAnimation(
-          currentPage: _navigationModel.currentPage, page: navigationPage);
+      _swipeComplete = _computeSwipeAnimationNr(
+          nr: i);
       HapticFeedback.selectionClick();
       _navigationModel.navigate(navigationPage);
     }
@@ -215,9 +215,26 @@ class NavigationCtrl with NavSwipeCompute {
   //   Navigator.of(context).push(MaterialPageRoute(builder: (context) => child));
   // }
 
-  Future<bool> _computeSwipeAnimation(
+  Future<bool> _computeSwipeAnimationNr(
+      {required int nr}) async {
+    if(nr>0) {
+      for (var i =0;i<nr; i++) {
+        await carouselKey!.currentState!.swipeXNext(x: nr);
+      }
+    }else {
+      for (var i =0;i>nr; i--) {
+        await carouselKey!.currentState!.swipeXPrevious(x: nr);
+      }
+    }
+    return true;
+  }
+
+
+  /*Future<bool> _computeSwipeAnimation(
       {required NavigationPage currentPage,
       required NavigationPage page}) async {
+    // return await carouselKey!.currentState!.swipeXNext();
+
     if (currentPage == NavigationPage.home && page == NavigationPage.settings) {
       // return await carouselKey!.currentState!.swipeXNext(x: 2);
       await carouselKey!.currentState!.swipeXNext(x: 2);
@@ -241,5 +258,5 @@ class NavigationCtrl with NavSwipeCompute {
       return await carouselKey!.currentState!.swipeXNext();
     }
     return false;
-  }
+  }*/
 }
