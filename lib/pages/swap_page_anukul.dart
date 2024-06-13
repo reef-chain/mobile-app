@@ -139,6 +139,13 @@ class _SwapPageState extends State<SwapPage> {
     setState(() {
       selectedTopToken = selectedTopToken!.setAmount(formattedValue);
     });
+    setState(() {
+      if(double.parse(formattedValue)<=double.parse(selectedTopToken!.balance.toString())){
+      rating=double.parse(formattedValue)/double.parse(selectedTopToken!.balance.toString());
+      }else{
+        rating=1.0;
+      }
+    });
 
     if (BigInt.parse(formattedValue) > selectedTopToken!.balance) {
       print("WARN: Insufficient ${selectedTopToken!.symbol} balance");
@@ -161,7 +168,6 @@ class _SwapPageState extends State<SwapPage> {
           selectedBottomToken!.amount,
           decimals: selectedBottomToken!.decimals);
     });
-
     print(
         "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
     print(
@@ -375,13 +381,12 @@ class _SwapPageState extends State<SwapPage> {
                   ),
                   MaxAmountButton(
                     onPressed: () async {
-                      //TODO: anukul -  set slider to max
                       var tokenBalance = toAmountDisplayBigInt(
                           selectedTokenWithAmount!.balance,
                           decimals: selectedTokenWithAmount!.decimals,
                           fractionDigits: selectedTokenWithAmount!.decimals);
-                      await amountUpdated(selectedTokenWithAmount);
-                      amountBottomController.text = tokenBalance;
+                      await amountUpdated(tokenBalance);
+                      amountController.text = tokenBalance;
                     },
                   )
                 ]
