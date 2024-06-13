@@ -124,7 +124,7 @@ class _SwapPageState extends State<SwapPage> {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
     }
-
+    
     selectedTopToken = selectedTopToken!.setAmount("0");
     amountTopController.clear();
     selectedBottomToken = selectedBottomToken!.setAmount("0");

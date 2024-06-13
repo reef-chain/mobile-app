@@ -43,6 +43,13 @@ class _SwapPageState extends State<SwapPage> {
   bool _isValueTopEditing = false;
   bool _isValueBottomEditing = false;
 
+  //settings
+  SwapSettings settings = SwapSettings(1, 0.8);
+
+  //reserves
+  String reserveTop = "";
+  String reserveBottom = "";
+
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -56,6 +63,53 @@ class _SwapPageState extends State<SwapPage> {
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
     });
     super.initState();
+  }
+
+  void _getPoolReserves() async {
+    if (selectedTopToken == null || selectedBottomToken == null) {
+      return;
+    }
+
+    setState(() {
+      selectedTopToken = selectedTopToken!.setAmount("0");
+      amountTopController.clear();
+      selectedBottomToken = selectedBottomToken!.setAmount("0");
+      amountBottomController.clear();
+    });
+
+    var res = await ReefAppState.instance.swapCtrl.getPoolReserves(
+        selectedTopToken!.address, selectedBottomToken!.address);
+    if (res is bool && res == false) {
+      print("ERROR: Pool does not exist");
+      setState(() {
+        reserveTop = "";
+        reserveBottom = "";
+      });
+      return;
+    }
+    setState(() {
+      reserveTop = res["reserve1"];
+      reserveBottom = res["reserve2"];
+    });
+    print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
+  }
+
+  void _executeSwap() async {
+    if (selectedTopToken == null || selectedBottomToken == null) {
+      return;
+    }
+
+    if (selectedTopToken!.amount <= BigInt.zero) {
+      return;
+    }
+
+    var signerAddress = await ReefAppState.instance.storageCtrl
+        .getValue(StorageKey.selected_address.name);
+    var res = await ReefAppState.instance.swapCtrl.swapTokens(
+        signerAddress, selectedTopToken!, selectedBottomToken!, settings);
+    print("here i am ${res}");
+    _getPoolReserves();
+    print("SWAP TOKEN RESPONSE === $res");
   }
 
   Future<void> _amountTopUpdated(String value) async {
@@ -89,26 +143,28 @@ class _SwapPageState extends State<SwapPage> {
       print("WARN: Insufficient ${selectedTopToken!.symbol} balance");
     }
 
-    // if (reserveTop.isEmpty) {
-    //   return; // Pool does not exist
-    // }
+    if (reserveTop.isEmpty) {
+      return; // Pool does not exist
+    }
 
-    // var token1 = selectedTopToken!.setAmount(reserveTop);
-    // var token2 = selectedBottomToken!.setAmount(reserveBottom);
+    var token1 = selectedTopToken!.setAmount(reserveTop);
+    var token2 = selectedBottomToken!.setAmount(reserveBottom);
 
-    // var res = (await ReefAppState.instance.swapCtrl
-    //         .getSwapAmount(value, false, token1, token2))
-    //     .replaceAll("\"", "");
+    var res = (await ReefAppState.instance.swapCtrl
+            .getSwapAmount(value, false, token1, token2))
+        .replaceAll("\"", "");
 
-    // selectedBottomToken = selectedBottomToken!.setAmount(res);
-    // amountBottomController.text = toAmountDisplayBigInt(
-    //     selectedBottomToken!.amount,
-    //     decimals: selectedBottomToken!.decimals);
+    setState(() {
+      selectedBottomToken = selectedBottomToken!.setAmount(res);
+      amountBottomController.text = toAmountDisplayBigInt(
+          selectedBottomToken!.amount,
+          decimals: selectedBottomToken!.decimals);
+    });
 
-    // print(
-    //     "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
-    // print(
-    //     "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
+    print(
+        "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
+    print(
+        "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
   }
 
   Future<void> _amountBottomUpdated(String value) async {
@@ -129,58 +185,59 @@ class _SwapPageState extends State<SwapPage> {
         });
       }
       setState(() {
-          selectedBottomToken = selectedBottomToken!.setAmount("0");
-          amountBottomController.clear();
-        });
+        selectedBottomToken = selectedBottomToken!.setAmount("0");
+        amountBottomController.clear();
+      });
       return;
     }
     setState(() {
       selectedBottomToken = selectedBottomToken!.setAmount(formattedValue);
     });
-    // if (reserveTop.isEmpty) {
-    //   return; // Pool does not exist
-    // }
+    if (reserveTop.isEmpty) {
+      return; // Pool does not exist
+    }
 
-    // if (BigInt.parse(formattedValue) > BigInt.parse(reserveBottom)) {
-    //   print(
-    //       "ERROR: Insufficient ${selectedBottomToken!.symbol} liquidity in pool");
-    //   selectedTopToken = selectedTopToken!.setAmount("0");
-    //   amountTopController.clear();
-    //   return;
-    // }
+    if (BigInt.parse(formattedValue) > BigInt.parse(reserveBottom)) {
+      print(
+          "ERROR: Insufficient ${selectedBottomToken!.symbol} liquidity in pool");
+      selectedTopToken = selectedTopToken!.setAmount("0");
+      amountTopController.clear();
+      return;
+    }
 
-    // var token1 = selectedTopToken!.setAmount(reserveTop);
-    // var token2 = selectedBottomToken!.setAmount(reserveBottom);
+    var token1 = selectedTopToken!.setAmount(reserveTop);
+    var token2 = selectedBottomToken!.setAmount(reserveBottom);
 
-    // var res = (await ReefAppState.instance.swapCtrl
-    //         .getSwapAmount(value, true, token1, token2))
-    //     .replaceAll("\"", "");
+    var res = (await ReefAppState.instance.swapCtrl
+            .getSwapAmount(value, true, token1, token2))
+        .replaceAll("\"", "");
 
-    // if (BigInt.parse(res) > selectedTopToken!.balance) {
-    //   print("WARN: Insufficient ${selectedTopToken!.symbol} balance");
-    // }
+    if (BigInt.parse(res) > selectedTopToken!.balance) {
+      print("WARN: Insufficient ${selectedTopToken!.symbol} balance");
+    }
+    setState(() {
+      selectedTopToken = selectedTopToken!.setAmount(res);
+      amountTopController.text = toAmountDisplayBigInt(selectedTopToken!.amount,
+          decimals: selectedTopToken!.decimals);
+    });
 
-    // selectedTopToken = selectedTopToken!.setAmount(res);
-    // amountTopController.text = toAmountDisplayBigInt(selectedTopToken!.amount,
-    //     decimals: selectedTopToken!.decimals);
-
-    // print(
-    //     "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
-    // print(
-    //     "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
+    print(
+        "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
+    print(
+        "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
   }
 
   void _changeSelectedTopToken(TokenWithAmount token) {
     setState(() {
       selectedTopToken = token;
-      // _getPoolReserves();
+      _getPoolReserves();
     });
   }
 
   void _changeSelectedBottomToken(TokenWithAmount token) {
     setState(() {
       selectedBottomToken = token;
-      // _getPoolReserves();
+      _getPoolReserves();
     });
   }
 
@@ -219,22 +276,21 @@ class _SwapPageState extends State<SwapPage> {
     ];
   }
 
-  InputDecoration getInputDecoration(){
+  InputDecoration getInputDecoration() {
     return InputDecoration(
-                      constraints: const BoxConstraints(maxHeight: 32),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      border: const OutlineInputBorder(),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.transparent,
-                        ),
-                      ),
-                      hintText: '0.0',
-                      hintStyle: TextStyle(color: Styles.textLightColor));
+        constraints: const BoxConstraints(maxHeight: 32),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        border: const OutlineInputBorder(),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.transparent,
+          ),
+        ),
+        hintText: '0.0',
+        hintStyle: TextStyle(color: Styles.textLightColor));
   }
 
   Container getTopToken() {
@@ -421,6 +477,79 @@ class _SwapPageState extends State<SwapPage> {
     );
   }
 
+  SizedBox getSwapBtn(){
+     return SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                            shadowColor: const Color(0x559d6cff),
+                            elevation: 0,
+                            backgroundColor: (selectedTopToken == null ||
+                                    selectedTopToken!.amount <= BigInt.zero ||
+                                    selectedBottomToken == null ||
+                                    selectedBottomToken!.amount <= BigInt.zero)
+                                ? Color.fromARGB(255, 125, 125, 125)
+                                : Color.fromARGB(0, 215, 31, 31),
+                            padding: const EdgeInsets.all(0),
+                          ),
+                          onPressed: () {
+                            if (selectedTopToken == null ||
+                                selectedTopToken!.amount <= BigInt.zero ||
+                                selectedBottomToken == null ||
+                                selectedBottomToken!.amount <= BigInt.zero) {
+                              return;
+                            }
+                            _executeSwap();
+                          },
+                          child: Ink(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 15, horizontal: 22),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffe6e2f1),
+                              gradient: (selectedTopToken == null ||
+                                      selectedTopToken!.amount <= BigInt.zero ||
+                                      selectedBottomToken == null ||
+                                      selectedBottomToken!.amount <=
+                                          BigInt.zero)
+                                  ? null
+                                  : Styles.buttonGradient,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(14.0)),
+                            ),
+                            child: Center(
+                              child: Text(
+                                (selectedTopToken == null
+                                    ? "Select sell token"
+                                    : selectedBottomToken == null
+                                        ? "Select buy token"
+                                        : selectedTopToken!.amount <=
+                                                    BigInt.zero ||
+                                                selectedBottomToken!.amount <=
+                                                    BigInt.zero
+                                            ? "Insert amount"
+                                            : "Swap"),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: (selectedTopToken == null ||
+                                          selectedBottomToken == null ||
+                                          selectedTopToken!.amount <=
+                                              BigInt.zero ||
+                                          selectedBottomToken!.amount <=
+                                              BigInt.zero)
+                                      ? const Color(0x65898e9c)
+                                      : Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+  }
+
   // dispose
   @override
   void dispose() {
@@ -441,7 +570,14 @@ class _SwapPageState extends State<SwapPage> {
             boxShadow: neumorphicShadow()),
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          children: [getTopToken(),Gap(16), getBottomToken(),Text("${selectedTopToken?.amount}-${selectedBottomToken?.amount}")],
+          children: [
+            getTopToken(),
+            Gap(16),
+            getBottomToken(),
+            Gap(16),
+            getSwapBtn(),
+            Text("${selectedTopToken?.amount}-${selectedBottomToken?.amount}")
+          ],
         ),
       ),
     );
