@@ -48,6 +48,9 @@ class NavigationCtrl with NavSwipeCompute {
     final i = computeSwipeAnimation(
         currentPage: _navigationModel.currentPage, page: navigationPage);
 
+    print("NAV FOR=$i");
+
+
     if (i.abs() > 1) {
       HapticFeedback.selectionClick();
       _swipeComplete = _computeSwipeAnimation(
