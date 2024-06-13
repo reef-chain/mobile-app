@@ -1,4 +1,4 @@
-import { reefState } from '@reef-chain/util-lib';
+import { reefState ,network as nw, getAccountSigner} from '@reef-chain/util-lib';
 import { switchMap, take } from "rxjs/operators";
 import { Contract} from "ethers";
 import { ReefswapRouter } from "./abi/ReefswapRouter";
@@ -6,6 +6,7 @@ import { combineLatest, firstValueFrom } from "rxjs";
 import { calculateAmount, calculateAmountWithPercentage, calculateDeadline, getInputAmount, getOutputAmount } from "./utils/math";
 import { approveTokenAmount } from './utils/tokenUtils';
 import { getPoolReserves } from './utils/poolUtils';
+import Signer from "./background/Signer";
 
 interface SwapSettings {
     deadline: number;
@@ -24,15 +25,16 @@ const resolveSettings = (
     slippageTolerance: Number.isNaN(slippageTolerance) ? defaultSwapSettings.slippageTolerance : slippageTolerance,
   });
 
-export const initApi = () => {
+export const initApi = (signingKey: Signer) => {
     (window as any).swap = {
         // Executes a swap
         execute: async (signerAddress: string, token1: TokenWithAmount, token2: TokenWithAmount, settings: SwapSettings) => {
             return firstValueFrom(
-                combineLatest([reefState.selectedNetwork$, reefState.accounts$]).pipe(
+                combineLatest([reefState.selectedNetwork$, reefState.accounts$,reefState.selectedProvider$]).pipe(
                     take(1),
-                    switchMap(async ([network, reefSigners]) => {
+                    switchMap(async ([network, reefSigners,provider]) => {
                         const reefSigner = reefSigners.find((s)=>s.address===signerAddress);
+                    
                         if (!reefSigner) {
                             console.log("swap.send() - NO SIGNER FOUND",);
                             return false;
@@ -40,15 +42,19 @@ export const initApi = () => {
 
                         settings = resolveSettings(settings);
                         const sellAmount = calculateAmount({ decimals: token1.decimals, amount: token1.amount });
+                       
                         const minBuyAmount = calculateAmountWithPercentage(
                             { decimals: token2.decimals, amount: token2.amount },
                             settings.slippageTolerance
                         );
+                        console.log("here i am ssellAmount",minBuyAmount);
+                        const signer = await getAccountSigner(reefSigner.address,provider,signingKey)
                         const swapRouter = new Contract(
-                            network.routerAddress,
+                            nw.getReefswapNetworkConfig(network).routerAddress,
                             ReefswapRouter,
-                            reefSigner.signer
+                            signer,
                         );
+                        console.log("here i am swapRouter",swapRouter.address,signer.getAddress());
 
                         try {
                             // Approve token1
@@ -56,8 +62,8 @@ export const initApi = () => {
                             await approveTokenAmount(
                                 token1.address,
                                 sellAmount,
-                                network.routerAddress,
-                                reefSigner.signer
+                                nw.getReefswapNetworkConfig(network).routerAddress,
+                                signer,
                             );
                             console.log("Token approved");
 
@@ -86,10 +92,10 @@ export const initApi = () => {
         // Returns pool reserves, if pool exists
         getPoolReserves: async (token1Address: string, token2Address: string) => {
             return firstValueFrom(
-                combineLatest([appState.selectedNetwork$, appState.selectedProvider$]).pipe(
+                combineLatest([reefState.selectedNetwork$, reefState.selectedProvider$]).pipe(
                     take(1),
                     switchMap(async ([network, provider]) => {
-                        return getPoolReserves(token1Address, token2Address, provider, network.factoryAddress);
+                        return getPoolReserves(token1Address, token2Address, provider, nw.getReefswapNetworkConfig(network).factoryAddress);
                     }),
                     take(1)
                 )

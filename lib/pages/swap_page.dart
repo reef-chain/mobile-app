@@ -61,21 +61,20 @@ class _SwapPageState extends State<SwapPage> {
     _focus.addListener(_onFocusChange);
     //If token is not REEF - set target to reef
     if (widget.preselected != Constants.REEF_TOKEN_ADDRESS) {
-     setState(() {
-       isSelectedTokenREEF = false;
-       selectedBottomToken = ReefAppState
-      .instance.model.tokens.selectedErc20List
-      .firstWhere((token) => token.address == Constants.REEF_TOKEN_ADDRESS);
-      selectedTopToken=ReefAppState
-      .instance.model.tokens.selectedErc20List
-      .firstWhere((token) => token.address == widget.preselected);
-     });
-    }else{
       setState(() {
-       selectedTopToken = ReefAppState
-      .instance.model.tokens.selectedErc20List
-      .firstWhere((token) => token.address == Constants.REEF_TOKEN_ADDRESS);
-     });
+        isSelectedTokenREEF = false;
+        selectedBottomToken =
+            ReefAppState.instance.model.tokens.selectedErc20List.firstWhere(
+                (token) => token.address == Constants.REEF_TOKEN_ADDRESS);
+        selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
+            .firstWhere((token) => token.address == widget.preselected);
+      });
+    } else {
+      setState(() {
+        selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
+            .firstWhere(
+                (token) => token.address == Constants.REEF_TOKEN_ADDRESS);
+      });
     }
   }
 
@@ -125,7 +124,7 @@ class _SwapPageState extends State<SwapPage> {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
     }
-
+    
     selectedTopToken = selectedTopToken!.setAmount("0");
     amountTopController.clear();
     selectedBottomToken = selectedBottomToken!.setAmount("0");
@@ -291,438 +290,487 @@ class _SwapPageState extends State<SwapPage> {
                 children: [
                   Column(
                     children: <Widget>[
-                      !isSelectedTokenREEF? Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: _isValueEditing
-                              ? Border.all(color: const Color(0xffa328ab))
-                              : Border.all(color: const Color(0x00d7d1e9)),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            if (_isValueEditing)
-                              const BoxShadow(
-                                  blurRadius: 15,
-                                  spreadRadius: -8,
-                                  offset: Offset(0, 10),
-                                  color: Color(0x40a328ab))
-                          ],
-                          color: _isValueEditing
-                              ? const Color(0xffeeebf6)
-                              : const Color(0xffE7E2F2),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                MaterialButton(
-                                  onPressed: () {
-                                    showTokenSelectionModal(context,
-                                        callback: _changeSelectedTopToken,selectedToken: selectedBottomToken?.address);
-                                  },
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  minWidth: 0,
-                                  height: 36,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 4, horizontal: 12),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      side: const BorderSide(
-                                          color: Colors.black26)),
-                                  child: Row(
-                                    children: [
-                                      if (selectedTopToken == null)
-                                        const Text("Select token")
-                                      else ...[
-                                        IconFromUrl(selectedTopToken!.iconUrl),
-                                        const Gap(4),
-                                        Text(selectedTopToken!.symbol),
-                                      ],
-                                      const Gap(4),
-                                      Icon(CupertinoIcons.chevron_down,
-                                          size: 16,
-                                          color: Styles.textLightColor)
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: TextField(
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                          RegExp(r'[\.0-9]'))
-                                    ],
-                                    keyboardType: TextInputType.number,
-                                    controller: amountTopController,
-                                    onChanged: (text) async {
-                                      await _amountTopUpdated(
-                                          amountTopController.text);
-                                    },
-                                    decoration: InputDecoration(
-                                        constraints:
-                                            const BoxConstraints(maxHeight: 32),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 8),
-                                        enabledBorder: const OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: Colors.transparent),
-                                        ),
-                                        border: const OutlineInputBorder(),
-                                        focusedBorder: const OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        hintText: '0.0',
-                                        hintStyle: TextStyle(
-                                            color: Styles.textLightColor)),
-                                    textAlign: TextAlign.right,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Gap(8),
-                            SizedBox(
+                      !isSelectedTokenREEF
+                          ? Container(
                               width: double.infinity,
-                              child: Row(
-                                children: [
-                                  if (selectedTopToken != null) ...[
-                                    Text(
-                                      "Balance: ${toAmountDisplayBigInt(selectedTopToken!.balance, decimals: selectedTopToken!.decimals)} ${selectedTopToken!.symbol}",
-                                      style: TextStyle(
-                                          color: Styles.textLightColor,
-                                          fontSize: 12),
-                                    ),
-                                    MaxAmountButton(
-                                      onPressed: () async {
-                                        //TODO: anukul -  set slider to max
-                                        var topTokenBalance =
-                                            toAmountDisplayBigInt(
-                                                selectedTopToken!.balance,
-                                                decimals:
-                                                    selectedTopToken!.decimals,
-                                                fractionDigits:
-                                                    selectedTopToken!.decimals);
-                                        await _amountTopUpdated(
-                                            topTokenBalance);
-                                        amountTopController.text =
-                                            topTokenBalance;
-                                      },
-                                    )
-                                  ]
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: _isValueEditing
+                                    ? Border.all(color: const Color(0xffa328ab))
+                                    : Border.all(
+                                        color: const Color(0x00d7d1e9)),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  if (_isValueEditing)
+                                    const BoxShadow(
+                                        blurRadius: 15,
+                                        spreadRadius: -8,
+                                        offset: Offset(0, 10),
+                                        color: Color(0x40a328ab))
                                 ],
+                                color: _isValueEditing
+                                    ? const Color(0xffeeebf6)
+                                    : const Color(0xffE7E2F2),
                               ),
-                            )
-                          ],
-                        ),
-                      ):
-                      // If selected Token is REEF
-                       Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: _isValueEditing
-                        ? Border.all(color: const Color(0xffa328ab))
-                        : Border.all(color: const Color(0x00d7d1e9)),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      if (_isValueEditing)
-                        const BoxShadow(
-                            blurRadius: 15,
-                            spreadRadius: -8,
-                            offset: Offset(0, 10),
-                            color: Color(0x40a328ab))
-                    ],
-                    color: _isValueEditing
-                        ? const Color(0xffeeebf6)
-                        : const Color(0xffE7E2F2),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Row(
-                            children: [
-                              IconFromUrl(selectedTopToken?.iconUrl, size: 48),
-                              const Gap(13),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Column(
                                 children: [
-                                  Text(
-                                    selectedTopToken != null
-                                        ? selectedTopToken!.name
-                                        : 'Select',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 18,
-                                        color: Color(0xff19233c)),
+                                  Row(
+                                    children: [
+                                      MaterialButton(
+                                        onPressed: () {
+                                          showTokenSelectionModal(context,
+                                              callback: _changeSelectedTopToken,
+                                              selectedToken:
+                                                  selectedBottomToken?.address);
+                                        },
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        minWidth: 0,
+                                        height: 36,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 4, horizontal: 12),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            side: const BorderSide(
+                                                color: Colors.black26)),
+                                        child: Row(
+                                          children: [
+                                            if (selectedTopToken == null)
+                                              const Text("Select token")
+                                            else ...[
+                                              IconFromUrl(
+                                                  selectedTopToken!.iconUrl),
+                                              const Gap(4),
+                                              Text(selectedTopToken!.symbol),
+                                            ],
+                                            const Gap(4),
+                                            Icon(CupertinoIcons.chevron_down,
+                                                size: 16,
+                                                color: Styles.textLightColor)
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: TextField(
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'[\.0-9]'))
+                                          ],
+                                          keyboardType: TextInputType.number,
+                                          controller: amountTopController,
+                                          onChanged: (text) async {
+                                            await _amountTopUpdated(
+                                                amountTopController.text);
+                                          },
+                                          decoration: InputDecoration(
+                                              constraints: const BoxConstraints(
+                                                  maxHeight: 32),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8),
+                                              enabledBorder:
+                                                  const OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.transparent),
+                                              ),
+                                              border:
+                                                  const OutlineInputBorder(),
+                                              focusedBorder:
+                                                  const OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.transparent,
+                                                ),
+                                              ),
+                                              hintText: '0.0',
+                                              hintStyle: TextStyle(
+                                                  color:
+                                                      Styles.textLightColor)),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    "${toAmountDisplayBigInt(selectedTopToken!.balance)} ${selectedTopToken!.name.toUpperCase()}",
-                                    style: TextStyle(
-                                        color: Styles.textLightColor,
-                                        fontSize: 12),
+                                  const Gap(8),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Row(
+                                      children: [
+                                        if (selectedTopToken != null) ...[
+                                          Text(
+                                            "Balance: ${toAmountDisplayBigInt(selectedTopToken!.balance, decimals: selectedTopToken!.decimals)} ${selectedTopToken!.symbol}",
+                                            style: TextStyle(
+                                                color: Styles.textLightColor,
+                                                fontSize: 12),
+                                          ),
+                                          MaxAmountButton(
+                                            onPressed: () async {
+                                              //TODO: anukul -  set slider to max
+                                              var topTokenBalance =
+                                                  toAmountDisplayBigInt(
+                                                      selectedTopToken!.balance,
+                                                      decimals:
+                                                          selectedTopToken!
+                                                              .decimals,
+                                                      fractionDigits:
+                                                          selectedTopToken!
+                                                              .decimals);
+                                              await _amountTopUpdated(
+                                                  topTokenBalance);
+                                              amountTopController.text =
+                                                  topTokenBalance;
+                                            },
+                                          )
+                                        ]
+                                      ],
+                                    ),
                                   )
                                 ],
                               ),
-                            ],
-                          ),
-                          Expanded(
-                            child: TextFormField(
-                              focusNode: _focus,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'[\.0-9]'))
-                              ],
-                              keyboardType: TextInputType.number,
-                              controller: amountController,
-                              onChanged: (text) async {
-                                setState(() {
-                                  //you can access nameController in its scope to get
-                                  // the value of text entered as shown below
-                                  amount = amountController.text;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                  constraints:
-                                      const BoxConstraints(maxHeight: 32),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  enabledBorder: const OutlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: Colors.transparent),
-                                  ),
-                                  border: const OutlineInputBorder(),
-                                  focusedBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.transparent,
-                                    ),
-                                  ),
-                                  hintText: '0.0',
-                                  hintStyle:
-                                      TextStyle(color: Styles.textLightColor)),
-                              textAlign: TextAlign.right,
-                              validator: (String? value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Address cannot be empty';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                    
-                      const Gap(14),
-                      isSelectedTokenREEF?Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: _isValueSecondEditing
-                              ? Border.all(color: const Color(0xffa328ab))
-                              : Border.all(color: const Color(0x00d7d1e9)),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            if (_isValueSecondEditing)
-                              const BoxShadow(
-                                  blurRadius: 15,
-                                  spreadRadius: -8,
-                                  offset: Offset(0, 10),
-                                  color: Color(0x40a328ab))
-                          ],
-                          color: _isValueEditing
-                              ? const Color(0xffeeebf6)
-                              : const Color(0xffE7E2F2),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                MaterialButton(
-  onPressed: () {
-    showTokenSelectionModal(context,
-        callback: _changeSelectedBottomToken,selectedToken: selectedTopToken?.address);
-  },
-  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  minWidth: 0,
-  height: 36,
-  elevation: 0,
-  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-    // Remove the `BorderSide` from the `shape` property
-  ),
-  child: Row(
-    children: [
-      if (selectedBottomToken == null)
-        const Text("Select token")
-      else ...[
-        IconFromUrl(selectedBottomToken!.iconUrl),
-        const Gap(4),
-        Text(selectedBottomToken!.symbol),
-      ],
-      const Gap(4),
-      Icon(CupertinoIcons.chevron_down,
-          size: 16,
-          color: Styles.textLightColor)
-    ],
-  ),
-),
-
-                                Expanded(
-                                  child: TextField(
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                            RegExp(r'[\.0-9]'))
-                                      ],
-                                      keyboardType: TextInputType.number,
-                                      controller: amountBottomController,
-                                      onChanged: (text) async {
-                                        await _amountBottomUpdated(
-                                            amountBottomController.text);
-                                      },
-                                      decoration: InputDecoration(
-                                          constraints: const BoxConstraints(
-                                              maxHeight: 32),
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 12, vertical: 8),
-                                          enabledBorder:
-                                              const OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.transparent),
-                                          ),
-                                          border: const OutlineInputBorder(),
-                                          focusedBorder:
-                                              const OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                          ),
-                                          hintText: '0.0',
-                                          hintStyle: TextStyle(
-                                              color: Styles.textLightColor)),
-                                      textAlign: TextAlign.right),
-                                ),
-                              ],
-                            ),
-                            const Gap(8),
-                            SizedBox(
+                            )
+                          :
+                          // If selected Token is REEF
+                          Container(
                               width: double.infinity,
-                              child: Row(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: _isValueEditing
+                                    ? Border.all(color: const Color(0xffa328ab))
+                                    : Border.all(
+                                        color: const Color(0x00d7d1e9)),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  if (_isValueEditing)
+                                    const BoxShadow(
+                                        blurRadius: 15,
+                                        spreadRadius: -8,
+                                        offset: Offset(0, 10),
+                                        color: Color(0x40a328ab))
+                                ],
+                                color: _isValueEditing
+                                    ? const Color(0xffeeebf6)
+                                    : const Color(0xffE7E2F2),
+                              ),
+                              child: Column(
                                 children: [
-                                  if (selectedBottomToken != null)
-                                    Text(
-                                      "Balance: ${toAmountDisplayBigInt(selectedBottomToken!.balance, decimals: selectedBottomToken!.decimals)} ${selectedBottomToken!.symbol}",
-                                      style: TextStyle(
-                                          color: Styles.textLightColor,
-                                          fontSize: 12),
-                                    )
+                                  Row(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          IconFromUrl(selectedTopToken?.iconUrl,
+                                              size: 48),
+                                          const Gap(13),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                selectedTopToken != null
+                                                    ? selectedTopToken!.name
+                                                    : 'Select',
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 18,
+                                                    color: Color(0xff19233c)),
+                                              ),
+                                              Text(
+                                                "${toAmountDisplayBigInt(selectedTopToken!.balance)} ${selectedTopToken!.name.toUpperCase()}",
+                                                style: TextStyle(
+                                                    color:
+                                                        Styles.textLightColor,
+                                                    fontSize: 12),
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Expanded(
+                                        child: TextFormField(
+                                          focusNode: _focus,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'[\.0-9]'))
+                                          ],
+                                          keyboardType: TextInputType.number,
+                                          controller: amountController,
+                                          onChanged: (text) async {
+                                            setState(() {
+                                              //you can access nameController in its scope to get
+                                              // the value of text entered as shown below
+                                              amount = amountController.text;
+                                              _amountTopUpdated( amountController.text);
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                              constraints: const BoxConstraints(
+                                                  maxHeight: 32),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8),
+                                              enabledBorder:
+                                                  const OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.transparent),
+                                              ),
+                                              border:
+                                                  const OutlineInputBorder(),
+                                              focusedBorder:
+                                                  const OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.transparent,
+                                                ),
+                                              ),
+                                              hintText: '0.0',
+                                              hintStyle: TextStyle(
+                                                  color:
+                                                      Styles.textLightColor)),
+                                          textAlign: TextAlign.right,
+                                          validator: (String? value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Address cannot be empty';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                      const Gap(14),
+                      isSelectedTokenREEF
+                          ? Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: _isValueSecondEditing
+                                    ? Border.all(color: const Color(0xffa328ab))
+                                    : Border.all(
+                                        color: const Color(0x00d7d1e9)),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  if (_isValueSecondEditing)
+                                    const BoxShadow(
+                                        blurRadius: 15,
+                                        spreadRadius: -8,
+                                        offset: Offset(0, 10),
+                                        color: Color(0x40a328ab))
+                                ],
+                                color: _isValueEditing
+                                    ? const Color(0xffeeebf6)
+                                    : const Color(0xffE7E2F2),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      MaterialButton(
+                                        onPressed: () {
+                                          showTokenSelectionModal(context,
+                                              callback:
+                                                  _changeSelectedBottomToken,
+                                              selectedToken:
+                                                  selectedTopToken?.address);
+                                        },
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        minWidth: 0,
+                                        height: 36,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 4, horizontal: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          // Remove the `BorderSide` from the `shape` property
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            if (selectedBottomToken == null)
+                                              const Text("Select token")
+                                            else ...[
+                                              IconFromUrl(
+                                                  selectedBottomToken!.iconUrl),
+                                              const Gap(4),
+                                              Text(selectedBottomToken!.symbol),
+                                            ],
+                                            const Gap(4),
+                                            Icon(CupertinoIcons.chevron_down,
+                                                size: 16,
+                                                color: Styles.textLightColor)
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: TextField(
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                  RegExp(r'[\.0-9]'))
+                                            ],
+                                            keyboardType: TextInputType.number,
+                                            controller: amountBottomController,
+                                            onChanged: (text) async {
+                                              await _amountBottomUpdated(
+                                                  amountBottomController.text);
+                                            },
+                                            decoration: InputDecoration(
+                                                constraints:
+                                                    const BoxConstraints(
+                                                        maxHeight: 32),
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 8),
+                                                enabledBorder:
+                                                    const OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color:
+                                                          Colors.transparent),
+                                                ),
+                                                border:
+                                                    const OutlineInputBorder(),
+                                                focusedBorder:
+                                                    const OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Colors.transparent,
+                                                  ),
+                                                ),
+                                                hintText: '0.0',
+                                                hintStyle: TextStyle(
+                                                    color:
+                                                        Styles.textLightColor)),
+                                            textAlign: TextAlign.right),
+                                      ),
+                                    ],
+                                  ),
+                                  const Gap(8),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Row(
+                                      children: [
+                                        if (selectedBottomToken != null)
+                                          Text(
+                                            "Balance: ${toAmountDisplayBigInt(selectedBottomToken!.balance, decimals: selectedBottomToken!.decimals)} ${selectedBottomToken!.symbol}",
+                                            style: TextStyle(
+                                                color: Styles.textLightColor,
+                                                fontSize: 12),
+                                          )
+                                      ],
+                                    ),
+                                  )
                                 ],
                               ),
                             )
-                          ],
-                        ),
-                      )
-                      :
-                      // render this if selected token is not reef
-                      Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: _isValueSecondEditing
-                        ? Border.all(color: const Color(0xffa328ab))
-                        : Border.all(color: const Color(0x00d7d1e9)),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      if (_isValueSecondEditing)
-                        const BoxShadow(
-                            blurRadius: 15,
-                            spreadRadius: -8,
-                            offset: Offset(0, 10),
-                            color: Color(0x40a328ab))
-                    ],
-                    color: _isValueSecondEditing
-                        ? const Color(0xffeeebf6)
-                        : const Color(0xffE7E2F2),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Row(
-                            children: [
-                              IconFromUrl(selectedBottomToken?.iconUrl, size: 48),
-                              const Gap(13),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          :
+                          // render this if selected token is not reef
+                          Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                border: _isValueSecondEditing
+                                    ? Border.all(color: const Color(0xffa328ab))
+                                    : Border.all(
+                                        color: const Color(0x00d7d1e9)),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  if (_isValueSecondEditing)
+                                    const BoxShadow(
+                                        blurRadius: 15,
+                                        spreadRadius: -8,
+                                        offset: Offset(0, 10),
+                                        color: Color(0x40a328ab))
+                                ],
+                                color: _isValueSecondEditing
+                                    ? const Color(0xffeeebf6)
+                                    : const Color(0xffE7E2F2),
+                              ),
+                              child: Column(
                                 children: [
-                                  Text(
-                                    selectedBottomToken != null
-                                        ? selectedBottomToken!.name
-                                        : 'Select',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 18,
-                                        color: Color(0xff19233c)),
+                                  Row(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          IconFromUrl(
+                                              selectedBottomToken?.iconUrl,
+                                              size: 48),
+                                          const Gap(13),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                selectedBottomToken != null
+                                                    ? selectedBottomToken!.name
+                                                    : 'Select',
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 18,
+                                                    color: Color(0xff19233c)),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Expanded(
+                                        child: TextFormField(
+                                          focusNode: _focusSecond,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.allow(
+                                                RegExp(r'[\.0-9]'))
+                                          ],
+                                          keyboardType: TextInputType.number,
+                                          controller: amountController,
+                                          onChanged: (text) async {
+                                            setState(() {
+                                              //you can access nameController in its scope to get
+                                              // the value of text entered as shown below
+                                              amount = amountController.text;
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                              constraints: const BoxConstraints(
+                                                  maxHeight: 32),
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8),
+                                              enabledBorder:
+                                                  const OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Colors.transparent),
+                                              ),
+                                              border:
+                                                  const OutlineInputBorder(),
+                                              focusedBorder:
+                                                  const OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.transparent,
+                                                ),
+                                              ),
+                                              hintText: '0.0',
+                                              hintStyle: TextStyle(
+                                                  color:
+                                                      Styles.textLightColor)),
+                                          textAlign: TextAlign.right,
+                                          validator: (String? value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Address cannot be empty';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                          Expanded(
-                            child: TextFormField(
-                              focusNode: _focusSecond,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'[\.0-9]'))
-                              ],
-                              keyboardType: TextInputType.number,
-                              controller: amountController,
-                              onChanged: (text) async {
-                                setState(() {
-                                  //you can access nameController in its scope to get
-                                  // the value of text entered as shown below
-                                  amount = amountController.text;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                  constraints:
-                                      const BoxConstraints(maxHeight: 32),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  enabledBorder: const OutlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: Colors.transparent),
-                                  ),
-                                  border: const OutlineInputBorder(),
-                                  focusedBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.transparent,
-                                    ),
-                                  ),
-                                  hintText: '0.0',
-                                  hintStyle:
-                                      TextStyle(color: Styles.textLightColor)),
-                              textAlign: TextAlign.right,
-                              validator: (String? value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Address cannot be empty';
-                                }
-                                return null;
-                              },
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
                       const Gap(36),
                       SliderStandAlone(
                           rating: rating,
@@ -757,12 +805,12 @@ class _SwapPageState extends State<SwapPage> {
                             padding: const EdgeInsets.all(0),
                           ),
                           onPressed: () {
-                            if (selectedTopToken == null ||
-                                selectedTopToken!.amount <= BigInt.zero ||
-                                selectedBottomToken == null ||
-                                selectedBottomToken!.amount <= BigInt.zero) {
-                              return;
-                            }
+                            // if (selectedTopToken == null ||
+                            //     selectedTopToken!.amount <= BigInt.zero ||
+                            //     selectedBottomToken == null ||
+                            //     selectedBottomToken!.amount <= BigInt.zero) {
+                            //   return;
+                            // }
                             _executeSwap();
                           },
                           child: Ink(
@@ -795,12 +843,14 @@ class _SwapPageState extends State<SwapPage> {
                                             : "Swap"),
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: (selectedTopToken == null || selectedBottomToken == null||selectedTopToken!.amount <=
-                                                    BigInt.zero ||
-                                                selectedBottomToken!.amount <=
-                                                    BigInt.zero)
-                                ? const Color(0x65898e9c)
-                                : Colors.white,
+                                  color: (selectedTopToken == null ||
+                                          selectedBottomToken == null ||
+                                          selectedTopToken!.amount <=
+                                              BigInt.zero ||
+                                          selectedBottomToken!.amount <=
+                                              BigInt.zero)
+                                      ? const Color(0x65898e9c)
+                                      : Colors.white,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -808,6 +858,10 @@ class _SwapPageState extends State<SwapPage> {
                           ),
                         ),
                       ),
+                      ElevatedButton(onPressed: (){
+                        print("${selectedTopToken?.name}-${selectedBottomToken?.name}");
+                        print("${selectedTopToken?.amount}-${selectedBottomToken?.amount}");
+                      }, child: Text("print values"))
                     ],
                   ),
                 ]),
