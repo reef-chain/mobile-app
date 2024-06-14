@@ -10,7 +10,7 @@ import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/pages/pools_page.dart';
 import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
-import 'package:reef_mobile_app/pages/swap_page.dart';
+import 'package:reef_mobile_app/pages/swap_page_anukul.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_page.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_tx_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';

@@ -20,7 +20,6 @@ const DEFAULT_TOKEN_ICONS: string[] = [
 export const getPoolReserves = async (token1Address: string, token2Address: string, provider: Provider, factoryAddress: string) => {
   const poolAddress = await findPoolTokenAddress(
     token1Address, token2Address, provider, factoryAddress);
-
   if (poolAddress === tokenUtil.EMPTY_ADDRESS||tokenUtil.EMPTY_ADDRESS.startsWith(poolAddress)) {
       console.log("NO POOL FOUND",);
       return false;
