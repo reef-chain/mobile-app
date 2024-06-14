@@ -479,7 +479,7 @@ Widget buildPreloader() {
             Expanded(
               //todo fix this logic anukul
               child: Text(
-                "${max(selectedTopToken!.amount.toDouble()*selectedTopToken!.price!.toDouble()/1e18,0.001).toStringAsFixed(4)}\$",
+                "${max(selectedTopToken!.amount.toDouble()*selectedTopToken!.price!.toDouble()*0.0003/1e18,0.0000).toStringAsFixed(4)}\$",
                 textAlign: TextAlign.right,
               ),
             ),
