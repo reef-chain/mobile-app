@@ -1,11 +1,15 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
+import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
@@ -37,6 +41,9 @@ class _SwapPageState extends State<SwapPage> {
   TextEditingController amountTopController = TextEditingController();
   TextEditingController amountBottomController = TextEditingController();
 
+  //slider
+  double rating = 0;
+
   // focus
   FocusNode _focusTop = FocusNode();
   FocusNode _focusBottom = FocusNode();
@@ -50,6 +57,11 @@ class _SwapPageState extends State<SwapPage> {
   String reserveTop = "";
   String reserveBottom = "";
 
+  //summary
+  String rate = "";
+  String slippage = "0.8";
+  String fee = "";
+
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -59,7 +71,6 @@ class _SwapPageState extends State<SwapPage> {
       selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
           .firstWhere((token) => token.address == widget.preselected);
 
-      // Initialize the controller with the current amount of the selected token
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
     });
     super.initState();
@@ -91,9 +102,35 @@ class _SwapPageState extends State<SwapPage> {
       reserveTop = res["reserve1"];
       reserveBottom = res["reserve2"];
     });
+
+setState(() {
+    rate = getPoolRate(reserveBottom,reserveTop,selectedTopToken!.symbol,selectedBottomToken!.symbol);
+});
+    
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
+ String getPoolRate(String reserveTop, String reserveBottom, String symbol1, String symbol2) {
+  final BigInt bigIntReserveTop = BigInt.parse(reserveTop);
+  final BigInt bigIntReserveBottom = BigInt.parse(reserveBottom);
+
+  final BigInt quotient = bigIntReserveTop ~/ bigIntReserveBottom;
+  final BigInt remainder = bigIntReserveTop % bigIntReserveBottom;
+
+  const int precision = 4;
+  final BigInt scaledRemainder = (remainder * BigInt.from(10).pow(precision));
+  final BigInt fractionalPart = scaledRemainder ~/ bigIntReserveBottom;
+
+  String result = quotient.toString();
+  if (fractionalPart != BigInt.zero) {
+    String fractionalString = fractionalPart.toString().padLeft(precision, '0');
+    result += '.' + fractionalString.substring(0, precision);
+  } else {
+    result += '.0000';
+  }
+
+  return '1 $symbol1 = $result $symbol2';
+}
   void _executeSwap() async {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
@@ -105,11 +142,44 @@ class _SwapPageState extends State<SwapPage> {
 
     var signerAddress = await ReefAppState.instance.storageCtrl
         .getValue(StorageKey.selected_address.name);
-    var res = await ReefAppState.instance.swapCtrl.swapTokens(
-        signerAddress, selectedTopToken!, selectedBottomToken!, settings);
-    print("here i am ${res}");
+    Stream<dynamic> executeTransactionFeedbackStream =
+        await ReefAppState.instance.swapCtrl.swapTokens(
+            signerAddress, selectedTopToken!, selectedBottomToken!, settings);
+    executeTransactionFeedbackStream =
+        executeTransactionFeedbackStream.asBroadcastStream();
+
+    executeTransactionFeedbackStream.listen((txResponse) {
+      print('TRANSACTION RESPONSE anukul=$txResponse');
+      if(txResponse!=null){
+        setState(() {
+          if(txResponse['status']=="approving"){
+            showModal(context,
+            headText: "Swap in progress",
+            child: Column(
+              children: [
+                Gap(16.0),
+                CircularCountDown(
+                    countdownMs: 4500,
+                    width: 80,
+                    height: 80,
+                    fillColor: Styles.primaryAccentColor,
+                    strokeWidth: 4,
+                    child:IconFromUrl(selectedTopToken!.iconUrl),
+                    close: ()=>Navigator.of(context).pop(),
+                  ),  Gap(8.0),
+                  Text("approving ${selectedTopToken?.name}...",style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.textLightColor,
+                ),)
+              ],
+            ));
+          }
+        });
+      }
+    });
     _getPoolReserves();
-    print("SWAP TOKEN RESPONSE === $res");
+    print("SWAP TOKEN RESPONSE === $executeTransactionFeedbackStream");
   }
 
   Future<void> _amountTopUpdated(String value) async {
@@ -138,6 +208,17 @@ class _SwapPageState extends State<SwapPage> {
     setState(() {
       selectedTopToken = selectedTopToken!.setAmount(formattedValue);
     });
+    setState(() {
+      if (double.parse(formattedValue) <=
+          double.parse(selectedTopToken!.balance.toString())) {
+        rating = double.parse(formattedValue) /
+            double.parse(selectedTopToken!.balance.toString());
+      } else {
+        rating = 0.0;
+        selectedTopToken?.setAmount("0");
+        amountTopController.clear();
+      }
+    });
 
     if (BigInt.parse(formattedValue) > selectedTopToken!.balance) {
       print("WARN: Insufficient ${selectedTopToken!.symbol} balance");
@@ -160,7 +241,6 @@ class _SwapPageState extends State<SwapPage> {
           selectedBottomToken!.amount,
           decimals: selectedBottomToken!.decimals);
     });
-
     print(
         "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
     print(
@@ -255,6 +335,66 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   // UI builders
+  Container getPoolSummary() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Styles.boxBackgroundColor,
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    margin: EdgeInsets.only(top: 8.0),
+    padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              "Rate: ",
+              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              child: Text(
+                "${rate}",
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              "Slippage: ",
+              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              child: Text(
+                "${slippage}",
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              "Fees: ",
+              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              //todo fix this logic anukul
+              child: Text(
+                "${max(selectedTopToken!.amount.toDouble()*selectedTopToken!.price!.toDouble()/1e18,0.001).toStringAsFixed(4)}\$",
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
   BoxBorder getBorder(value) {
     return value
         ? Border.all(color: const Color(0xffa328ab))
@@ -293,15 +433,21 @@ class _SwapPageState extends State<SwapPage> {
         hintStyle: TextStyle(color: Styles.textLightColor));
   }
 
-  Container getTopToken() {
+  Container getToken(
+      bool isEditing,
+      dynamic callback,
+      TokenWithAmount? selectedTokenWithAmount,
+      FocusNode focusNode,
+      TextEditingController amountController,
+      dynamic amountUpdated) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: getBorder(_isValueTopEditing),
+        border: getBorder(isEditing),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: getBoxShadow(_isValueTopEditing),
-        color: getColor(_isValueTopEditing),
+        boxShadow: getBoxShadow(isEditing),
+        color: getColor(isEditing),
       ),
       child: Column(
         children: [
@@ -310,7 +456,7 @@ class _SwapPageState extends State<SwapPage> {
               MaterialButton(
                 onPressed: () {
                   showTokenSelectionModal(context,
-                      callback: _changeSelectedTopToken,
+                      callback: callback,
                       selectedToken: selectedTopToken?.address);
                 },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -324,12 +470,12 @@ class _SwapPageState extends State<SwapPage> {
                     side: const BorderSide(color: Colors.black26)),
                 child: Row(
                   children: [
-                    if (selectedTopToken == null)
+                    if (selectedTokenWithAmount == null)
                       const Text("Select token")
                     else ...[
-                      IconFromUrl(selectedTopToken!.iconUrl),
+                      IconFromUrl(selectedTokenWithAmount!.iconUrl),
                       const Gap(4),
-                      Text(selectedTopToken!.symbol),
+                      Text(selectedTokenWithAmount!.symbol),
                     ],
                     const Gap(4),
                     Icon(CupertinoIcons.chevron_down,
@@ -339,6 +485,170 @@ class _SwapPageState extends State<SwapPage> {
               ),
               Expanded(
                 child: TextField(
+                  focusNode: focusNode,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^(0|[1-9]\d*)(\.\d+)?$'))
+                  ],
+                  keyboardType: TextInputType.number,
+                  controller: amountController,
+                  onChanged: (text) async {
+                    await amountUpdated(amountController.text);
+                  },
+                  decoration: getInputDecoration(),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+          const Gap(8),
+          SizedBox(
+            width: double.infinity,
+            child: Row(
+              children: [
+                if (selectedTokenWithAmount != null) ...[
+                  Text(
+                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount!.balance, decimals: selectedTokenWithAmount!.decimals)} ${selectedTokenWithAmount!.symbol}",
+                    style:
+                        TextStyle(color: Styles.textLightColor, fontSize: 12),
+                  ),
+                  MaxAmountButton(
+                    onPressed: () async {
+                      var tokenBalance = toAmountDisplayBigInt(
+                          selectedTokenWithAmount!.balance,
+                          decimals: selectedTokenWithAmount!.decimals,
+                          fractionDigits: selectedTokenWithAmount!.decimals);
+                      await amountUpdated(tokenBalance);
+                      amountController.text = tokenBalance;
+                    },
+                  )
+                ]
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  SizedBox getSwapBtn() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shadowColor: const Color(0x559d6cff),
+          elevation: 0,
+          backgroundColor: (selectedTopToken == null ||
+                  selectedTopToken!.amount <= BigInt.zero ||
+                  selectedBottomToken == null ||
+                  selectedBottomToken!.amount <= BigInt.zero)
+              ? Color.fromARGB(255, 125, 125, 125)
+              : Color.fromARGB(0, 215, 31, 31),
+          padding: const EdgeInsets.all(0),
+        ),
+        onPressed: () {
+          if (selectedTopToken == null ||
+              selectedTopToken!.amount <= BigInt.zero ||
+              selectedBottomToken == null ||
+              selectedBottomToken!.amount <= BigInt.zero) {
+            return;
+          }
+          _executeSwap();
+        },
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+          decoration: BoxDecoration(
+            color: const Color(0xffe6e2f1),
+            gradient: (selectedTopToken == null ||
+                    selectedTopToken!.amount <= BigInt.zero ||
+                    selectedBottomToken == null ||
+                    selectedBottomToken!.amount <= BigInt.zero)
+                ? null
+                : Styles.buttonGradient,
+            borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+          ),
+          child: Center(
+            child: Text(
+              (selectedTopToken == null
+                  ? "Select sell token"
+                  : selectedBottomToken == null
+                      ? "Select buy token"
+                      : selectedTopToken!.amount <= BigInt.zero ||
+                              selectedBottomToken!.amount <= BigInt.zero
+                          ? "Insert amount"
+                          :"Swap"),
+              style: TextStyle(
+                fontSize: 16,
+                color: (selectedTopToken == null ||
+                        selectedBottomToken == null ||
+                        selectedTopToken!.amount <= BigInt.zero ||
+                        selectedBottomToken!.amount <= BigInt.zero)
+                    ? const Color(0x65898e9c)
+                    : Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container getReefTokenField() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: _isValueTopEditing
+            ? Border.all(color: const Color(0xffa328ab))
+            : Border.all(color: const Color(0x00d7d1e9)),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          if (_isValueTopEditing)
+            const BoxShadow(
+                blurRadius: 15,
+                spreadRadius: -8,
+                offset: Offset(0, 10),
+                color: Color(0x40a328ab))
+        ],
+        color: _isValueTopEditing
+            ? const Color(0xffeeebf6)
+            : const Color(0xffE7E2F2),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Row(
+                children: [
+                  IconFromUrl(selectedTopToken?.iconUrl, size: 48),
+                  const Gap(13),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        selectedTopToken != null
+                            ? selectedTopToken!.name
+                            : 'Select',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                            color: Color(0xff19233c)),
+                      ),
+                      Text(
+                        "${toAmountDisplayBigInt(selectedTopToken!.balance)} ${selectedTopToken!.name.toUpperCase()}",
+                        style: TextStyle(
+                            color: Styles.textLightColor, fontSize: 12),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+              Expanded(
+                child: TextFormField(
                   focusNode: _focusTop,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
@@ -346,208 +656,33 @@ class _SwapPageState extends State<SwapPage> {
                   keyboardType: TextInputType.number,
                   controller: amountTopController,
                   onChanged: (text) async {
-                    await _amountTopUpdated(amountTopController.text);
+                    setState(() {
+                      _amountTopUpdated(amountTopController.text);
+                    });
                   },
-                  decoration: getInputDecoration(),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-          const Gap(8),
-          SizedBox(
-            width: double.infinity,
-            child: Row(
-              children: [
-                if (selectedTopToken != null) ...[
-                  Text(
-                    "Balance: ${toAmountDisplayBigInt(selectedTopToken!.balance, decimals: selectedTopToken!.decimals)} ${selectedTopToken!.symbol}",
-                    style:
-                        TextStyle(color: Styles.textLightColor, fontSize: 12),
-                  ),
-                  MaxAmountButton(
-                    onPressed: () async {
-                      //TODO: anukul -  set slider to max
-                      var topTokenBalance = toAmountDisplayBigInt(
-                          selectedTopToken!.balance,
-                          decimals: selectedTopToken!.decimals,
-                          fractionDigits: selectedTopToken!.decimals);
-                      await _amountTopUpdated(topTokenBalance);
-                      amountTopController.text = topTokenBalance;
-                    },
-                  )
-                ]
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Container getBottomToken() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: getBorder(_isValueBottomEditing),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: getBoxShadow(_isValueBottomEditing),
-        color: getColor(_isValueBottomEditing),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              MaterialButton(
-                onPressed: () {
-                  showTokenSelectionModal(context,
-                      callback: _changeSelectedBottomToken,
-                      selectedToken: selectedTopToken?.address);
-                },
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                minWidth: 0,
-                height: 36,
-                elevation: 0,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: const BorderSide(color: Colors.black26)),
-                child: Row(
-                  children: [
-                    if (selectedBottomToken == null)
-                      const Text("Select token")
-                    else ...[
-                      IconFromUrl(selectedBottomToken!.iconUrl),
-                      const Gap(4),
-                      Text(selectedBottomToken!.symbol),
-                    ],
-                    const Gap(4),
-                    Icon(CupertinoIcons.chevron_down,
-                        size: 16, color: Styles.textLightColor)
-                  ],
-                ),
-              ),
-              Expanded(
-                child: TextField(
-                  focusNode: _focusBottom,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
-                  ],
-                  keyboardType: TextInputType.number,
-                  controller: amountBottomController,
-                  onChanged: (text) async {
-                    await _amountBottomUpdated(amountBottomController.text);
-                  },
-                  decoration: getInputDecoration(),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-          const Gap(8),
-          SizedBox(
-            width: double.infinity,
-            child: Row(
-              children: [
-                if (selectedBottomToken != null) ...[
-                  Text(
-                    "Balance: ${toAmountDisplayBigInt(selectedBottomToken!.balance, decimals: selectedBottomToken!.decimals)} ${selectedBottomToken!.symbol}",
-                    style:
-                        TextStyle(color: Styles.textLightColor, fontSize: 12),
-                  ),
-                  MaxAmountButton(
-                    onPressed: () async {
-                      //TODO: anukul -  set slider to max
-                      var bottomTokenBalance = toAmountDisplayBigInt(
-                          selectedBottomToken!.balance,
-                          decimals: selectedBottomToken!.decimals,
-                          fractionDigits: selectedBottomToken!.decimals);
-                      await _amountBottomUpdated(bottomTokenBalance);
-                      amountBottomController.text = bottomTokenBalance;
-                    },
-                  )
-                ]
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  SizedBox getSwapBtn(){
-     return SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
-                            shadowColor: const Color(0x559d6cff),
-                            elevation: 0,
-                            backgroundColor: (selectedTopToken == null ||
-                                    selectedTopToken!.amount <= BigInt.zero ||
-                                    selectedBottomToken == null ||
-                                    selectedBottomToken!.amount <= BigInt.zero)
-                                ? Color.fromARGB(255, 125, 125, 125)
-                                : Color.fromARGB(0, 215, 31, 31),
-                            padding: const EdgeInsets.all(0),
-                          ),
-                          onPressed: () {
-                            if (selectedTopToken == null ||
-                                selectedTopToken!.amount <= BigInt.zero ||
-                                selectedBottomToken == null ||
-                                selectedBottomToken!.amount <= BigInt.zero) {
-                              return;
-                            }
-                            _executeSwap();
-                          },
-                          child: Ink(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 22),
-                            decoration: BoxDecoration(
-                              color: const Color(0xffe6e2f1),
-                              gradient: (selectedTopToken == null ||
-                                      selectedTopToken!.amount <= BigInt.zero ||
-                                      selectedBottomToken == null ||
-                                      selectedBottomToken!.amount <=
-                                          BigInt.zero)
-                                  ? null
-                                  : Styles.buttonGradient,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(14.0)),
-                            ),
-                            child: Center(
-                              child: Text(
-                                (selectedTopToken == null
-                                    ? "Select sell token"
-                                    : selectedBottomToken == null
-                                        ? "Select buy token"
-                                        : selectedTopToken!.amount <=
-                                                    BigInt.zero ||
-                                                selectedBottomToken!.amount <=
-                                                    BigInt.zero
-                                            ? "Insert amount"
-                                            : "Swap"),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: (selectedTopToken == null ||
-                                          selectedBottomToken == null ||
-                                          selectedTopToken!.amount <=
-                                              BigInt.zero ||
-                                          selectedBottomToken!.amount <=
-                                              BigInt.zero)
-                                      ? const Color(0x65898e9c)
-                                      : Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
+                  decoration: InputDecoration(
+                      constraints: const BoxConstraints(maxHeight: 32),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      border: const OutlineInputBorder(),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.transparent,
                         ),
-                      );
+                      ),
+                      hintText: '0.0',
+                      hintStyle: TextStyle(color: Styles.textLightColor)),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   // dispose
@@ -571,12 +706,42 @@ class _SwapPageState extends State<SwapPage> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            getTopToken(),
+            if (selectedTopToken?.address == Constants.REEF_TOKEN_ADDRESS)
+              getReefTokenField(),
+            if (selectedTopToken?.address != Constants.REEF_TOKEN_ADDRESS)
+              getToken(
+                  _isValueTopEditing,
+                  _changeSelectedTopToken,
+                  selectedTopToken,
+                  _focusTop,
+                  amountTopController,
+                  _amountTopUpdated),
             Gap(16),
-            getBottomToken(),
+            getToken(
+                _isValueBottomEditing,
+                _changeSelectedBottomToken,
+                selectedBottomToken,
+                _focusBottom,
+                amountBottomController,
+                _amountBottomUpdated),
+            Gap(16),
+            SliderStandAlone(
+                rating: rating,
+                onChanged: (newRating) async {
+                  setState(() {
+                    rating = newRating;
+                    String amountValue = (double.parse(toAmountDisplayBigInt(
+                                selectedTopToken!.balance)) *
+                            rating)
+                        .toStringAsFixed(2);
+                    amountTopController.text = amountValue;
+                    _amountTopUpdated(amountValue);
+                  });
+                }),
+            Gap(16),
+            if(rate!="")getPoolSummary(),
             Gap(16),
             getSwapBtn(),
-            Text("${selectedTopToken?.amount}-${selectedBottomToken?.amount}")
           ],
         ),
       ),
