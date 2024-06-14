@@ -90,8 +90,8 @@ export const initApi = (signingKey: Signer) => {
                             observer.complete();
         
                         } catch (e) {
-                            console.log("ERROR swapping tokens", e);
-                            observer.error(e);
+                            console.log("ERROR swapping tokens", e.message);
+                            observer.next({status:e.message});
                         }
                     } catch (e) {
                         console.log("ERROR in swap process", e);

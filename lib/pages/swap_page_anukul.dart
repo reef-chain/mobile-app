@@ -70,6 +70,13 @@ class _SwapPageState extends State<SwapPage> {
 
   //swap button label
   String btnLabel="";
+  bool txInProgress=false;
+
+  //preloaders
+  bool preloader = false;
+  String? preloaderMessage;
+  Widget? preloaderChild;
+
 
   @override
   void initState() {
@@ -140,6 +147,42 @@ setState(() {
 
   return '1 $symbol1 = $result $symbol2';
 }
+
+Widget buildPreloader() {
+  return Align(
+    alignment: Alignment(0,-0.35),
+    child: Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Styles.whiteColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularCountDown(
+            countdownMs: 60000,
+            width: 80,
+            height: 80,
+            fillColor: Styles.primaryAccentColor,
+            strokeWidth: 4,
+            child: preloaderChild,
+          ),
+          Gap(8.0),
+          Text(
+            "${preloaderMessage}",
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Styles.textLightColor,
+            ),
+          )
+        ],
+      ),
+    ),
+  );
+}
+
   void _executeSwap() async {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
@@ -157,77 +200,35 @@ setState(() {
     executeTransactionFeedbackStream =
         executeTransactionFeedbackStream.asBroadcastStream();
 
-    executeTransactionFeedbackStream.listen((txResponse) {
+    executeTransactionFeedbackStream.listen(
+      (txResponse) {
       print('TRANSACTION RESPONSE anukul=$txResponse');
       if(txResponse!=null){
         setState(() {
+          txInProgress=true;
           if(txResponse['status']=="approving"){
-            showModal(context,
-            headText: "Swap in progress",
-            child: Column(
-              children: [
-                Gap(16.0),
-                CircularCountDown(
-                    countdownMs: 4500,
-                    width: 80,
-                    height: 80,
-                    fillColor: Styles.primaryAccentColor,
-                    strokeWidth: 4,
-                    child:IconFromUrl(selectedTopToken!.iconUrl),
-                    close: ()=>Navigator.of(context).pop(),
-                  ),  Gap(8.0),
-                  Text("approving ${selectedTopToken?.name}...",style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Styles.textLightColor,
-                ),)
-              ],
-            ));
+            btnLabel="Waiting to Approve";
+            preloader = true;
+            preloaderMessage="waiting for you to approve ${selectedTopToken?.name}";
+            preloaderChild=IconFromUrl(selectedTopToken!.iconUrl);
           }
           if(txResponse['status']=="approve-started"){
-            setState(() {
-              btnLabel = "Approving";
-            });
+            btnLabel = "Approving";
           }
           if(txResponse['status']=="approved"){
-            setState(() {
-              btnLabel = "";
-            });
-            showModal(context,
-            headText: "Swap in progress",
-            child: Column(
-              children: [
-                Gap(16.0),
-                CircularCountDown(
-                    countdownMs: 4500,
-                    width: 110,
-                    height: 110,
-                    fillColor: Styles.primaryAccentColor,
-                    strokeWidth: 4,
-                    child:Center(
-                      child: Row(
-                        children: [
-                          IconFromUrl(selectedTopToken!.iconUrl),
-                          Gap(4.0),
-                          IconFromUrl(selectedBottomToken!.iconUrl),
-                        ],
-                      ),
-                    ),
-                    close: ()=>Navigator.of(context).pop(),
-                  ),  Gap(8.0),
-                  Text("initializing swap from ${selectedTopToken?.name} to ${selectedBottomToken?.name}",style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Styles.textLightColor,
-                ),)
-              ],
-            ));
-         
+            btnLabel="Waiting to Swap";
+            preloaderMessage="approving ${selectedTopToken?.name}";
+            preloaderMessage="waiting for swap transaction (${selectedTopToken?.name} - ${selectedBottomToken?.name})";
+          }
+          if(txResponse['status']=="_canceled"){
+            preloader=false;
+            btnLabel = "Cancelled";
           }
         });
         handleEvmTransactionResponse(txResponse);
       }
-    });
+    },
+    );
     _getPoolReserves();
     print("SWAP TOKEN RESPONSE === $executeTransactionFeedbackStream");
   }
@@ -411,6 +412,23 @@ setState(() {
     });
   }
 
+  String getBtnLabel(){
+    if(txInProgress){
+      if(btnLabel=="Cancelled")setState(() {
+        txInProgress=false;
+      });
+      return btnLabel;
+    }
+    return selectedTopToken == null
+                  ? "Select sell token"
+                  : selectedBottomToken == null
+                      ? "Select buy token"
+                      : selectedTopToken!.amount <= BigInt.zero ||
+                              selectedBottomToken!.amount <= BigInt.zero
+                          ? "Insert amount"
+                          :"Swap";
+  }
+
   // UI builders
   Container getPoolSummary() {
   return Container(
@@ -563,6 +581,7 @@ setState(() {
               Expanded(
                 child: TextField(
                   focusNode: focusNode,
+                  readOnly: txInProgress,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(
                         RegExp(r'^(0|[1-9]\d*)(\.\d+)?$'))
@@ -649,14 +668,7 @@ setState(() {
           ),
           child: Center(
             child: Text(
-              (btnLabel!=""?btnLabel:selectedTopToken == null
-                  ? "Select sell token"
-                  : selectedBottomToken == null
-                      ? "Select buy token"
-                      : selectedTopToken!.amount <= BigInt.zero ||
-                              selectedBottomToken!.amount <= BigInt.zero
-                          ? "Insert amount"
-                          :"Swap"),
+              getBtnLabel(),
               style: TextStyle(
                 fontSize: 16,
                 color: (selectedTopToken == null ||
@@ -727,6 +739,7 @@ setState(() {
               Expanded(
                 child: TextFormField(
                   focusNode: _focusTop,
+                  readOnly: txInProgress,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
                   ],
@@ -973,52 +986,59 @@ setState(() {
       // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
     return transferStatusUI?? SignatureContentToggle(
-      Container(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: Styles.primaryBackgroundColor,
-            boxShadow: neumorphicShadow()),
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            if (selectedTopToken?.address == Constants.REEF_TOKEN_ADDRESS)
-              getReefTokenField(),
-            if (selectedTopToken?.address != Constants.REEF_TOKEN_ADDRESS)
+      
+      Stack(
+        children: [
+      
+          Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Styles.primaryBackgroundColor,
+              boxShadow: neumorphicShadow()),
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              if (selectedTopToken?.address == Constants.REEF_TOKEN_ADDRESS)
+                getReefTokenField(),
+              if (selectedTopToken?.address != Constants.REEF_TOKEN_ADDRESS)
+                getToken(
+                    _isValueTopEditing,
+                    _changeSelectedTopToken,
+                    selectedTopToken,
+                    _focusTop,
+                    amountTopController,
+                    _amountTopUpdated),
+              Gap(16),
               getToken(
-                  _isValueTopEditing,
-                  _changeSelectedTopToken,
-                  selectedTopToken,
-                  _focusTop,
-                  amountTopController,
-                  _amountTopUpdated),
-            Gap(16),
-            getToken(
-                _isValueBottomEditing,
-                _changeSelectedBottomToken,
-                selectedBottomToken,
-                _focusBottom,
-                amountBottomController,
-                _amountBottomUpdated),
-            Gap(16),
-            SliderStandAlone(
-                rating: rating,
-                onChanged: (newRating) async {
-                  setState(() {
-                    rating = newRating;
-                    String amountValue = (double.parse(toAmountDisplayBigInt(
-                                selectedTopToken!.balance)) *
-                            rating)
-                        .toStringAsFixed(2);
-                    amountTopController.text = amountValue;
-                    _amountTopUpdated(amountValue);
-                  });
-                }),
-            Gap(16),
-            if(rate!="")getPoolSummary(),
-            Gap(16),
-            getSwapBtn(),
-          ],
+                  _isValueBottomEditing,
+                  _changeSelectedBottomToken,
+                  selectedBottomToken,
+                  _focusBottom,
+                  amountBottomController,
+                  _amountBottomUpdated),
+              Gap(16),
+              SliderStandAlone(
+                  rating: rating,
+                  onChanged: (newRating) async {
+                    setState(() {
+                      rating = newRating;
+                      String amountValue = (double.parse(toAmountDisplayBigInt(
+                                  selectedTopToken!.balance)) *
+                              rating)
+                          .toStringAsFixed(2);
+                      amountTopController.text = amountValue;
+                      _amountTopUpdated(amountValue);
+                    });
+                  }),
+              Gap(16),
+              if(rate!="")getPoolSummary(),
+              Gap(16),
+              getSwapBtn(),
+            ],
+          ),
         ),
+          if(preloader)buildPreloader(),
+        ]
       ),
     );
   }
