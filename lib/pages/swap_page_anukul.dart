@@ -55,6 +55,11 @@ class _SwapPageState extends State<SwapPage> {
   String reserveTop = "";
   String reserveBottom = "";
 
+  //summary
+  String rate = "";
+  String slippage = "0.8";
+  String fee = "";
+
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -95,9 +100,35 @@ class _SwapPageState extends State<SwapPage> {
       reserveTop = res["reserve1"];
       reserveBottom = res["reserve2"];
     });
+
+setState(() {
+    rate = getPoolRate(reserveBottom,reserveTop,selectedTopToken!.symbol,selectedBottomToken!.symbol);
+});
+    
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
+ String getPoolRate(String reserveTop, String reserveBottom, String symbol1, String symbol2) {
+  final BigInt bigIntReserveTop = BigInt.parse(reserveTop);
+  final BigInt bigIntReserveBottom = BigInt.parse(reserveBottom);
+
+  final BigInt quotient = bigIntReserveTop ~/ bigIntReserveBottom;
+  final BigInt remainder = bigIntReserveTop % bigIntReserveBottom;
+
+  const int precision = 4;
+  final BigInt scaledRemainder = (remainder * BigInt.from(10).pow(precision));
+  final BigInt fractionalPart = scaledRemainder ~/ bigIntReserveBottom;
+
+  String result = quotient.toString();
+  if (fractionalPart != BigInt.zero) {
+    String fractionalString = fractionalPart.toString().padLeft(precision, '0');
+    result += '.' + fractionalString.substring(0, precision);
+  } else {
+    result += '.0000';
+  }
+
+  return '1 $symbol1 = $result $symbol2';
+}
   void _executeSwap() async {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
@@ -119,7 +150,6 @@ class _SwapPageState extends State<SwapPage> {
       print('TRANSACTION RESPONSE anukul=$txResponse');
       if(txResponse!=null){
         setState(() {
-          print("anukul=== ${txResponse['status']=="approving"}");
           if(txResponse['status']=="approving"){
             showModal(context,
             headText: "Swap in progress",
@@ -303,6 +333,65 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   // UI builders
+  Container getPoolSummary() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Styles.boxBackgroundColor,
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    margin: EdgeInsets.only(top: 8.0),
+    padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              "Rate: ",
+              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              child: Text(
+                "${rate}",
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              "Slippage: ",
+              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              child: Text(
+                "${slippage}",
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Text(
+              "Fees: ",
+              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
+            ),
+            Expanded(
+              child: Text(
+                "${slippage}\$",
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
   BoxBorder getBorder(value) {
     return value
         ? Border.all(color: const Color(0xffa328ab))
@@ -646,6 +735,8 @@ class _SwapPageState extends State<SwapPage> {
                     _amountTopUpdated(amountValue);
                   });
                 }),
+            Gap(16),
+            if(rate!="")getPoolSummary(),
             Gap(16),
             getSwapBtn(),
           ],

@@ -61,7 +61,6 @@ export const initApi = (signingKey: Signer) => {
                         );
         
                         try {
-                            observer.next({ status: 'approve-screen' });
                             // Approve token1
                             await approveTokenAmount(
                                 token1.address,
