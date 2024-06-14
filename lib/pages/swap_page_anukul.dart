@@ -215,7 +215,7 @@ setState(() {
                     ),
                     close: ()=>Navigator.of(context).pop(),
                   ),  Gap(8.0),
-                  Text("swapping ${selectedTopToken?.name} to ${selectedBottomToken?.name}",style: TextStyle(
+                  Text("initializing swap from ${selectedTopToken?.name} to ${selectedBottomToken?.name}",style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: Styles.textLightColor,
