@@ -209,7 +209,7 @@ Widget buildPreloader() {
           if(txResponse['status']=="approving"){
             btnLabel="Waiting to Approve";
             preloader = true;
-            preloaderMessage="waiting for you to approve ${selectedTopToken?.name}";
+            preloaderMessage="waiting for ${selectedTopToken?.name} approval";
             preloaderChild=IconFromUrl(selectedTopToken!.iconUrl);
           }
           if(txResponse['status']=="approve-started"){
@@ -217,8 +217,8 @@ Widget buildPreloader() {
           }
           if(txResponse['status']=="approved"){
             btnLabel="Waiting to Swap";
-            preloaderMessage="approving ${selectedTopToken?.name}";
             preloaderMessage="waiting for swap transaction (${selectedTopToken?.name} - ${selectedBottomToken?.name})";
+            preloaderChild=IconFromUrl(selectedBottomToken!.iconUrl);
           }
           if(txResponse['status']=="_canceled"){
             preloader=false;
@@ -1018,6 +1018,7 @@ Widget buildPreloader() {
                   _amountBottomUpdated),
               Gap(16),
               SliderStandAlone(
+                  isDisabled:txInProgress,
                   rating: rating,
                   onChanged: (newRating) async {
                     setState(() {

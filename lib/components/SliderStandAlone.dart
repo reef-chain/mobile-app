@@ -6,8 +6,9 @@ import 'package:reef_mobile_app/utils/styles.dart';
 class SliderStandAlone extends StatefulWidget {
   final double rating;
   final Function(double) onChanged;
+  final bool? isDisabled;
 
-  const SliderStandAlone({Key? key, required this.rating, required this.onChanged})
+  const SliderStandAlone({Key? key, required this.rating, required this.onChanged,this.isDisabled})
       : super(key: key);
 
   @override
@@ -45,6 +46,7 @@ class _SliderStandAloneState extends State<SliderStandAlone> {
       child: Slider(
         value: widget.rating,
         onChanged:(newRating){
+          if(widget.isDisabled!)return;
           widget.onChanged(newRating);
           },
         divisions: 100,
