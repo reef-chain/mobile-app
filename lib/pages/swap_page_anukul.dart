@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,7 +37,7 @@ class SwapPage extends StatefulWidget {
 
 class _SwapPageState extends State<SwapPage> {
   //preselected
-  bool isPreselectedTopExists=false;
+  bool isPreselectedTopExists = false;
 
   // swap tokens with amount
   TokenWithAmount? selectedTopToken;
@@ -72,27 +73,27 @@ class _SwapPageState extends State<SwapPage> {
   dynamic transactionData;
 
   //swap button label
-  String btnLabel="";
-  bool txInProgress=false;
+  String btnLabel = "";
+  bool txInProgress = false;
 
   //preloaders
   bool preloader = false;
   String? preloaderMessage;
   Widget? preloaderChild;
 
-
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
     _focusBottom.addListener(_onFocusBottomChange);
-    bool checkPreselection = ReefAppState.instance.model.tokens.selectedErc20List
-    .any((token) => token.address == widget.preselectedTop);
+    bool checkPreselection = ReefAppState
+        .instance.model.tokens.selectedErc20List
+        .any((token) => token.address == widget.preselectedTop);
     setState(() {
       isPreselectedTopExists = checkPreselection;
       // set preselectedTop token
-      if(checkPreselection){
-      selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
-          .firstWhere((token) => token.address == widget.preselectedTop);
+      if (checkPreselection) {
+        selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
+            .firstWhere((token) => token.address == widget.preselectedTop);
       }
 
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
@@ -127,69 +128,72 @@ class _SwapPageState extends State<SwapPage> {
       reserveBottom = res["reserve2"];
     });
 
-setState(() {
-    rate = getPoolRate(reserveBottom,reserveTop,selectedTopToken!.symbol,selectedBottomToken!.symbol);
-});
-    
+    setState(() {
+      rate = getPoolRate(reserveBottom, reserveTop, selectedTopToken!.symbol,
+          selectedBottomToken!.symbol);
+    });
+
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
- String getPoolRate(String reserveTop, String reserveBottom, String symbol1, String symbol2) {
-  final BigInt bigIntReserveTop = BigInt.parse(reserveTop);
-  final BigInt bigIntReserveBottom = BigInt.parse(reserveBottom);
+  String getPoolRate(
+      String reserveTop, String reserveBottom, String symbol1, String symbol2) {
+    final BigInt bigIntReserveTop = BigInt.parse(reserveTop);
+    final BigInt bigIntReserveBottom = BigInt.parse(reserveBottom);
 
-  final BigInt quotient = bigIntReserveTop ~/ bigIntReserveBottom;
-  final BigInt remainder = bigIntReserveTop % bigIntReserveBottom;
+    final BigInt quotient = bigIntReserveTop ~/ bigIntReserveBottom;
+    final BigInt remainder = bigIntReserveTop % bigIntReserveBottom;
 
-  const int precision = 4;
-  final BigInt scaledRemainder = (remainder * BigInt.from(10).pow(precision));
-  final BigInt fractionalPart = scaledRemainder ~/ bigIntReserveBottom;
+    const int precision = 4;
+    final BigInt scaledRemainder = (remainder * BigInt.from(10).pow(precision));
+    final BigInt fractionalPart = scaledRemainder ~/ bigIntReserveBottom;
 
-  String result = quotient.toString();
-  if (fractionalPart != BigInt.zero) {
-    String fractionalString = fractionalPart.toString().padLeft(precision, '0');
-    result += '.' + fractionalString.substring(0, precision);
-  } else {
-    result += '.0000';
+    String result = quotient.toString();
+    if (fractionalPart != BigInt.zero) {
+      String fractionalString =
+          fractionalPart.toString().padLeft(precision, '0');
+      result += '.' + fractionalString.substring(0, precision);
+    } else {
+      result += '.0000';
+    }
+
+    return '1 $symbol1 = $result $symbol2';
   }
 
-  return '1 $symbol1 = $result $symbol2';
-}
-
-Widget buildPreloader() {
-  return Align(
-    alignment: Alignment(0,0.5),
-    child: Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Styles.whiteColor,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularCountDown(
-            countdownMs: 60000,
-            width: 80,
-            height: 80,
-            fillColor: Styles.primaryAccentColor,
-            strokeWidth: 4,
-            child: preloaderChild,
-          ),
-          Gap(8.0),
-          Text(
-            "${preloaderMessage}",
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Styles.textLightColor,
+  Widget buildPreloader() {
+    return Align(
+      alignment: Alignment(0, 0.5),
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Styles.whiteColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularCountDown(
+              countdownMs: 60000,
+              width: 80,
+              height: 80,
+              fillColor: Styles.primaryAccentColor,
+              strokeWidth: 4,
+              child: preloaderChild,
             ),
-          )
-        ],
+            Gap(8.0),
+            Text(
+              "${preloaderMessage}",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Styles.textLightColor,
+              ),
+            )
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _executeSwap() async {
     if (selectedTopToken == null || selectedBottomToken == null) {
@@ -210,64 +214,67 @@ Widget buildPreloader() {
 
     executeTransactionFeedbackStream.listen(
       (txResponse) {
-      print('TRANSACTION RESPONSE anukul=$txResponse');
-      if(txResponse!=null){
-        setState(() {
-          txInProgress=true;
-          if(txResponse['status']=="approving"){
-            btnLabel="Waiting to Approve";
-            preloader = true;
-            preloaderMessage="waiting for ${selectedTopToken?.name} approval";
-            preloaderChild=IconFromUrl(selectedTopToken!.iconUrl);
-          }
-          if(txResponse['status']=="approve-started"){
-            btnLabel = "Approving";
-          }
-          if(txResponse['status']=="approved"){
-            btnLabel="Waiting to Swap";
-            preloaderMessage="waiting for swap transaction (${selectedTopToken?.name} - ${selectedBottomToken?.name})";
-            preloaderChild=IconFromUrl(selectedBottomToken!.iconUrl);
-          }
-          if(txResponse['status']=="_canceled"){
-            preloader=false;
-            btnLabel = "Cancelled";
-          }
-        });
-        handleEvmTransactionResponse(txResponse);
-      }
-    },
+        print('TRANSACTION RESPONSE anukul=$txResponse');
+        if (txResponse != null) {
+          setState(() {
+            txInProgress = true;
+            if (txResponse['status'] == "approving") {
+              btnLabel = "Waiting to Approve";
+              preloader = true;
+              preloaderMessage =
+                  "waiting for ${selectedTopToken?.name} approval";
+              preloaderChild = IconFromUrl(selectedTopToken!.iconUrl);
+            }
+            if (txResponse['status'] == "approve-started") {
+              btnLabel = "Approving";
+            }
+            if (txResponse['status'] == "approved") {
+              btnLabel = "Waiting to Swap";
+              preloaderMessage =
+                  "waiting for swap transaction (${selectedTopToken?.name} - ${selectedBottomToken?.name})";
+              preloaderChild = IconFromUrl(selectedBottomToken!.iconUrl);
+            }
+            if (txResponse['status'] == "_canceled") {
+              preloader = false;
+              btnLabel = "Cancelled";
+            }
+          });
+          handleEvmTransactionResponse(txResponse);
+        }
+      },
     );
     _getPoolReserves();
     print("SWAP TOKEN RESPONSE === $executeTransactionFeedbackStream");
   }
 
   bool handleEvmTransactionResponse(txResponse) {
-      if (txResponse['status'] == 'broadcast') {
-        setState(() {
-          transactionData = txResponse['data'];
-          statusValue = SendStatus.SENT_TO_NETWORK;
-        });
-      }
-      if (txResponse['status'] == 'included-in-block') {
-        setState(() {
-          transactionData = txResponse['data'];
-          statusValue = SendStatus.INCLUDED_IN_BLOCK;
-        });
-      }
-      if (txResponse['status'] == 'finalized') {
-        setState(() {
-          transactionData = txResponse['data'];
-          statusValue = SendStatus.FINALIZED;
-        });
-      }
-      if (txResponse['status'] == 'not-finalized') {
-        print('block was not finalized');
-        setState(() {
-          statusValue = SendStatus.NOT_FINALIZED;
-        });
-      }
-      return true;
+    if (txResponse['status'] == 'broadcast') {
+      setState(() {
+        transactionData = txResponse['data'];
+        statusValue = SendStatus.SENT_TO_NETWORK;
+      });
+    }
+    if (txResponse['status'] == 'included-in-block') {
+      setState(() {
+        transactionData = txResponse['data'];
+        statusValue = SendStatus.INCLUDED_IN_BLOCK;
+      });
+    }
+    if (txResponse['status'] == 'finalized') {
+      setState(() {
+        transactionData = txResponse['data'];
+        statusValue = SendStatus.FINALIZED;
+      });
+    }
+    if (txResponse['status'] == 'not-finalized') {
+      print('block was not finalized');
+      setState(() {
+        statusValue = SendStatus.NOT_FINALIZED;
+      });
+    }
+    return true;
   }
+
   Future<void> _amountTopUpdated(String value) async {
     if (selectedTopToken == null) {
       return;
@@ -420,82 +427,89 @@ Widget buildPreloader() {
     });
   }
 
-  String getBtnLabel(){
-    if(txInProgress){
-      if(btnLabel=="Cancelled")setState(() {
-        txInProgress=false;
-      });
+  String getBtnLabel() {
+    if (txInProgress) {
+      if (btnLabel == "Cancelled")
+        setState(() {
+          txInProgress = false;
+        });
       return btnLabel;
     }
     return selectedTopToken == null
-                  ? "Select sell token"
-                  : selectedBottomToken == null
-                      ? "Select buy token"
-                      : selectedTopToken!.amount <= BigInt.zero ||
-                              selectedBottomToken!.amount <= BigInt.zero
-                          ? "Insert amount"
-                          :"Swap";
+        ? "Select sell token"
+        : selectedBottomToken == null
+            ? "Select buy token"
+            : selectedTopToken!.amount <= BigInt.zero ||
+                    selectedBottomToken!.amount <= BigInt.zero
+                ? "Insert amount"
+                : "Swap";
   }
 
   // UI builders
   Container getPoolSummary() {
-  return Container(
-    decoration: BoxDecoration(
-      color: Styles.boxBackgroundColor,
-      borderRadius: BorderRadius.circular(10.0),
-    ),
-    margin: EdgeInsets.only(top: 8.0),
-    padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              "Rate: ",
-              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
-            ),
-            Expanded(
-              child: Text(
-                "${rate}",
-                textAlign: TextAlign.right,
+    return Container(
+      decoration: BoxDecoration(
+        color: Styles.boxBackgroundColor,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      margin: EdgeInsets.only(top: 8.0),
+      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                "Rate: ",
+                style: TextStyle(
+                    color: Styles.primaryAccentColor,
+                    fontWeight: FontWeight.w600),
               ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Text(
-              "Slippage: ",
-              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
-            ),
-            Expanded(
-              child: Text(
-                "${slippage}",
-                textAlign: TextAlign.right,
+              Expanded(
+                child: Text(
+                  "${rate}",
+                  textAlign: TextAlign.right,
+                ),
               ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Text(
-              "Fees: ",
-              style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
-            ),
-            Expanded(
-              child: Text(
-                "${max(selectedTopToken!.amount.toDouble()*selectedTopToken!.price!.toDouble()*0.0003/1e18,0.0000).toStringAsFixed(4)}\$",
-                textAlign: TextAlign.right,
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                "Slippage: ",
+                style: TextStyle(
+                    color: Styles.primaryAccentColor,
+                    fontWeight: FontWeight.w600),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
+              Expanded(
+                child: Text(
+                  "${slippage}",
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                "Fees: ",
+                style: TextStyle(
+                    color: Styles.primaryAccentColor,
+                    fontWeight: FontWeight.w600),
+              ),
+              Expanded(
+                child: Text(
+                  "${max(selectedTopToken!.amount.toDouble() * selectedTopToken!.price!.toDouble() * 0.0003 / 1e18, 0.0000).toStringAsFixed(4)}\$",
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   BoxBorder getBorder(value) {
     return value
@@ -559,7 +573,8 @@ Widget buildPreloader() {
                 onPressed: () {
                   showTokenSelectionModal(context,
                       callback: callback,
-                      selectedToken:selectedTopToken?.address??Constants.REEF_TOKEN_ADDRESS);
+                      selectedToken: selectedTopToken?.address ??
+                          Constants.REEF_TOKEN_ADDRESS);
                 },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 minWidth: 0,
@@ -845,24 +860,26 @@ Widget buildPreloader() {
                           Container(
                             margin: const EdgeInsets.only(top: 20),
                             child: ElevatedButton(
-                             style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40),
-                          ),
-                          shadowColor: const Color(0x559d6cff),
-                          elevation: 5,
-                          backgroundColor: Styles.primaryAccentColor,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 32),
-                        ),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                shadowColor: const Color(0x559d6cff),
+                                elevation: 5,
+                                backgroundColor: Styles.primaryAccentColor,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 32),
+                              ),
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: Text("Continue",style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Styles.whiteColor
-                          ),),
+                              child: Text(
+                                "Continue",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Styles.whiteColor),
+                              ),
                             ),
                           )
                         ],
@@ -882,7 +899,6 @@ Widget buildPreloader() {
           )),
     );
   }
-
 
   List<ReefStep> steps(SendStatus stat, int index) => [
         ReefStep(
@@ -977,110 +993,137 @@ Widget buildPreloader() {
             )),
         ReefStep(
             state: getStepState(stat, 3, index),
-            title:  Text(
+            title: Text(
               AppLocalizations.of(context)!.transaction_finalized,
             ),
             content: const SizedBox(),
             icon: Icons.lock),
       ];
 
+  void _reversePair(){
+    if(selectedTopToken==null||selectedBottomToken==null)return;
+    var topToken = selectedTopToken;
+    setState(() {
+      selectedTopToken = selectedBottomToken;
+      selectedBottomToken = topToken;
+    });
+    _getPoolReserves();
+  }
+
   @override
   Widget build(BuildContext context) {
-    var transferStatusUI =
-        buildFeedbackUI(context, statusValue, ()=>{}, () {
+    var transferStatusUI = buildFeedbackUI(context, statusValue, () => {}, () {
       final navigator = Navigator.of(context);
       navigator.pop();
       // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
-    return transferStatusUI?? SignatureContentToggle(
-      
-      Stack(
-        children: [
-      
-          Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: Styles.primaryBackgroundColor,
-              boxShadow: neumorphicShadow()),
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              isPreselectedTopExists?
-                getReefTokenField():
-                getToken(
-                    _isValueTopEditing,
-                    _changeSelectedTopToken,
-                    selectedTopToken,
-                    _focusTop,
-                    amountTopController,
-                    _amountTopUpdated),
-              Gap(16),
-              getToken(
-                  _isValueBottomEditing,
-                  _changeSelectedBottomToken,
-                  selectedBottomToken,
-                  _focusBottom,
-                  amountBottomController,
-                  _amountBottomUpdated),
-              Gap(16),
-              SliderStandAlone(
-                  isDisabled:txInProgress,
-                  rating: rating,
-                  onChanged: (newRating) async {
-                    setState(() {
-                      rating = newRating;
-                      String amountValue = (double.parse(toAmountDisplayBigInt(
-                                  selectedTopToken!.balance)) *
-                              rating)
-                          .toStringAsFixed(2);
-                      amountTopController.text = amountValue;
-                      _amountTopUpdated(amountValue);
-                    });
-                  }),
-              Gap(16),
-              if(rate!="")getPoolSummary(),
-              Gap(16),
-              getSwapBtn(),
-            ],
-          ),
-        ),
-          if(preloader)buildPreloader(),
-        ]
-      ),
-    );
+    return transferStatusUI ??
+        SignatureContentToggle(
+          Stack(children: [
+            Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: Styles.primaryBackgroundColor,
+                  boxShadow: neumorphicShadow()),
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  isPreselectedTopExists
+                      ? getReefTokenField()
+                      : getToken(
+                          _isValueTopEditing,
+                          _changeSelectedTopToken,
+                          selectedTopToken,
+                          _focusTop,
+                          amountTopController,
+                          _amountTopUpdated),
+                  Gap(16),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+                          _reversePair();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            gradient: Styles.buttonGradient
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(Icons.repeat,size: 18,color: Styles.whiteColor,),
+                          ),
+                        ),
+                      ),
+                      Gap(8.0),
+                      Expanded(
+                        child: SliderStandAlone(
+                            isDisabled: txInProgress,
+                            rating: rating,
+                            onChanged: (newRating) async {
+                              setState(() {
+                                rating = newRating;
+                                String amountValue = (double.parse(
+                                            toAmountDisplayBigInt(
+                                                selectedTopToken!.balance)) *
+                                        rating)
+                                    .toStringAsFixed(2);
+                                amountTopController.text = amountValue;
+                                _amountTopUpdated(amountValue);
+                              });
+                            }),
+                      ),
+                    ],
+                  ),
+                  Gap(16),
+                  getToken(
+                      _isValueBottomEditing,
+                      _changeSelectedBottomToken,
+                      selectedBottomToken,
+                      _focusBottom,
+                      amountBottomController,
+                      _amountBottomUpdated),
+                  Gap(16),
+                  if (rate != "") getPoolSummary(),
+                  Gap(16),
+                  getSwapBtn(),
+                ],
+              ),
+            ),
+            if (preloader) buildPreloader(),
+          ]),
+        );
   }
 }
 
-
-  ReefStepState getStepState(SendStatus stat, int stepIndex, int currentIndex) {
-    switch (stat) {
-      case SendStatus.FINALIZED:
-        if (stepIndex == currentIndex) {
-          return ReefStepState.complete;
-        } else if (stepIndex < currentIndex) {
-          return ReefStepState.complete;
-        }
-        break;
-      case SendStatus.CANCELED:
-        if (stepIndex == currentIndex) {
-          return ReefStepState.error;
-        }
-        break;
-      case SendStatus.ERROR:
-        if (stepIndex == currentIndex) {
-          return ReefStepState.error;
-        }
-        break;
-      default:
-        if (currentIndex == stepIndex) {
-          return ReefStepState.editing;
-        } else if (stepIndex < currentIndex) {
-          return ReefStepState.complete;
-        }
-    }
-    return ReefStepState.indexed;
+ReefStepState getStepState(SendStatus stat, int stepIndex, int currentIndex) {
+  switch (stat) {
+    case SendStatus.FINALIZED:
+      if (stepIndex == currentIndex) {
+        return ReefStepState.complete;
+      } else if (stepIndex < currentIndex) {
+        return ReefStepState.complete;
+      }
+      break;
+    case SendStatus.CANCELED:
+      if (stepIndex == currentIndex) {
+        return ReefStepState.error;
+      }
+      break;
+    case SendStatus.ERROR:
+      if (stepIndex == currentIndex) {
+        return ReefStepState.error;
+      }
+      break;
+    default:
+      if (currentIndex == stepIndex) {
+        return ReefStepState.editing;
+      } else if (stepIndex < currentIndex) {
+        return ReefStepState.complete;
+      }
   }
-
+  return ReefStepState.indexed;
+}
 
 enum SendStatus {
   READY,
