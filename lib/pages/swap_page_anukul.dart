@@ -238,6 +238,11 @@ class _SwapPageState extends State<SwapPage> {
               preloader = false;
               btnLabel = "Cancelled";
             }
+            if (txResponse['status'].toString().contains("-32603")) {
+              preloader = false;
+              btnLabel = "Encountered an error";
+            }
+
           });
           handleEvmTransactionResponse(txResponse);
         }
@@ -429,7 +434,7 @@ class _SwapPageState extends State<SwapPage> {
 
   String getBtnLabel() {
     if (txInProgress) {
-      if (btnLabel == "Cancelled")
+      if (btnLabel == "Cancelled"||btnLabel=="Encountered an error")
         setState(() {
           txInProgress = false;
         });
