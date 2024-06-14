@@ -150,7 +150,7 @@ setState(() {
 
 Widget buildPreloader() {
   return Align(
-    alignment: Alignment(0,-0.35),
+    alignment: Alignment(0,0.5),
     child: Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
