@@ -20,6 +20,7 @@ import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
 import 'package:restart_app/restart_app.dart';
 
+import '../pages/pools_page.dart';
 import 'sign/SignatureContentToggle.dart';
 
 List<BarItemNavigationPage> bottomNavigationBarItems = const [
@@ -190,7 +191,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                       children: [
                         const LiquidCarouselWrapper(),
                         const HomePage(key: PageStorageKey("homepage")),
-                        const SettingsPage(key: const PageStorageKey("poolsPage")),
+                        const PoolsPage(key: const PageStorageKey("poolsPage")),
                         AccountsPage(key: const PageStorageKey("accountPage")),
                         const SettingsPage(key: PageStorageKey("settingsPage")),
                         const LiquidCarouselWrapper()
