@@ -162,7 +162,7 @@ class _SwapPageState extends State<SwapPage> {
 
   Widget buildPreloader() {
     return Align(
-      alignment: Alignment(0, 0.5),
+      alignment: Alignment(0, 0.64),
       child: Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -1020,75 +1020,80 @@ class _SwapPageState extends State<SwapPage> {
     return transferStatusUI ??
         SignatureContentToggle(
           Stack(children: [
-            Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Styles.primaryBackgroundColor,
-                  boxShadow: neumorphicShadow()),
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  isPreselectedTopExists
-                      ? getReefTokenField()
-                      : getToken(
-                          _isValueTopEditing,
-                          _changeSelectedTopToken,
-                          selectedTopToken,
-                          _focusTop,
-                          amountTopController,
-                          _amountTopUpdated),
-                  Gap(16),
-                  Row(
+            Column(
+              children: [
+                Gap(24),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Styles.primaryBackgroundColor,
+                      boxShadow: neumorphicShadow()),
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: (){
-                          _reversePair();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            gradient: Styles.buttonGradient
+                      isPreselectedTopExists
+                          ? getReefTokenField()
+                          : getToken(
+                              _isValueTopEditing,
+                              _changeSelectedTopToken,
+                              selectedTopToken,
+                              _focusTop,
+                              amountTopController,
+                              _amountTopUpdated),
+                      Gap(16),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: (){
+                              _reversePair();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(14),
+                                gradient: Styles.buttonGradient
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(Icons.repeat,size: 18,color: Styles.whiteColor,),
+                              ),
+                            ),
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(Icons.repeat,size: 18,color: Styles.whiteColor,),
+                          Gap(8.0),
+                          Expanded(
+                            child: SliderStandAlone(
+                                isDisabled: txInProgress,
+                                rating: rating,
+                                onChanged: (newRating) async {
+                                  setState(() {
+                                    rating = newRating;
+                                    String amountValue = (double.parse(
+                                                toAmountDisplayBigInt(
+                                                    selectedTopToken!.balance)) *
+                                            rating)
+                                        .toStringAsFixed(2);
+                                    amountTopController.text = amountValue;
+                                    _amountTopUpdated(amountValue);
+                                  });
+                                }),
                           ),
-                        ),
+                        ],
                       ),
-                      Gap(8.0),
-                      Expanded(
-                        child: SliderStandAlone(
-                            isDisabled: txInProgress,
-                            rating: rating,
-                            onChanged: (newRating) async {
-                              setState(() {
-                                rating = newRating;
-                                String amountValue = (double.parse(
-                                            toAmountDisplayBigInt(
-                                                selectedTopToken!.balance)) *
-                                        rating)
-                                    .toStringAsFixed(2);
-                                amountTopController.text = amountValue;
-                                _amountTopUpdated(amountValue);
-                              });
-                            }),
-                      ),
+                      Gap(16),
+                      getToken(
+                          _isValueBottomEditing,
+                          _changeSelectedBottomToken,
+                          selectedBottomToken,
+                          _focusBottom,
+                          amountBottomController,
+                          _amountBottomUpdated),
+                      Gap(16),
+                      if (rate != "") getPoolSummary(),
+                      Gap(16),
+                      getSwapBtn(),
                     ],
                   ),
-                  Gap(16),
-                  getToken(
-                      _isValueBottomEditing,
-                      _changeSelectedBottomToken,
-                      selectedBottomToken,
-                      _focusBottom,
-                      amountBottomController,
-                      _amountBottomUpdated),
-                  Gap(16),
-                  if (rate != "") getPoolSummary(),
-                  Gap(16),
-                  getSwapBtn(),
-                ],
-              ),
+                ),
+              ],
             ),
             if (preloader) buildPreloader(),
           ]),
