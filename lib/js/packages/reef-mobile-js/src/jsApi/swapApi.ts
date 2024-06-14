@@ -61,6 +61,7 @@ export const initApi = (signingKey: Signer) => {
                         );
         
                         try {
+                            observer.next({ status: 'approve-started' });
                             // Approve token1
                             await approveTokenAmount(
                                 token1.address,
@@ -85,6 +86,7 @@ export const initApi = (signingKey: Signer) => {
                             const receipt = await tx.wait();
                             console.log("SWAP RESULT=", receipt);
                             observer.next({ status: 'included-in-block', transactionReceipt: receipt });
+                            observer.next({ status: 'finalized', transactionReceipt: receipt });
                             observer.complete();
         
                         } catch (e) {

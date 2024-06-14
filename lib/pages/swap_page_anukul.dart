@@ -68,6 +68,9 @@ class _SwapPageState extends State<SwapPage> {
   SendStatus statusValue = SendStatus.NO_ADDRESS;
   dynamic transactionData;
 
+  //swap button label
+  String btnLabel="";
+
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -180,6 +183,46 @@ setState(() {
                 ),)
               ],
             ));
+          }
+          if(txResponse['status']=="approve-started"){
+            setState(() {
+              btnLabel = "Approving";
+            });
+          }
+          if(txResponse['status']=="approved"){
+            setState(() {
+              btnLabel = "";
+            });
+            showModal(context,
+            headText: "Swap in progress",
+            child: Column(
+              children: [
+                Gap(16.0),
+                CircularCountDown(
+                    countdownMs: 4500,
+                    width: 110,
+                    height: 110,
+                    fillColor: Styles.primaryAccentColor,
+                    strokeWidth: 4,
+                    child:Center(
+                      child: Row(
+                        children: [
+                          IconFromUrl(selectedTopToken!.iconUrl),
+                          Gap(4.0),
+                          IconFromUrl(selectedBottomToken!.iconUrl),
+                        ],
+                      ),
+                    ),
+                    close: ()=>Navigator.of(context).pop(),
+                  ),  Gap(8.0),
+                  Text("swapping ${selectedTopToken?.name} to ${selectedBottomToken?.name}",style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.textLightColor,
+                ),)
+              ],
+            ));
+         
           }
         });
         handleEvmTransactionResponse(txResponse);
@@ -606,7 +649,7 @@ setState(() {
           ),
           child: Center(
             child: Text(
-              (selectedTopToken == null
+              (btnLabel!=""?btnLabel:selectedTopToken == null
                   ? "Select sell token"
                   : selectedBottomToken == null
                       ? "Select buy token"
