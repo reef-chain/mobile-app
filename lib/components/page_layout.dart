@@ -22,6 +22,45 @@ import 'package:restart_app/restart_app.dart';
 
 import 'sign/SignatureContentToggle.dart';
 
+List<BarItemNavigationPage> bottomNavigationBarItems = const [
+  BarItemNavigationPage(
+    icon: Icon(Icons.home_outlined),
+    page: NavigationPage.home,
+    label: 'Home',
+  ),
+  // BottomNavigationBarItem(
+  //   icon: Icon(CupertinoIcons.arrow_right_arrow_left_square),
+  //   label: 'Swap',
+  // ),
+  // BottomNavigationBarItem(
+  //   icon: Icon(CupertinoIcons.money_dollar_circle),
+  //   label: 'Buy',
+  // ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.cached),
+    page: NavigationPage.pools,
+    //  SvgIcon(
+    //   'assets/images/reef_icon.svg',
+    //   height: 20,
+    // ),
+    label: 'Pools',
+  ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.account_balance_wallet_outlined),
+    page: NavigationPage.accounts,
+    //  SvgIcon(
+    //   'assets/images/reef_icon.svg',
+    //   height: 20,
+    // ),
+    label: 'Accounts',
+  ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.settings_outlined),
+    page: NavigationPage.settings,
+    label: 'Settings',
+  ),
+];
+
 class BottomNav extends StatefulWidget {
   const BottomNav({Key? key}) : super(key: key);
 
@@ -100,36 +139,6 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
         .navigate(bottomNavigationBarItems[index].page);
   }
 
-  List<BarItemNavigationPage> bottomNavigationBarItems = const [
-    BarItemNavigationPage(
-      icon: Icon(Icons.home_outlined),
-      page: NavigationPage.home,
-      label: 'Home',
-    ),
-    // BottomNavigationBarItem(
-    //   icon: Icon(CupertinoIcons.arrow_right_arrow_left_square),
-    //   label: 'Swap',
-    // ),
-    // BottomNavigationBarItem(
-    //   icon: Icon(CupertinoIcons.money_dollar_circle),
-    //   label: 'Buy',
-    // ),
-    BarItemNavigationPage(
-      icon: Icon(Icons.account_balance_wallet_outlined),
-      page: NavigationPage.accounts,
-      //  SvgIcon(
-      //   'assets/images/reef_icon.svg',
-      //   height: 20,
-      // ),
-      label: 'Accounts',
-    ),
-    BarItemNavigationPage(
-      icon: Icon(Icons.settings_outlined),
-      page: NavigationPage.settings,
-      label: 'Settings',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return SignatureContentToggle(GestureDetector(
@@ -181,6 +190,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                       children: [
                         const LiquidCarouselWrapper(),
                         const HomePage(key: PageStorageKey("homepage")),
+                        const SettingsPage(key: const PageStorageKey("poolsPage")),
                         AccountsPage(key: const PageStorageKey("accountPage")),
                         const SettingsPage(key: PageStorageKey("settingsPage")),
                         const LiquidCarouselWrapper()
