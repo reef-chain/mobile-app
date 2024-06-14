@@ -45,7 +45,7 @@ class _SliderStandAloneState extends State<SliderStandAlone> {
       child: Slider(
         value: widget.rating,
         onChanged:(newRating){
-          widget.onChanged(widget.rating);
+          widget.onChanged(newRating);
           },
         divisions: 100,
         label: "${(widget.rating * 100).toInt()}%",

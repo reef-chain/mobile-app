@@ -140,10 +140,14 @@ class _SwapPageState extends State<SwapPage> {
       selectedTopToken = selectedTopToken!.setAmount(formattedValue);
     });
     setState(() {
-      if(double.parse(formattedValue)<=double.parse(selectedTopToken!.balance.toString())){
-      rating=double.parse(formattedValue)/double.parse(selectedTopToken!.balance.toString());
-      }else{
-        rating=1.0;
+      if (double.parse(formattedValue) <=
+          double.parse(selectedTopToken!.balance.toString())) {
+        rating = double.parse(formattedValue) /
+            double.parse(selectedTopToken!.balance.toString());
+      } else {
+        rating = 0.0;
+        selectedTopToken?.setAmount("0");
+        amountTopController.clear();
       }
     });
 
@@ -504,6 +508,7 @@ class _SwapPageState extends State<SwapPage> {
             SliderStandAlone(
                 rating: rating,
                 onChanged: (newRating) async {
+                  print("new rating ${newRating}");
                   setState(() {
                     rating = newRating;
                     String amountValue = (double.parse(toAmountDisplayBigInt(
