@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -380,8 +382,9 @@ setState(() {
               style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
             ),
             Expanded(
+              //todo fix this logic anukul
               child: Text(
-                "${slippage}\$",
+                "${max(selectedTopToken!.amount.toDouble()*selectedTopToken!.price!.toDouble()/1e18,0.001).toStringAsFixed(4)}\$",
                 textAlign: TextAlign.right,
               ),
             ),
