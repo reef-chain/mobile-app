@@ -5,12 +5,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
+import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/swap/swap_settings.dart';
@@ -61,6 +63,10 @@ class _SwapPageState extends State<SwapPage> {
   String rate = "";
   String slippage = "0.8";
   String fee = "";
+
+  //status reefstepper
+  SendStatus statusValue = SendStatus.NO_ADDRESS;
+  dynamic transactionData;
 
   @override
   void initState() {
@@ -176,12 +182,40 @@ setState(() {
             ));
           }
         });
+        handleEvmTransactionResponse(txResponse);
       }
     });
     _getPoolReserves();
     print("SWAP TOKEN RESPONSE === $executeTransactionFeedbackStream");
   }
 
+  bool handleEvmTransactionResponse(txResponse) {
+      if (txResponse['status'] == 'broadcast') {
+        setState(() {
+          transactionData = txResponse['data'];
+          statusValue = SendStatus.SENT_TO_NETWORK;
+        });
+      }
+      if (txResponse['status'] == 'included-in-block') {
+        setState(() {
+          transactionData = txResponse['data'];
+          statusValue = SendStatus.INCLUDED_IN_BLOCK;
+        });
+      }
+      if (txResponse['status'] == 'finalized') {
+        setState(() {
+          transactionData = txResponse['data'];
+          statusValue = SendStatus.FINALIZED;
+        });
+      }
+      if (txResponse['status'] == 'not-finalized') {
+        print('block was not finalized');
+        setState(() {
+          statusValue = SendStatus.NOT_FINALIZED;
+        });
+      }
+      return true;
+  }
   Future<void> _amountTopUpdated(String value) async {
     if (selectedTopToken == null) {
       return;
@@ -695,9 +729,207 @@ setState(() {
     _focusBottom.dispose();
   }
 
+  buildFeedbackUI(BuildContext context, SendStatus stat, void Function() onNew,
+      void Function() onHome) {
+    int? index;
+
+    if (stat == SendStatus.ERROR) {
+      //index = 'Transaction Error';
+      print('send tx error');
+    }
+    if (stat == SendStatus.CANCELED) {
+      //title = 'Transaction Canceled';
+      print('send tx canceled');
+    }
+    if (stat == SendStatus.SENDING) {
+      index = 0;
+    }
+    if (stat == SendStatus.SENT_TO_NETWORK) {
+      index = 1;
+    }
+    if (stat == SendStatus.INCLUDED_IN_BLOCK) {
+      index = 2;
+    }
+    if (stat == SendStatus.FINALIZED) {
+      index = 3;
+    }
+    // index = 2;
+    if (stat == SendStatus.NOT_FINALIZED) {
+      // title = 'NOT finalized!';
+    }
+
+    if (index == null) {
+      return null;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: Container(
+          margin: const EdgeInsets.only(top: 20),
+          child: SingleChildScrollView(
+            child: ReefStepper(
+              currentStep: index,
+              steps: steps(stat, index),
+              displayStepProgressIndicator: true,
+              controlsBuilder: (context, details) {
+                if ((index ?? 0) >= 3) {
+                  return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Flex(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            child: ElevatedButton(
+                             style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                          shadowColor: const Color(0x559d6cff),
+                          elevation: 5,
+                          backgroundColor: Styles.primaryAccentColor,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
+                        ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text("Continue",style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Styles.whiteColor
+                          ),),
+                            ),
+                          )
+                        ],
+                      ));
+                }
+                return const Flex(
+                  direction: Axis.horizontal,
+                  children: <Widget>[
+                    Expanded(
+                        child: SizedBox(
+                      height: 0,
+                    ))
+                  ],
+                );
+              },
+            ),
+          )),
+    );
+  }
+
+
+  List<ReefStep> steps(SendStatus stat, int index) => [
+        ReefStep(
+            state: getStepState(stat, 0, index),
+            title: Text(
+              AppLocalizations.of(context)!.sending_transaction,
+            ),
+            content: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Flex(
+                direction: Axis.horizontal,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  /*const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurple,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),*/
+                  Flexible(
+                      child: Text(
+                    AppLocalizations.of(context)!.sending_tx_to_nw,
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                  )),
+                ],
+              ),
+            )),
+        ReefStep(
+            state: getStepState(stat, 1, index),
+            title: Text(
+              AppLocalizations.of(context)!.adding_to_chain,
+            ),
+            content: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Flex(
+                direction: Axis.horizontal,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  /*const SizedBox(
+                    height: 28,
+                    width: 28,
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurple,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),*/
+                  Flexible(
+                      child: Text(
+                    AppLocalizations.of(context)!.waiting_to_include_in_block,
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                  )),
+                ],
+              ),
+            )),
+        ReefStep(
+            state: getStepState(stat, 2, index),
+            title: Text(
+              AppLocalizations.of(context)!.sealing_block,
+            ),
+            content: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Flex(
+                direction: Axis.horizontal,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  /*const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurple,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),*/
+                  Flexible(
+                      child: Text(
+                    AppLocalizations.of(context)!.unreversible_finality,
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                  )),
+                ],
+              ),
+            )),
+        ReefStep(
+            state: getStepState(stat, 3, index),
+            title:  Text(
+              AppLocalizations.of(context)!.transaction_finalized,
+            ),
+            content: const SizedBox(),
+            icon: Icons.lock),
+      ];
+
   @override
   Widget build(BuildContext context) {
-    return SignatureContentToggle(
+    var transferStatusUI =
+        buildFeedbackUI(context, statusValue, ()=>{}, () {
+      final navigator = Navigator.of(context);
+      navigator.pop();
+      // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
+    });
+    return transferStatusUI?? SignatureContentToggle(
       Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
@@ -747,4 +979,57 @@ setState(() {
       ),
     );
   }
+}
+
+
+  ReefStepState getStepState(SendStatus stat, int stepIndex, int currentIndex) {
+    switch (stat) {
+      case SendStatus.FINALIZED:
+        if (stepIndex == currentIndex) {
+          return ReefStepState.complete;
+        } else if (stepIndex < currentIndex) {
+          return ReefStepState.complete;
+        }
+        break;
+      case SendStatus.CANCELED:
+        if (stepIndex == currentIndex) {
+          return ReefStepState.error;
+        }
+        break;
+      case SendStatus.ERROR:
+        if (stepIndex == currentIndex) {
+          return ReefStepState.error;
+        }
+        break;
+      default:
+        if (currentIndex == stepIndex) {
+          return ReefStepState.editing;
+        } else if (stepIndex < currentIndex) {
+          return ReefStepState.complete;
+        }
+    }
+    return ReefStepState.indexed;
+  }
+
+
+enum SendStatus {
+  READY,
+  NO_EVM_CONNECTED,
+  NO_ADDRESS,
+  NO_AMT,
+  AMT_TOO_HIGH,
+  ADDR_NOT_VALID,
+  ADDR_NOT_EXIST,
+  LOW_REEF_EVM,
+  LOW_REEF_NATIVE,
+  SIGNING,
+  SENDING,
+  CANCELED,
+  ERROR,
+  SENT_TO_NETWORK,
+  INCLUDED_IN_BLOCK,
+  FINALIZED,
+  NOT_FINALIZED,
+  EVM_NOT_BINDED,
+  CONNECTING
 }
