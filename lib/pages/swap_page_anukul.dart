@@ -27,14 +27,17 @@ import 'package:shimmer/shimmer.dart';
 import '../components/sign/SignatureContentToggle.dart';
 
 class SwapPage extends StatefulWidget {
-  final String preselected;
-  const SwapPage(this.preselected, {Key? key}) : super(key: key);
+  final String? preselectedTop;
+  const SwapPage({this.preselectedTop = "", Key? key}) : super(key: key);
 
   @override
   State<SwapPage> createState() => _SwapPageState();
 }
 
 class _SwapPageState extends State<SwapPage> {
+  //preselected
+  bool isPreselectedTopExists=false;
+
   // swap tokens with amount
   TokenWithAmount? selectedTopToken;
   TokenWithAmount? selectedBottomToken;
@@ -82,10 +85,15 @@ class _SwapPageState extends State<SwapPage> {
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
     _focusBottom.addListener(_onFocusBottomChange);
+    bool checkPreselection = ReefAppState.instance.model.tokens.selectedErc20List
+    .any((token) => token.address == widget.preselectedTop);
     setState(() {
-      // set preselected token
+      isPreselectedTopExists = checkPreselection;
+      // set preselectedTop token
+      if(checkPreselection){
       selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
-          .firstWhere((token) => token.address == widget.preselected);
+          .firstWhere((token) => token.address == widget.preselectedTop);
+      }
 
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
     });
@@ -477,7 +485,6 @@ Widget buildPreloader() {
               style: TextStyle(color: Styles.primaryAccentColor, fontWeight: FontWeight.w600),
             ),
             Expanded(
-              //todo fix this logic anukul
               child: Text(
                 "${max(selectedTopToken!.amount.toDouble()*selectedTopToken!.price!.toDouble()*0.0003/1e18,0.0000).toStringAsFixed(4)}\$",
                 textAlign: TextAlign.right,
@@ -552,7 +559,7 @@ Widget buildPreloader() {
                 onPressed: () {
                   showTokenSelectionModal(context,
                       callback: callback,
-                      selectedToken: selectedTopToken?.address);
+                      selectedToken:selectedTopToken?.address??Constants.REEF_TOKEN_ADDRESS);
                 },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 minWidth: 0,
@@ -998,9 +1005,8 @@ Widget buildPreloader() {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              if (selectedTopToken?.address == Constants.REEF_TOKEN_ADDRESS)
-                getReefTokenField(),
-              if (selectedTopToken?.address != Constants.REEF_TOKEN_ADDRESS)
+              isPreselectedTopExists?
+                getReefTokenField():
                 getToken(
                     _isValueTopEditing,
                     _changeSelectedTopToken,
