@@ -54,6 +54,8 @@ class CircularCountDown extends StatefulWidget {
     this.strokeWidth = 1.5,
     this.fillColor,
     this.svgAssetPath,
+    this.child,
+    this.close,
   });
 
   final int countdownMs;
@@ -62,6 +64,8 @@ class CircularCountDown extends StatefulWidget {
   final double strokeWidth;
   final Color? fillColor;
   final String? svgAssetPath;
+  final Widget? child;
+  final VoidCallback? close;
 
   @override
   CircularCountDownState createState() => CircularCountDownState();
@@ -86,6 +90,7 @@ class CircularCountDownState extends State<CircularCountDown>
     Future.delayed(Duration(milliseconds: widget.countdownMs), () {
       setState(() {
         _isCompleted = true;
+        if(widget.close!=null)widget.close!();
       });
     });
 
@@ -121,11 +126,11 @@ class CircularCountDownState extends State<CircularCountDown>
                     );
                   },
                 ),
-                if (widget.svgAssetPath != null)
+                if (widget.svgAssetPath != null || widget.child!=null)
                   SizedBox(
                     width: widget.width * 0.5,
                     height: widget.height * 0.5,
-                    child: SvgPicture.asset(
+                    child:widget.child?? SvgPicture.asset(
                       widget.svgAssetPath!,
                       fit: BoxFit.contain,
                     ),

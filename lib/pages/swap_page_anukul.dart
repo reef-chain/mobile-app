@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
+import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
@@ -107,10 +109,45 @@ class _SwapPageState extends State<SwapPage> {
 
     var signerAddress = await ReefAppState.instance.storageCtrl
         .getValue(StorageKey.selected_address.name);
-    var res = await ReefAppState.instance.swapCtrl.swapTokens(
-        signerAddress, selectedTopToken!, selectedBottomToken!, settings);
+    Stream<dynamic> executeTransactionFeedbackStream =
+        await ReefAppState.instance.swapCtrl.swapTokens(
+            signerAddress, selectedTopToken!, selectedBottomToken!, settings);
+    executeTransactionFeedbackStream =
+        executeTransactionFeedbackStream.asBroadcastStream();
+
+    executeTransactionFeedbackStream.listen((txResponse) {
+      print('TRANSACTION RESPONSE anukul=$txResponse');
+      if(txResponse!=null){
+        setState(() {
+          print("anukul=== ${txResponse['status']=="approving"}");
+          if(txResponse['status']=="approving"){
+            showModal(context,
+            headText: "Swap in progress",
+            child: Column(
+              children: [
+                Gap(16.0),
+                CircularCountDown(
+                    countdownMs: 4500,
+                    width: 80,
+                    height: 80,
+                    fillColor: Styles.primaryAccentColor,
+                    strokeWidth: 4,
+                    child:IconFromUrl(selectedTopToken!.iconUrl),
+                    close: ()=>Navigator.of(context).pop(),
+                  ),  Gap(8.0),
+                  Text("approving ${selectedTopToken?.name}...",style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Styles.textLightColor,
+                ),)
+              ],
+            ));
+          }
+        });
+      }
+    });
     _getPoolReserves();
-    print("SWAP TOKEN RESPONSE === $res");
+    print("SWAP TOKEN RESPONSE === $executeTransactionFeedbackStream");
   }
 
   Future<void> _amountTopUpdated(String value) async {
@@ -450,7 +487,7 @@ class _SwapPageState extends State<SwapPage> {
                       : selectedTopToken!.amount <= BigInt.zero ||
                               selectedBottomToken!.amount <= BigInt.zero
                           ? "Insert amount"
-                          : "Swap"),
+                          :"Swap"),
               style: TextStyle(
                 fontSize: 16,
                 color: (selectedTopToken == null ||
@@ -464,6 +501,94 @@ class _SwapPageState extends State<SwapPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Container getReefTokenField() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: _isValueTopEditing
+            ? Border.all(color: const Color(0xffa328ab))
+            : Border.all(color: const Color(0x00d7d1e9)),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          if (_isValueTopEditing)
+            const BoxShadow(
+                blurRadius: 15,
+                spreadRadius: -8,
+                offset: Offset(0, 10),
+                color: Color(0x40a328ab))
+        ],
+        color: _isValueTopEditing
+            ? const Color(0xffeeebf6)
+            : const Color(0xffE7E2F2),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Row(
+                children: [
+                  IconFromUrl(selectedTopToken?.iconUrl, size: 48),
+                  const Gap(13),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        selectedTopToken != null
+                            ? selectedTopToken!.name
+                            : 'Select',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                            color: Color(0xff19233c)),
+                      ),
+                      Text(
+                        "${toAmountDisplayBigInt(selectedTopToken!.balance)} ${selectedTopToken!.name.toUpperCase()}",
+                        style: TextStyle(
+                            color: Styles.textLightColor, fontSize: 12),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+              Expanded(
+                child: TextFormField(
+                  focusNode: _focusTop,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
+                  ],
+                  keyboardType: TextInputType.number,
+                  controller: amountTopController,
+                  onChanged: (text) async {
+                    setState(() {
+                      _amountTopUpdated(amountTopController.text);
+                    });
+                  },
+                  decoration: InputDecoration(
+                      constraints: const BoxConstraints(maxHeight: 32),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      border: const OutlineInputBorder(),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      hintText: '0.0',
+                      hintStyle: TextStyle(color: Styles.textLightColor)),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -489,13 +614,16 @@ class _SwapPageState extends State<SwapPage> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            getToken(
-                _isValueTopEditing,
-                _changeSelectedTopToken,
-                selectedTopToken,
-                _focusTop,
-                amountTopController,
-                _amountTopUpdated),
+            if (selectedTopToken?.address == Constants.REEF_TOKEN_ADDRESS)
+              getReefTokenField(),
+            if (selectedTopToken?.address != Constants.REEF_TOKEN_ADDRESS)
+              getToken(
+                  _isValueTopEditing,
+                  _changeSelectedTopToken,
+                  selectedTopToken,
+                  _focusTop,
+                  amountTopController,
+                  _amountTopUpdated),
             Gap(16),
             getToken(
                 _isValueBottomEditing,
@@ -508,7 +636,6 @@ class _SwapPageState extends State<SwapPage> {
             SliderStandAlone(
                 rating: rating,
                 onChanged: (newRating) async {
-                  print("new rating ${newRating}");
                   setState(() {
                     rating = newRating;
                     String amountValue = (double.parse(toAmountDisplayBigInt(

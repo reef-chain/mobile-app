@@ -2,7 +2,7 @@ import { reefState ,network as nw, getAccountSigner} from '@reef-chain/util-lib'
 import { switchMap, take } from "rxjs/operators";
 import { Contract} from "ethers";
 import { ReefswapRouter } from "./abi/ReefswapRouter";
-import { combineLatest, firstValueFrom } from "rxjs";
+import { Observable, combineLatest, firstValueFrom } from "rxjs";
 import { calculateAmount, calculateAmountWithPercentage, calculateDeadline, getInputAmount, getOutputAmount } from "./utils/math";
 import { approveTokenAmount } from './utils/tokenUtils';
 import { getPoolReserves } from './utils/poolUtils';
@@ -28,34 +28,40 @@ const resolveSettings = (
 export const initApi = (signingKey: Signer) => {
     (window as any).swap = {
         // Executes a swap
-        execute: async (signerAddress: string, token1: TokenWithAmount, token2: TokenWithAmount, settings: SwapSettings) => {
-            return firstValueFrom(
-                combineLatest([reefState.selectedNetwork$, reefState.accounts$,reefState.selectedProvider$]).pipe(
-                    take(1),
-                    switchMap(async ([network, reefSigners,provider]) => {
-                        const reefSigner = reefSigners.find((s)=>s.address===signerAddress);
-                    
+        execute: (signerAddress, token1, token2, settings) => {
+            return new Observable((observer) => {
+                (async () => {
+                    try {
+                        observer.next({ status: 'approving' });
+                        const [network, reefSigners, provider] = await firstValueFrom(
+                            combineLatest([reefState.selectedNetwork$, reefState.accounts$, reefState.selectedProvider$]).pipe(take(1))
+                        );
+        
+                        const reefSigner = reefSigners.find((s) => s.address === signerAddress);
+        
                         if (!reefSigner) {
-                            console.log("swap.send() - NO SIGNER FOUND",);
-                            return false;
+                            console.log("swap.send() - NO SIGNER FOUND");
+                            observer.error(new Error('No signer found'));
+                            return;
                         }
-
+        
                         settings = resolveSettings(settings);
                         const sellAmount = calculateAmount({ decimals: token1.decimals, amount: token1.amount });
-                       
+        
                         const minBuyAmount = calculateAmountWithPercentage(
                             { decimals: token2.decimals, amount: token2.amount },
                             settings.slippageTolerance
                         );
-                        console.log("here i am ssellAmount",minBuyAmount);
-                        const signer = await getAccountSigner(reefSigner.address,provider,signingKey)
+        
+                        const signer = await getAccountSigner(reefSigner.address, provider, signingKey);
                         const swapRouter = new Contract(
                             nw.getReefswapNetworkConfig(network).routerAddress,
                             ReefswapRouter,
                             signer,
                         );
-
+        
                         try {
+                            observer.next({ status: 'approve-screen' });
                             // Approve token1
                             await approveTokenAmount(
                                 token1.address,
@@ -63,29 +69,35 @@ export const initApi = (signingKey: Signer) => {
                                 nw.getReefswapNetworkConfig(network).routerAddress,
                                 signer,
                             );
+                            observer.next({ status: 'approved' });
                             console.log("Token approved");
-
+        
                             // Swap
                             console.log("Waiting for confirmation of swap...");
                             const tx = await swapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                              sellAmount,
-                              minBuyAmount,
-                              [token1.address, token2.address],
-                              reefSigner.evmAddress,
-                              calculateDeadline(settings.deadline)
+                                sellAmount,
+                                minBuyAmount,
+                                [token1.address, token2.address],
+                                reefSigner.evmAddress,
+                                calculateDeadline(settings.deadline)
                             );
+                            observer.next({ status: 'broadcast', transactionResponse: tx });
+        
                             const receipt = await tx.wait();
                             console.log("SWAP RESULT=", receipt);
-
-                            return receipt;
+                            observer.next({ status: 'included-in-block', transactionReceipt: receipt });
+                            observer.complete();
+        
                         } catch (e) {
                             console.log("ERROR swapping tokens", e);
-                            return null;
+                            observer.error(e);
                         }
-                    }),
-                    take(1)
-                )
-            );
+                    } catch (e) {
+                        console.log("ERROR in swap process", e);
+                        observer.error(e);
+                    }
+                })();
+            });
         },
         // Returns pool reserves, if pool exists
         getPoolReserves: async (token1Address: string, token2Address: string) => {
