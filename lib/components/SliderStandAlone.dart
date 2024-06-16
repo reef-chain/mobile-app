@@ -6,8 +6,9 @@ import 'package:reef_mobile_app/utils/styles.dart';
 class SliderStandAlone extends StatefulWidget {
   final double rating;
   final Function(double) onChanged;
+  final bool? isDisabled;
 
-  const SliderStandAlone({Key? key, required this.rating, required this.onChanged})
+  const SliderStandAlone({Key? key, required this.rating, required this.onChanged,this.isDisabled})
       : super(key: key);
 
   @override
@@ -15,13 +16,11 @@ class SliderStandAlone extends StatefulWidget {
 }
 
 class _SliderStandAloneState extends State<SliderStandAlone> {
-  double rating = 0.0;
   late TextEditingController amountController;
   late TextEditingController amountTopController;
 
   @override
   void initState() {
-    rating = widget.rating;
     amountController = TextEditingController();
     amountTopController = TextEditingController();
     super.initState();
@@ -45,15 +44,13 @@ class _SliderStandAloneState extends State<SliderStandAlone> {
         thumbShape: const ThumbShape(),
       ),
       child: Slider(
-        value: rating,
+        value: widget.rating,
         onChanged:(newRating){
-          setState(() {
-            rating = newRating;
-          });
-          widget.onChanged(rating);
+          if(widget.isDisabled!)return;
+          widget.onChanged(newRating);
           },
         divisions: 100,
-        label: "${(rating * 100).toInt()}%",
+        label: "${(widget.rating * 100).toInt()}%",
       ),
     );
   }

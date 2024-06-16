@@ -7,9 +7,10 @@ import 'package:reef_mobile_app/model/navigation/homepage_navigation_model.dart'
 import 'package:reef_mobile_app/model/navigation/nav_swipe_compute.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
+import 'package:reef_mobile_app/pages/pools_page.dart';
 import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
-import 'package:reef_mobile_app/pages/swap_page.dart';
+import 'package:reef_mobile_app/pages/swap_page_anukul.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_page.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_tx_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
@@ -44,16 +45,16 @@ class NavigationCtrl with NavSwipeCompute {
       _swiping = false;
       return;
     }
-    final i = computeSwipeAnimation(
+    final pageDiff = computeSwipeAnimation(
         currentPage: _navigationModel.currentPage, page: navigationPage);
 
-    if (i.abs() > 1) {
+    if (pageDiff.abs() > 1) {
       HapticFeedback.selectionClick();
-      _swipeComplete = _computeSwipeAnimation(
-          currentPage: _navigationModel.currentPage, page: navigationPage);
+      _swipeComplete = _swipePageTo(
+          nr: pageDiff);
     } else {
-      _swipeComplete = _computeSwipeAnimation(
-          currentPage: _navigationModel.currentPage, page: navigationPage);
+      _swipeComplete = _swipePageTo(
+          nr: pageDiff);
       HapticFeedback.selectionClick();
       _navigationModel.navigate(navigationPage);
     }
@@ -141,17 +142,17 @@ class NavigationCtrl with NavSwipeCompute {
   }
 
   void navigateToSwapPage(
-      {required BuildContext context, required String preselected}) {
+      {required BuildContext context, String? preselectedTop}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.swap_tokens),
+                title: Text(AppLocalizations.of(context)!.swap_tokens,style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
               body: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                child: SwapPage(preselected),
+                child: SwapPage(preselectedTop: preselectedTop,),
               ),
               backgroundColor: Styles.greyColor,
             ))));
@@ -190,36 +191,35 @@ class NavigationCtrl with NavSwipeCompute {
               backgroundColor: Styles.greyColor,
             ))));
   }
-
-  // void navigateToPage({required BuildContext context, required Widget child}) {
-  //   Navigator.of(context).push(MaterialPageRoute(builder: (context) => child));
-  // }
-
-  Future<bool> _computeSwipeAnimation(
-      {required NavigationPage currentPage,
-      required NavigationPage page}) async {
-    if (currentPage == NavigationPage.home && page == NavigationPage.settings) {
-      // return await carouselKey!.currentState!.swipeXNext(x: 2);
-      await carouselKey!.currentState!.swipeXNext(x: 2);
-      await carouselKey!.currentState!.swipeXNext(x: 2);
-      return true;
-    } else if ((currentPage == NavigationPage.accounts &&
-            page == NavigationPage.home) ||
-        (currentPage == NavigationPage.settings &&
-            page == NavigationPage.accounts)) {
-      return await carouselKey!.currentState!.swipeXPrevious();
-    } else if (currentPage == NavigationPage.settings &&
-        page == NavigationPage.home) {
-      // return await carouselKey!.currentState!.swipeXPrevious(x: 2);
-      await carouselKey!.currentState!.swipeXPrevious(x: 2);
-      await carouselKey!.currentState!.swipeXPrevious(x: 2);
-      return true;
-    } else if ((currentPage == NavigationPage.home &&
-            page == NavigationPage.accounts) ||
-        (currentPage == NavigationPage.accounts &&
-            page == NavigationPage.settings)) {
-      return await carouselKey!.currentState!.swipeXNext();
-    }
-    return false;
+  void navigateToPoolsPage(
+      {required BuildContext context}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => SignatureContentToggle(Scaffold(
+              appBar: AppBar(
+                title: Text("Pools",style: TextStyle(color: Styles.whiteColor),),
+                backgroundColor: Colors.deepPurple.shade700,
+              ),
+              body: const Padding(
+                padding:
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                child: PoolsPage(),
+              ),
+              backgroundColor: Styles.greyColor,
+            ))));
   }
+
+  Future<bool> _swipePageTo(
+      {required int nr}) async {
+    if(nr>0) {
+      for (var i =0;i<nr; i++) {
+        await carouselKey!.currentState!.swipeXNext(x: nr);
+      }
+    }else {
+      for (var i =0;i>nr; i--) {
+        await carouselKey!.currentState!.swipeXPrevious(x: nr);
+      }
+    }
+    return true;
+  }
+
 }
