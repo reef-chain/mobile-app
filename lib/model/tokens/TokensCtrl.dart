@@ -79,7 +79,7 @@ class TokenCtrl {
   }
 
   Future<dynamic> getPools(dynamic offset) async {
-    return jsApi.jsPromise('window.utils.getPools(10,${offset},"","5FxjoWsqFzTLSF8m9osTywz8ENKLrDv34qRf1EtdpW8kxc7n")');
+    return jsApi.jsPromise('window.utils.getPools(10,${offset},"","")');
   }
 
   void reload(bool force) async {
