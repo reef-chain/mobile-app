@@ -3,9 +3,13 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../components/sign/SignatureContentToggle.dart';
 
 class PoolsPage extends StatefulWidget {
   const PoolsPage({super.key});
@@ -53,7 +57,22 @@ class _PoolsPageState extends State<PoolsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
+    return SignatureContentToggle(Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    color: Styles.darkBackgroundColor,
+    // color: Color.fromARGB(255, 86, 54, 162),
+    child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+        Text(
+        AppLocalizations.of(context)!.pools,
+      style: GoogleFonts.spaceGrotesk(
+          fontWeight: FontWeight.w500,
+          fontSize: 32,
+          color: Colors.grey.shade100),
+    ),
+        const Gap(12),
+        NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
         if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
           _fetchTokensAndPools();
@@ -146,7 +165,7 @@ class _PoolsPageState extends State<PoolsPage> {
                             onPressed: () async {
                               ReefAppState.instance.navigationCtrl.navigateToSwapPage(
                                   context: context,
-                                  preselected: pool['token1']); //anukulpandey also preselect token2 
+                                  preselectedTop: pool['token1']); //anukulpandey also preselect token2
                             },
                           ),
                         )
@@ -170,6 +189,9 @@ class _PoolsPageState extends State<PoolsPage> {
             )
         ],
       ),
+    )]
+    )
+    )
     );
   }
 

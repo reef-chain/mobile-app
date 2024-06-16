@@ -20,7 +20,47 @@ import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
 import 'package:restart_app/restart_app.dart';
 
+import '../pages/pools_page.dart';
 import 'sign/SignatureContentToggle.dart';
+
+List<BarItemNavigationPage> bottomNavigationBarItems = const [
+  BarItemNavigationPage(
+    icon: Icon(Icons.home_outlined),
+    page: NavigationPage.home,
+    label: 'Home',
+  ),
+  // BottomNavigationBarItem(
+  //   icon: Icon(CupertinoIcons.arrow_right_arrow_left_square),
+  //   label: 'Swap',
+  // ),
+  // BottomNavigationBarItem(
+  //   icon: Icon(CupertinoIcons.money_dollar_circle),
+  //   label: 'Buy',
+  // ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.cached),
+    page: NavigationPage.pools,
+    //  SvgIcon(
+    //   'assets/images/reef_icon.svg',
+    //   height: 20,
+    // ),
+    label: 'Pools',
+  ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.account_balance_wallet_outlined),
+    page: NavigationPage.accounts,
+    //  SvgIcon(
+    //   'assets/images/reef_icon.svg',
+    //   height: 20,
+    // ),
+    label: 'Accounts',
+  ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.settings_outlined),
+    page: NavigationPage.settings,
+    label: 'Settings',
+  ),
+];
 
 class BottomNav extends StatefulWidget {
   const BottomNav({Key? key}) : super(key: key);
@@ -32,7 +72,7 @@ class BottomNav extends StatefulWidget {
 class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   final _liquidCarouselKey = GlobalKey<LiquidCarouselState>();
   bool _swiping = false;
-  bool _fromHidden = false;
+  // bool _fromHidden = false;
 
   @override
   void initState() {
@@ -53,16 +93,16 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     if (kDebugMode) {
       print('APP STATE=$state');
     }
-    if (state == AppLifecycleState.hidden) {
+    /*if (state == AppLifecycleState.hidden) {
       this._fromHidden = true;
-    }
+    }*/
     if (state == AppLifecycleState.resumed) {
-      if (this._fromHidden) {
+      /*if (this._fromHidden) {
         this._fromHidden = false;
           if(!Platform.isIOS) Restart.restartApp();
-      }
+      }*/
       
-      // await ReefAppState.instance.networkCtrl.reconnectProvider();
+      await ReefAppState.instance.networkCtrl.reconnectProvider();
       // ReefAppState.instance.tokensCtrl.reload(false);
     }
   }
@@ -99,36 +139,6 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     ReefAppState.instance.navigationCtrl
         .navigate(bottomNavigationBarItems[index].page);
   }
-
-  List<BarItemNavigationPage> bottomNavigationBarItems = const [
-    BarItemNavigationPage(
-      icon: Icon(Icons.home_outlined),
-      page: NavigationPage.home,
-      label: 'Home',
-    ),
-    // BottomNavigationBarItem(
-    //   icon: Icon(CupertinoIcons.arrow_right_arrow_left_square),
-    //   label: 'Swap',
-    // ),
-    // BottomNavigationBarItem(
-    //   icon: Icon(CupertinoIcons.money_dollar_circle),
-    //   label: 'Buy',
-    // ),
-    BarItemNavigationPage(
-      icon: Icon(Icons.account_balance_wallet_outlined),
-      page: NavigationPage.accounts,
-      //  SvgIcon(
-      //   'assets/images/reef_icon.svg',
-      //   height: 20,
-      // ),
-      label: 'Accounts',
-    ),
-    BarItemNavigationPage(
-      icon: Icon(Icons.settings_outlined),
-      page: NavigationPage.settings,
-      label: 'Settings',
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +191,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                       children: [
                         const LiquidCarouselWrapper(),
                         const HomePage(key: PageStorageKey("homepage")),
+                        const PoolsPage(key: const PageStorageKey("poolsPage")),
                         AccountsPage(key: const PageStorageKey("accountPage")),
                         const SettingsPage(key: PageStorageKey("settingsPage")),
                         const LiquidCarouselWrapper()
