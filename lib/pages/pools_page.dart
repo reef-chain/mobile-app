@@ -16,13 +16,13 @@ class PoolsPage extends StatefulWidget {
 }
 
 class _PoolsPageState extends State<PoolsPage> {
-  List<dynamic> _pools = [];
+  List<dynamic> _pools = ReefAppState.instance.poolsCtrl.getCachedPools();
   Map<String, dynamic> tokenBalances = {};
   int offset = 0;
   bool isLoading = false;
 
   // searched pools
-  List<dynamic>? searchedPools;
+  List<dynamic> searchedPools=[];
   String searchInput = "";
 
   // search input listeners
@@ -68,11 +68,10 @@ class _PoolsPageState extends State<PoolsPage> {
     for (var token in selectedTokens) {
       tokenBalances[token.address] = token.balance;
     }
-
-    final pools = await ReefAppState.instance.tokensCtrl.getPools(offset,"");
+    final pools = offset == 0? []: await ReefAppState.instance.tokensCtrl.getPools(offset,"");
     if (pools is List<dynamic>) {
+      ReefAppState.instance.poolsCtrl.appendPools(pools);
       setState(() {
-        _pools.addAll(pools);
         offset += 10;
         isLoading = false;
       });
@@ -212,7 +211,7 @@ class _PoolsPageState extends State<PoolsPage> {
                   fontSize: 16,
                 ),
               )),
-              if(searchInput.isNotEmpty && searchedPools!.isEmpty)
+              if(searchInput.isNotEmpty && searchedPools.isEmpty)
               Container(child: Row(
                 children: [
                   Icon(Icons.error,size: 18.0,color: Styles.errorColor,),
