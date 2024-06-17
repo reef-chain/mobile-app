@@ -456,7 +456,7 @@ class _SwapPageState extends State<SwapPage> {
   Container getPoolSummary() {
     return Container(
       decoration: BoxDecoration(
-        color: Styles.boxBackgroundColor,
+        color: const Color(0xffE7E2F2),
         borderRadius: BorderRadius.circular(10.0),
       ),
       margin: EdgeInsets.only(top: 8.0),
@@ -477,6 +477,24 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   "${rate}",
                   textAlign: TextAlign.right,
+                     style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                "Fee: ",
+                style: TextStyle(
+                    color: Styles.primaryAccentColor,
+                    fontWeight: FontWeight.w600),
+              ),
+              Expanded(
+                child: Text(
+                  "${max(selectedTopToken!.amount.toDouble() * selectedTopToken!.price!.toDouble() * 0.0003 / 1e18, 0.0000).toStringAsFixed(4)}\$",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
                 ),
               ),
             ],
@@ -493,26 +511,12 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   "${slippage}",
                   textAlign: TextAlign.right,
+                     style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
                 ),
               ),
             ],
           ),
-          Row(
-            children: [
-              Text(
-                "Fees: ",
-                style: TextStyle(
-                    color: Styles.primaryAccentColor,
-                    fontWeight: FontWeight.w600),
-              ),
-              Expanded(
-                child: Text(
-                  "${max(selectedTopToken!.amount.toDouble() * selectedTopToken!.price!.toDouble() * 0.0003 / 1e18, 0.0000).toStringAsFixed(4)}\$",
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
+          
         ],
       ),
     );
