@@ -3833,9 +3833,9 @@
   integrity sha512-nKu8pDrE3LNCEgJjZe1iGXzaD6OSIDD4Xzz/yo4KO9mQ6LBvf49BVrt4qxBFGL6++NneLiWUZGoh+VSd4PyVIg==
 
 "@substrate/connect-known-chains@^1.1.1":
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/@substrate/connect-known-chains/-/connect-known-chains-1.1.5.tgz#4aed3c402458bfb31ddfc54eeb5cb4a4c74ca88e"
-  integrity sha512-GCdDMs5q9xDYyP/KEwrlWMdqv8OIPjuVMZvNowvUrvEFo5d+x+VqfRPzyl/RbV+snRQVWTTacRydE7GqyjCYPQ==
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/@substrate/connect-known-chains/-/connect-known-chains-1.1.6.tgz#2627d329b82b46c7d745752c48c73e1b8ce6ac81"
+  integrity sha512-JwtdGbnK3ZqrY1qp3Ifr/p648sp9hG0Q715h4nRghnqZJnMQIiLKaFkcLnvrAiYQD3zNTYDztHidy5Q/u0TcbQ==
 
 "@substrate/connect@0.8.8":
   version "0.8.8"
@@ -3973,9 +3973,9 @@
   integrity sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==
 
 "@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
-  version "20.14.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.14.2.tgz#a5f4d2bcb4b6a87bffcaa717718c5a0f208f4a18"
-  integrity sha512-xyu6WAMVwv6AKFLB+e/7ySZVr/0zLCzOa7rSpq6jNwpqOrUbcACDWC+53d4n2QHOnDou0fbIsg8wZu/sxrnI4Q==
+  version "20.14.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.14.3.tgz#7a9a5d009b0861e7f337166dc435dbfd758db92d"
+  integrity sha512-Nuzqa6WAxeGnve6SXqiPAM9rA++VQs+iLZ1DDd56y0gdvygSZlQvZuvdFPR3yLqkVxPu4WrO02iDEyH1g+wazw==
   dependencies:
     undici-types "~5.26.4"
 
