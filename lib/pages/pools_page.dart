@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -20,10 +21,41 @@ class _PoolsPageState extends State<PoolsPage> {
   int offset = 0;
   bool isLoading = false;
 
+  // searched pools
+  List<dynamic>? searchedPools;
+  String searchInput = "";
+
+  // search input listeners
+  bool _isSearchEditing = false;
+
+  FocusNode _focusNodeSearch = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    _focusNodeSearch.addListener(_onFocusSearchChange);
+    _searchController.text = searchInput;
+    _searchController.addListener(() {
+      setState(() {
+        searchPools(_searchController.text);
+        searchInput = _searchController.text;
+      });
+    });
     _fetchTokensAndPools();
+  }
+
+  void searchPools(String val)async{
+    final searchedPoolsRes = await ReefAppState.instance.tokensCtrl.getPools(offset,val);
+    setState(() { 
+      searchedPools = searchedPoolsRes; 
+    });
+  }
+
+  void _onFocusSearchChange() {
+    setState(() {
+      _isSearchEditing = !_isSearchEditing;
+    });
   }
 
   void _fetchTokensAndPools() async {
@@ -37,7 +69,7 @@ class _PoolsPageState extends State<PoolsPage> {
       tokenBalances[token.address] = token.balance;
     }
 
-    final pools = await ReefAppState.instance.tokensCtrl.getPools(offset);
+    final pools = await ReefAppState.instance.tokensCtrl.getPools(offset,"");
     if (pools is List<dynamic>) {
       setState(() {
         _pools.addAll(pools);
@@ -52,23 +84,15 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-          _fetchTokensAndPools();
-        }
-        return true;
-      },
-      child: Stack(
-        children: [
-          Positioned.fill(
-            bottom: 14.0,
-            child: ListView.builder(
-              itemCount: _pools.length,
-              itemBuilder: (context, index) {
-                var pool = _pools[index];
-                return Card(
+  void dispose() {
+    super.dispose();
+    _searchController.dispose();
+    _focusNodeSearch.removeListener(_onFocusSearchChange);
+    _focusNodeSearch.dispose();
+  }
+
+  Card getPoolCard(dynamic pool){
+    return Card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -153,23 +177,80 @@ class _PoolsPageState extends State<PoolsPage> {
                     ],
                   ),
                 );
-              },
-            ),
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+          _fetchTokensAndPools();
+        }
+        return true;
+      },
+      child: _pools.length>0?
+          Positioned.fill(
+            bottom: 14.0,
+            child: Column(
+              children: [
+                Gap(12.0),
+                Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                color: Styles.whiteColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0x20000000),
+                  width: 1,
+                ),
+              ),
+              child: TextField(
+                focusNode: _focusNodeSearch,
+                controller: _searchController,
+                decoration: const InputDecoration.collapsed(hintText: 'Search'),
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              )),
+              if(searchInput.isNotEmpty && searchedPools!.isEmpty)
+              Container(child: Row(
+                children: [
+                  Icon(Icons.error,size: 18.0,color: Styles.errorColor,),
+                  Gap(4.0),
+                  Text("No pools found!",style: TextStyle(color: Styles.errorColor,fontWeight: FontWeight.w800),),
+                ],
+              ),),
+                 Gap(8.0),
+                searchedPools is List<dynamic> && searchedPools!.isNotEmpty?
+          Positioned(child: 
+          Expanded(
+            child: ListView.builder(
+                itemCount: searchedPools?.length,
+                itemBuilder: (context, index) {
+                  var pool = searchedPools![index];
+                  return getPoolCard(pool);
+                },
+              ),
           ),
-          if (isLoading && _pools.length>0)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
+          )
+          :
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _pools.length,
+                    itemBuilder: (context, index) {
+                      var pool = _pools[index];
+                      return getPoolCard(pool);
+                    },
+                  ),
+                ),
+                isLoading && _pools.length>0?
+                Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: CircularProgressIndicator(),
-              ),
+              ):Gap(36.0),
+              ],
             ),
-            if (isLoading && !(_pools.length>0))
-            Center(
-              child: CircularProgressIndicator(),
-            )
-        ],
-      ),
+      ):Center(child: CircularProgressIndicator(color: Styles.primaryColor,),),
     );
   }
 
