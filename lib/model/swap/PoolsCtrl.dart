@@ -6,9 +6,15 @@ class PoolsCtrl{
   final PoolsModel poolsModel;
 
   PoolsCtrl( this.jsApi, this.poolsModel){
-    jsApi.jsPromise('window.utils.getPools(10,0,"","")').then((pools) {
+    fetchPools().then((pools) {
       poolsModel.setPools(pools);
       });
+    jsApi.jsObservable('window.reefState.selectedNetwork\$')
+        .listen((network)async{refetch(await fetchPools());});
+  }
+
+  Future<List<dynamic>>fetchPools()async{
+    return await jsApi.jsPromise('window.utils.getPools(10,0,"","")');
   }
 
   List<dynamic> getCachedPools(){
@@ -19,5 +25,10 @@ class PoolsCtrl{
     final oldPool = poolsModel.pools;
     oldPool.addAll(pools);
     poolsModel.setPools(oldPool);
+  }
+
+  // fetches new pools on nw change
+  void refetch(List<dynamic> pools){
+    poolsModel.setPools(pools);
   }
 }
