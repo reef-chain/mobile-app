@@ -22,7 +22,7 @@ class SwapCtrl {
       'decimals': token2.decimals,
       'amount': toAmountDisplayBigInt(token2.amount, decimals: token2.decimals, fractionDigits: token2.decimals),
     };
-    return jsApi.jsPromise(
+    return jsApi.jsObservable(
         'window.swap.execute("$signerAddress", ${jsonEncode(mappedToken1)}, ${jsonEncode(mappedToken2)}, ${jsonEncode(settings.toJson())})');
   }
 

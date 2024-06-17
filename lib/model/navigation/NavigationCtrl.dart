@@ -10,7 +10,7 @@ import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/pages/pools_page.dart';
 import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
-import 'package:reef_mobile_app/pages/swap_page.dart';
+import 'package:reef_mobile_app/pages/swap_page_anukul.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_page.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_tx_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
@@ -142,17 +142,17 @@ class NavigationCtrl with NavSwipeCompute {
   }
 
   void navigateToSwapPage(
-      {required BuildContext context, required String preselected}) {
+      {required BuildContext context, String? preselectedTop,String? preselectedBottom}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.swap_tokens),
+                title: Text(AppLocalizations.of(context)!.swap_tokens,style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
               ),
               body: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                child: SwapPage(preselected),
+                child: SwapPage(preselectedTop: preselectedTop,preselectedBottom:preselectedBottom),
               ),
               backgroundColor: Styles.greyColor,
             ))));
