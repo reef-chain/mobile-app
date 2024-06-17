@@ -143,36 +143,24 @@ class _SwapPageState extends State<SwapPage> {
       reserveBottom = res["reserve2"];
     });
 
+    var _rate = await getPoolRate();
     setState(() {
-      rate = getPoolRate(reserveBottom, reserveTop, selectedTopToken!.symbol,
-          selectedBottomToken!.symbol);
+      rate = _rate;
     });
 
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
-  String getPoolRate(
-      String reserveTop, String reserveBottom, String symbol1, String symbol2) {
-    final BigInt bigIntReserveTop = BigInt.parse(reserveTop);
-    final BigInt bigIntReserveBottom = BigInt.parse(reserveBottom);
+  Future<String> getPoolRate()async {
+     var token1 = selectedTopToken!.setAmount(reserveTop);
+    var token2 = selectedBottomToken!.setAmount(reserveBottom);
 
-    final BigInt quotient = bigIntReserveTop ~/ bigIntReserveBottom;
-    final BigInt remainder = bigIntReserveTop % bigIntReserveBottom;
+    var res = (await ReefAppState.instance.swapCtrl
+            .getSwapAmount("1", false, token1, token2))
+        .replaceAll("\"", "");
+    var formattedRes = (BigInt.parse(res) / BigInt.from(10).pow(18)).toStringAsFixed(4);
 
-    const int precision = 4;
-    final BigInt scaledRemainder = (remainder * BigInt.from(10).pow(precision));
-    final BigInt fractionalPart = scaledRemainder ~/ bigIntReserveBottom;
-
-    String result = quotient.toString();
-    if (fractionalPart != BigInt.zero) {
-      String fractionalString =
-          fractionalPart.toString().padLeft(precision, '0');
-      result += '.' + fractionalString.substring(0, precision);
-    } else {
-      result += '.0000';
-    }
-
-    return '1 $symbol1 = $result $symbol2';
+    return '1 ${token1.symbol} = $formattedRes ${token2.symbol}';
   }
 
   Widget buildPreloader() {
