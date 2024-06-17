@@ -99,10 +99,12 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       /*if (this._fromHidden) {
         this._fromHidden = false;
+        // breaks signing when using app for signing browser txs - switching apps
           if(!Platform.isIOS) Restart.restartApp();
       }*/
       
-      await ReefAppState.instance.networkCtrl.reconnectProvider();
+      // reconnecting provider breaks signing since app looses focus and provider gets disconnected on resumed when signature is sent
+      // await ReefAppState.instance.networkCtrl.reconnectProvider();
       // ReefAppState.instance.tokensCtrl.reload(false);
     }
   }
