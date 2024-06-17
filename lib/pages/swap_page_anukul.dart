@@ -1000,42 +1000,8 @@ class _SwapPageState extends State<SwapPage> {
     _getPoolReserves();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    var transferStatusUI = buildFeedbackUI(context, statusValue, () => {}, () {
-      final navigator = Navigator.of(context);
-      navigator.pop();
-    });
-    return transferStatusUI ??
-        SignatureContentToggle(
-          Stack(children: [
-            Column(
-              children: [
-                Gap(24),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Styles.primaryBackgroundColor,
-                      boxShadow: neumorphicShadow()),
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      isPreselectedTopExists
-                          ? getFixedTokenField(
-                              _isValueTopEditing,
-                              selectedTopToken,
-                              _focusTop,
-                              amountTopController,
-                              _amountTopUpdated)
-                          : getToken(
-                              _isValueTopEditing,
-                              _changeSelectedTopToken,
-                              selectedTopToken,
-                              _focusTop,
-                              amountTopController,
-                              _amountTopUpdated),
-                      Gap(16),
-                      Row(
+  Row getSlider(){
+    return Row(
                         children: [
                           GestureDetector(
                             onTap: () {
@@ -1075,7 +1041,45 @@ class _SwapPageState extends State<SwapPage> {
                                 }),
                           ),
                         ],
-                      ),
+                      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var transferStatusUI = buildFeedbackUI(context, statusValue, () => {}, () {
+      final navigator = Navigator.of(context);
+      navigator.pop();
+    });
+    return transferStatusUI ??
+        SignatureContentToggle(
+          Stack(children: [
+            Column(
+              children: [
+                Gap(24),
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Styles.primaryBackgroundColor,
+                      boxShadow: neumorphicShadow()),
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    children: [
+                      isPreselectedTopExists
+                          ? getFixedTokenField(
+                              _isValueTopEditing,
+                              selectedTopToken,
+                              _focusTop,
+                              amountTopController,
+                              _amountTopUpdated)
+                          : getToken(
+                              _isValueTopEditing,
+                              _changeSelectedTopToken,
+                              selectedTopToken,
+                              _focusTop,
+                              amountTopController,
+                              _amountTopUpdated),
+                      Gap(16),
+                      getSlider(),
                       Gap(16),
                       isPreselectedBottomExists
                           ? getFixedTokenField(

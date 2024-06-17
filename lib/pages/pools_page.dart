@@ -146,7 +146,7 @@ class _PoolsPageState extends State<PoolsPage> {
                             onPressed: () async {
                               ReefAppState.instance.navigationCtrl.navigateToSwapPage(
                                   context: context,
-                                  preselectedTop: pool['token1'],preselectedBottom: "0xe8f4D9308DC06D1D570117B1656C26F515aF22a7");
+                                  preselectedTop: pool['token1'],preselectedBottom: pool['token2']);
                             },
                           ),
                         )
