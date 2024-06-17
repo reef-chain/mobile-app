@@ -31,4 +31,8 @@ class PoolsCtrl{
   void refetch(List<dynamic> pools){
     poolsModel.setPools(pools);
   }
+
+  Future<dynamic> getPools(dynamic offset,String search) async {
+    return jsApi.jsPromise('window.utils.getPools(10,${offset},"${search}","")');
+  }
 }

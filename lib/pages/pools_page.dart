@@ -46,7 +46,7 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   void searchPools(String val)async{
-    final searchedPoolsRes = await ReefAppState.instance.tokensCtrl.getPools(offset,val);
+    final searchedPoolsRes = await ReefAppState.instance.poolsCtrl.getPools(offset,val);
     setState(() { 
       searchedPools = searchedPoolsRes; 
     });
@@ -68,7 +68,7 @@ class _PoolsPageState extends State<PoolsPage> {
     for (var token in selectedTokens) {
       tokenBalances[token.address] = token.balance;
     }
-    final pools = offset == 0? []: await ReefAppState.instance.tokensCtrl.getPools(offset,"");
+    final pools = offset == 0? []: await ReefAppState.instance.poolsCtrl.getPools(offset,"");
     if (pools is List<dynamic>) {
       ReefAppState.instance.poolsCtrl.appendPools(pools);
       setState(() {
