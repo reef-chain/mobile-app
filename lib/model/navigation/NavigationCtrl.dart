@@ -45,16 +45,16 @@ class NavigationCtrl with NavSwipeCompute {
       _swiping = false;
       return;
     }
-    final i = computeSwipeAnimation(
+    final pageDiff = computeSwipeAnimation(
         currentPage: _navigationModel.currentPage, page: navigationPage);
 
-    if (i.abs() > 1) {
+    if (pageDiff.abs() > 1) {
       HapticFeedback.selectionClick();
-      _swipeComplete = _computeSwipeAnimation(
-          currentPage: _navigationModel.currentPage, page: navigationPage);
+      _swipeComplete = _swipePageTo(
+          nr: pageDiff);
     } else {
-      _swipeComplete = _computeSwipeAnimation(
-          currentPage: _navigationModel.currentPage, page: navigationPage);
+      _swipeComplete = _swipePageTo(
+          nr: pageDiff);
       HapticFeedback.selectionClick();
       _navigationModel.navigate(navigationPage);
     }
@@ -208,35 +208,18 @@ class NavigationCtrl with NavSwipeCompute {
             ))));
   }
 
-  // void navigateToPage({required BuildContext context, required Widget child}) {
-  //   Navigator.of(context).push(MaterialPageRoute(builder: (context) => child));
-  // }
-
-  Future<bool> _computeSwipeAnimation(
-      {required NavigationPage currentPage,
-      required NavigationPage page}) async {
-    if (currentPage == NavigationPage.home && page == NavigationPage.settings) {
-      // return await carouselKey!.currentState!.swipeXNext(x: 2);
-      await carouselKey!.currentState!.swipeXNext(x: 2);
-      await carouselKey!.currentState!.swipeXNext(x: 2);
-      return true;
-    } else if ((currentPage == NavigationPage.accounts &&
-            page == NavigationPage.home) ||
-        (currentPage == NavigationPage.settings &&
-            page == NavigationPage.accounts)) {
-      return await carouselKey!.currentState!.swipeXPrevious();
-    } else if (currentPage == NavigationPage.settings &&
-        page == NavigationPage.home) {
-      // return await carouselKey!.currentState!.swipeXPrevious(x: 2);
-      await carouselKey!.currentState!.swipeXPrevious(x: 2);
-      await carouselKey!.currentState!.swipeXPrevious(x: 2);
-      return true;
-    } else if ((currentPage == NavigationPage.home &&
-            page == NavigationPage.accounts) ||
-        (currentPage == NavigationPage.accounts &&
-            page == NavigationPage.settings)) {
-      return await carouselKey!.currentState!.swipeXNext();
+  Future<bool> _swipePageTo(
+      {required int nr}) async {
+    if(nr>0) {
+      for (var i =0;i<nr; i++) {
+        await carouselKey!.currentState!.swipeXNext(x: nr);
+      }
+    }else {
+      for (var i =0;i>nr; i--) {
+        await carouselKey!.currentState!.swipeXPrevious(x: nr);
+      }
     }
-    return false;
+    return true;
   }
+
 }

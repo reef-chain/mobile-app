@@ -62,6 +62,10 @@ class _ConnectionDetailsState extends State<ConnectionDetails> {
         });
       });
     });
+
+    // TODO check how reconnecting here works
+    // ReefAppState.instance.networkCtrl.reconnectProvider().ignore();
+
     super.initState();
   }
 
