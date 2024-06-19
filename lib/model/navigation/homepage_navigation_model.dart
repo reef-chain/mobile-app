@@ -2,7 +2,6 @@ import 'package:mobx/mobx.dart';
 
 part 'homepage_navigation_model.g.dart';
 
-// Bottom navigation bar items should be placed in the same order as they appear
 
 class HomePageNavigationModel = _HomePageNavigationModel
     with _$HomePageNavigationModel;

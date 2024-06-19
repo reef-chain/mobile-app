@@ -38,15 +38,6 @@ List<BarItemNavigationPage> bottomNavigationBarItems = const [
   //   label: 'Buy',
   // ),
   BarItemNavigationPage(
-    icon: Icon(Icons.cached),
-    page: NavigationPage.pools,
-    //  SvgIcon(
-    //   'assets/images/reef_icon.svg',
-    //   height: 20,
-    // ),
-    label: 'Pools',
-  ),
-  BarItemNavigationPage(
     icon: Icon(Icons.account_balance_wallet_outlined),
     page: NavigationPage.accounts,
     //  SvgIcon(
@@ -55,6 +46,16 @@ List<BarItemNavigationPage> bottomNavigationBarItems = const [
     // ),
     label: 'Accounts',
   ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.cached),
+    page: NavigationPage.pools,
+    //  SvgIcon(
+    //   'assets/images/reef_icon.svg',
+    //   height: 20,
+    // ),
+    label: 'Pools',
+  ),
+
   BarItemNavigationPage(
     icon: Icon(Icons.settings_outlined),
     page: NavigationPage.settings,
@@ -190,14 +191,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                         ReefAppState.instance.model.navigationModel
                             .navigate(bottomNavigationBarItems[index - 1].page);
                       },
-                      children: [
-                        const LiquidCarouselWrapper(),
-                        const HomePage(key: PageStorageKey("homepage")),
-                        const PoolsPage(key: const PageStorageKey("poolsPage")),
-                        AccountsPage(key: const PageStorageKey("accountPage")),
-                        const SettingsPage(key: PageStorageKey("settingsPage")),
-                        const LiquidCarouselWrapper()
-                      ],
+                      children: getMainNavPages(),
                     )),
                     // Expanded(
                     //   child: Container(
@@ -248,6 +242,25 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
         }),
       ),
     ));
+  }
+
+  List<Widget> getMainNavPages() {
+    var pages = bottomNavigationBarItems.map((navItem){
+      switch (navItem.page){
+        case NavigationPage.home:
+          return const HomePage(key: PageStorageKey("homepage"));
+        case NavigationPage.accounts:
+          return AccountsPage(key: const PageStorageKey("accountPage"));
+        case NavigationPage.pools:
+          return const PoolsPage(key: const PageStorageKey("poolsPage"));
+        case NavigationPage.settings:
+          return const SettingsPage(key: PageStorageKey("settingsPage"));
+      }
+      throw "Define page for menu item in getMainNavPages!";
+    }).toList(growable: true);
+    pages.insert(0, const LiquidCarouselWrapper());
+    pages.insert(pages.length, const LiquidCarouselWrapper());
+    return pages;
   }
 }
 

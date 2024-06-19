@@ -19,15 +19,46 @@ class PoolsPage extends StatefulWidget {
 }
 
 class _PoolsPageState extends State<PoolsPage> {
-  List<dynamic> _pools = [];
+  List<dynamic> _pools = ReefAppState.instance.poolsCtrl.getCachedPools();
   Map<String, dynamic> tokenBalances = {};
   int offset = 0;
   bool isLoading = false;
 
+  // searched pools
+  List<dynamic> searchedPools=[];
+  String searchInput = "";
+
+  // search input listeners
+  bool _isSearchEditing = false;
+
+  FocusNode _focusNodeSearch = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    _focusNodeSearch.addListener(_onFocusSearchChange);
+    _searchController.text = searchInput;
+    _searchController.addListener(() {
+      setState(() {
+        searchPools(_searchController.text);
+        searchInput = _searchController.text;
+      });
+    });
     _fetchTokensAndPools();
+  }
+
+  void searchPools(String val)async{
+    final searchedPoolsRes = await ReefAppState.instance.poolsCtrl.getPools(offset,val);
+    setState(() { 
+      searchedPools = searchedPoolsRes; 
+    });
+  }
+
+  void _onFocusSearchChange() {
+    setState(() {
+      _isSearchEditing = !_isSearchEditing;
+    });
   }
 
   void _fetchTokensAndPools() async {
@@ -40,11 +71,10 @@ class _PoolsPageState extends State<PoolsPage> {
     for (var token in selectedTokens) {
       tokenBalances[token.address] = token.balance;
     }
-
-    final pools = await ReefAppState.instance.tokensCtrl.getPools(offset);
+    final pools = offset == 0? []: await ReefAppState.instance.poolsCtrl.getPools(offset,"");
     if (pools is List<dynamic>) {
+      ReefAppState.instance.poolsCtrl.appendPools(pools);
       setState(() {
-        _pools.addAll(pools);
         offset += 10;
         isLoading = false;
       });
@@ -56,38 +86,15 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SignatureContentToggle(Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-    color: Styles.darkBackgroundColor,
-    // color: Color.fromARGB(255, 86, 54, 162),
-    child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        Text(
-        AppLocalizations.of(context)!.pools,
-      style: GoogleFonts.spaceGrotesk(
-          fontWeight: FontWeight.w500,
-          fontSize: 32,
-          color: Colors.grey.shade100),
-    ),
-        const Gap(12),
-        NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-          _fetchTokensAndPools();
-        }
-        return true;
-      },
-      child: Stack(
-        children: [
-          Positioned.fill(
-            bottom: 14.0,
-            child: ListView.builder(
-              itemCount: _pools.length,
-              itemBuilder: (context, index) {
-                var pool = _pools[index];
-                return Card(
+  void dispose() {
+    super.dispose();
+    _searchController.dispose();
+    _focusNodeSearch.removeListener(_onFocusSearchChange);
+    _focusNodeSearch.dispose();
+  }
+
+  Card getPoolCard(dynamic pool){
+    return Card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -165,35 +172,108 @@ class _PoolsPageState extends State<PoolsPage> {
                             onPressed: () async {
                               ReefAppState.instance.navigationCtrl.navigateToSwapPage(
                                   context: context,
-                                  preselectedTop: pool['token1']); //anukulpandey also preselect token2
+                                  preselectedTop: pool['token1'],preselectedBottom: pool['token2']);
                             },
                           ),
                         )
                     ],
                   ),
                 );
-              },
+  }
+
+  @override
+Widget build(BuildContext context) {
+  return SignatureContentToggle(
+    Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      color: Styles.darkBackgroundColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.pools,
+            style: GoogleFonts.spaceGrotesk(
+              fontWeight: FontWeight.w500,
+              fontSize: 32,
+              color: Colors.grey.shade100,
             ),
           ),
-          if (isLoading && _pools.length>0)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
+          const Gap(12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: Styles.whiteColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0x20000000),
+                width: 1,
               ),
             ),
-            if (isLoading && !(_pools.length>0))
-            Center(
-              child: CircularProgressIndicator(),
-            )
+            child: TextField(
+              focusNode: _focusNodeSearch,
+              controller: _searchController,
+              decoration: const InputDecoration.collapsed(hintText: 'Search'),
+              style: const TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ),
+          if (searchInput.isNotEmpty && searchedPools.isEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                children: [
+                  Icon(Icons.error, size: 18.0, color: Styles.errorColor),
+                  const Gap(4.0),
+                  Text(
+                    "No pools found!",
+                    style: TextStyle(
+                      color: Styles.errorColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                  _fetchTokensAndPools();
+                }
+                return true;
+              },
+              child: searchedPools.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: searchedPools.length,
+                      itemBuilder: (context, index) {
+                        var pool = searchedPools[index];
+                        return getPoolCard(pool);
+                      },
+                    )
+                  : _pools.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: _pools.length,
+                          itemBuilder: (context, index) {
+                            var pool = _pools[index];
+                            return getPoolCard(pool);
+                          },
+                        )
+                      : Center(child: CircularProgressIndicator(color: Styles.primaryColor)),
+            ),
+          ),
+          if (isLoading && _pools.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          if(!isLoading && _pools.isNotEmpty)
+          SizedBox(height: 40.0,)
         ],
       ),
-    )]
-    )
-    )
-    );
-  }
+    ),
+  );
+}
 
   Widget buildIcon(String dataUrl, double positionOffset) {
     return ClipOval(
