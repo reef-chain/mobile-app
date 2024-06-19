@@ -34,6 +34,8 @@ class TokenSelectionState extends State<TokenSelection> {
 
   TextEditingController valueContainer = TextEditingController();
 
+  bool shouldDisplaySearch = false;
+
   // late List<TokenWithAmount> displayTokens;
   String filterTokensBy = '';
 
@@ -73,6 +75,14 @@ class TokenSelectionState extends State<TokenSelection> {
     valueContainer.dispose();
   }
 
+  void toggleSearch(){
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    setState(() {
+      shouldDisplaySearch = true;
+    });
+  });
+}
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -80,6 +90,7 @@ class TokenSelectionState extends State<TokenSelection> {
       child: Column(
         children: [
           //BoxContent
+          if(shouldDisplaySearch)
           ViewBoxContainer(
             color: Colors.white,
             child: TextField(
@@ -108,17 +119,23 @@ class TokenSelectionState extends State<TokenSelection> {
                   maxHeight: 256, minWidth: double.infinity),
               child: Observer(builder: (_) {
                 var displayTokens = ReefAppState
-                    .instance.model.tokens.selectedErc20s.data
+                    .instance.model.tokens.allErc20s.data
                     .toList();
+                var allPoolPairs = ReefAppState.instance.model.tokens.poolPairs;
+                displayTokens = displayTokens.where((tkn)=>( allPoolPairs[widget.selectedToken].indexOf(tkn.data.address)>-1)).toList();
+                if(displayTokens.length>5){
+                  toggleSearch();
+                }
                 if (filterTokensBy.isNotEmpty) {
                   displayTokens = displayTokens
                       .where((tkn) =>
-                          tkn.data.name
+                          (tkn.data.name
                               .toLowerCase()
                               .contains(valueContainer.text.toLowerCase()) ||
                           tkn.data.address
                               .toLowerCase()
                               .contains(valueContainer.text.toLowerCase()))
+                              )
                       .toList();
                   if (displayTokens.isEmpty &&
                       isEvmAddress(valueContainer.text)) {

@@ -14,10 +14,32 @@ abstract class _TokenModel with Store {
       StatusDataObject(
           [], [FeedbackStatus(StatusCode.loading, 'Setting up token list.')]);
 
+  @observable
+  StatusDataObject<List<StatusDataObject<TokenWithAmount>>> allErc20s =
+      StatusDataObject(
+          [], [FeedbackStatus(StatusCode.loading, 'Setting up token list.')]);
+
+  //TODO: move to pools_page once merged in develop
+  @observable
+  dynamic poolPairs ={};
+
   @action
   void setSelectedErc20s(
       StatusDataObject<List<StatusDataObject<TokenWithAmount>>> tknsFdm) {
     selectedErc20s = tknsFdm;
+  }
+
+  @action
+  void setAllErc20s(
+      StatusDataObject<List<StatusDataObject<TokenWithAmount>>> tknsFdm) {
+    allErc20s = tknsFdm;
+  }
+
+  //TODO: move to pools_page once merged in develop
+  @action
+  void setPoolPairs(
+      dynamic _poolPairs) {
+    poolPairs = _poolPairs;
   }
 
   @computed

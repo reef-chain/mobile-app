@@ -35,6 +35,32 @@ class TokenCtrl {
     });
 
     jsApi
+        .jsObservable('window.reefState.allTokenBalances_status\$')
+        .listen((tokens) {
+      ParseListFn<StatusDataObject<TokenWithAmount>> parsableListFn =
+          getParsableListFn(TokenWithAmount.fromJson);
+      var tokensListFdm = StatusDataObject.fromJsonList(tokens, parsableListFn);
+
+      if (kDebugMode) {
+        try {
+          /*var tkn = tokensListFdm.data.firstWhere((t) =>
+          t.data.address == '0x9250BA0e7616357D6d98825186CF7723D38D8B23');
+          print('GOT TOKENS ${tkn.statusList.map((e) => e.code.toString()).toString()}');*/
+          print('GOT TOKENS ${tokensListFdm.data.length}');
+        } catch (e) {
+          print('Error getting tokens');
+        }
+      }
+      // print(
+      //     'GOT TOKENS ${tokensListFdm.statusList.map((e) => e.code)} msg = ${tokensListFdm.statusList[0].propertyName}');
+      tokenModel.setAllErc20s(tokensListFdm);
+    });
+
+    // TODO: move to PoolsCtrl page after mergin in develop
+    jsApi
+        .jsPromise('window.utils.getPoolPairs()').then((val)=>tokenModel.setPoolPairs(val));
+
+    jsApi
         .jsObservable('window.reefState.selectedNFTs_status\$')
         .listen((tokens) {
       ParseListFn<StatusDataObject<TokenNFT>> parsableListFn =
@@ -80,6 +106,10 @@ class TokenCtrl {
 
   Future<dynamic> getPools(dynamic offset) async {
     return jsApi.jsPromise('window.utils.getPools(10,${offset},"","")');
+  }
+
+  Future<dynamic> getPoolPairs() async {
+    return jsApi.jsPromise('window.utils.getPoolPairs()');
   }
 
   void reload(bool force) async {

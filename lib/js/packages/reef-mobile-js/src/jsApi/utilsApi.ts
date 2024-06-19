@@ -8,7 +8,7 @@ import {ERC20} from "./abi/ERC20";
 import { fetchTxInfo } from './txInfoApi';
 import { addressUtils } from '@reef-chain/util-lib';
 import { fetchNFTinfo } from './utils/nftUtils';
-import { fetchAllPools } from './poolsApi';
+import { fetchAllPools, getAllPoolsPairs } from './poolsApi';
 
 function lagWhenDisconnected() {
     return status => {
@@ -64,6 +64,9 @@ export const initApi = () => {
         },
         getPools: async (limit:number,offset:number,search:string,signerAddress:string) => {
             return await fetchAllPools(limit,offset,search,signerAddress);
+        },
+        getPoolPairs: async () => {
+            return await getAllPoolsPairs();
         },
         decodeMethod: (data: string, types?: any) => {
             return firstValueFrom(reefState.selectedProvider$.pipe(
