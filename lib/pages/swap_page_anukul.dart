@@ -29,7 +29,10 @@ import '../components/sign/SignatureContentToggle.dart';
 
 class SwapPage extends StatefulWidget {
   final String? preselectedTop;
-  const SwapPage({this.preselectedTop = "", Key? key}) : super(key: key);
+  final String? preselectedBottom;
+  const SwapPage(
+      {this.preselectedTop = "", this.preselectedBottom, Key? key})
+      : super(key: key);
 
   @override
   State<SwapPage> createState() => _SwapPageState();
@@ -38,6 +41,7 @@ class SwapPage extends StatefulWidget {
 class _SwapPageState extends State<SwapPage> {
   //preselected
   bool isPreselectedTopExists = false;
+  bool isPreselectedBottomExists = false;
 
   // swap tokens with amount
   TokenWithAmount? selectedTopToken;
@@ -88,13 +92,24 @@ class _SwapPageState extends State<SwapPage> {
     bool checkPreselection = ReefAppState
         .instance.model.tokens.selectedErc20List
         .any((token) => token.address == widget.preselectedTop);
+    bool checkPreselectionBottom = ReefAppState
+        .instance.model.tokens.selectedErc20List
+        .any((token) => token.address == widget.preselectedBottom);
+
     setState(() {
+      // setting fixed component
       isPreselectedTopExists = checkPreselection;
-      // set preselectedTop token
+      isPreselectedBottomExists = checkPreselectionBottom;
+
       if (checkPreselection) {
         selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
             .firstWhere((token) => token.address == widget.preselectedTop);
       }
+      if(checkPreselectionBottom){
+        selectedBottomToken = ReefAppState.instance.model.tokens.selectedErc20List
+            .firstWhere((token) => token.address == widget.preselectedBottom);
+      }
+      if(checkPreselection&&checkPreselectionBottom)_getPoolReserves();
 
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
     });
@@ -128,36 +143,24 @@ class _SwapPageState extends State<SwapPage> {
       reserveBottom = res["reserve2"];
     });
 
+    var _rate = await getPoolRate();
     setState(() {
-      rate = getPoolRate(reserveBottom, reserveTop, selectedTopToken!.symbol,
-          selectedBottomToken!.symbol);
+      rate = _rate;
     });
 
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
-  String getPoolRate(
-      String reserveTop, String reserveBottom, String symbol1, String symbol2) {
-    final BigInt bigIntReserveTop = BigInt.parse(reserveTop);
-    final BigInt bigIntReserveBottom = BigInt.parse(reserveBottom);
+  Future<String> getPoolRate()async {
+     var token1 = selectedTopToken!.setAmount(reserveTop);
+    var token2 = selectedBottomToken!.setAmount(reserveBottom);
 
-    final BigInt quotient = bigIntReserveTop ~/ bigIntReserveBottom;
-    final BigInt remainder = bigIntReserveTop % bigIntReserveBottom;
+    var res = (await ReefAppState.instance.swapCtrl
+            .getSwapAmount("1", false, token1, token2))
+        .replaceAll("\"", "");
+    var formattedRes = (BigInt.parse(res) / BigInt.from(10).pow(18)).toStringAsFixed(4);
 
-    const int precision = 4;
-    final BigInt scaledRemainder = (remainder * BigInt.from(10).pow(precision));
-    final BigInt fractionalPart = scaledRemainder ~/ bigIntReserveBottom;
-
-    String result = quotient.toString();
-    if (fractionalPart != BigInt.zero) {
-      String fractionalString =
-          fractionalPart.toString().padLeft(precision, '0');
-      result += '.' + fractionalString.substring(0, precision);
-    } else {
-      result += '.0000';
-    }
-
-    return '1 $symbol1 = $result $symbol2';
+    return '1 ${token1.symbol} = $formattedRes ${token2.symbol}';
   }
 
   Widget buildPreloader() {
@@ -242,7 +245,6 @@ class _SwapPageState extends State<SwapPage> {
               preloader = false;
               btnLabel = "Encountered an error";
             }
-
           });
           handleEvmTransactionResponse(txResponse);
         }
@@ -434,7 +436,7 @@ class _SwapPageState extends State<SwapPage> {
 
   String getBtnLabel() {
     if (txInProgress) {
-      if (btnLabel == "Cancelled"||btnLabel=="Encountered an error")
+      if (btnLabel == "Cancelled" || btnLabel == "Encountered an error")
         setState(() {
           txInProgress = false;
         });
@@ -454,7 +456,7 @@ class _SwapPageState extends State<SwapPage> {
   Container getPoolSummary() {
     return Container(
       decoration: BoxDecoration(
-        color: Styles.boxBackgroundColor,
+        color: const Color(0xffE7E2F2),
         borderRadius: BorderRadius.circular(10.0),
       ),
       margin: EdgeInsets.only(top: 8.0),
@@ -475,6 +477,24 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   "${rate}",
                   textAlign: TextAlign.right,
+                     style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                "Fee: ",
+                style: TextStyle(
+                    color: Styles.primaryAccentColor,
+                    fontWeight: FontWeight.w600),
+              ),
+              Expanded(
+                child: Text(
+                  "${max(selectedTopToken!.amount.toDouble() * selectedTopToken!.price!.toDouble() * 0.0003 / 1e18, 0.0000).toStringAsFixed(4)}\$",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
                 ),
               ),
             ],
@@ -491,26 +511,12 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   "${slippage}",
                   textAlign: TextAlign.right,
+                     style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
                 ),
               ),
             ],
           ),
-          Row(
-            children: [
-              Text(
-                "Fees: ",
-                style: TextStyle(
-                    color: Styles.primaryAccentColor,
-                    fontWeight: FontWeight.w600),
-              ),
-              Expanded(
-                child: Text(
-                  "${max(selectedTopToken!.amount.toDouble() * selectedTopToken!.price!.toDouble() * 0.0003 / 1e18, 0.0000).toStringAsFixed(4)}\$",
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
+          
         ],
       ),
     );
@@ -713,26 +719,29 @@ class _SwapPageState extends State<SwapPage> {
     );
   }
 
-  Container getReefTokenField() {
+  Container getFixedTokenField(
+      bool isEditing,
+      TokenWithAmount? token,
+      FocusNode isFocus,
+      TextEditingController amountController,
+      dynamic amountUpdated) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: _isValueTopEditing
+        border: isEditing
             ? Border.all(color: const Color(0xffa328ab))
             : Border.all(color: const Color(0x00d7d1e9)),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          if (_isValueTopEditing)
+          if (isEditing)
             const BoxShadow(
                 blurRadius: 15,
                 spreadRadius: -8,
                 offset: Offset(0, 10),
                 color: Color(0x40a328ab))
         ],
-        color: _isValueTopEditing
-            ? const Color(0xffeeebf6)
-            : const Color(0xffE7E2F2),
+        color: isEditing ? const Color(0xffeeebf6) : const Color(0xffE7E2F2),
       ),
       child: Column(
         children: [
@@ -740,22 +749,20 @@ class _SwapPageState extends State<SwapPage> {
             children: [
               Row(
                 children: [
-                  IconFromUrl(selectedTopToken?.iconUrl, size: 48),
+                  IconFromUrl(token!.iconUrl, size: 48),
                   const Gap(13),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selectedTopToken != null
-                            ? selectedTopToken!.name
-                            : 'Select',
+                        token != null ? token!.name : 'Select',
                         style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
                             color: Color(0xff19233c)),
                       ),
                       Text(
-                        "${toAmountDisplayBigInt(selectedTopToken!.balance)} ${selectedTopToken!.name.toUpperCase()}",
+                        "${toAmountDisplayBigInt(token!.balance)} ${token!.name.toUpperCase()}",
                         style: TextStyle(
                             color: Styles.textLightColor, fontSize: 12),
                       )
@@ -765,16 +772,16 @@ class _SwapPageState extends State<SwapPage> {
               ),
               Expanded(
                 child: TextFormField(
-                  focusNode: _focusTop,
+                  focusNode: isFocus,
                   readOnly: txInProgress,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
                   ],
                   keyboardType: TextInputType.number,
-                  controller: amountTopController,
+                  controller: amountController,
                   onChanged: (text) async {
                     setState(() {
-                      _amountTopUpdated(amountTopController.text);
+                      amountUpdated(amountController.text);
                     });
                   },
                   decoration: InputDecoration(
@@ -917,17 +924,6 @@ class _SwapPageState extends State<SwapPage> {
                 direction: Axis.horizontal,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  /*const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(
-                      color: Colors.deepPurple,
-                      strokeWidth: 3,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),*/
                   Flexible(
                       child: Text(
                     AppLocalizations.of(context)!.sending_tx_to_nw,
@@ -977,17 +973,6 @@ class _SwapPageState extends State<SwapPage> {
                 direction: Axis.horizontal,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  /*const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(
-                      color: Colors.deepPurple,
-                      strokeWidth: 3,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),*/
                   Flexible(
                       child: Text(
                     AppLocalizations.of(context)!.unreversible_finality,
@@ -1005,8 +990,8 @@ class _SwapPageState extends State<SwapPage> {
             icon: Icons.lock),
       ];
 
-  void _reversePair(){
-    if(selectedTopToken==null||selectedBottomToken==null)return;
+  void _reversePair() {
+    if (selectedTopToken == null || selectedBottomToken == null) return;
     var topToken = selectedTopToken;
     setState(() {
       selectedTopToken = selectedBottomToken;
@@ -1015,12 +1000,55 @@ class _SwapPageState extends State<SwapPage> {
     _getPoolReserves();
   }
 
+  Row getSlider(){
+    return Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              _reversePair();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  gradient: Styles.buttonGradient),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.repeat,
+                                  size: 18,
+                                  color: Styles.whiteColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Gap(8.0),
+                          Expanded(
+                            child: SliderStandAlone(
+                                isDisabled: txInProgress,
+                                rating: rating,
+                                onChanged: (newRating) async {
+                                  setState(() {
+                                    rating = newRating;
+                                    String amountValue = (double.parse(
+                                                toAmountDisplayBigInt(
+                                                    selectedTopToken!
+                                                        .balance)) *
+                                            rating)
+                                        .toStringAsFixed(2);
+                                    amountTopController.text = amountValue;
+                                    _amountTopUpdated(amountValue);
+                                  });
+                                }),
+                          ),
+                        ],
+                      );
+  }
+
   @override
   Widget build(BuildContext context) {
     var transferStatusUI = buildFeedbackUI(context, statusValue, () => {}, () {
       final navigator = Navigator.of(context);
       navigator.pop();
-      // ReefAppState.instance.navigationCtrl.navigate(NavigationPage.home);
     });
     return transferStatusUI ??
         SignatureContentToggle(
@@ -1037,7 +1065,12 @@ class _SwapPageState extends State<SwapPage> {
                   child: Column(
                     children: [
                       isPreselectedTopExists
-                          ? getReefTokenField()
+                          ? getFixedTokenField(
+                              _isValueTopEditing,
+                              selectedTopToken,
+                              _focusTop,
+                              amountTopController,
+                              _amountTopUpdated)
                           : getToken(
                               _isValueTopEditing,
                               _changeSelectedTopToken,
@@ -1046,51 +1079,22 @@ class _SwapPageState extends State<SwapPage> {
                               amountTopController,
                               _amountTopUpdated),
                       Gap(16),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: (){
-                              _reversePair();
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(14),
-                                gradient: Styles.buttonGradient
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(Icons.repeat,size: 18,color: Styles.whiteColor,),
-                              ),
-                            ),
-                          ),
-                          Gap(8.0),
-                          Expanded(
-                            child: SliderStandAlone(
-                                isDisabled: txInProgress,
-                                rating: rating,
-                                onChanged: (newRating) async {
-                                  setState(() {
-                                    rating = newRating;
-                                    String amountValue = (double.parse(
-                                                toAmountDisplayBigInt(
-                                                    selectedTopToken!.balance)) *
-                                            rating)
-                                        .toStringAsFixed(2);
-                                    amountTopController.text = amountValue;
-                                    _amountTopUpdated(amountValue);
-                                  });
-                                }),
-                          ),
-                        ],
-                      ),
+                      getSlider(),
                       Gap(16),
-                      getToken(
-                          _isValueBottomEditing,
-                          _changeSelectedBottomToken,
-                          selectedBottomToken,
-                          _focusBottom,
-                          amountBottomController,
-                          _amountBottomUpdated),
+                      isPreselectedBottomExists
+                          ? getFixedTokenField(
+                              _isValueBottomEditing,
+                              selectedBottomToken,
+                              _focusBottom,
+                              amountBottomController,
+                              _amountBottomUpdated)
+                          : getToken(
+                              _isValueBottomEditing,
+                              _changeSelectedBottomToken,
+                              selectedBottomToken,
+                              _focusBottom,
+                              amountBottomController,
+                              _amountBottomUpdated),
                       Gap(16),
                       if (rate != "") getPoolSummary(),
                       Gap(16),

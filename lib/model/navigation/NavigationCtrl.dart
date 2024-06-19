@@ -142,7 +142,7 @@ class NavigationCtrl with NavSwipeCompute {
   }
 
   void navigateToSwapPage(
-      {required BuildContext context, String? preselectedTop}) {
+      {required BuildContext context, String? preselectedTop,String? preselectedBottom}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => SignatureContentToggle(Scaffold(
               appBar: AppBar(
@@ -152,7 +152,7 @@ class NavigationCtrl with NavSwipeCompute {
               body: Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                child: SwapPage(preselectedTop: preselectedTop,),
+                child: SwapPage(preselectedTop: preselectedTop,preselectedBottom:preselectedBottom),
               ),
               backgroundColor: Styles.greyColor,
             ))));

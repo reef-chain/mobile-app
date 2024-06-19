@@ -13,6 +13,7 @@ import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
 import 'package:reef_mobile_app/model/storage/StorageCtrl.dart';
 import 'package:reef_mobile_app/model/signing/SigningCtrl.dart';
+import 'package:reef_mobile_app/model/swap/PoolsCtrl.dart';
 import 'package:reef_mobile_app/model/swap/SwapCtrl.dart';
 import 'package:reef_mobile_app/model/tokens/TokensCtrl.dart';
 import 'package:reef_mobile_app/model/transfer/TransferCtrl.dart';
@@ -30,6 +31,7 @@ class ReefAppState {
   late StorageService storage;
   late WalletConnectService walletConnect;
   late TokenCtrl tokensCtrl;
+  late PoolsCtrl poolsCtrl;
   late AccountCtrl accountCtrl;
   late SigningCtrl signingCtrl;
   late TransferCtrl transferCtrl;
@@ -71,6 +73,9 @@ class ReefAppState {
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("swap...");
     swapCtrl = SwapCtrl(jsApi);
+    await Future.delayed(Duration(milliseconds: 100));
+    this.initStatusStream.add("pools...");
+    poolsCtrl = PoolsCtrl(jsApi,model.pools);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("metadata...");
     metadataCtrl = MetadataCtrl(jsApi);

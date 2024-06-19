@@ -108,10 +108,9 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   return res.toNumber();
 };
 
-export const fetchAllPools = async (limit: number, offset: number, search: string, signerAddress: string) => {
-  try {
-    let selectedNw;
-    reefState.selectedNetwork$.subscribe((val) => selectedNw = val);
+export const fetchAllPools = async (limit:number,offset:number,search:string,signerAddress:string)=>{
+    try {
+      const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
 
     let tokenPrices = {};
     const response = await fetch(getDexUrl(selectedNw.name), {
