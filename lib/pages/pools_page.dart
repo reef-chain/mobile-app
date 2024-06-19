@@ -182,97 +182,98 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SignatureContentToggle(Container(
+Widget build(BuildContext context) {
+  return SignatureContentToggle(
+    Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       color: Styles.darkBackgroundColor,
-      // color: Color.fromARGB(255, 86, 54, 162),
-      child: Row(children: [Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-          AppLocalizations.of(context)!.pools,
-      style: GoogleFonts.spaceGrotesk(
-          fontWeight: FontWeight.w500,
-          fontSize: 32,
-          color: Colors.grey.shade100),
-    ),
-            const Gap(12),
-    /* TODO
-    NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-          _fetchTokensAndPools();
-        }
-        return true;
-      },
-      child: _pools.length>0?
-          Positioned.fill(
-            bottom: 14.0,
-            child: Column(
-              children: [
-                Gap(12.0),
-                Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              decoration: BoxDecoration(
-                color: Styles.whiteColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0x20000000),
-                  width: 1,
-                ),
-              ),
-              child: TextField(
-                focusNode: _focusNodeSearch,
-                controller: _searchController,
-                decoration: const InputDecoration.collapsed(hintText: 'Search'),
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
-              )),
-              if(searchInput.isNotEmpty && searchedPools.isEmpty)
-              Container(child: Row(
-                children: [
-                  Icon(Icons.error,size: 18.0,color: Styles.errorColor,),
-                  Gap(4.0),
-                  Text("No pools found!",style: TextStyle(color: Styles.errorColor,fontWeight: FontWeight.w800),),
-                ],
-              ),),
-                 Gap(8.0),
-                searchedPools is List<dynamic> && searchedPools!.isNotEmpty?
-          Positioned(child: 
-          Expanded(
-            child: ListView.builder(
-                itemCount: searchedPools?.length,
-                itemBuilder: (context, index) {
-                  var pool = searchedPools![index];
-                  return getPoolCard(pool);
-                },
-              ),
-          ),
-          )
-          :
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _pools.length,
-                    itemBuilder: (context, index) {
-                      var pool = _pools[index];
-                      return getPoolCard(pool);
-                    },
-                  ),
-                ),
-                isLoading && _pools.length>0?
-                Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
-              ):Gap(36.0),
-              ],
+            AppLocalizations.of(context)!.pools,
+            style: GoogleFonts.spaceGrotesk(
+              fontWeight: FontWeight.w500,
+              fontSize: 32,
+              color: Colors.grey.shade100,
             ),
-      ):Center(child: CircularProgressIndicator(color: Styles.primaryColor,),),
-    )*/
-          ]
-    )])));
-  }
+          ),
+          const Gap(12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: Styles.whiteColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0x20000000),
+                width: 1,
+              ),
+            ),
+            child: TextField(
+              focusNode: _focusNodeSearch,
+              controller: _searchController,
+              decoration: const InputDecoration.collapsed(hintText: 'Search'),
+              style: const TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ),
+          if (searchInput.isNotEmpty && searchedPools.isEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                children: [
+                  Icon(Icons.error, size: 18.0, color: Styles.errorColor),
+                  const Gap(4.0),
+                  Text(
+                    "No pools found!",
+                    style: TextStyle(
+                      color: Styles.errorColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!isLoading && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                  _fetchTokensAndPools();
+                }
+                return true;
+              },
+              child: searchedPools.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: searchedPools.length,
+                      itemBuilder: (context, index) {
+                        var pool = searchedPools[index];
+                        return getPoolCard(pool);
+                      },
+                    )
+                  : _pools.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: _pools.length,
+                          itemBuilder: (context, index) {
+                            var pool = _pools[index];
+                            return getPoolCard(pool);
+                          },
+                        )
+                      : Center(child: CircularProgressIndicator(color: Styles.primaryColor)),
+            ),
+          ),
+          if (isLoading && _pools.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          if(!isLoading && _pools.isNotEmpty)
+          SizedBox(height: 40.0,)
+        ],
+      ),
+    ),
+  );
+}
 
   Widget buildIcon(String dataUrl, double positionOffset) {
     return ClipOval(
