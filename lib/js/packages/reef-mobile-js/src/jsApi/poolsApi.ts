@@ -38,19 +38,8 @@ const getAllPoolsListQuery = (limit: number, offset: number, search: string, sig
 const ALL_POOLS = `
   query allPools {
     allPools {
-      address
-      decimals1
-      decimals2
-      reserved1
-      reserved2
-      symbol1
-      symbol2
       token1
       token2
-      name1
-      name2
-      iconUrl1
-      iconUrl2
     }
   }
 `;
