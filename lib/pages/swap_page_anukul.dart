@@ -240,6 +240,7 @@ class _SwapPageState extends State<SwapPage> {
             if (txResponse['status'] == "_canceled") {
               preloader = false;
               btnLabel = "Cancelled";
+              txInProgress = false;
             }
             if (txResponse['status'].toString().contains("-32603")) {
               preloader = false;
@@ -437,9 +438,6 @@ class _SwapPageState extends State<SwapPage> {
   String getBtnLabel() {
     if (txInProgress) {
       if (btnLabel == "Cancelled" || btnLabel == "Encountered an error")
-        setState(() {
-          txInProgress = false;
-        });
       return btnLabel;
     }
     return selectedTopToken == null
