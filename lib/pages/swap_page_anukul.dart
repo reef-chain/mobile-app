@@ -84,6 +84,7 @@ class _SwapPageState extends State<SwapPage> {
   bool preloader = false;
   String? preloaderMessage;
   Widget? preloaderChild;
+  bool isError = false;
 
   @override
   void initState() {
@@ -175,6 +176,7 @@ class _SwapPageState extends State<SwapPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if(!isError)
             CircularCountDown(
               countdownMs: 60000,
               width: 80,
@@ -183,6 +185,7 @@ class _SwapPageState extends State<SwapPage> {
               strokeWidth: 4,
               child: preloaderChild,
             ),
+            if(isError)preloaderChild!,
             Gap(8.0),
             Text(
               "${preloaderMessage}",
@@ -191,7 +194,26 @@ class _SwapPageState extends State<SwapPage> {
                 fontWeight: FontWeight.w700,
                 color: Styles.textLightColor,
               ),
-            )
+            ),
+            if(isError)ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                shadowColor: const Color(0x559d6cff),
+                                elevation: 5,
+                                backgroundColor: Styles.primaryAccentColor,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 0, horizontal: 32),
+                              ),
+              onPressed: (){
+              setState(() {
+                txInProgress=false;
+                isError=false;
+                preloader=false;
+                rating=0.0;
+              });
+            }, child: Text("Retry",style: TextStyle(fontSize: 12,color: Styles.whiteColor)))
           ],
         ),
       ),
@@ -242,8 +264,11 @@ class _SwapPageState extends State<SwapPage> {
               btnLabel = "Cancelled";
             }
             if (txResponse['status'].toString().contains("-32603")) {
-              preloader = false;
+              preloader = true;
               btnLabel = "Encountered an error";
+              isError=true;
+              preloaderChild=Icon(Icons.error_outline);
+              preloaderMessage="Encountered an error";
             }
           });
           handleEvmTransactionResponse(txResponse);
