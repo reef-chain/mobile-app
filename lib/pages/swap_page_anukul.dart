@@ -59,9 +59,6 @@ class _SwapPageState extends State<SwapPage> {
   bool _isValueTopEditing = false;
   bool _isValueBottomEditing = false;
 
-  //settings
-  SwapSettings settings = SwapSettings(1, 0.8); //default slippage
-
   //reserves
   String reserveTop = "";
   String reserveBottom = "";
@@ -211,9 +208,12 @@ class _SwapPageState extends State<SwapPage> {
 
     var signerAddress = await ReefAppState.instance.storageCtrl
         .getValue(StorageKey.selected_address.name);
+        var deadline = ReefAppState.instance.model.swapSettings.deadline;
+        var slippage = ReefAppState.instance.model.swapSettings.slippageTolerance;
+        SwapSettings settings = SwapSettings(deadline, slippage);
     Stream<dynamic> executeTransactionFeedbackStream =
         await ReefAppState.instance.swapCtrl.swapTokens(
-            signerAddress, selectedTopToken!, selectedBottomToken!, settings);
+            signerAddress, selectedTopToken!, selectedBottomToken!,settings );
     executeTransactionFeedbackStream =
         executeTransactionFeedbackStream.asBroadcastStream();
 
