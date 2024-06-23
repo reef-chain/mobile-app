@@ -31,6 +31,7 @@ class _PoolsPageState extends State<PoolsPage> {
   String searchInput = "";
   bool searched = false;
   bool displaySearchModal = false;
+  bool filterSwappable = false;
 
   // search input listeners
   bool _isSearchEditing = false;
@@ -111,7 +112,7 @@ class _PoolsPageState extends State<PoolsPage> {
     _focusNodeSearch.dispose();
   }
 
-  Container getPoolCard(dynamic pool) {
+  Widget getPoolCard(dynamic pool) {
     return Container(
       margin: EdgeInsets.only(bottom: 4.0),
       child: Card(
@@ -126,7 +127,8 @@ class _PoolsPageState extends State<PoolsPage> {
                   alignment: Alignment.centerLeft,
                   children: [
                     buildIcon(pool['iconUrl1'], 0),
-                    Positioned(left: 14, child: buildIcon(pool['iconUrl2'], 14)),
+                    Positioned(
+                        left: 14, child: buildIcon(pool['iconUrl2'], 14)),
                   ],
                 ),
               ),
@@ -140,7 +142,8 @@ class _PoolsPageState extends State<PoolsPage> {
                       Text('TVL : ',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 12.0)),
-                      Text('\$${pool["tvl"]}', style: TextStyle(fontSize: 12.0)),
+                      Text('\$${pool["tvl"]}',
+                          style: TextStyle(fontSize: 12.0)),
                     ],
                   ),
                   Row(
@@ -247,7 +250,6 @@ class _PoolsPageState extends State<PoolsPage> {
                       fontSize: 14.0,
                       fontWeight: FontWeight.w800),
                 ),
-          
           GestureDetector(
             onTap: () {
               clearSearch();
@@ -293,28 +295,105 @@ class _PoolsPageState extends State<PoolsPage> {
                         color: Colors.grey.shade100,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          displaySearchModal = true;
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            gradient: Styles.buttonGradient),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.search,
-                            size: 18,
-                            color: Styles.whiteColor,
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              filterSwappable = true;
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Styles.boxBackgroundColor,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(
+                                Icons.sort,
+                                size: 18,
+                                color: Styles.textLightColor,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        Gap(8.0),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              displaySearchModal = true;
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                gradient: Styles.buttonGradient),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(
+                                Icons.search,
+                                size: 18,
+                                color: Styles.whiteColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
+                if(filterSwappable)
+                Container(
+                  padding: EdgeInsets.only(bottom: 4.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Filter applied ",
+                        style: TextStyle(
+                            color: Styles.textLightColor,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(
+                            top: 4.0, bottom: 4.0, left: 12.0, right: 12.0),
+                        decoration: BoxDecoration(
+                          color: Styles.whiteColor,
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              "can swap",
+                              style: TextStyle(
+                                  color: Styles.textLightColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            Gap(8.0),
+                            GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  filterSwappable=false;
+                                });
+                              },
+                                child: Container(
+                              decoration: BoxDecoration(
+                                  color: Styles.greyColor,
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: Icon(CupertinoIcons.xmark,
+                                    color: Colors.black87, size: 12),
+                              ),
+                            )),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+               
                 Flexible(
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification scrollInfo) {
@@ -327,11 +406,16 @@ class _PoolsPageState extends State<PoolsPage> {
                     },
                     child: _pools.isNotEmpty
                         ? ListView.builder(
-                          padding: EdgeInsets.zero,
+                            padding: EdgeInsets.zero,
                             itemCount: _pools.length,
                             itemBuilder: (context, index) {
                               var pool = _pools[index];
+                                if(filterSwappable){
+      if(hasBalance(pool['token1']) || hasBalance(pool['token2']))return getPoolCard(pool);
+      else return Container();
+    }else{
                               return getPoolCard(pool);
+    }
                             },
                           )
                         : Center(
