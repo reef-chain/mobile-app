@@ -222,6 +222,7 @@ class _PoolsPageState extends State<PoolsPage> {
   Widget buildSearchAcknowledge() {
     return Container(
       margin: const EdgeInsets.only(top: 8.0),
+      padding: EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -246,6 +247,7 @@ class _PoolsPageState extends State<PoolsPage> {
                       fontSize: 14.0,
                       fontWeight: FontWeight.w800),
                 ),
+          
           GestureDetector(
             onTap: () {
               clearSearch();
