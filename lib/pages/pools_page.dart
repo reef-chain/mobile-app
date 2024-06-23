@@ -206,118 +206,83 @@ class _PoolsPageState extends State<PoolsPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SignatureContentToggle(
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        color: Styles.darkBackgroundColor,
+  void showSearchModal() {
+    showModal(context,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.pools,
-                  style: GoogleFonts.spaceGrotesk(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 32,
-                    color: Colors.grey.shade100,
-                  ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                color: Styles.whiteColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0x20000000),
+                  width: 1,
                 ),
-                GestureDetector(
-                  onTap: () {
-                    showModal(context,
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 14),
-                              decoration: BoxDecoration(
-                                color: Styles.whiteColor,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: const Color(0x20000000),
-                                  width: 1,
-                                ),
-                              ),
-                              child: TextField(
-                                focusNode: _focusNodeSearch,
-                                controller: _searchController,
-                                decoration: const InputDecoration.collapsed(
-                                    hintText: 'Search'),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                            Gap(12),
-                            Container(
-                              margin: EdgeInsets.only(
-                                  top: 8.0,
-                                  left: 16.0,
-                                  right: 16.0,
-                                  bottom: 8.0),
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Styles.secondaryAccentColorDark,
-                                      spreadRadius: -10,
-                                      offset: Offset(0, 5),
-                                      blurRadius: 20),
-                                ],
-                                borderRadius: BorderRadius.circular(80),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Styles.purpleColorLight,
-                                    Styles.secondaryAccentColorDark
-                                  ],
-                                  begin: Alignment(-1, -1),
-                                  end: Alignment(1, 1),
-                                ),
-                              ),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  searchPools(searchInput);
-                                  setState(() {
-                                    searched = true;
-                                  });
-                                },
-                                child: Text(
-                                  "Search",
-                                  style: TextStyle(color: Styles.whiteColor),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    backgroundColor: Colors.transparent,
-                                    shape: const StadiumBorder(),
-                                    elevation: 0),
-                              ),
-                            )
-                          ],
-                        ),
-                        headText: "Search Pools");
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: Styles.buttonGradient),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        Icons.search,
-                        size: 18,
-                        color: Styles.whiteColor,
-                      ),
-                    ),
-                  ),
+              ),
+              child: TextField(
+                focusNode: _focusNodeSearch,
+                controller: _searchController,
+                decoration: const InputDecoration.collapsed(hintText: 'Search'),
+                style: const TextStyle(
+                  fontSize: 16,
                 ),
-              ],
+              ),
             ),
-            if (searched)
-              Container(
+            Gap(12),
+            Container(
+              margin: EdgeInsets.only(
+                  top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                      color: Styles.secondaryAccentColorDark,
+                      spreadRadius: -10,
+                      offset: Offset(0, 5),
+                      blurRadius: 20),
+                ],
+                borderRadius: BorderRadius.circular(80),
+                gradient: LinearGradient(
+                  colors: [
+                    Styles.purpleColorLight,
+                    Styles.secondaryAccentColorDark
+                  ],
+                  begin: Alignment(-1, -1),
+                  end: Alignment(1, 1),
+                ),
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  searchPools(searchInput);
+                  setState(() {
+                    searched = true;
+                  });
+                },
+                child: Text(
+                  "Search",
+                  style: TextStyle(color: Styles.whiteColor),
+                ),
+                style: ElevatedButton.styleFrom(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    backgroundColor: Colors.transparent,
+                    shape: const StadiumBorder(),
+                    elevation: 0),
+              ),
+            )
+          ],
+        ),
+        headText: "Search Pools");
+  }
+
+  Widget buildLoader(){
+    return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+  }
+
+  Widget buildSearchAcknowledge(){
+    return   Container(
                 margin: const EdgeInsets.only(top: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -353,52 +318,86 @@ class _PoolsPageState extends State<PoolsPage> {
                    ),
                   ],
                 ),
-              ),
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification scrollInfo) {
-                  if (!isLoading &&
-                      scrollInfo.metrics.pixels ==
-                          scrollInfo.metrics.maxScrollExtent) {
-                    _fetchTokensAndPools();
-                  }
-                  return true;
-                },
-                child: searchedPools.isNotEmpty
-                    ? ListView.builder(
-                        itemCount: searchedPools.length,
-                        itemBuilder: (context, index) {
-                          var pool = searchedPools[index];
-                          return getPoolCard(pool);
-                        },
-                      )
-                    : _pools.isNotEmpty
-                        ? ListView.builder(
-                            itemCount: _pools.length,
-                            itemBuilder: (context, index) {
-                              var pool = _pools[index];
-                              return getPoolCard(pool);
-                            },
-                          )
-                        : Center(
-                            child: CircularProgressIndicator(
-                                color: Styles.primaryColor)),
-              ),
-            ),
-            if (isLoading && _pools.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            if (!isLoading && _pools.isNotEmpty)
-              SizedBox(
-                height: 40.0,
-              )
-          ],
-        ),
-      ),
-    );
+              );
   }
+
+ @override
+Widget build(BuildContext context) {
+  return SignatureContentToggle(
+    Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      color: Styles.darkBackgroundColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.pools,
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 32,
+                  color: Colors.grey.shade100,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  showSearchModal();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: Styles.buttonGradient),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.search,
+                      size: 18,
+                      color: Styles.whiteColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (searched) buildSearchAcknowledge(),
+          Flexible(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!isLoading &&
+                    scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                  _fetchTokensAndPools();
+                }
+                return true;
+              },
+              child: searchedPools.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: searchedPools.length,
+                      itemBuilder: (context, index) {
+                        var pool = searchedPools[index];
+                        return getPoolCard(pool);
+                      },
+                    )
+                  : _pools.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: _pools.length,
+                          itemBuilder: (context, index) {
+                            var pool = _pools[index];
+                            return getPoolCard(pool);
+                          },
+                        )
+                      : Center(
+                          child: CircularProgressIndicator(
+                              color: Styles.primaryColor)),
+            ),
+          ),
+          if (isLoading && _pools.isNotEmpty) buildLoader()
+        ],
+      ),
+    ),
+  );
+}
 
   Widget buildIcon(String dataUrl, double positionOffset) {
     return ClipOval(
