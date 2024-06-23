@@ -448,7 +448,7 @@ class _PoolsPageState extends State<PoolsPage> {
                 onTap: () {},
                 child: Container(
                   width: double.infinity,
-                  height: searchedPools.length > 0 ? 400 : 180,
+                  height: searchedPools.length > 0 ? 400 : 200,
                   margin: EdgeInsets.only(right: 18.0, left: 18.0),
                   padding: EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
