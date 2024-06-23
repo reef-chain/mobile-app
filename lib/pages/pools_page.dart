@@ -111,100 +111,103 @@ class _PoolsPageState extends State<PoolsPage> {
     _focusNodeSearch.dispose();
   }
 
-  Card getPoolCard(dynamic pool) {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ListTile(
-            leading: Container(
-              width: 44,
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.centerLeft,
+  Container getPoolCard(dynamic pool) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 4.0),
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              leading: Container(
+                width: 44,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    buildIcon(pool['iconUrl1'], 0),
+                    Positioned(left: 14, child: buildIcon(pool['iconUrl2'], 14)),
+                  ],
+                ),
+              ),
+              title: Text('${pool['name1']} - ${pool['name2']}'),
+              trailing: Text('${pool['symbol1']}/${pool['symbol2']}'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildIcon(pool['iconUrl1'], 0),
-                  Positioned(left: 14, child: buildIcon(pool['iconUrl2'], 14)),
+                  Row(
+                    children: [
+                      Text('TVL : ',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12.0)),
+                      Text('\$${pool["tvl"]}', style: TextStyle(fontSize: 12.0)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('24h Vol. : ',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12.0)),
+                      Text('\$ ${pool['volume24h']}',
+                          style: TextStyle(fontSize: 12.0)),
+                      Text(' ${pool['volumeChange24h']} %',
+                          style: TextStyle(
+                              fontSize: 12.0,
+                              color: Styles.greenColor,
+                              fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ],
               ),
             ),
-            title: Text('${pool['name1']} - ${pool['name2']}'),
-            trailing: Text('${pool['symbol1']}/${pool['symbol2']}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text('TVL : ',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 12.0)),
-                    Text('\$${pool["tvl"]}', style: TextStyle(fontSize: 12.0)),
+            if (hasBalance(pool['token1']) || hasBalance(pool['token2']))
+              Container(
+                margin: EdgeInsets.only(
+                    top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                        color: Styles.secondaryAccentColorDark,
+                        spreadRadius: -10,
+                        offset: Offset(0, 5),
+                        blurRadius: 20),
                   ],
+                  borderRadius: BorderRadius.circular(80),
+                  gradient: LinearGradient(
+                    colors: [
+                      Styles.purpleColorLight,
+                      Styles.secondaryAccentColorDark
+                    ],
+                    begin: Alignment(-1, -1),
+                    end: Alignment(1, 1),
+                  ),
                 ),
-                Row(
-                  children: [
-                    Text('24h Vol. : ',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 12.0)),
-                    Text('\$ ${pool['volume24h']}',
-                        style: TextStyle(fontSize: 12.0)),
-                    Text(' ${pool['volumeChange24h']} %',
-                        style: TextStyle(
-                            fontSize: 12.0,
-                            color: Styles.greenColor,
-                            fontWeight: FontWeight.bold)),
-                  ],
+                child: ElevatedButton.icon(
+                  icon: const Icon(
+                    CupertinoIcons.repeat,
+                    color: Colors.white,
+                    size: 16.0,
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      backgroundColor: Colors.transparent,
+                      shape: const StadiumBorder(),
+                      elevation: 0),
+                  label: Text(
+                    "Swap",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
+                  onPressed: () async {
+                    ReefAppState.instance.navigationCtrl.navigateToSwapPage(
+                        context: context,
+                        preselectedTop: pool['token1'],
+                        preselectedBottom: pool['token2']);
+                  },
                 ),
-              ],
-            ),
-          ),
-          if (hasBalance(pool['token1']) || hasBalance(pool['token2']))
-            Container(
-              margin: EdgeInsets.only(
-                  top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: Styles.secondaryAccentColorDark,
-                      spreadRadius: -10,
-                      offset: Offset(0, 5),
-                      blurRadius: 20),
-                ],
-                borderRadius: BorderRadius.circular(80),
-                gradient: LinearGradient(
-                  colors: [
-                    Styles.purpleColorLight,
-                    Styles.secondaryAccentColorDark
-                  ],
-                  begin: Alignment(-1, -1),
-                  end: Alignment(1, 1),
-                ),
-              ),
-              child: ElevatedButton.icon(
-                icon: const Icon(
-                  CupertinoIcons.repeat,
-                  color: Colors.white,
-                  size: 16.0,
-                ),
-                style: ElevatedButton.styleFrom(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    backgroundColor: Colors.transparent,
-                    shape: const StadiumBorder(),
-                    elevation: 0),
-                label: Text(
-                  "Swap",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w700),
-                ),
-                onPressed: () async {
-                  ReefAppState.instance.navigationCtrl.navigateToSwapPage(
-                      context: context,
-                      preselectedTop: pool['token1'],
-                      preselectedBottom: pool['token2']);
-                },
-              ),
-            )
-        ],
+              )
+          ],
+        ),
       ),
     );
   }
@@ -322,6 +325,7 @@ class _PoolsPageState extends State<PoolsPage> {
                     },
                     child: _pools.isNotEmpty
                         ? ListView.builder(
+                          padding: EdgeInsets.zero,
                             itemCount: _pools.length,
                             itemBuilder: (context, index) {
                               var pool = _pools[index];
@@ -486,6 +490,7 @@ class _PoolsPageState extends State<PoolsPage> {
                         if (searchedPools.isNotEmpty)
                           Flexible(
                             child: ListView.builder(
+                              padding: EdgeInsets.zero,
                               itemCount: searchedPools.length,
                               itemBuilder: (context, index) {
                                 var pool = searchedPools[index];
