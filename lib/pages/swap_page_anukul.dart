@@ -85,6 +85,9 @@ class _SwapPageState extends State<SwapPage> {
   String? preloaderMessage;
   Widget? preloaderChild;
 
+  //available swap pairs
+  List<dynamic> availableTokens=[];
+
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -104,14 +107,24 @@ class _SwapPageState extends State<SwapPage> {
       if (checkPreselection) {
         selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
             .firstWhere((token) => token.address == widget.preselectedTop);
+      _getPoolPairs(selectedTopToken!.address);
       }
       if(checkPreselectionBottom){
         selectedBottomToken = ReefAppState.instance.model.tokens.selectedErc20List
             .firstWhere((token) => token.address == widget.preselectedBottom);
       }
-      if(checkPreselection&&checkPreselectionBottom)_getPoolReserves();
+      
+      // if both set
+      if(widget.preselectedBottom !=null && widget.preselectedTop!=null){
+        // fetch token info
+        
+        
+      }
+      _getPoolReserves();
+      
 
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
+
     });
     super.initState();
   }
@@ -130,6 +143,7 @@ class _SwapPageState extends State<SwapPage> {
 
     var res = await ReefAppState.instance.swapCtrl.getPoolReserves(
         selectedTopToken!.address, selectedBottomToken!.address);
+
     if (res is bool && res == false) {
       print("ERROR: Pool does not exist");
       setState(() {
@@ -407,15 +421,25 @@ class _SwapPageState extends State<SwapPage> {
     print(
         "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
   }
+  
+  Future<List<dynamic>> _getPoolPairs(String tokenAddress)async{
+    var poolPairs = await ReefAppState.instance.tokensCtrl.getPoolPairs(tokenAddress);
+    setState(() {
+      availableTokens=poolPairs;
+    });
+    return poolPairs;
+  }
 
   void _changeSelectedTopToken(TokenWithAmount token) {
     setState(() {
       selectedTopToken = token;
       _getPoolReserves();
+      _getPoolPairs(token.address);
     });
   }
 
   void _changeSelectedBottomToken(TokenWithAmount token) {
+    print("==== ${token.address}");
     setState(() {
       selectedBottomToken = token;
       _getPoolReserves();
@@ -583,7 +607,7 @@ class _SwapPageState extends State<SwapPage> {
                   showTokenSelectionModal(context,
                       callback: callback,
                       selectedToken: selectedTopToken?.address ??
-                          Constants.REEF_TOKEN_ADDRESS);
+                          Constants.REEF_TOKEN_ADDRESS,availableTokens: availableTokens);
                 },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 minWidth: 0,
