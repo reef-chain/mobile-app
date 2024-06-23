@@ -30,6 +30,7 @@ class _PoolsPageState extends State<PoolsPage> {
   List<dynamic> searchedPools = [];
   String searchInput = "";
   bool searched = false;
+  bool displaySearchModal = false;
 
   // search input listeners
   bool _isSearchEditing = false;
@@ -45,6 +46,8 @@ class _PoolsPageState extends State<PoolsPage> {
     _searchController.addListener(() {
       setState(() {
         searchInput = _searchController.text;
+        searched = searchInput.isNotEmpty;
+        searchPools(searchInput);
       });
     });
     _fetchTokensAndPools();
@@ -206,198 +209,300 @@ class _PoolsPageState extends State<PoolsPage> {
     );
   }
 
-  void showSearchModal() {
-    showModal(context,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              decoration: BoxDecoration(
-                color: Styles.whiteColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0x20000000),
-                  width: 1,
+  Widget buildLoader() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget buildSearchAcknowledge() {
+    return Container(
+      margin: const EdgeInsets.only(top: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          searchedPools.isEmpty
+              ? Row(
+                  children: [
+                    Icon(Icons.error, size: 14.0, color: Styles.errorColor),
+                    const Gap(4.0),
+                    Text(
+                      "No pools found for ${searchInput}!",
+                      style: TextStyle(
+                          color: Styles.errorColor,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14),
+                    ),
+                  ],
+                )
+              : Text(
+                  "Search Results for ${searchInput}",
+                  style: TextStyle(
+                      color: Styles.textLightColor,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w800),
                 ),
-              ),
-              child: TextField(
-                focusNode: _focusNodeSearch,
-                controller: _searchController,
-                decoration: const InputDecoration.collapsed(hintText: 'Search'),
-                style: const TextStyle(
-                  fontSize: 16,
+          GestureDetector(
+            onTap: () {
+              clearSearch();
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Styles.buttonColor),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  Icons.close,
+                  size: 12,
+                  color: Styles.whiteColor,
                 ),
               ),
             ),
-            Gap(12),
-            Container(
-              margin: EdgeInsets.only(
-                  top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: Styles.secondaryAccentColorDark,
-                      spreadRadius: -10,
-                      offset: Offset(0, 5),
-                      blurRadius: 20),
-                ],
-                borderRadius: BorderRadius.circular(80),
-                gradient: LinearGradient(
-                  colors: [
-                    Styles.purpleColorLight,
-                    Styles.secondaryAccentColorDark
-                  ],
-                  begin: Alignment(-1, -1),
-                  end: Alignment(1, 1),
-                ),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  searchPools(searchInput);
-                  setState(() {
-                    searched = true;
-                  });
-                },
-                child: Text(
-                  "Search",
-                  style: TextStyle(color: Styles.whiteColor),
-                ),
-                style: ElevatedButton.styleFrom(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    backgroundColor: Colors.transparent,
-                    shape: const StadiumBorder(),
-                    elevation: 0),
-              ),
-            )
-          ],
-        ),
-        headText: "Search Pools");
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget buildLoader(){
-    return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(child: CircularProgressIndicator()),
-              );
-  }
-
-  Widget buildSearchAcknowledge(){
-    return   Container(
-                margin: const EdgeInsets.only(top: 8.0),
-                child: Row(
+  @override
+  Widget build(BuildContext context) {
+    return SignatureContentToggle(
+      Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            color: Styles.darkBackgroundColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                   searchedPools.isEmpty? Row(
-                      children: [
-                        Icon(Icons.error, size: 24.0, color: Styles.errorColor),
-                        const Gap(4.0),
-                        Text(
-                          "No pools found for ${searchInput}!",
-                          style: TextStyle(
-                              color: Styles.errorColor,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18),
-                        ),
-                      ],
-                    ):Text("Search Results for ${searchInput}",style: TextStyle(color: Styles.textLightColor,fontSize: 18.0,fontWeight: FontWeight.w800),),
-                   GestureDetector(
-                    onTap: (){clearSearch();},
-                     child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: Styles.buttonColor),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.close,
-                          size: 12,
-                          color: Styles.whiteColor,
+                    Text(
+                      AppLocalizations.of(context)!.pools,
+                      style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 32,
+                        color: Colors.grey.shade100,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          displaySearchModal = true;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            gradient: Styles.buttonGradient),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.search,
+                            size: 18,
+                            color: Styles.whiteColor,
+                          ),
                         ),
                       ),
-                                       ),
-                   ),
+                    ),
                   ],
                 ),
-              );
-  }
-
- @override
-Widget build(BuildContext context) {
-  return SignatureContentToggle(
-    Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      color: Styles.darkBackgroundColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.pools,
-                style: GoogleFonts.spaceGrotesk(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 32,
-                  color: Colors.grey.shade100,
+                Flexible(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification scrollInfo) {
+                      if (!isLoading &&
+                          scrollInfo.metrics.pixels ==
+                              scrollInfo.metrics.maxScrollExtent) {
+                        _fetchTokensAndPools();
+                      }
+                      return true;
+                    },
+                    child: _pools.isNotEmpty
+                        ? ListView.builder(
+                            itemCount: _pools.length,
+                            itemBuilder: (context, index) {
+                              var pool = _pools[index];
+                              return getPoolCard(pool);
+                            },
+                          )
+                        : Center(
+                            child: CircularProgressIndicator(
+                                color: Styles.primaryColor)),
+                  ),
                 ),
+                if (isLoading && _pools.isNotEmpty) buildLoader()
+              ],
+            ),
+          ),
+          // blur effect and detect tap outside modal
+          if (displaySearchModal)
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  displaySearchModal = false;
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.black.withOpacity(0.5),
               ),
-              GestureDetector(
-                onTap: () {
-                  showSearchModal();
-                },
+            ),
+          // search overlay
+          if (displaySearchModal)
+            Center(
+              child: GestureDetector(
+                onTap: () {},
                 child: Container(
+                  width: double.infinity,
+                  height: searchedPools.length > 0 ? 400 : 180,
+                  margin: EdgeInsets.only(right: 18.0, left: 18.0),
+                  padding: EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: Styles.buttonGradient),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Icon(
-                      Icons.search,
-                      size: 18,
-                      color: Styles.whiteColor,
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: Styles.boxBackgroundColor,
+                  ),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                                child: Text(
+                              "Search Pools",
+                              style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 24,
+                                  color: Styles.textColor,
+                                  fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.fade,
+                            )),
+                            GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    displaySearchModal = false;
+                                  });
+                                },
+                                child: Container(
+                                    decoration: const BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(99)),
+                                      color: Colors.white,
+                                    ),
+                                    child: const Padding(
+                                        padding: EdgeInsets.all(10),
+                                        child: Icon(CupertinoIcons.xmark,
+                                            color: Colors.black87, size: 12))))
+                          ],
+                        ),
+                        Gap(16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: Styles.whiteColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0x20000000),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: TextField(
+                                  focusNode: _focusNodeSearch,
+                                  controller: _searchController,
+                                  decoration: const InputDecoration.collapsed(
+                                      hintText: 'Search'),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            AnimatedContainer(
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              width: searchInput.isNotEmpty ? 48 : 0,
+                              margin: EdgeInsets.only(left: 16.0),
+                              child: AnimatedOpacity(
+                                duration: Duration(milliseconds: 300),
+                                opacity: searchInput.isNotEmpty ? 1.0 : 0.0,
+                                child: Center(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                              Styles.secondaryAccentColorDark,
+                                          spreadRadius: -10,
+                                          offset: Offset(0, 5),
+                                          blurRadius: 20,
+                                        ),
+                                      ],
+                                      borderRadius: BorderRadius.circular(80),
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Styles.purpleColorLight,
+                                          Styles.secondaryAccentColorDark,
+                                        ],
+                                        begin: Alignment(-1, -1),
+                                        end: Alignment(1, 1),
+                                      ),
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        searchPools(searchInput);
+                                        setState(() {
+                                          searched = true;
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.search,
+                                        color: Styles.whiteColor,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        backgroundColor: Colors.transparent,
+                                        shape: const StadiumBorder(),
+                                        elevation: 0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Gap(4.0),
+                        if (searched) buildSearchAcknowledge(),
+                        Gap(4.0),
+                        if (searchedPools.isNotEmpty)
+                          Flexible(
+                            child: ListView.builder(
+                              itemCount: searchedPools.length,
+                              itemBuilder: (context, index) {
+                                var pool = searchedPools[index];
+                                return getPoolCard(pool);
+                              },
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
-          if (searched) buildSearchAcknowledge(),
-          Flexible(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification scrollInfo) {
-                if (!isLoading &&
-                    scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
-                  _fetchTokensAndPools();
-                }
-                return true;
-              },
-              child: searchedPools.isNotEmpty
-                  ? ListView.builder(
-                      itemCount: searchedPools.length,
-                      itemBuilder: (context, index) {
-                        var pool = searchedPools[index];
-                        return getPoolCard(pool);
-                      },
-                    )
-                  : _pools.isNotEmpty
-                      ? ListView.builder(
-                          itemCount: _pools.length,
-                          itemBuilder: (context, index) {
-                            var pool = _pools[index];
-                            return getPoolCard(pool);
-                          },
-                        )
-                      : Center(
-                          child: CircularProgressIndicator(
-                              color: Styles.primaryColor)),
             ),
-          ),
-          if (isLoading && _pools.isNotEmpty) buildLoader()
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget buildIcon(String dataUrl, double positionOffset) {
     return ClipOval(
