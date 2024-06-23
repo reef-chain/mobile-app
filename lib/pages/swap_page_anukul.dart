@@ -117,7 +117,11 @@ class _SwapPageState extends State<SwapPage> {
       // if both set
       if(widget.preselectedBottom !=null && widget.preselectedTop!=null){
         // fetch token info
-        
+        ReefAppState.instance.tokensCtrl.getTokenInfo(widget.preselectedBottom!).then((value) {
+          selectedBottomToken=TokenWithAmount.fromJson(value);
+          isPreselectedBottomExists=true;
+          _getPoolReserves();
+        });
         
       }
       _getPoolReserves();
@@ -130,10 +134,10 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   void _getPoolReserves() async {
+    print("here i am ${selectedTopToken} ${selectedBottomToken}");
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
     }
-
     setState(() {
       selectedTopToken = selectedTopToken!.setAmount("0");
       amountTopController.clear();
@@ -143,7 +147,6 @@ class _SwapPageState extends State<SwapPage> {
 
     var res = await ReefAppState.instance.swapCtrl.getPoolReserves(
         selectedTopToken!.address, selectedBottomToken!.address);
-
     if (res is bool && res == false) {
       print("ERROR: Pool does not exist");
       setState(() {

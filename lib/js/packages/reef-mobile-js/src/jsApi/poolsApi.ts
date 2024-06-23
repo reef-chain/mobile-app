@@ -35,11 +35,11 @@ const getAllPoolsQuery = (limit: number, offset: number, search: string, signerA
   }
 };
 
-const getPoolPairsQuery = (tokenAddr) => {
+const getPoolPairsQuery = (tokenAddr,limit,offset) => {
   return {
     query: `
     query PoolPairs {
-  pools(limit:70,where: {token1: {id_eq: "${tokenAddr}"}, OR: {token2: {id_eq: "${tokenAddr}"}}}) {
+  pools(limit:${limit},offset:${offset},where: {token1: {id_eq: "${tokenAddr}"}, OR: {token2: {id_eq: "${tokenAddr}"}}}) {
     token1 {
       id
       name
@@ -59,6 +59,24 @@ const getPoolPairsQuery = (tokenAddr) => {
     `
   }
 };
+
+const getTokenInfoQuery = (tokenAddr) => {
+  return {
+    query: `
+    query TokenQuery {
+        tokens(where: {id_eq: "${tokenAddr}"}) {
+          decimals
+          iconUrl
+          id
+          name
+          symbol
+        }
+      }
+    `
+  }
+};
+
+
 
 
 const calculateUSDTVL = ({
@@ -171,12 +189,14 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
 export const getPoolPairs = async (tokenAddr:string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
+    let limit = 70;
+    let offset = 0;
     const response = await fetch(getDexUrl(selectedNw.name), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(getPoolPairsQuery(tokenAddr)),
+      body: JSON.stringify(getPoolPairsQuery(tokenAddr,limit,offset)),
     });
 
     if (!response.ok) {
@@ -203,6 +223,36 @@ export const getPoolPairs = async (tokenAddr:string) => {
       }
     })
     return pools;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
+export const getTokenInfo = async (tokenAddr:string) => {
+  try {
+    const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
+    const response = await fetch(getDexUrl(selectedNw.name), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(getTokenInfoQuery(tokenAddr)),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const { data } = await response.json();
+    let token;
+    if(data.tokens.length){
+      token = {
+        ...data.tokens[0],
+        address:data.tokens[0].id,
+        iconUrl:data.tokens[0]['iconUrl']==''?getIconUrl(data.tokens[0]['id']):data.tokens[0]['iconUrl']
+      };
+    }
+    return token;
   } catch (error) {
     console.log(error);
     return [];

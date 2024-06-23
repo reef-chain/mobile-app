@@ -85,6 +85,9 @@ class TokenCtrl {
   Future<dynamic> getPoolPairs(String tokenAddress) async {
     return jsApi.jsPromise('window.utils.getPoolPairs("${tokenAddress}")');
   }
+  Future<dynamic> getTokenInfo(String tokenAddress) async {
+    return jsApi.jsPromise('window.utils.getTokenInfo("${tokenAddress}")');
+  }
 
   void reload(bool force) async {
     var isProvConn =
