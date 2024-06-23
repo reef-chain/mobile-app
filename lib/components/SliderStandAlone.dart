@@ -7,9 +7,15 @@ class SliderStandAlone extends StatefulWidget {
   final double rating;
   final Function(double) onChanged;
   final bool? isDisabled;
+  final bool isSlippageSlider;
 
-  const SliderStandAlone({Key? key, required this.rating, required this.onChanged,this.isDisabled})
-      : super(key: key);
+  const SliderStandAlone({
+    Key? key,
+    required this.rating,
+    required this.onChanged,
+    this.isDisabled,
+    this.isSlippageSlider = false,
+  }) : super(key: key);
 
   @override
   _SliderStandAloneState createState() => _SliderStandAloneState();
@@ -45,12 +51,16 @@ class _SliderStandAloneState extends State<SliderStandAlone> {
       ),
       child: Slider(
         value: widget.rating,
-        onChanged:(newRating){
-          if(widget.isDisabled!)return;
+        min: 0.0,
+        max: widget.isSlippageSlider ? 0.2 : 1.0,
+        onChanged: (newRating) {
+          if (widget.isDisabled == true) return;
           widget.onChanged(newRating);
-          },
-        divisions: 100,
-        label: "${(widget.rating * 100).toInt()}%",
+        },
+        divisions: widget.isSlippageSlider ? 200 : 100,
+        label: widget.isSlippageSlider
+            ? "${(widget.rating * 100).toStringAsFixed(1)}%"
+            : "${(widget.rating*100).toInt()}",
       ),
     );
   }

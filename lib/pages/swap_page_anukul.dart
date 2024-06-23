@@ -87,6 +87,7 @@ class _SwapPageState extends State<SwapPage> {
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
     _focusBottom.addListener(_onFocusBottomChange);
+
     bool checkPreselection = ReefAppState
         .instance.model.tokens.selectedErc20List
         .any((token) => token.address == widget.preselectedTop);
@@ -98,6 +99,9 @@ class _SwapPageState extends State<SwapPage> {
       // setting fixed component
       isPreselectedTopExists = checkPreselection;
       isPreselectedBottomExists = checkPreselectionBottom;
+
+      // set default slider to 0.8%
+      resetDefaultSlider();
 
       if (checkPreselection) {
         selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
@@ -113,6 +117,13 @@ class _SwapPageState extends State<SwapPage> {
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
     });
     super.initState();
+  }
+
+  void resetDefaultSlider(){
+      ReefAppState.instance.model.swapSettings.setSlippageTolerance(0.008);
+      setState(() {
+        slippage="0.008";
+      });
   }
 
   void _getPoolReserves() async {
@@ -232,7 +243,7 @@ class _SwapPageState extends State<SwapPage> {
         .getValue(StorageKey.selected_address.name);
         var deadline = ReefAppState.instance.model.swapSettings.deadline;
         var slippage = ReefAppState.instance.model.swapSettings.slippageTolerance;
-        SwapSettings settings = SwapSettings(deadline, slippage);
+        SwapSettings settings = SwapSettings(deadline, slippage*100);
     Stream<dynamic> executeTransactionFeedbackStream =
         await ReefAppState.instance.swapCtrl.swapTokens(
             signerAddress, selectedTopToken!, selectedBottomToken!,settings );
@@ -536,7 +547,7 @@ class _SwapPageState extends State<SwapPage> {
               ),
               Expanded(
                 child: Text(
-                  "${slippage}",
+                  "${(double.parse(slippage)*100).toStringAsFixed(2)}",
                   textAlign: TextAlign.right,
                   style: TextStyle(
                       fontWeight: FontWeight.w600, letterSpacing: 1.0),
@@ -1075,6 +1086,7 @@ class _SwapPageState extends State<SwapPage> {
         Text("Slippage :",style: TextStyle(color: Styles.textLightColor,fontWeight: FontWeight.w600,fontSize: 12),),
         Expanded(
           child: SliderStandAlone(
+              isSlippageSlider: true,
               isDisabled: txInProgress,
               rating: double.parse(slippage),
               onChanged: (newRating) async {

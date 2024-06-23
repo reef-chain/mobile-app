@@ -13,6 +13,7 @@ class SwapCtrl {
 
   Future<dynamic> swapTokens(String signerAddress, TokenWithAmount token1,
       TokenWithAmount token2, SwapSettings settings) async {
+        print("settings===${settings}");
     var mappedToken1 = {
       'address': token1.address,
       'decimals': token1.decimals,
