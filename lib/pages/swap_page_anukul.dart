@@ -30,8 +30,7 @@ import '../components/sign/SignatureContentToggle.dart';
 class SwapPage extends StatefulWidget {
   final String? preselectedTop;
   final String? preselectedBottom;
-  const SwapPage(
-      {this.preselectedTop = "", this.preselectedBottom, Key? key})
+  const SwapPage({this.preselectedTop = "", this.preselectedBottom, Key? key})
       : super(key: key);
 
   @override
@@ -60,16 +59,14 @@ class _SwapPageState extends State<SwapPage> {
   bool _isValueTopEditing = false;
   bool _isValueBottomEditing = false;
 
-  //settings
-  SwapSettings settings = SwapSettings(1, 0.8);
-
   //reserves
   String reserveTop = "";
   String reserveBottom = "";
 
   //summary
   String rate = "";
-  String slippage = "0.8";
+  String slippage =
+      ReefAppState.instance.model.swapSettings.slippageTolerance.toString();
   String fee = "";
 
   //status reefstepper
@@ -84,11 +81,13 @@ class _SwapPageState extends State<SwapPage> {
   bool preloader = false;
   String? preloaderMessage;
   Widget? preloaderChild;
+  bool isError = false;
 
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
     _focusBottom.addListener(_onFocusBottomChange);
+
     bool checkPreselection = ReefAppState
         .instance.model.tokens.selectedErc20List
         .any((token) => token.address == widget.preselectedTop);
@@ -101,19 +100,30 @@ class _SwapPageState extends State<SwapPage> {
       isPreselectedTopExists = checkPreselection;
       isPreselectedBottomExists = checkPreselectionBottom;
 
+      // set default slider to 0.8%
+      resetDefaultSlider();
+
       if (checkPreselection) {
         selectedTopToken = ReefAppState.instance.model.tokens.selectedErc20List
             .firstWhere((token) => token.address == widget.preselectedTop);
       }
-      if(checkPreselectionBottom){
-        selectedBottomToken = ReefAppState.instance.model.tokens.selectedErc20List
+      if (checkPreselectionBottom) {
+        selectedBottomToken = ReefAppState
+            .instance.model.tokens.selectedErc20List
             .firstWhere((token) => token.address == widget.preselectedBottom);
       }
-      if(checkPreselection&&checkPreselectionBottom)_getPoolReserves();
+      if (checkPreselection && checkPreselectionBottom) _getPoolReserves();
 
       amountTopController.text = selectedTopToken?.amount.toString() ?? '0';
     });
     super.initState();
+  }
+
+  void resetDefaultSlider(){
+      ReefAppState.instance.model.swapSettings.setSlippageTolerance(0.008);
+      setState(() {
+        slippage="0.008";
+      });
   }
 
   void _getPoolReserves() async {
@@ -151,14 +161,15 @@ class _SwapPageState extends State<SwapPage> {
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
-  Future<String> getPoolRate()async {
-     var token1 = selectedTopToken!.setAmount(reserveTop);
+  Future<String> getPoolRate() async {
+    var token1 = selectedTopToken!.setAmount(reserveTop);
     var token2 = selectedBottomToken!.setAmount(reserveBottom);
 
     var res = (await ReefAppState.instance.swapCtrl
             .getSwapAmount("1", false, token1, token2))
         .replaceAll("\"", "");
-    var formattedRes = (BigInt.parse(res) / BigInt.from(10).pow(18)).toStringAsFixed(4);
+    var formattedRes =
+        (BigInt.parse(res) / BigInt.from(10).pow(18)).toStringAsFixed(4);
 
     return '1 ${token1.symbol} = $formattedRes ${token2.symbol}';
   }
@@ -175,6 +186,7 @@ class _SwapPageState extends State<SwapPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if(!isError)
             CircularCountDown(
               countdownMs: 60000,
               width: 80,
@@ -183,6 +195,7 @@ class _SwapPageState extends State<SwapPage> {
               strokeWidth: 4,
               child: preloaderChild,
             ),
+            if(isError)preloaderChild!,
             Gap(8.0),
             Text(
               "${preloaderMessage}",
@@ -191,7 +204,26 @@ class _SwapPageState extends State<SwapPage> {
                 fontWeight: FontWeight.w700,
                 color: Styles.textLightColor,
               ),
-            )
+            ),
+            if(isError)ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                shadowColor: const Color(0x559d6cff),
+                                elevation: 5,
+                                backgroundColor: Styles.primaryAccentColor,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 0, horizontal: 32),
+                              ),
+              onPressed: (){
+              setState(() {
+                txInProgress=false;
+                isError=false;
+                preloader=false;
+                rating=0.0;
+              });
+            }, child: Text("Retry",style: TextStyle(fontSize: 12,color: Styles.whiteColor)))
           ],
         ),
       ),
@@ -209,9 +241,12 @@ class _SwapPageState extends State<SwapPage> {
 
     var signerAddress = await ReefAppState.instance.storageCtrl
         .getValue(StorageKey.selected_address.name);
+        var deadline = ReefAppState.instance.model.swapSettings.deadline;
+        var slippage = ReefAppState.instance.model.swapSettings.slippageTolerance;
+        SwapSettings settings = SwapSettings(deadline, slippage*100);
     Stream<dynamic> executeTransactionFeedbackStream =
         await ReefAppState.instance.swapCtrl.swapTokens(
-            signerAddress, selectedTopToken!, selectedBottomToken!, settings);
+            signerAddress, selectedTopToken!, selectedBottomToken!,settings );
     executeTransactionFeedbackStream =
         executeTransactionFeedbackStream.asBroadcastStream();
 
@@ -240,10 +275,14 @@ class _SwapPageState extends State<SwapPage> {
             if (txResponse['status'] == "_canceled") {
               preloader = false;
               btnLabel = "Cancelled";
+              txInProgress = false;
             }
             if (txResponse['status'].toString().contains("-32603")) {
-              preloader = false;
+              preloader = true;
               btnLabel = "Encountered an error";
+              isError=true;
+              preloaderChild=Icon(Icons.error_outline);
+              preloaderMessage="Encountered an error";
             }
           });
           handleEvmTransactionResponse(txResponse);
@@ -437,10 +476,7 @@ class _SwapPageState extends State<SwapPage> {
   String getBtnLabel() {
     if (txInProgress) {
       if (btnLabel == "Cancelled" || btnLabel == "Encountered an error")
-        setState(() {
-          txInProgress = false;
-        });
-      return btnLabel;
+        return btnLabel;
     }
     return selectedTopToken == null
         ? "Select sell token"
@@ -477,7 +513,8 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   "${rate}",
                   textAlign: TextAlign.right,
-                     style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, letterSpacing: 1.0),
                 ),
               ),
             ],
@@ -494,7 +531,8 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   "${max(selectedTopToken!.amount.toDouble() * selectedTopToken!.price!.toDouble() * 0.0003 / 1e18, 0.0000).toStringAsFixed(4)}\$",
                   textAlign: TextAlign.right,
-                  style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, letterSpacing: 1.0),
                 ),
               ),
             ],
@@ -509,14 +547,14 @@ class _SwapPageState extends State<SwapPage> {
               ),
               Expanded(
                 child: Text(
-                  "${slippage}",
+                  "${(double.parse(slippage)*100).toStringAsFixed(2)}",
                   textAlign: TextAlign.right,
-                     style: TextStyle(fontWeight: FontWeight.w600,letterSpacing: 1.0),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, letterSpacing: 1.0),
                 ),
               ),
             ],
           ),
-          
         ],
       ),
     );
@@ -1000,48 +1038,66 @@ class _SwapPageState extends State<SwapPage> {
     _getPoolReserves();
   }
 
-  Row getSlider(){
+  Row getSlider() {
     return Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              _reversePair();
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  gradient: Styles.buttonGradient),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.repeat,
-                                  size: 18,
-                                  color: Styles.whiteColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Gap(8.0),
-                          Expanded(
-                            child: SliderStandAlone(
-                                isDisabled: txInProgress,
-                                rating: rating,
-                                onChanged: (newRating) async {
-                                  setState(() {
-                                    rating = newRating;
-                                    String amountValue = (double.parse(
-                                                toAmountDisplayBigInt(
-                                                    selectedTopToken!
-                                                        .balance)) *
-                                            rating)
-                                        .toStringAsFixed(2);
-                                    amountTopController.text = amountValue;
-                                    _amountTopUpdated(amountValue);
-                                  });
-                                }),
-                          ),
-                        ],
-                      );
+      children: [
+        GestureDetector(
+          onTap: () {
+            _reversePair();
+          },
+          child: Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                gradient: Styles.buttonGradient),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(
+                Icons.repeat,
+                size: 18,
+                color: Styles.whiteColor,
+              ),
+            ),
+          ),
+        ),
+        Gap(8.0),
+        Expanded(
+          child: SliderStandAlone(
+              isDisabled: txInProgress,
+              rating: rating,
+              onChanged: (newRating) async {
+                setState(() {
+                  rating = newRating;
+                  String amountValue = (double.parse(toAmountDisplayBigInt(
+                              selectedTopToken!.balance)) *
+                          rating)
+                      .toStringAsFixed(2);
+                  amountTopController.text = amountValue;
+                  _amountTopUpdated(amountValue);
+                });
+              }),
+        ),
+      ],
+    );
+  }
+
+  Row getSlippageSlider() {
+    return Row(
+      children: [
+        Text("Slippage :",style: TextStyle(color: Styles.textLightColor,fontWeight: FontWeight.w600,fontSize: 12),),
+        Expanded(
+          child: SliderStandAlone(
+              isSlippageSlider: true,
+              isDisabled: txInProgress,
+              rating: double.parse(slippage),
+              onChanged: (newRating) async {
+                setState(() {
+                  slippage = newRating.toString();
+                });
+                ReefAppState.instance.model.swapSettings.setSlippageTolerance(newRating);
+              }),
+        ),
+      ],
+    );
   }
 
   @override
@@ -1095,6 +1151,8 @@ class _SwapPageState extends State<SwapPage> {
                               _focusBottom,
                               amountBottomController,
                               _amountBottomUpdated),
+                      Gap(16),
+                      getSlippageSlider(),
                       Gap(16),
                       if (rate != "") getPoolSummary(),
                       Gap(16),

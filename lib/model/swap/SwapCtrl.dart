@@ -7,8 +7,9 @@ import 'package:reef_mobile_app/utils/functions.dart';
 
 class SwapCtrl {
   final JsApiService jsApi;
+  final SwapSettings swapSettings;
 
-  SwapCtrl(this.jsApi);
+  SwapCtrl(this.jsApi,this.swapSettings);
 
   Future<dynamic> swapTokens(String signerAddress, TokenWithAmount token1,
       TokenWithAmount token2, SwapSettings settings) async {

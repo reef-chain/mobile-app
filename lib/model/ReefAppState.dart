@@ -72,7 +72,7 @@ class ReefAppState {
     transferCtrl = TransferCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("swap...");
-    swapCtrl = SwapCtrl(jsApi);
+    swapCtrl = SwapCtrl(jsApi,model.swapSettings);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("pools...");
     poolsCtrl = PoolsCtrl(jsApi,model.pools);
