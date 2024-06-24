@@ -134,6 +134,7 @@ class _SwapPageState extends State<SwapPage> {
             if(e['address']==Constants.REEF_TOKEN_ADDRESS){
               selectedBottomToken=ReefAppState.instance.model.tokens.selectedErc20List
             .firstWhere((token) => token.address == Constants.REEF_TOKEN_ADDRESS);
+             _getPoolReserves();
             }
           });
         });
