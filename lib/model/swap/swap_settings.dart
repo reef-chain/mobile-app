@@ -17,4 +17,12 @@ abstract class _SwapSettings with Store {
     'deadline': deadline,
     'slippageTolerance': slippageTolerance,
   };
+
+  @action
+  void setSlippageTolerance(double newSlippageTolerance) {
+    slippageTolerance = newSlippageTolerance;
+  }
+
+
+  
 }
