@@ -144,6 +144,7 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   void _getPoolReserves() async {
+    print("here i am ${selectedTopToken} ${selectedBottomToken}");
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
     }
@@ -479,6 +480,7 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   void _changeSelectedBottomToken(TokenWithAmount token) {
+    print("==== ${token.address}");
     setState(() {
       selectedBottomToken = token;
       _getPoolReserves();
