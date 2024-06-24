@@ -139,8 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   thickness: 1,
                 ),
                 // ElevatedButton(onPressed:(){
-                //   ReefAppState.instance.navigationCtrl
-                //       .navigateToPoolsPage(context: context);
+                //   ReefAppState.instance.tokensCtrl.getPoolPairs("0x0000000000000000000000000000000001000000");
                 // }, child: Text("test btn")),
                 Observer(builder: (_) {
                   var navigateOnAccountSwitchVal = ReefAppState

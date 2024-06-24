@@ -7,7 +7,6 @@ import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
-import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -19,58 +18,42 @@ import '../../model/tokens/Token.dart';
 
 class TokenSelection extends StatefulWidget {
   const TokenSelection(
-      {Key? key, required this.callback, required this.selectedToken})
+      {Key? key,
+      this.availableTokens = const [],
+      required this.callback,
+      required this.selectedToken})
       : super(key: key);
 
   final Function(TokenWithAmount token) callback;
   final String selectedToken;
+  final List<dynamic> availableTokens;
 
   @override
   State<TokenSelection> createState() => TokenSelectionState();
 }
 
 class TokenSelectionState extends State<TokenSelection> {
-  // bool value = false;
-
   TextEditingController valueContainer = TextEditingController();
-
-  // late List<TokenWithAmount> displayTokens;
   String filterTokensBy = '';
 
   _changeState() {
     setState(() {
       bool isInputEmpty = valueContainer.text.isEmpty;
-      if (!isInputEmpty) {
-        filterTokensBy = valueContainer.text.toLowerCase();
-        /*displayTokens = displayTokens
-              .where((tkn) =>
-                  tkn.name
-                      .toLowerCase()
-                      .contains(valueContainer.text.toLowerCase()) ||
-                  tkn.address
-                      .toLowerCase()
-                      .contains(valueContainer.text.toLowerCase()))
-              .toList();*/
-      } else {
-        filterTokensBy = '';
-      }
+      filterTokensBy = isInputEmpty ? '' : valueContainer.text.toLowerCase();
     });
   }
 
   @override
   void initState() {
     super.initState();
-    /*setState(() {
-      displayTokens = widget.tokens;
-    });*/
-    // Start listening to changes.
     valueContainer.addListener(_changeState);
   }
 
   @override
   void dispose() {
-    super.dispose();
+    valueContainer.removeListener(_changeState);
     valueContainer.dispose();
+    super.dispose();
   }
 
   @override
@@ -79,7 +62,6 @@ class TokenSelectionState extends State<TokenSelection> {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 32.0),
       child: Column(
         children: [
-          //BoxContent
           ViewBoxContainer(
             color: Colors.white,
             child: TextField(
@@ -100,7 +82,6 @@ class TokenSelectionState extends State<TokenSelection> {
               ),
             ),
           ),
-          //Information Section
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ConstrainedBox(
@@ -110,35 +91,43 @@ class TokenSelectionState extends State<TokenSelection> {
                 var displayTokens = ReefAppState
                     .instance.model.tokens.selectedErc20s.data
                     .toList();
+                List<TokenWithAmount> newDisplayTokens = [];
+
+                if (widget.availableTokens.isNotEmpty) {
+                  try {
+                    widget.availableTokens.forEach((element) {
+                      var newTkn = TokenWithAmount.fromJson(element);
+                      newDisplayTokens.add(newTkn);
+                    });
+                  } catch (e) {
+                    print("error in available tokens=== $e");
+                  }
+                }
+
                 if (filterTokensBy.isNotEmpty) {
-                  displayTokens = displayTokens
+                  newDisplayTokens = newDisplayTokens
                       .where((tkn) =>
-                          tkn.data.name
-                              .toLowerCase()
-                              .contains(valueContainer.text.toLowerCase()) ||
-                          tkn.data.address
-                              .toLowerCase()
-                              .contains(valueContainer.text.toLowerCase()))
+                          tkn.name.toLowerCase().contains(filterTokensBy) ||
+                          tkn.address.toLowerCase().contains(filterTokensBy))
                       .toList();
-                  if (displayTokens.isEmpty &&
+                  
+                  if (newDisplayTokens.isEmpty &&
                       isEvmAddress(valueContainer.text)) {
                     ReefAppState.instance.tokensCtrl
                         .findToken(valueContainer.text)
-                        .then((token) => {
-                              if (token != null)
-                                {
-                                  // TODO show token with option of adding to list
-                                  widget
-                                      .callback(TokenWithAmount.fromJson(token))
-                                }
-                            });
+                        .then((token) {
+                          if (token != null) {
+                            widget.callback(TokenWithAmount.fromJson(token));
+                          }
+                        });
                   }
                 }
+
                 return ListView(
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),
-                  children: displayTokens.map((e) {
-                    if (e.data.address == widget.selectedToken) {
+                  children: newDisplayTokens.map((e) {
+                    if (e.address == widget.selectedToken) {
                       return SizedBox.shrink();
                     }
                     return Column(
@@ -165,7 +154,7 @@ class TokenSelectionState extends State<TokenSelection> {
                                   borderRadius: BorderRadius.circular(8)),
                               elevation: 0,
                               onPressed: () {
-                                widget.callback(e.data);
+                                widget.callback(e);
                                 Navigator.of(context).pop();
                               },
                               child: Row(
@@ -173,28 +162,26 @@ class TokenSelectionState extends State<TokenSelection> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(children: [
-                                    IconFromUrl(e.data.iconUrl),
+                                    IconFromUrl(e.iconUrl),
                                     const Gap(12),
                                     Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(e.data.name,
+                                        Text(e.name,
                                             style:
                                                 const TextStyle(fontSize: 16)),
                                         Wrap(spacing: 8.0, children: [
                                           Text(toAmountDisplayBigInt(
-                                              e.data.balance,
-                                              decimals: e.data.decimals)),
-                                          Text(e.data.symbol)
+                                              e.balance,
+                                              decimals: e.decimals)),
+                                          Text(e.symbol)
                                         ]),
                                         Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              e.data.address
-                                                  .toString()
-                                                  .shorten(),
+                                              e.address.toString().shorten(),
                                               style: TextStyle(
                                                   fontSize: 12,
                                                   color: Colors.grey[600]!),
@@ -202,7 +189,7 @@ class TokenSelectionState extends State<TokenSelection> {
                                             TextButton(
                                                 style: TextButton.styleFrom(
                                                     padding: const EdgeInsets
-                                                            .symmetric(
+                                                        .symmetric(
                                                         horizontal: 8,
                                                         vertical: 6),
                                                     minimumSize:
@@ -213,8 +200,7 @@ class TokenSelectionState extends State<TokenSelection> {
                                                 onPressed: () {
                                                   Clipboard.setData(
                                                       ClipboardData(
-                                                          text:
-                                                              e.data.address));
+                                                          text: e.address));
                                                 },
                                                 child: Row(
                                                   mainAxisSize:
@@ -244,10 +230,7 @@ class TokenSelectionState extends State<TokenSelection> {
                                 ],
                               )),
                         ),
-                        if (e.data.address !=
-                            displayTokens[displayTokens.length - 1]
-                                .data
-                                .address)
+                        if (e.address != newDisplayTokens.last.address)
                           const Gap(16),
                       ],
                     );
@@ -263,8 +246,13 @@ class TokenSelectionState extends State<TokenSelection> {
 }
 
 void showTokenSelectionModal(context,
-    {required callback, required selectedToken}) {
+    {required callback,
+    required selectedToken,
+    List<dynamic>? availableTokens}) {
   showModal(context,
-      child: TokenSelection(callback: callback, selectedToken: selectedToken),
+      child: TokenSelection(
+          callback: callback,
+          selectedToken: selectedToken,
+          availableTokens: availableTokens ?? []),
       headText: "Select Token");
 }
