@@ -61,7 +61,7 @@ class _PoolsPageState extends State<PoolsPage> {
 
   void searchPools(String val) async {
     final searchedPoolsRes =
-        await ReefAppState.instance.poolsCtrl.getPools(offset, val);
+        await ReefAppState.instance.poolsCtrl.getPools(0, val);
     setState(() {
       searchedPools = searchedPoolsRes;
     });
