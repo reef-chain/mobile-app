@@ -91,13 +91,24 @@ class TokenSelectionState extends State<TokenSelection> {
                 var displayTokens = ReefAppState
                     .instance.model.tokens.selectedErc20s.data
                     .toList();
+
+                // hashmapping tokens
+                var tokensHashMap={};
+                for(var i=0;i<displayTokens.length;i++){
+                  tokensHashMap[displayTokens[i].data.address]=i;
+                }
+
                 List<TokenWithAmount> newDisplayTokens = [];
 
                 if (widget.availableTokens.isNotEmpty) {
                   try {
                     widget.availableTokens.forEach((element) {
                       var newTkn = TokenWithAmount.fromJson(element);
-                      newDisplayTokens.add(newTkn);
+                      if(tokensHashMap[element['address']]!=null){
+                        newDisplayTokens.add(displayTokens[tokensHashMap[element['address']]].data);
+                      }else{
+                        newDisplayTokens.add(newTkn);
+                      }
                     });
                   } catch (e) {
                     print("error in available tokens=== $e");
