@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
+import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
@@ -725,8 +726,8 @@ class _SwapPageState extends State<SwapPage> {
     );
   }
 
-  SizedBox getSwapBtn() {
-    return SizedBox(
+  ConnectWrapperButton getSwapBtn() {
+    return ConnectWrapperButton(child: SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -781,7 +782,7 @@ class _SwapPageState extends State<SwapPage> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Container getFixedTokenField(
