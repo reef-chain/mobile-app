@@ -125,8 +125,20 @@ class _SwapPageState extends State<SwapPage> {
           isPreselectedBottomExists=true;
           _getPoolReserves();
         });
-        
       }
+
+      if(widget.preselectedBottom==null && widget.preselectedTop!=Constants.REEF_TOKEN_ADDRESS && widget.preselectedTop!=null ){
+        // set bottom to reef if pair exists
+        _getPoolPairs(widget.preselectedTop!).then((value){
+          value.forEach((e) {
+            if(e['address']==Constants.REEF_TOKEN_ADDRESS){
+              selectedBottomToken=ReefAppState.instance.model.tokens.selectedErc20List
+            .firstWhere((token) => token.address == Constants.REEF_TOKEN_ADDRESS);
+            }
+          });
+        });
+      }
+
       _getPoolReserves();
       
 
