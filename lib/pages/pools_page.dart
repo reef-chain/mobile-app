@@ -29,7 +29,7 @@ class _PoolsPageState extends State<PoolsPage> {
   bool isLoading = false;
 
   // searched pools
-  List<dynamic> searchedPools = [];
+  List<dynamic>? searchedPools;
   String searchInput = "";
   bool searched = false;
   bool displaySearchModal = false;
@@ -247,27 +247,35 @@ class _PoolsPageState extends State<PoolsPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          searchedPools.isEmpty
-              ? Row(
-                  children: [
-                    Icon(Icons.error, size: 14.0, color: Styles.errorColor),
-                    const Gap(4.0),
-                    Text(
-                      "No pools found for ${searchInput}!",
-                      style: TextStyle(
-                          color: Styles.errorColor,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14),
-                    ),
-                  ],
-                )
-              : Text(
-                  "Search Results for ${searchInput}",
+          searchedPools == null
+              ? Text(
+                  "Search pools for ${searchInput} ...",
                   style: TextStyle(
                       color: Styles.textLightColor,
                       fontSize: 14.0,
                       fontWeight: FontWeight.w800),
-                ),
+                )
+              : searchedPools!.isEmpty
+                  ? Row(
+                      children: [
+                        Icon(Icons.error, size: 14.0, color: Styles.errorColor),
+                        const Gap(4.0),
+                        Text(
+                          "No pools found for ${searchInput}!",
+                          style: TextStyle(
+                              color: Styles.errorColor,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      "Search Results for ${searchInput} ( ${searchedPools?.length} )",
+                      style: TextStyle(
+                          color: Styles.textLightColor,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w800),
+                    ),
           GestureDetector(
             onTap: () {
               clearSearch();
@@ -288,6 +296,45 @@ class _PoolsPageState extends State<PoolsPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget buildSearchContainer() {
+    return Column(
+      children: [
+        Gap(16),
+        Row(
+          children: [
+            Gap(4.0),
+            Expanded(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Styles.whiteColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0x20000000),
+                    width: 1,
+                  ),
+                ),
+                child: TextField(
+                  focusNode: _focusNodeSearch,
+                  controller: _searchController,
+                  decoration:
+                      const InputDecoration.collapsed(hintText: 'Search'),
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Gap(4.0),
+        if (searched) buildSearchAcknowledge(),
+        Gap(4.0),
+      ],
     );
   }
 
@@ -337,26 +384,26 @@ class _PoolsPageState extends State<PoolsPage> {
                         //   ),
                         // ),
                         // Gap(8.0),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              displaySearchModal = true;
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                gradient: Styles.buttonGradient),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(
-                                Icons.search,
-                                size: 18,
-                                color: Styles.whiteColor,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // GestureDetector(
+                        //   onTap: () {
+                        //     setState(() {
+                        //       displaySearchModal = true;
+                        //     });
+                        //   },
+                        //   child: Container(
+                        //     decoration: BoxDecoration(
+                        //         borderRadius: BorderRadius.circular(20),
+                        //         gradient: Styles.buttonGradient),
+                        //     child: Padding(
+                        //       padding: const EdgeInsets.all(8.0),
+                        //       child: Icon(
+                        //         Icons.search,
+                        //         size: 18,
+                        //         color: Styles.whiteColor,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ],
@@ -411,17 +458,30 @@ class _PoolsPageState extends State<PoolsPage> {
                 //     ],
                 //   ),
                 // ),
-if(!hasReef)
-Container(child: Column(
-  children: [
-    Row(
-      children: [
-        Expanded(child: InsufficientBalance(customText: "Get REEFs to swap tokens",))
-      ],
-    ),
-    Gap(16.0)
-  ],
-),),
+                if (hasReef)
+                  Column(
+                    children: [
+                      Gap(8.0),
+                      buildSearchContainer(),
+                      Gap(8.0),
+                    ],
+                  ),
+                if (!hasReef)
+                  Container(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                                child: InsufficientBalance(
+                              customText: "Get REEFs to swap tokens",
+                            ))
+                          ],
+                        ),
+                        Gap(16.0)
+                      ],
+                    ),
+                  ),
                 Flexible(
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification scrollInfo) {
@@ -432,199 +492,47 @@ Container(child: Column(
                       }
                       return true;
                     },
-                    child: _pools.isNotEmpty
-                        ? ListView.builder(
-                            padding: EdgeInsets.zero,
-                            itemCount: _pools.length,
-                            itemBuilder: (context, index) {
-                              var pool = _pools[index];
-                              //                             if(filterSwappable){
-                              //   if(hasBalance(pool['token1']) || hasBalance(pool['token2']))return getPoolCard(pool);
-                              //   else return Container();
-                              // }else{
-                              if (hasReef) {
-                                if (hasBalance(pool['token1']) ||
-                                    hasBalance(pool['token2']))
-                                  return getPoolCard(pool);
-                                else
-                                  return Container();
-                              }
-                              return getPoolCard(pool);
-                              // }
-                            },
+                    child: searchedPools != null && searchedPools!.isNotEmpty
+                        ? Expanded(
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: searchedPools!.length,
+                              itemBuilder: (context, index) {
+                                var pool = searchedPools![index];
+                                return getPoolCard(pool);
+                              },
+                            ),
                           )
-                        : Center(
-                            child: CircularProgressIndicator(
-                                color: Styles.primaryColor)),
+                        : _pools.isNotEmpty
+                            ? ListView.builder(
+                                padding: EdgeInsets.zero,
+                                itemCount: _pools.length,
+                                itemBuilder: (context, index) {
+                                  var pool = _pools[index];
+                                  //                             if(filterSwappable){
+                                  //   if(hasBalance(pool['token1']) || hasBalance(pool['token2']))return getPoolCard(pool);
+                                  //   else return Container();
+                                  // }else{
+                                  if (hasReef) {
+                                    if (hasBalance(pool['token1']) ||
+                                        hasBalance(pool['token2']))
+                                      return getPoolCard(pool);
+                                    else
+                                      return Container();
+                                  }
+                                  return getPoolCard(pool);
+                                  // }
+                                },
+                              )
+                            : Center(
+                                child: CircularProgressIndicator(
+                                    color: Styles.primaryColor)),
                   ),
                 ),
                 if (isLoading && _pools.isNotEmpty) buildLoader()
               ],
             ),
           ),
-          // blur effect and detect tap outside modal
-          if (displaySearchModal)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  displaySearchModal = false;
-                });
-              },
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: Colors.black.withOpacity(0.5),
-              ),
-            ),
-          // search overlay
-          if (displaySearchModal)
-            Center(
-              child: GestureDetector(
-                onTap: () {},
-                child: Container(
-                  width: double.infinity,
-                  height: searchedPools.length > 0 ? 400 : 200,
-                  margin: EdgeInsets.only(right: 18.0, left: 18.0),
-                  padding: EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Styles.boxBackgroundColor,
-                  ),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                                child: Text(
-                              "Search Pools",
-                              style: GoogleFonts.spaceGrotesk(
-                                  fontSize: 24,
-                                  color: Styles.textColor,
-                                  fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.fade,
-                            )),
-                            GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    displaySearchModal = false;
-                                  });
-                                },
-                                child: Container(
-                                    decoration: const BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(99)),
-                                      color: Colors.white,
-                                    ),
-                                    child: const Padding(
-                                        padding: EdgeInsets.all(10),
-                                        child: Icon(CupertinoIcons.xmark,
-                                            color: Colors.black87, size: 12))))
-                          ],
-                        ),
-                        Gap(16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AnimatedContainer(
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 14),
-                                decoration: BoxDecoration(
-                                  color: Styles.whiteColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0x20000000),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: TextField(
-                                  focusNode: _focusNodeSearch,
-                                  controller: _searchController,
-                                  decoration: const InputDecoration.collapsed(
-                                      hintText: 'Search'),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            AnimatedContainer(
-                              duration: Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                              width: searchInput.isNotEmpty ? 48 : 0,
-                              margin: EdgeInsets.only(left: 16.0),
-                              child: AnimatedOpacity(
-                                duration: Duration(milliseconds: 300),
-                                opacity: searchInput.isNotEmpty ? 1.0 : 0.0,
-                                child: Center(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color:
-                                              Styles.secondaryAccentColorDark,
-                                          spreadRadius: -10,
-                                          offset: Offset(0, 5),
-                                          blurRadius: 20,
-                                        ),
-                                      ],
-                                      borderRadius: BorderRadius.circular(80),
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Styles.purpleColorLight,
-                                          Styles.secondaryAccentColorDark,
-                                        ],
-                                        begin: Alignment(-1, -1),
-                                        end: Alignment(1, 1),
-                                      ),
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        searchPools(searchInput);
-                                        setState(() {
-                                          searched = true;
-                                        });
-                                      },
-                                      child: Icon(
-                                        Icons.search,
-                                        color: Styles.whiteColor,
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                        backgroundColor: Colors.transparent,
-                                        shape: const StadiumBorder(),
-                                        elevation: 0,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Gap(4.0),
-                        if (searched) buildSearchAcknowledge(),
-                        Gap(4.0),
-                        if (searchedPools.isNotEmpty)
-                          Flexible(
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: searchedPools.length,
-                              itemBuilder: (context, index) {
-                                var pool = searchedPools[index];
-                                return getPoolCard(pool);
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -639,7 +547,6 @@ Container(child: Column(
               width: 30,
               height: 30)
           : Image.network(dataUrl, width: 30, height: 30, fit: BoxFit.cover),
-
     );
   }
 
