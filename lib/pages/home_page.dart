@@ -80,7 +80,7 @@ class _HomePageState extends State<HomePage> {
       "component": const StakingView()
     },*/
     {"key": 1, "name": "NFTs", "component": NFTView()},
-    {"key": 2, "name": "Activity", "component": ActivityView()}
+    // {"key": 2, "name": "Activity", "component": ActivityView()}
   ];
 
   Widget rowMember(Map member) {
@@ -184,7 +184,7 @@ class _HomePageState extends State<HomePage> {
           ]),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           if(gqlConn!=null && providerConn!=null && (!gqlConn!.isConnected==true || !providerConn!.isConnected))rowMember({
             "key": null,
             "name": "Reload",
