@@ -10,7 +10,7 @@
     "@polkadot/util-crypto": "^7.8.2",
     "@polkadot/wasm-crypto-init": "^7.3.2",
     "@popperjs/core": "^2.11.5",
-    "@reef-chain/util-lib": "^2.5.0",
+    "@reef-chain/util-lib": "^2.5.10",
     "crypto-browserify": "^3.12.0",
     "esbuild": "^0.14.42",
     "ethers": "^5.6.9",

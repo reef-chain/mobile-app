@@ -17,7 +17,8 @@ class Token {
       required this.decimals});
 
   static Token fromJson(dynamic json) {
-    var balanceVal = JsonBigInt.toBigInt(json['balance']);
+    var balanceVal = JsonBigInt.toBigInt( json['balance'] != null && json['balance'] != "" ? json['balance'] : "0");
+
     return Token(
         name: json['name'] ?? '<no title>',
         address: json['address'],

@@ -162,23 +162,6 @@ class CustomModalState extends State<CustomModal>
                         child: Icon(CupertinoIcons.xmark,
                             color: Colors.black87, size: 12))
 
-                    /*child: ElevatedButton(
-                                    ,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                style: ElevatedButton.styleFrom(
-
-                                    shape: const CircleBorder(),
-                                    padding: const EdgeInsets.all(8),
-                                    minimumSize: const Size.fromRadius(4),
-                                    backgroundColor: Styles.whiteColor,
-                                    foregroundColor: Colors.grey[300],
-                                    elevation: 2,
-                                    shadowColor: Colors.black12),
-                                child: const Icon(CupertinoIcons.xmark,
-                                    color: Colors.black87, size: 12),
-                              )*/
                     ))
         ],
       ),
