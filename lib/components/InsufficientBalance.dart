@@ -5,7 +5,8 @@ import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
 class InsufficientBalance extends StatelessWidget {
-  const InsufficientBalance({super.key});
+  final String? customText;
+  const InsufficientBalance({Key? key,this.customText}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class InsufficientBalance extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) {
                 return WebViewScreen(
-                  title: isMainnet?"Buy Reef":"Get Reef Testnet Tokens",
+                  title:  isMainnet?"Buy Reef":"Get Reef Testnet Tokens",
                   url: isMainnet
                       ? "https://onramp.money/main/buy/?appId=487411&walletAddress=${ReefAppState.instance.signingCtrl.accountModel.selectedAddress}"
                       : "https://discord.com/channels/793946260171259904/1087737503550816396");
@@ -50,7 +51,7 @@ class InsufficientBalance extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(14.0)),
           ),
           child: Center(
-            child: Text(
+            child: Text(customText!=null?customText!:
               isMainnet?"Buy Reef":"Get Testnet Tokens",
               style: TextStyle(
                 fontSize: 16,

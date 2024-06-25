@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/InsufficientBalance.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/ipfs.dart';
@@ -32,7 +33,10 @@ class _PoolsPageState extends State<PoolsPage> {
   String searchInput = "";
   bool searched = false;
   bool displaySearchModal = false;
-  bool filterSwappable = false;
+  // bool filterSwappable = false;
+
+  // filtering pools
+  bool hasReef = false; //if user has reef display only swappable
 
   // search input listeners
   bool _isSearchEditing = false;
@@ -52,7 +56,20 @@ class _PoolsPageState extends State<PoolsPage> {
         searchPools(searchInput);
       });
     });
+    _fetchUserBalance();
     _fetchTokensAndPools();
+  }
+
+  void _fetchUserBalance() {
+    var selectedAccount = ReefAppState.instance.model.accounts.accountsList
+        .firstWhere((account) =>
+            account.address ==
+            ReefAppState.instance.model.accounts.selectedAddress);
+    if (selectedAccount.balance > BigInt.zero) {
+      setState(() {
+        hasReef = true;
+      });
+    }
   }
 
   void clearSearch() {
@@ -298,28 +315,28 @@ class _PoolsPageState extends State<PoolsPage> {
                     ),
                     Row(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              filterSwappable = true;
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Styles.boxBackgroundColor,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(
-                                Icons.sort,
-                                size: 18,
-                                color: Styles.textLightColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Gap(8.0),
+                        // GestureDetector(
+                        //   onTap: () {
+                        //     setState(() {
+                        //       filterSwappable = true;
+                        //     });
+                        //   },
+                        //   child: Container(
+                        //     decoration: BoxDecoration(
+                        //       borderRadius: BorderRadius.circular(20),
+                        //       color: Styles.boxBackgroundColor,
+                        //     ),
+                        //     child: Padding(
+                        //       padding: const EdgeInsets.all(8.0),
+                        //       child: Icon(
+                        //         Icons.sort,
+                        //         size: 18,
+                        //         color: Styles.textLightColor,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        // Gap(8.0),
                         GestureDetector(
                           onTap: () {
                             setState(() {
@@ -344,57 +361,67 @@ class _PoolsPageState extends State<PoolsPage> {
                     ),
                   ],
                 ),
-                if(filterSwappable)
-                Container(
-                  padding: EdgeInsets.only(bottom: 4.0),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Filter applied ",
-                        style: TextStyle(
-                            color: Styles.textLightColor,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(
-                            top: 4.0, bottom: 4.0, left: 12.0, right: 12.0),
-                        decoration: BoxDecoration(
-                          color: Styles.whiteColor,
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              "can swap",
-                              style: TextStyle(
-                                  color: Styles.textLightColor,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            Gap(8.0),
-                            GestureDetector(
-                              onTap: (){
-                                setState(() {
-                                  filterSwappable=false;
-                                });
-                              },
-                                child: Container(
-                              decoration: BoxDecoration(
-                                  color: Styles.greyColor,
-                                  borderRadius: BorderRadius.circular(20)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Icon(CupertinoIcons.xmark,
-                                    color: Colors.black87, size: 12),
-                              ),
-                            )),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
+                // if(filterSwappable)
+                // Container(
+                //   padding: EdgeInsets.only(bottom: 4.0),
+                //   child: Row(
+                //     children: [
+                //       Text(
+                //         "Filter applied ",
+                //         style: TextStyle(
+                //             color: Styles.textLightColor,
+                //             fontWeight: FontWeight.bold),
+                //       ),
+                //       Container(
+                //         padding: EdgeInsets.only(
+                //             top: 4.0, bottom: 4.0, left: 12.0, right: 12.0),
+                //         decoration: BoxDecoration(
+                //           color: Styles.whiteColor,
+                //           borderRadius: BorderRadius.circular(12.0),
+                //         ),
+                //         child: Row(
+                //           children: [
+                //             Text(
+                //               "can swap",
+                //               style: TextStyle(
+                //                   color: Styles.textLightColor,
+                //                   fontSize: 12,
+                //                   fontWeight: FontWeight.w600),
+                //             ),
+                //             Gap(8.0),
+                //             GestureDetector(
+                //               onTap: (){
+                //                 setState(() {
+                //                   filterSwappable=false;
+                //                 });
+                //               },
+                //                 child: Container(
+                //               decoration: BoxDecoration(
+                //                   color: Styles.greyColor,
+                //                   borderRadius: BorderRadius.circular(20)),
+                //               child: Padding(
+                //                 padding: const EdgeInsets.all(2.0),
+                //                 child: Icon(CupertinoIcons.xmark,
+                //                     color: Colors.black87, size: 12),
+                //               ),
+                //             )),
+                //           ],
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+if(!hasReef)
+Container(child: Column(
+  children: [
+    Row(
+      children: [
+        Expanded(child: InsufficientBalance(customText: "Get REEFs to swap tokens",))
+      ],
+    ),
+    Gap(16.0)
+  ],
+),),
                 Flexible(
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification scrollInfo) {
@@ -411,12 +438,19 @@ class _PoolsPageState extends State<PoolsPage> {
                             itemCount: _pools.length,
                             itemBuilder: (context, index) {
                               var pool = _pools[index];
-                                if(filterSwappable){
-      if(hasBalance(pool['token1']) || hasBalance(pool['token2']))return getPoolCard(pool);
-      else return Container();
-    }else{
+                              //                             if(filterSwappable){
+                              //   if(hasBalance(pool['token1']) || hasBalance(pool['token2']))return getPoolCard(pool);
+                              //   else return Container();
+                              // }else{
+                              if (hasReef) {
+                                if (hasBalance(pool['token1']) ||
+                                    hasBalance(pool['token2']))
+                                  return getPoolCard(pool);
+                                else
+                                  return Container();
+                              }
                               return getPoolCard(pool);
-    }
+                              // }
                             },
                           )
                         : Center(
