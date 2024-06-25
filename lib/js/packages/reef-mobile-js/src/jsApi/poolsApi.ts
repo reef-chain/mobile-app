@@ -107,15 +107,15 @@ const getExplorerTokenIcon = async (nwName: string, tokenAddresses: string[]) =>
   const tokenIconMap = {};
   data.verifiedContracts.forEach((v) => {
     if (v.contractData && v.contractData['iconUrl']) {
-      const iconUrl = v.contractData['iconUrl'].startsWith("ipfs://") 
-          ? "https://reef.infura-ipfs.io/ipfs/" + v.contractData['iconUrl'].split("ipfs://")[1] 
+      const iconUrl = v.contractData['iconUrl'].startsWith("ipfs://")
+          ? "https://reef.infura-ipfs.io/ipfs/" + v.contractData['iconUrl'].split("ipfs://")[1]
           : v.contractData['iconUrl'];
           tokenIconMap[v.id] =iconUrl;
   } else {
     tokenIconMap[v.id] =v.contractData['iconUrl'];
   }
   })
-  
+
   return tokenIconMap;
 };
 
