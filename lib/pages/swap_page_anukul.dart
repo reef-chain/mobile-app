@@ -158,7 +158,6 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   void _getPoolReserves() async {
-    print("here i am ${selectedTopToken} ${selectedBottomToken}");
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
     }
@@ -588,7 +587,7 @@ class _SwapPageState extends State<SwapPage> {
               ),
               Expanded(
                 child: Text(
-                  "${(double.parse(slippage)*100).toStringAsFixed(2)}",
+                  "${(double.parse(slippage)*100).toStringAsFixed(2)}%",
                   textAlign: TextAlign.right,
                   style: TextStyle(
                       fontWeight: FontWeight.w600, letterSpacing: 1.0),
