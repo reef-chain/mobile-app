@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/InsufficientBalance.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/utils/ipfs.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -638,6 +639,7 @@ Container(child: Column(
               width: 30,
               height: 30)
           : Image.network(dataUrl, width: 30, height: 30, fit: BoxFit.cover),
+
     );
   }
 

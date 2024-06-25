@@ -119,7 +119,7 @@ class _SwapPageState extends State<SwapPage> {
       }
       
       // if both set
-      if(widget.preselectedBottom !=null && widget.preselectedTop!=null){
+      if(widget.preselectedBottom !=null && widget.preselectedTop!=null && !checkPreselectionBottom){
         // fetch token info
         ReefAppState.instance.tokensCtrl.getTokenInfo(widget.preselectedBottom!).then((value) {
           selectedBottomToken=TokenWithAmount.fromJson(value);
@@ -128,8 +128,8 @@ class _SwapPageState extends State<SwapPage> {
         });
       }
 
+      // set bottom to reef if pair exists
       if(widget.preselectedBottom==null && widget.preselectedTop!=Constants.REEF_TOKEN_ADDRESS && widget.preselectedTop!=null ){
-        // set bottom to reef if pair exists
         _getPoolPairs(widget.preselectedTop!).then((value){
           value.forEach((e) {
             if(e['address']==Constants.REEF_TOKEN_ADDRESS){
