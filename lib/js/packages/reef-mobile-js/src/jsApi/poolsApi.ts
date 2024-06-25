@@ -2,7 +2,7 @@ import { graphql, reefState } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
 import { firstValueFrom, skip } from 'rxjs';
-import { getDexUrl } from './utils/networkUtils';
+import { getDexUrl, getExplorerUrl } from './utils/networkUtils';
 
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
@@ -35,7 +35,7 @@ const getAllPoolsQuery = (limit: number, offset: number, search: string, signerA
   }
 };
 
-const getPoolPairsQuery = (tokenAddr,limit,offset) => {
+const getPoolPairsQuery = (tokenAddr, limit, offset) => {
   return {
     query: `
     query PoolPairs {
@@ -76,7 +76,48 @@ const getTokenInfoQuery = (tokenAddr) => {
   }
 };
 
+const getTokenIconQuery = (tokenAddresses: string[]) => {
+  const formattedAddresses = tokenAddresses.map(address => `"${address}"`).join(", ");
+  return {
+    query: `
+    query TokenIconQuery {
+      verifiedContracts(where: { id_in: [${formattedAddresses}] }) {
+        contractData
+        id
+      }
+    }
+    `
+  };
+};
 
+const getExplorerTokenIcon = async (nwName: string, tokenAddresses: string[]) => {
+  const response = await fetch(getExplorerUrl(nwName), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(getTokenIconQuery(tokenAddresses)),
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const { data } = await response.json();
+  const tokenIconMap = {};
+  data.verifiedContracts.forEach((v) => {
+    if (v.contractData && v.contractData['iconUrl']) {
+      const iconUrl = v.contractData['iconUrl'].startsWith("ipfs://")
+          ? "https://reef.infura-ipfs.io/ipfs/" + v.contractData['iconUrl'].split("ipfs://")[1]
+          : v.contractData['iconUrl'];
+          tokenIconMap[v.id] =iconUrl;
+  } else {
+    tokenIconMap[v.id] =v.contractData['iconUrl'];
+  }
+  })
+
+  return tokenIconMap;
+};
 
 
 const calculateUSDTVL = ({
@@ -170,10 +211,24 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
     });
 
     const { data } = await response.json();
+
+    let tokenAddresess = [];
+
+    for (let i = 0; i < data.allPoolsList.length; i++) {
+      if (!tokenAddresess.includes(data.allPoolsList[i].token1)) {
+        tokenAddresess.push(data.allPoolsList[i].token1);
+      }
+      if (!tokenAddresess.includes(data.allPoolsList[i].token2)) {
+        tokenAddresess.push(data.allPoolsList[i].token2);
+      }
+    }
+
+    const tokenIconMap = await getExplorerTokenIcon(selectedNw.name, tokenAddresess);
+
     const pools = data.allPoolsList.map((pool) => ({
       ...pool,
-      iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
-      iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
+      iconUrl1: pool.iconUrl1 === '' ? tokenIconMap[pool.token1] != '' && tokenIconMap[pool.token1] ? tokenIconMap[pool.token1] : getIconUrl(pool.token1) : pool.iconUrl1,
+      iconUrl2: pool.iconUrl2 === '' ? tokenIconMap[pool.token2] != '' && tokenIconMap[pool.token2] ? tokenIconMap[pool.token2] : getIconUrl(pool.token2) : pool.iconUrl2,
       tvl: calculateUSDTVL({ reserved1: pool.reserved1, reserved2: pool.reserved2, decimals1: pool.decimals1, decimals2: pool.decimals2, token1: pool.token1, token2: pool.token2 }, tokenPrices),
       volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
       volumeChange24h: calculateVolumeChange(pool, tokenPrices),
@@ -186,7 +241,7 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
   }
 }
 
-export const getPoolPairs = async (tokenAddr:string) => {
+export const getPoolPairs = async (tokenAddr: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
     let limit = 70;
@@ -196,32 +251,34 @@ export const getPoolPairs = async (tokenAddr:string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(getPoolPairsQuery(tokenAddr,limit,offset)),
+      body: JSON.stringify(getPoolPairsQuery(tokenAddr, limit, offset)),
     });
 
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
     const { data } = await response.json();
-    const pools = data.pools.map((pool)=>{
-      if(pool['token1'].id==tokenAddr){
+
+    const pools = data.pools.map((pool) => {
+      if (pool['token1'].id == tokenAddr) {
         return {
-          address:pool['token2']['id'],
-          name:pool['token2']['name'],
-          symbol:pool['token2']['symbol'],
-          iconUrl:pool['token2']['iconUrl']==""?getIconUrl(pool['token2']['id']):pool['token2']['iconUrl'],
-          decimals:pool['token2']['decimals']
+          address: pool['token2']['id'],
+          name: pool['token2']['name'],
+          symbol: pool['token2']['symbol'],
+          iconUrl: pool['token2']['iconUrl'] == "" ? getIconUrl(pool['token2']['id']) : pool['token2']['iconUrl'],
+          decimals: pool['token2']['decimals']
         }
-      }else{
+      } else {
         return {
-          address:pool['token1']['id'],
-          name:pool['token1']['name'],
-          symbol:pool['token1']['symbol'],
-          iconUrl:pool['token1']['iconUrl']==""?getIconUrl(pool['token1']['id']):pool['token1']['iconUrl'],
-          decimals:pool['token1']['decimals']
+          address: pool['token1']['id'],
+          name: pool['token1']['name'],
+          symbol: pool['token1']['symbol'],
+          iconUrl: pool['token1']['iconUrl'] == "" ? getIconUrl(pool['token1']['id']) : pool['token1']['iconUrl'],
+          decimals: pool['token1']['decimals']
         }
       }
     })
+
     return pools;
   } catch (error) {
     console.log(error);
@@ -229,7 +286,7 @@ export const getPoolPairs = async (tokenAddr:string) => {
   }
 }
 
-export const getTokenInfo = async (tokenAddr:string) => {
+export const getTokenInfo = async (tokenAddr: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
     const response = await fetch(getDexUrl(selectedNw.name), {
@@ -244,12 +301,24 @@ export const getTokenInfo = async (tokenAddr:string) => {
       throw new Error('Network response was not ok');
     }
     const { data } = await response.json();
+
+    let tokenAddresess = [];
+
+    for (let i = 0; i < data.tokens.length; i++) {
+      if (!tokenAddresess.includes(data.tokens[i].id)) {
+        tokenAddresess.push(data.tokens[i].id);
+      }
+    }
+
+    const tokenIconMap = await getExplorerTokenIcon(selectedNw.name, tokenAddresess);
+
+
     let token;
-    if(data.tokens.length){
+    if (data.tokens.length) {
       token = {
         ...data.tokens[0],
-        address:data.tokens[0].id,
-        iconUrl:data.tokens[0]['iconUrl']==''?getIconUrl(data.tokens[0]['id']):data.tokens[0]['iconUrl']
+        address: data.tokens[0].id,
+        iconUrl: data.tokens[0]['iconUrl'] == '' ?tokenIconMap[data.tokens[0].id]!='' && tokenIconMap[data.tokens[0].id]? tokenIconMap[data.tokens[0].id]: getIconUrl(data.tokens[0]['id']) : data.tokens[0]['iconUrl']
       };
     }
     return token;
