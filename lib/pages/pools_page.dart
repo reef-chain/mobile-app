@@ -329,57 +329,6 @@ class _PoolsPageState extends State<PoolsPage> {
                 ),
               ),
             ),
-            AnimatedContainer(
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              width: searchInput.isNotEmpty ? 48 : 0,
-              margin: EdgeInsets.only(left: 16.0),
-              child: AnimatedOpacity(
-                duration: Duration(milliseconds: 300),
-                opacity: searchInput.isNotEmpty ? 1.0 : 0.0,
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Styles.secondaryAccentColorDark,
-                          spreadRadius: -10,
-                          offset: Offset(0, 5),
-                          blurRadius: 20,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(80),
-                      gradient: LinearGradient(
-                        colors: [
-                          Styles.purpleColorLight,
-                          Styles.secondaryAccentColorDark,
-                        ],
-                        begin: Alignment(-1, -1),
-                        end: Alignment(1, 1),
-                      ),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        searchPools(searchInput);
-                        setState(() {
-                          searched = true;
-                        });
-                      },
-                      child: Icon(
-                        Icons.search,
-                        color: Styles.whiteColor,
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        backgroundColor: Colors.transparent,
-                        shape: const StadiumBorder(),
-                        elevation: 0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
         Gap(4.0),
