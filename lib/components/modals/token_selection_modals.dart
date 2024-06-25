@@ -62,26 +62,26 @@ class TokenSelectionState extends State<TokenSelection> {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 32.0),
       child: Column(
         children: [
-          ViewBoxContainer(
-            color: Colors.white,
-            child: TextField(
-              controller: valueContainer,
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                  borderSide:
-                      BorderSide(color: Styles.secondaryAccentColor, width: 2),
-                ),
-                hintText: 'Search token name or address',
-              ),
-            ),
-          ),
+          // ViewBoxContainer(
+          //   color: Colors.white,
+          //   child: TextField(
+          //     controller: valueContainer,
+          //     decoration: InputDecoration(
+          //       contentPadding:
+          //           const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          //       border: const OutlineInputBorder(
+          //         borderRadius: BorderRadius.all(Radius.circular(10)),
+          //         borderSide: BorderSide(color: Colors.grey),
+          //       ),
+          //       focusedBorder: OutlineInputBorder(
+          //         borderRadius: const BorderRadius.all(Radius.circular(10)),
+          //         borderSide:
+          //             BorderSide(color: Styles.secondaryAccentColor, width: 2),
+          //       ),
+          //       hintText: 'Search token name or address',
+          //     ),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ConstrainedBox(
