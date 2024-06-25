@@ -499,7 +499,14 @@ class _PoolsPageState extends State<PoolsPage> {
                               itemCount: searchedPools!.length,
                               itemBuilder: (context, index) {
                                 var pool = searchedPools![index];
-                                return getPoolCard(pool);
+                                if (hasReef) {
+                                    if (hasBalance(pool['token1']) ||
+                                        hasBalance(pool['token2']))
+                                      return getPoolCard(pool);
+                                    else
+                                      return Container();
+                                  }
+                                  // return getPoolCard(pool);
                               },
                             ),
                           )
