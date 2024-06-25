@@ -2,7 +2,7 @@ import { graphql, reefState} from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
 import { firstValueFrom, skip } from 'rxjs';
-import { getDexUrl } from './utils/networkUtils';
+import { getDexUrl, getExplorerUrl } from './utils/networkUtils';
 
 
 const getAllPoolsQuery = (limit:number,offset:number,search:string,signerAddress:string) => {
@@ -90,6 +90,42 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   return res.toNumber();
 };
 
+const getTokenIconQuery = (tokenAddresses: string[]) => {
+  const formattedAddresses = tokenAddresses.map(address => `"${address}"`).join(", ");
+  return {
+    query: `
+    query TokenIconQuery {
+      verifiedContracts(where: { id_in: [${formattedAddresses}] }) {
+        contractData
+        id
+      }
+    }
+    `
+  };
+};
+
+const getExplorerTokenIcon = async (nwName: string, tokenAddresses: string[]) => {
+  const response = await fetch(getExplorerUrl(nwName), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(getTokenIconQuery(tokenAddresses)),
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const { data } = await response.json();
+  const tokenIconMap = {};
+  data.verifiedContracts.forEach((v)=>{
+    tokenIconMap[v.id]=v.contractData['tokenUrl']
+  })
+  return tokenIconMap;
+};
+
+
 export const fetchAllPools = async (limit:number,offset:number,search:string,signerAddress:string)=>{
     try {
       const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
@@ -111,9 +147,7 @@ export const fetchAllPools = async (limit:number,offset:number,search:string,sig
             next: (tokens) => {
               if (tokens && tokens.length > 0) {
                 tokenPrices = mapTokensToPrices(tokens);
-                console.log('Token Prices updated:', tokenPrices);
               } else {
-                console.log('No tokens available');
                 tokenPrices = {};
               }
             },
@@ -121,20 +155,35 @@ export const fetchAllPools = async (limit:number,offset:number,search:string,sig
               console.error('Error receiving token prices:', err);
             },
             complete: () => {
-              console.log('Subscription completed');
             }
           });
       
           const {data} = await response.json();
+
+          let tokenAddresess = [];
+
+          for(let i=0;i<data.allPoolsList.length;i++){
+            if(!tokenAddresess.includes(data.allPoolsList[i].token1)){
+              tokenAddresess.push(data.allPoolsList[i].token1);
+            }
+            if(!tokenAddresess.includes(data.allPoolsList[i].token2)){
+            tokenAddresess.push(data.allPoolsList[i].token2);
+            }
+          }
+
+          const tokenIconMap = await getExplorerTokenIcon(selectedNw.name,tokenAddresess);
+          
+
           const pools = data.allPoolsList.map((pool) => ({
             ...pool,
-            iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
-            iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
+            iconUrl1: pool.iconUrl1 === '' ? tokenIconMap[pool.token1]!='' && tokenIconMap[pool.token1]?tokenIconMap[pool.token1]: getIconUrl(pool.token1) : pool.iconUrl1,
+            iconUrl2: pool.iconUrl2 === '' ?tokenIconMap[pool.token2]!='' && tokenIconMap[pool.token2]?tokenIconMap[pool.token2]: getIconUrl(pool.token2) : pool.iconUrl2,
             tvl:calculateUSDTVL({reserved1:pool.reserved1,reserved2:pool.reserved2,decimals1:pool.decimals1,decimals2:pool.decimals2,token1:pool.token1,token2:pool.token2},tokenPrices),
             volume24h:calculate24hVolumeUSD(pool,tokenPrices,true).toFormat(2),
             volumeChange24h: calculateVolumeChange(pool, tokenPrices),
           }));
           subscription.unsubscribe();
+
           return pools;
     } catch (error) {
         console.log(error);
