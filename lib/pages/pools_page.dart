@@ -61,6 +61,8 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   void _fetchUserBalance() {
+    try {
+      
     var selectedAccount = ReefAppState.instance.model.accounts.accountsList
         .firstWhere((account) =>
             account.address ==
@@ -69,6 +71,9 @@ class _PoolsPageState extends State<PoolsPage> {
       setState(() {
         hasReef = true;
       });
+    }
+    } catch (e) {
+     print("error in fetching selected account ${e}"); 
     }
   }
 
