@@ -7,12 +7,13 @@ import 'package:reef_mobile_app/components/getQrTypeData.dart';
 class GenerateQrJsonValue extends StatelessWidget {
   final ReefQrCodeType type;
   final String data;
-  const GenerateQrJsonValue({super.key,required this.type,required this.data});
+  final bool? shouldDisplayValueOnly;
+  const GenerateQrJsonValue({super.key,required this.type,required this.data,this.shouldDisplayValueOnly=false});
 
   @override
   Widget build(BuildContext context) {
     return QrImage(
-            data: jsonEncode({"type":type.name,"data":data}).toString(),
+            data: shouldDisplayValueOnly! ?data: jsonEncode({"type":type.name,"data":data}).toString(),
             version: QrVersions.auto,
             // importAccount QR should be larger otherwise wrong value might be scanned
             size:type!=ReefQrCodeType.accountJson? 200.0:400,
