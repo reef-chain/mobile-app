@@ -1,5 +1,5 @@
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
-import 'package:reef_mobile_app/components/page_layout.dart';
+import 'package:reef_mobile_app/components/page_layout_anukul.dart';
 
 mixin NavSwipeCompute {
   int computeSwipeAnimation(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
-import 'package:reef_mobile_app/components/page_layout.dart';
+import 'package:reef_mobile_app/components/page_layout_anukul.dart';
 import 'package:reef_mobile_app/service/AppLifecycleManager.dart';
 import 'package:reef_mobile_app/service/LocalNotificationService.dart';
 
