@@ -19,7 +19,7 @@ class QRCodeGenerator extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          GenerateQrJsonValue(type: ReefQrCodeType.address, data: data),
+          GenerateQrJsonValue(type: ReefQrCodeType.address, data: data,shouldDisplayValueOnly: true,),
           const SizedBox(
             height: 8,
           ),
