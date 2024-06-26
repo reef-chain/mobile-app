@@ -234,6 +234,7 @@ class _SwapPageState extends State<SwapPage> {
                 fontWeight: FontWeight.w700,
                 color: Styles.textLightColor,
               ),
+              textAlign: TextAlign.center,
             ),
             if(isError)ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -299,7 +300,7 @@ class _SwapPageState extends State<SwapPage> {
             if (txResponse['status'] == "approved") {
               btnLabel = "Waiting to Swap";
               preloaderMessage =
-                  "waiting for swap transaction (${selectedTopToken?.name} - ${selectedBottomToken?.name})";
+                  "waiting for swap transaction\n(${selectedTopToken?.name} - ${selectedBottomToken?.name})";
               preloaderChild = IconFromUrl(selectedBottomToken!.iconUrl);
             }
             if (txResponse['status'] == "_canceled") {
