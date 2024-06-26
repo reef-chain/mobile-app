@@ -1,0 +1,186 @@
+import 'dart:io';
+
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:reef_mobile_app/components/navigation/liquid_carousel_wrapper.dart';
+import 'package:reef_mobile_app/components/top_bar.dart';
+import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
+import 'package:reef_mobile_app/pages/accounts_page.dart';
+import 'package:reef_mobile_app/pages/home_page.dart';
+import 'package:reef_mobile_app/pages/send_page.dart';
+import 'package:reef_mobile_app/pages/settings_page.dart';
+import 'package:reef_mobile_app/pages/swap_page.dart';
+import 'package:reef_mobile_app/utils/constants.dart';
+import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
+import "package:reef_mobile_app/utils/styles.dart";
+import 'package:restart_app/restart_app.dart';
+
+import '../pages/pools_page.dart';
+import 'sign/SignatureContentToggle.dart';
+
+List<BarItemNavigationPage> bottomNavigationBarItems = const [
+  BarItemNavigationPage(
+    icon: Icon(Icons.home_outlined),
+    page: NavigationPage.home,
+    label: 'Home',
+  ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.account_balance_wallet_outlined),
+    page: NavigationPage.accounts,
+    label: 'Accounts',
+  ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.cached),
+    page: NavigationPage.pools,
+    label: 'Pools',
+  ),
+
+  BarItemNavigationPage(
+    icon: Icon(Icons.settings_outlined),
+    page: NavigationPage.settings,
+    label: 'Settings',
+  ),
+];
+
+class BottomNav extends StatefulWidget {
+  const BottomNav({Key? key}) : super(key: key);
+
+  @override
+  State<BottomNav> createState() => _BottomNavState();
+}
+
+class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
+
+  int selectedPageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkNotificationPermission();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  Future<bool> _checkNotificationPermission() async {
+    final status = await Permission.storage.status;
+    if (status.isDenied) {
+      await Permission.notification.request();
+    }
+    return status.isGranted;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SignatureContentToggle(GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        body: Center(
+            child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+          ),
+          child: Material(
+            color: Colors.white,
+            elevation: 0,
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  color: Styles.primaryBackgroundColor,
+                ),   
+                Column(
+                  children: <Widget>[
+                    Material(
+                      elevation: 3,
+                      shadowColor: Colors.black45,
+                      child: Container(
+                          // color: Styles.whiteColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image:
+                                    AssetImage("assets/images/reef-header.png"),
+                                fit: BoxFit.cover,
+                                alignment: Alignment(-0.82, 1.0)),
+                          ),
+                          child: topBar(context)),
+                    ),
+                    Expanded(child:                                  getMainNavPages())
+                  ],
+                ),
+              ],
+            ),
+          ),
+        )),
+        bottomNavigationBar: Observer(builder: (_) {
+          int currIndex = bottomNavigationBarItems.indexWhere((barItem) =>
+              barItem.page ==
+              ReefAppState.instance.model.navigationModel.currentPage);
+          if (currIndex < 0) {
+            currIndex = 0;
+          }
+          var itemColor = bottomNavigationBarItems.firstWhereOrNull((barItem) =>
+                      barItem.page ==
+                      ReefAppState
+                          .instance.model.navigationModel.currentPage) !=
+                  null
+              ? Styles.purpleColor
+              : Colors.black38;
+
+          return BottomNavigationBar(
+            backgroundColor: Styles.whiteColor,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            selectedLabelStyle:
+                TextStyle(fontSize: 20, color: Styles.primaryColor),
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: itemColor,
+            unselectedItemColor: Colors.black38,
+            items: bottomNavigationBarItems,
+            currentIndex: selectedPageIndex,
+            onTap: (idx){
+              setState(() {
+                selectedPageIndex=idx;
+              });
+            },
+          );
+        }),
+      ),
+    ));
+  }
+
+  Widget getMainNavPages() {
+    var pages = [const HomePage(key: PageStorageKey("homepage")),AccountsPage(key: const PageStorageKey("accountPage")),const PoolsPage(key: const PageStorageKey("poolsPage")),const SettingsPage(key: PageStorageKey("settingsPage"))];
+   
+    return pages[selectedPageIndex];
+  }
+}
+
+class BarItemNavigationPage extends BottomNavigationBarItem {
+  final NavigationPage page;
+
+  const BarItemNavigationPage({
+    required icon,
+    required this.page,
+    label,
+    Widget? activeIcon,
+    backgroundColor,
+    tooltip,
+  }) : super(
+            icon: icon,
+            label: label,
+            activeIcon: activeIcon,
+            backgroundColor: backgroundColor,
+            tooltip: tooltip);
+}
