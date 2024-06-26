@@ -12,14 +12,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class WebViewFlutterJS extends StatefulWidget {
   final Completer<WebViewController> controller;
   final Completer<void> loaded;
-  final Set<JavascriptChannel> jsChannels;
   final bool hidden;
 
   WebViewFlutterJS({
     required this.hidden,
     required this.controller,
     required this.loaded,
-    required this.jsChannels,
     Key? key,
   }) : super(key: key); // Modify
 
@@ -79,30 +77,32 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
                           fontSize: 12),
                     )),
               ])),
-        Expanded(
-            child: WebView(
-          javascriptMode: JavascriptMode.unrestricted,
-          javascriptChannels: widget.jsChannels,
-          onWebViewCreated: (webViewController) {
-            _controller = webViewController;
-            if (!widget.controller.isCompleted) {
-              widget.controller.complete(_controller);
-            }
-          },
-          onPageFinished: (url) {
-            var strippedUrl = stripUrl(url);
-            if (strippedUrl.isNotEmpty) {
-              ReefAppState.instance.storage
-                  .getAuthUrl(strippedUrl)
-                  .then((authUrl) {
-                if (authUrl != null && !authUrl.isAllowed) {
-                  _setAuthUrl(true, strippedUrl);
-                }
-              });
-            }
-            widget.loaded.complete(_controller);
-          },
-        )),
+
+        // fix this anukul
+        // Expanded(
+        //     child: WebView(
+        //   javascriptMode: JavascriptMode.unrestricted,
+        //   javascriptChannels: widget.jsChannels,
+        //   onWebViewCreated: (webViewController) {
+        //     _controller = webViewController;
+        //     if (!widget.controller.isCompleted) {
+        //       widget.controller.complete(_controller);
+        //     }
+        //   },
+        //   onPageFinished: (url) {
+        //     var strippedUrl = stripUrl(url);
+        //     if (strippedUrl.isNotEmpty) {
+        //       ReefAppState.instance.storage
+        //           .getAuthUrl(strippedUrl)
+        //           .then((authUrl) {
+        //         if (authUrl != null && !authUrl.isAllowed) {
+        //           _setAuthUrl(true, strippedUrl);
+        //         }
+        //       });
+        //     }
+        //     widget.loaded.complete(_controller);
+        //   },
+        // )),
       ]),
     );
   }

@@ -49,7 +49,6 @@ class JsApiService {
       hidden: hiddenWidget,
       controller: controllerInit,
       loaded: jsApiLoaded,
-      jsChannels: _createJavascriptChannels(),
     );
   }
 
@@ -73,6 +72,25 @@ class JsApiService {
   void _renderWithFlutterJS(
       String fJsFilePath, String? htmlString, String? baseUrl) {
     htmlString ??= "<html><head></head><body></body></html>";
+    controllerInit.future.then((ctrl){
+      ctrl.addJavaScriptChannel(REEF_MOBILE_CHANNEL_NAME, onMessageReceived: (message) {
+          JsApiMessage apiMsg =
+              JsApiMessage.fromJson(jsonDecode(message.message));
+          if (apiMsg.streamId == LOG_STREAM_ID) {
+            print('$LOG_STREAM_ID= ${apiMsg.value}');
+          } else if (apiMsg.streamId == API_READY_STREAM_ID) {
+            jsApiLoaded.future.then((ctrl) => jsApiReady.complete(ctrl));
+          } else if (apiMsg.streamId == TX_SIGNATURE_CONFIRMATION_STREAM_ID) {
+            jsTxSignatureConfirmationMessageSubj.add(apiMsg);
+          } else if (apiMsg.streamId == DAPP_MSG_CONFIRMATION_STREAM_ID) {
+            jsDAppMsgSubj.add(apiMsg);
+          } else if (int.tryParse(apiMsg.streamId) == null) {
+            jsMessageUnknownSubj.add(apiMsg);
+          } else {
+            jsMessageSubj.add(apiMsg);
+          }
+        });
+    });
     controllerInit.future.then((ctrl) {
       return _getFlutterJsHeaderTags(fJsFilePath).then((headerTags) {
         return _insertHeaderTags(htmlString!, headerTags);
@@ -84,13 +102,13 @@ class JsApiService {
 
   // for js methods with no return value
   Future<void> jsCallVoidReturn(String executeJs) {
-    return _controller.then((ctrl) => ctrl.runJavascript(executeJs));
+    return _controller.then((ctrl) => ctrl.runJavaScript(executeJs));
   }
 
   Future<dynamic> jsCall<T>(String executeJs) async {
     try {
       dynamic res = await _controller
-          .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
+          .then((ctrl) => ctrl.runJavaScriptReturningResult(executeJs));
       return T == bool ? resolveBooleanValue(res) : res;
     }catch(e){
       print('JS LOST ctrl ERROR=${e.toString()}');
@@ -168,30 +186,30 @@ class JsApiService {
     });
   }
 
-  Set<JavascriptChannel> _createJavascriptChannels() {
-    return {
-      JavascriptChannel(
-        name: REEF_MOBILE_CHANNEL_NAME,
-        onMessageReceived: (message) {
-          JsApiMessage apiMsg =
-              JsApiMessage.fromJson(jsonDecode(message.message));
-          if (apiMsg.streamId == LOG_STREAM_ID) {
-            print('$LOG_STREAM_ID= ${apiMsg.value}');
-          } else if (apiMsg.streamId == API_READY_STREAM_ID) {
-            jsApiLoaded.future.then((ctrl) => jsApiReady.complete(ctrl));
-          } else if (apiMsg.streamId == TX_SIGNATURE_CONFIRMATION_STREAM_ID) {
-            jsTxSignatureConfirmationMessageSubj.add(apiMsg);
-          } else if (apiMsg.streamId == DAPP_MSG_CONFIRMATION_STREAM_ID) {
-            jsDAppMsgSubj.add(apiMsg);
-          } else if (int.tryParse(apiMsg.streamId) == null) {
-            jsMessageUnknownSubj.add(apiMsg);
-          } else {
-            jsMessageSubj.add(apiMsg);
-          }
-        },
-      ),
-    };
-  }
+  // Set<JavascriptChannel> _createJavascriptChannels() {
+  //   return {
+  //     JavascriptChannel(
+  //       name: REEF_MOBILE_CHANNEL_NAME,
+  //       onMessageReceived: (message) {
+  //         JsApiMessage apiMsg =
+  //             JsApiMessage.fromJson(jsonDecode(message.message));
+  //         if (apiMsg.streamId == LOG_STREAM_ID) {
+  //           print('$LOG_STREAM_ID= ${apiMsg.value}');
+  //         } else if (apiMsg.streamId == API_READY_STREAM_ID) {
+  //           jsApiLoaded.future.then((ctrl) => jsApiReady.complete(ctrl));
+  //         } else if (apiMsg.streamId == TX_SIGNATURE_CONFIRMATION_STREAM_ID) {
+  //           jsTxSignatureConfirmationMessageSubj.add(apiMsg);
+  //         } else if (apiMsg.streamId == DAPP_MSG_CONFIRMATION_STREAM_ID) {
+  //           jsDAppMsgSubj.add(apiMsg);
+  //         } else if (int.tryParse(apiMsg.streamId) == null) {
+  //           jsMessageUnknownSubj.add(apiMsg);
+  //         } else {
+  //           jsMessageSubj.add(apiMsg);
+  //         }
+  //       },
+  //     ),
+  //   };
+  // }
 
   void rejectTxSignature(String signatureIdent) {
     confirmTxSignature(signatureIdent, '_canceled');
