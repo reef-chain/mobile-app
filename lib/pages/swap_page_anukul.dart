@@ -494,10 +494,10 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   void _changeSelectedBottomToken(TokenWithAmount token) {
-    print("==== ${token.address}");
     setState(() {
       selectedBottomToken = token;
       _getPoolReserves();
+      resetDefaultSlider();
     });
   }
 
