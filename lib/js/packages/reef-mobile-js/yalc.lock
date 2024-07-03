@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "@polkadot/x-ws": {
+      "version": "12.6.3-11-x",
+      "signature": "9dbec7b829eb92c259f511d23173748b"
+    }
+  }
+}

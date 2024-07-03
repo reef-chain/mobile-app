@@ -1,0 +1,25 @@
+{
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "bugs": "https://github.com/polkadot-js/common/issues",
+  "description": "A bundler helper",
+  "engines": {
+    "node": ">=18"
+  },
+  "homepage": "https://github.com/polkadot-js/common/tree/master/packages/x-bundle#readme",
+  "license": "Apache-2.0",
+  "name": "@polkadot/x-bundle",
+  "repository": {
+    "directory": "packages/x-bundle",
+    "type": "git",
+    "url": "https://github.com/polkadot-js/common.git"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "12.6.3-11-x",
+  "main": "index.js",
+  "dependencies": {
+    "@polkadot/util": "12.6.3-11-x",
+    "buffer-es6": "^4.9.3",
+    "tslib": "^2.6.2"
+  }
+}

@@ -9,6 +9,7 @@
     "@polkadot/ui-shared": "^2.4.1",
     "@polkadot/util-crypto": "^7.8.2",
     "@polkadot/wasm-crypto-init": "^7.3.2",
+    "@polkadot/x-ws": "file:.yalc/@polkadot/x-ws",
     "@popperjs/core": "^2.11.5",
     "@reef-chain/util-lib": "^2.5.10",
     "crypto-browserify": "^3.12.0",
@@ -30,5 +31,8 @@
   },
   "devDependencies": {
     "util": "^0.12.5"
+  },
+  "resolutions": {
+    "@polkadot/x-ws": "file:.yalc/@polkadot/x-ws"
   }
 }

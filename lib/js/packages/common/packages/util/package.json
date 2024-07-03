@@ -1,0 +1,49 @@
+{
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "bugs": "https://github.com/polkadot-js/common/issues",
+  "description": "A collection of useful utilities for @polkadot",
+  "engines": {
+    "node": ">=18"
+  },
+  "homepage": "https://github.com/polkadot-js/common/tree/master/packages/util#readme",
+  "license": "Apache-2.0",
+  "name": "@polkadot/util",
+  "repository": {
+    "directory": "packages/util",
+    "type": "git",
+    "url": "https://github.com/polkadot-js/common.git"
+  },
+  "sideEffects": [
+    "./packageDetect.js",
+    "./packageDetect.cjs"
+  ],
+  "type": "module",
+  "version": "12.6.3-11-x",
+  "main": "index.js",
+  "exports": {
+    "./hex/toU8a": {
+      "node": {
+        "require": "./cjs/hex/toU8aBuffer.js",
+        "default": "./hex/toU8aBuffer.js"
+      }
+    },
+    "./u8a/toHex": {
+      "node": {
+        "require": "./cjs/u8a/toHexBuffer.js",
+        "default": "./u8a/toHexBuffer.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@polkadot/x-bigint": "12.6.3-11-x",
+    "@polkadot/x-global": "12.6.3-11-x",
+    "@polkadot/x-textdecoder": "12.6.3-11-x",
+    "@polkadot/x-textencoder": "12.6.3-11-x",
+    "@types/bn.js": "^5.1.5",
+    "bn.js": "^5.2.1",
+    "tslib": "^2.6.2"
+  },
+  "devDependencies": {
+    "@polkadot/x-randomvalues": "12.6.3-11-x"
+  }
+}

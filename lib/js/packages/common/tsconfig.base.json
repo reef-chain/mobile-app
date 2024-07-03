@@ -1,0 +1,35 @@
+{
+  "extends": "@polkadot/dev/config/tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "paths": {
+      "@polkadot/hw-ledger": ["hw-ledger/src/index.ts"],
+      "@polkadot/hw-ledger/packageInfo": ["hw-ledger/src/packageInfo.ts"],
+      "@polkadot/hw-ledger/*": ["hw-ledger/src/*.ts"],
+      "@polkadot/hw-ledger-transports": ["hw-ledger-transports/src/browser.ts"],
+      "@polkadot/hw-ledger-transports/packageInfo": ["hw-ledger-transports/src/packageInfo.ts"],
+      "@polkadot/hw-ledger-transports/types": ["hw-ledger-transports/src/types.ts"],
+      "@polkadot/hw-ledger-transports/*": ["hw-ledger-transports/src/browser.ts"],
+      "@polkadot/keyring": ["keyring/src/index.ts"],
+      "@polkadot/keyring/packageInfo": ["keyring/src/packageInfo.ts"],
+      "@polkadot/networks": ["networks/src/index.ts"],
+      "@polkadot/networks/packageInfo": ["networks/src/packageInfo.ts"],
+      "@polkadot/util-crypto": ["util-crypto/src/index.ts"],
+      "@polkadot/util-crypto/packageInfo": ["util-crypto/src/packageInfo.ts"],
+      "@polkadot/util-crypto/*": ["util-crypto/src/*.ts"],
+      "@polkadot/util": ["util/src/index.ts"],
+      "@polkadot/util/packageInfo": ["util/src/packageInfo.ts"],
+      "@polkadot/util/test": ["util/src/test/index.ts"],
+      "@polkadot/util/*": ["util/src/*.ts"],
+      "@polkadot/x-bundle/*": ["x-bundle/src/*.ts"],
+      "@polkadot/x-bigint": ["x-bigint/src/index.ts"],
+      "@polkadot/x-bigint/shim": ["x-bigint/src/shim.ts"],
+      "@polkadot/x-fetch": ["x-fetch/src/browser.ts"],
+      "@polkadot/x-global": ["x-global/src/index.ts"],
+      "@polkadot/x-randomvalues": ["x-randomvalues/src/browser.ts"],
+      "@polkadot/x-textdecoder": ["x-textdecoder/src/browser.ts"],
+      "@polkadot/x-textencoder": ["x-textencoder/src/browser.ts"],
+      "@polkadot/x-ws": ["x-ws/src/browser.ts"]
+    }
+  }
+ }

@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "outDir": "./build",
+    "rootDir": "./src",
+    "emitDeclarationOnly": false,
+    "noEmit": true
+  },
+  "include": [
+    "**/*.spec.ts"
+  ],
+  "references": [
+    { "path": "../hw-ledger/tsconfig.build.json" },
+    { "path": "../networks/tsconfig.build.json" },
+    { "path": "../util/tsconfig.build.json" }
+  ]
+}

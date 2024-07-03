@@ -1,0 +1,28 @@
+{
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "bugs": "https://github.com/polkadot-js/common/issues",
+  "engines": {
+    "node": ">=18"
+  },
+  "homepage": "https://github.com/polkadot-js/common/tree/master/packages/hw-ledger#readme",
+  "license": "Apache-2.0",
+  "name": "@polkadot/hw-ledger",
+  "repository": {
+    "directory": "packages/hw-ledger",
+    "type": "git",
+    "url": "https://github.com/polkadot-js/common.git"
+  },
+  "sideEffects": [
+    "./packageDetect.js",
+    "./packageDetect.cjs"
+  ],
+  "type": "module",
+  "version": "12.6.3-11-x",
+  "main": "index.js",
+  "dependencies": {
+    "@polkadot/hw-ledger-transports": "12.6.3-11-x",
+    "@polkadot/util": "12.6.3-11-x",
+    "@zondax/ledger-substrate": "^0.41.3",
+    "tslib": "^2.6.2"
+  }
+}

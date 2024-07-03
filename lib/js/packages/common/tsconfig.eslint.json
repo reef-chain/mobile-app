@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "./packages",
+    "composite": false
+  },
+  "include": [
+    "packages/**/src/**/*",
+    "packages/**/scripts/**/*",
+    ".prettierrc.cjs",
+    "eslint.config.js",
+    "rollup.config.js"
+  ],
+  "exclude": [
+    "**/node_modules/**/*"
+  ]
+}
