@@ -69,7 +69,7 @@ Widget topBar(BuildContext context) {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              AccountPill(selSignerList.first.name),
+                              AccountPill(abbreviateName(selSignerList.first.name)),
                               Gap(2.0),
                              Material(
   elevation: 4,
@@ -184,4 +184,14 @@ List<StreamSubscription> listeners=[];
         }
       });
   }
+}
+
+String abbreviateName(String name) {
+  List<String> words = name.split(' ');
+  if (words.length >= 2) {
+    return words[0][0].toUpperCase() + words[1][0].toUpperCase();
+  } else if (words.length == 1) {
+    return words[0][0].toUpperCase();
+  }
+  return '';
 }
