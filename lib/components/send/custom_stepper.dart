@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../utils/styles.dart';
 
@@ -657,22 +658,22 @@ class _ReefStepperState extends State<ReefStepper>
       case ReefStepState.editing:
         return textTheme.bodyLarge!.copyWith(
             color: Styles.primaryColor,
-            fontSize: 28,
+            fontSize: 22.sp,
             fontWeight: FontWeight.bold);
       case ReefStepState.complete:
         return textTheme.bodyLarge!.copyWith(
           color: Styles.greenColor,
-          fontSize: widget.steps.length == index + 1 ? 28 : 18,
+          fontSize: widget.steps.length == index + 1 ? 22.sp : 16.sp,
         );
       case ReefStepState.disabled:
         return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kDisabledDark : _kDisabledLight,
-          fontSize: 18,
+          fontSize: 16.sp,
         );
       case ReefStepState.error:
         return textTheme.bodyLarge!.copyWith(
           color: _isDark() ? _kErrorDark : _kErrorLight,
-          fontSize: 18,
+          fontSize: 16.sp,
         );
     }
   }
