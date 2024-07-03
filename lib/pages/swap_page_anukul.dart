@@ -640,12 +640,13 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   Container getToken(
-      bool isEditing,
-      dynamic callback,
-      TokenWithAmount? selectedTokenWithAmount,
-      FocusNode focusNode,
-      TextEditingController amountController,
-      dynamic amountUpdated) {
+    bool isEditing,
+    dynamic callback,
+    TokenWithAmount? selectedTokenWithAmount,
+    FocusNode focusNode,
+    TextEditingController amountController,
+    dynamic amountUpdated,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -663,8 +664,9 @@ class _SwapPageState extends State<SwapPage> {
                 onPressed: () {
                   showTokenSelectionModal(context,
                       callback: callback,
-                      selectedToken: selectedTopToken?.address ??
-                          Constants.REEF_TOKEN_ADDRESS,availableTokens: availableTokens);
+                      selectedToken: selectedTokenWithAmount?.address ??
+                          Constants.REEF_TOKEN_ADDRESS,
+                      availableTokens: availableTokens);
                 },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 minWidth: 0,
@@ -680,9 +682,9 @@ class _SwapPageState extends State<SwapPage> {
                     if (selectedTokenWithAmount == null)
                       const Text("Select token")
                     else ...[
-                      IconFromUrl(selectedTokenWithAmount!.iconUrl),
+                      IconFromUrl(selectedTokenWithAmount.iconUrl),
                       const Gap(4),
-                      Text(selectedTokenWithAmount!.symbol),
+                      Text(selectedTokenWithAmount.symbol),
                     ],
                     const Gap(4),
                     Icon(CupertinoIcons.chevron_down,
@@ -703,29 +705,33 @@ class _SwapPageState extends State<SwapPage> {
                   onChanged: (text) async {
                     await amountUpdated(amountController.text);
                   },
-                  decoration: getInputDecoration(),
+                  decoration: getInputDecoration().copyWith(
+                    contentPadding:
+                        const EdgeInsets.only(bottom: 4), // Add bottom padding
+                  ),
                   textAlign: TextAlign.right,
                 ),
-              ),
+              )
             ],
           ),
           const Gap(8),
           SizedBox(
             width: double.infinity,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (selectedTokenWithAmount != null) ...[
                   Text(
-                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount!.balance, decimals: selectedTokenWithAmount!.decimals)} ${selectedTokenWithAmount!.symbol}",
+                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount.balance, decimals: selectedTokenWithAmount.decimals)} ${selectedTokenWithAmount.symbol}",
                     style:
                         TextStyle(color: Styles.textLightColor, fontSize: 12),
                   ),
                   MaxAmountButton(
                     onPressed: () async {
                       var tokenBalance = toAmountDisplayBigInt(
-                          selectedTokenWithAmount!.balance,
-                          decimals: selectedTokenWithAmount!.decimals,
-                          fractionDigits: selectedTokenWithAmount!.decimals);
+                          selectedTokenWithAmount.balance,
+                          decimals: selectedTokenWithAmount.decimals,
+                          fractionDigits: selectedTokenWithAmount.decimals);
                       await amountUpdated(tokenBalance);
                       amountController.text = tokenBalance;
                     },
@@ -798,12 +804,13 @@ class _SwapPageState extends State<SwapPage> {
     ));
   }
 
-  Container getFixedTokenField(
-      bool isEditing,
-      TokenWithAmount? token,
-      FocusNode isFocus,
-      TextEditingController amountController,
-      dynamic amountUpdated) {
+ Container getFixedTokenField(
+    bool isEditing,
+    TokenWithAmount? token,
+    FocusNode isFocus,
+    TextEditingController amountController,
+    dynamic amountUpdated,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -826,59 +833,67 @@ class _SwapPageState extends State<SwapPage> {
         children: [
           Row(
             children: [
-              Row(
-                children: [
-                  IconFromUrl(token!.iconUrl, size: 48),
-                  const Gap(13),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        token != null ? token!.name : 'Select',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                            color: Color(0xff19233c)),
-                      ),
-                      Text(
-                        "${toAmountDisplayBigInt(token!.balance)} ${token!.name.toUpperCase()}",
-                        style: TextStyle(
-                            color: Styles.textLightColor, fontSize: 12),
-                      )
-                    ],
-                  ),
-                ],
-              ),
+              IconFromUrl(token!.iconUrl, size: 48),
+              const Gap(13),
               Expanded(
-                child: TextFormField(
-                  focusNode: isFocus,
-                  readOnly: txInProgress,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\.0-9]'))
-                  ],
-                  keyboardType: TextInputType.number,
-                  controller: amountController,
-                  onChanged: (text) async {
-                    setState(() {
-                      amountUpdated(amountController.text);
-                    });
-                  },
-                  decoration: InputDecoration(
-                      constraints: const BoxConstraints(maxHeight: 32),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      border: const OutlineInputBorder(),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      token.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          color: Color(0xff19233c)),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "${toAmountDisplayBigInt(token.balance)} ${token.name.toUpperCase()}",
+                            style: TextStyle(
+                                color: Styles.textLightColor, fontSize: 12),
+                          ),
                         ),
-                      ),
-                      hintText: '0.0',
-                      hintStyle: TextStyle(color: Styles.textLightColor)),
-                  textAlign: TextAlign.right,
+                        Expanded(
+                          child: TextFormField(
+                            focusNode: isFocus,
+                            readOnly: txInProgress,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'[\.0-9]'))
+                            ],
+                            keyboardType: TextInputType.number,
+                            controller: amountController,
+                            onChanged: (text) async {
+                              setState(() {
+                                amountUpdated(amountController.text);
+                              });
+                            },
+                            decoration: InputDecoration(
+                                constraints:
+                                    const BoxConstraints(maxHeight: 32),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                enabledBorder: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.transparent),
+                                ),
+                                border: const OutlineInputBorder(),
+                                focusedBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                                hintText: '0.0',
+                                hintStyle:
+                                    TextStyle(color: Styles.textLightColor)),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
