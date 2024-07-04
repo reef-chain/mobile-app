@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 
-class WsBridge extends WebSocket {
+export class WsBridge extends WebSocket {
   private messageSubject: Subject<{ type: string; data: any }>;
 
   constructor(url: string, protocols?: string | string[]) {
@@ -13,20 +13,13 @@ class WsBridge extends WebSocket {
     this.messageSubject.next({ type: 'send', data });
   }
 
- //on receiving any message, should send to WsBridge.dart and listen to acknowldegment from there
-  override onmessage: (this: WebSocket, ev: MessageEvent) => any = (ev: MessageEvent) => {
-    this.messageSubject.next({ type: 'received', data: ev.data });
-  };
+ //on receiving any message from js, should be emitted
+  messageFromFlutter(data){
+    this.onmessage(data)
+  }
 
   // Method to get the message subject as observable to subscribe
   public get messageObservable() {
     return this.messageSubject.asObservable();
   }
-}
-
-export const wsBridge ={
-    getWsBridge:(url:string)=>{
-        const wsBridgeConn = new WsBridge(url);
-        return wsBridgeConn.messageObservable;
-    },
 }

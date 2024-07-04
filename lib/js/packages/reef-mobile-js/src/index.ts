@@ -17,4 +17,12 @@ window['signer'] = Signer;
 window['firebase'] = Firebase;
 window['getReefJsVer'] = ()=>({reefAppJs:'0.0.1', utilLib:version});
 window['isJsConn'] = ()=>{return true};
-window['wsBridge']= wsBridge;
+
+
+// would need a separate file for this
+// then flutter subscribes to messages and forwards responses by calling fromFlutter()
+const jsWs = new WsBridge(url);
+window['wsBridge']= {
+    fromFlutter: jsWs.messageFromFlutter,
+    sendMessage$: jsWs.messageObservable
+};
