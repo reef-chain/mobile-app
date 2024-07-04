@@ -12,6 +12,7 @@ import 'package:reef_mobile_app/components/switch_network.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/service/LocalNotificationService.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+import 'package:reef_mobile_app/utils/ws_bridge.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -109,6 +110,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   );
                 }),
+                ElevatedButton(onPressed: (){
+                  var bridge = WsBridge("wss://rpc.reefscan.com/ws");
+                  bridge.connect();
+                }, child: Text("anukul")),
                 const Gap(12),
                 const Divider(
                   color: Styles.textLightColor,

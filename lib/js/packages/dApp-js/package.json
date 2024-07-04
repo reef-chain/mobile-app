@@ -19,6 +19,9 @@
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --tsconfig=tsconfig.json",
     "start": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --watch --tsconfig=tsconfig.json"
   },
+  "resolutions": {
+    "@polkadot/x-ws": "npm:@anukulpandey/reef-x-ws@1.0.2"
+  },
   "browser": {
     "crypto": false
   }

@@ -5,7 +5,8 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/wasm-crypto": "4.6.1"
+    "@polkadot/wasm-crypto": "4.6.1",
+    "@polkadot/x-ws": "@anukulpandey/reef-x-ws@1.0.2"
   },
   "scripts": {
     "build:clean": "yarn clean0&&yarn clean1&&yarn clean2&&yarn clean&&yarn install&&yarn build",
@@ -21,5 +22,8 @@
     "build1": "yarn --cwd ./packages/dApp-js build",
     "build2": "yarn --cwd ./packages/flutter-js-bridge build",
     "man-link": "cd ./node_modules/@reef-chain&&rm -rf util-lib&&ln -s ~/reef/util-lib ./util-lib&&cd ../.."
+  },
+  "dependencies": {
+    "@anukulpandey/reef-x-ws": "^1.0.2"
   }
 }

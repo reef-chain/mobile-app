@@ -16,6 +16,9 @@
   "devDependencies": {
     "esbuild": "^0.14.42"
   },
+  "resolutions": {
+    "@polkadot/x-ws": "npm:@anukulpandey/reef-x-ws@1.0.2"
+  },
   "scripts": {
     "clean": "rm -rf node_modules && rm -rf dist",
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --tsconfig=tsconfig.json",

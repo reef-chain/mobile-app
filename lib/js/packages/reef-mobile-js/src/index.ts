@@ -6,6 +6,7 @@ import {initFlutterApi} from "./jsApi/initFlutterApi";
 import Keyring from "./jsApi/keyring";
 import Signer from "./jsApi/signing/signer";
 import Firebase from "./jsApi/firebaseApi";
+import { wsBridge } from './jsApi/wsBridgeApi';
 
 polyfill;
 window['flutterJS'] = new FlutterJS(initFlutterApi);
@@ -16,3 +17,4 @@ window['signer'] = Signer;
 window['firebase'] = Firebase;
 window['getReefJsVer'] = ()=>({reefAppJs:'0.0.1', utilLib:version});
 window['isJsConn'] = ()=>{return true};
+window['wsBridge']= wsBridge;

@@ -10,6 +10,7 @@ import {FlutterJS} from "flutter-js-bridge/src/FlutterJS";
 import {InjectedAccountWithMeta} from '@reef-chain/util-lib/dist/dts/extension'
 import Signer from "./background/Signer";
 import {getSignatureSendRequest} from "flutter-js-bridge/src/sendRequestSignature";
+import * as anukulTest from "@polkadot/x-ws";
 
 const {AVAILABLE_NETWORKS } = network;
 
@@ -31,6 +32,9 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                     }
                 ));
                 console.log("INIT REEF ACCOUNTS len=",accountsWithMeta.length);
+
+                console.log("anukulTest===",anukulTest);
+
                 const destroyFn = await reefState.initReefState({
                     network: AVAILABLE_NETWORKS[selNetwork],
                     jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey},

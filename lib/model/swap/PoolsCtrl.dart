@@ -13,6 +13,10 @@ class PoolsCtrl{
         .listen((network)async{refetch(await fetchPools());});
   }
 
+  dynamic connectWsBridge(String url)async{
+    return await jsApi.jsObservable('window.wsBridge.getWsBridge("${url}")');
+  }
+
   Future<List<dynamic>>fetchPools()async{
     return await jsApi.jsPromise('window.utils.getPools(10,0,"","")');
   }
