@@ -1,0 +1,10 @@
+import { Observable } from "rxjs";
+import { Signer } from "@reef-chain/evm-provider";
+import { NFT } from "./tokenModel";
+import { StatusDataObject } from "../reefState/model/statusDataObject";
+import { IpfsUrlResolverFn } from "../reefState/ipfsUrlResolverFn";
+export declare function getIpfsUrl(ipfsHash: string): string;
+export declare const toIpfsProviderUrl: (ipfsUriStr: string, ipfsUrlResolver?: IpfsUrlResolverFn) => string | null;
+export declare const getResolveNftPromise: (nft: NFT | null, signer: Signer, ipfsUrlResolver?: IpfsUrlResolverFn) => Promise<NFT | null>;
+export declare const resolveNftImageLinks: (nfts: (NFT | null)[], signer: Signer, ipfsUrlResolver?: IpfsUrlResolverFn) => Observable<(NFT | null)[]>;
+export declare const resolveNftImageLinks$: (nfts: (NFT | null)[] | NFT[], signer: Signer, ipfsUrlResolver?: IpfsUrlResolverFn) => Observable<StatusDataObject<NFT | null>[]> | Observable<StatusDataObject<NFT>[]>;

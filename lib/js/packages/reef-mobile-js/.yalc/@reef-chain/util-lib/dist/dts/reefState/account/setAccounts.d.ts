@@ -1,0 +1,12 @@
+import { UpdateDataCtx } from "../model/updateStateModel";
+import { ReefAccount } from "../../account/accountModel";
+import { ReplaySubject, Subject, BehaviorSubject } from "rxjs";
+import type { Signer as InjectedSigningKey } from "@polkadot/api/types";
+import type { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+import { InjectedAccountWithMeta as InjectedAccountWithMetaReef, AccountJson } from "../../extension";
+export declare const accountsJsonSubj: ReplaySubject<InjectedAccountWithMetaReef[] | AccountJson[] | InjectedAccountWithMeta[]>;
+export declare const accountsJsonSigningKeySubj: BehaviorSubject<InjectedSigningKey>;
+export declare const updateSignersSubj: Subject<UpdateDataCtx<ReefAccount[]>>;
+export declare const setAccounts: (accounts: AccountJson[] | InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[] | null) => void;
+export declare const selectedAddressSubj: Subject<string | undefined>;
+export declare const setSelectedAddress: (address: string | undefined) => void;

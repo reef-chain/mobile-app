@@ -38,8 +38,19 @@ export const initApi = (signingKey: Signer)=>{
 
             // TODO call this from dart ws response handler
             onFlutterWsResponse: (data)=>{
-                flutterWs.flutterWsProvider.getFlutterWs().onFlutterWsMessage(data);
-            },
+                let formattedString = data.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+                formattedString = formattedString.replace(/:\s*([a-zA-Z_][\w]*)/g, ': "$1"');
+                formattedString = formattedString.replace(/:\s*([\d.]+)/g, ': $1');
+                formattedString = formattedString.replace(/:\s*(0x[0-9a-fA-F]+)/g, ': "$1"');
+                try {
+                  if (!formattedString.trim().startsWith('{')) {
+                    formattedString = `{${formattedString}}`;
+                  }
+                  const jsonObject = JSON.parse(formattedString);
+                  const jsonString = JSON.stringify(jsonObject, null, 2);
+                  flutterWs.flutterWsProvider.getFlutterWs().onFlutterWsMessage({data:jsonString});
+            }
+        },
 
             initReefState: async (networkName, accounts: Account[]) => {
 
