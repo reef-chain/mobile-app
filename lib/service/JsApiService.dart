@@ -111,7 +111,16 @@ class JsApiService {
     String ident = Random().nextInt(9999999).toString();
 
     jsCall(
-        "window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName', '$ident')");
+        "window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName', '$ident')").then((res){
+      var err = jsonDecode(res)['error'];
+      if(err!=null) {
+        print("ERROR while calling JS ${jsObsRefName} ///// err=$err");
+      }
+    }).catchError((err){
+      print("ERROR evaluating = $jsObsRefName ///// uncaught exception - ${err}");
+    });
+
+    // stream not emitting or if awaiting Future stuck if error in js - we'd need to async this method and return stream in then() fn above or close stream immediately on error
     return jsMessageSubj.stream
         .where((event) => event.streamId == ident)
         .map((event) => event.value);
