@@ -109,16 +109,16 @@ class ReefAppState {
   _initReefState(JsApiService jsApiService, Network currentNetwork) async {
 
     await jsApiService.jsPromise(
-        'window.jsApi.initWsBridge("${currentNetwork.name}")');
-    var wsReqStream = jsApiService.jsObservable('window.jsApi.wsBridgeReq\$');
+        'window.reefStateInitMethods.initWsBridge("${currentNetwork.name}")');
+    var wsReqStream = jsApiService.jsObservable('reefStateInitMethods.wsBridgeReq.flutterWsReq');
+    // wsReqStream must subscribe before websocket connects otherwise it will NOT receive messages from beginning
     wsReqStream.listen((data){
-      print("WSSSSSSS $data");
+      print("!!!!!!!WSSSSSSS RRRRRRRRRRREQ= $data");
     });
 
     var accounts = await accountCtrl.getStorageAccountsList();
     await jsApiService.jsPromise(
-        'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
-
+        'window.reefStateInitMethods.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
   }
 
   _initReefObservables(JsApiService reefAppJsApiService) async {

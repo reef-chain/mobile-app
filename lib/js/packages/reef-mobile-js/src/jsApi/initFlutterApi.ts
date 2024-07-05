@@ -30,7 +30,7 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
         
         (window as any).jsApi = {
 
-            initWsBridge: (networkName: NetworkName) => {
+            /* initWsBridge: (networkName: NetworkName) => {
                 const rpcUrl=AVAILABLE_NETWORKS[networkName].rpcUrl
                 flutterWsProvider = new FlutterWsProvider(rpcUrl);
                 flutterWsReq$ = flutterWsProvider.getSend$();
@@ -58,15 +58,15 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                     rpcConfig: { autoConnectMs:5000,customWsProvider: flutterWsProvider }
                 });
                 // TODO check if it's really destroyed
-                /*setTimeout((  )=>{
+                 *//*setTimeout((  )=>{
                     destroyFn();
                     console.log('destroyed')
-                },5000)*/
+                },5000)*//*
                 window.addEventListener("beforeunload", function(e){
                     console.log('DESTROY Reef Api');
                     destroyFn();
                 }, false);
-            }
+            } */
         };
         // testReefObservables();
         accountApi.innitApi(signingKey);
@@ -75,7 +75,7 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
         signApi.initApi(signingKey);
         utilsApi.initApi();
         metadataApi.initApi();
-//         reefStateInitMethodsApi.initApi();
+        reefStateInitMethodsApi.initApi(signingKey);
     } catch (e) {
         console.log("INIT FLUTTER JS API ERROR=", e.message);
     }
