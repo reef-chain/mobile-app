@@ -5,13 +5,15 @@ import * as swapApi from "./swapApi";
 import * as signApi from "./signApi";
 import * as utilsApi from "./utilsApi";
 import * as metadataApi from "./metadataApi";
+import * as wsBridgeApi from "./wsBridgeApi";
 import {reefState, network} from "@reef-chain/util-lib";
 import {FlutterJS} from "flutter-js-bridge/src/FlutterJS";
 import {InjectedAccountWithMeta} from '@reef-chain/util-lib/dist/dts/extension'
 import Signer from "./background/Signer";
 import {getSignatureSendRequest} from "flutter-js-bridge/src/sendRequestSignature";
+import { Observable, Subject, firstValueFrom } from "rxjs";
 
-const {AVAILABLE_NETWORKS } = network;
+const {AVAILABLE_NETWORKS,ReefWsProvider} = network;
 
 const getIpfsGatewayUrl = (hash: string): string => {
     const ret = `https://reef.infura-ipfs.io/ipfs/${hash}`
@@ -22,7 +24,7 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
     try {
         console.log("INIT FLUTTER JS API util-lib v1.0.0-rc1");
         const signingKey = getFlutterSigningKey(flutterJS);
-
+        
         (window as any).jsApi = {
             initReefState: async (selNetwork: AVAILABLE_NETWORKS, accounts: Account[]) => {
                 let accountsWithMeta: InjectedAccountWithMeta[] = await Promise.all(
@@ -31,11 +33,14 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                     }
                 ));
                 console.log("INIT REEF ACCOUNTS len=",accountsWithMeta.length);
+                // flutterWs.connectFlutterWs(sendToFlutterSubj);
+                const flutterWsProvider = new ReefWsProvider(AVAILABLE_NETWORKS[selNetwork].rpcUrl);
+                const flutterWsMessageObs$ = flutterWsProvider.connectToFlutter();
                 const destroyFn = await reefState.initReefState({
                     network: AVAILABLE_NETWORKS[selNetwork],
                     jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey},
                     ipfsHashResolverFn: getIpfsGatewayUrl,
-                    rpcConfig: { autoConnectMs:5000 }
+                    rpcConfig: { autoConnectMs:5000,customWsProvider:flutterWsProvider }
                 });
                 // TODO check if it's really destroyed
                 /*setTimeout((  )=>{
@@ -46,6 +51,7 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                     console.log('DESTROY Reef Api');
                     destroyFn();
                 }, false);
+                return flutterWsMessageObs$;
             }
         };
         // testReefObservables();

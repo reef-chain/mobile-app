@@ -1,0 +1,12 @@
+import type { InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, ProviderList, Unsubcall, Web3AccountsOptions } from "../extension-inject/types";
+export declare const SELECTED_EXTENSION_IDENT = "selected_extension_reef";
+declare let isWeb3Injected: boolean;
+declare let web3EnablePromise: Promise<InjectedExtension[]> | null;
+export { isWeb3Injected, web3EnablePromise };
+export declare function web3Enable(originName: string, compatInits?: (() => Promise<boolean>)[], tryConnectSnap?: boolean): Promise<InjectedExtension[]>;
+export declare function web3Accounts({ accountType, ss58Format, }?: Web3AccountsOptions): Promise<InjectedAccountWithMeta[]>;
+export declare function web3AccountsSubscribe(cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format }?: Web3AccountsOptions): Promise<Unsubcall>;
+export declare function web3FromSource(source: string): Promise<InjectedExtension>;
+export declare function web3FromAddress(address: string): Promise<InjectedExtension>;
+export declare function web3ListRpcProviders(source: string): Promise<ProviderList | null>;
+export declare function web3UseRpcProvider(source: string, key: string): Promise<InjectedProviderWithMeta>;
