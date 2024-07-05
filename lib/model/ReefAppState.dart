@@ -107,11 +107,18 @@ class ReefAppState {
   }
 
   _initReefState(JsApiService jsApiService, Network currentNetwork) async {
+
+    await jsApiService.jsPromise(
+        'window.jsApi.initWsBridge("${currentNetwork.name}")');
+    var wsReqStream = jsApiService.jsObservable('window.jsApi.wsBridgeReq\$');
+    wsReqStream.listen((data){
+      print("WSSSSSSS $data");
+    });
+
     var accounts = await accountCtrl.getStorageAccountsList();
-    var flutterWsMessageObs$ = await jsApiService.jsPromise(
+    await jsApiService.jsPromise(
         'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
 
-    // here i am trying to log flutterWsMessageObs$ events
   }
 
   _initReefObservables(JsApiService reefAppJsApiService) async {

@@ -5,7 +5,7 @@ import * as swapApi from "./swapApi";
 import * as signApi from "./signApi";
 import * as utilsApi from "./utilsApi";
 import * as metadataApi from "./metadataApi";
-import * as reefStateInitMethodsApi from "./reefStateInitMethodsApi";
+import * as wsBridgeApi from "./wsBridgeApi";
 import {reefState, network} from "@reef-chain/util-lib";
 import {FlutterJS} from "flutter-js-bridge/src/FlutterJS";
 import {InjectedAccountWithMeta} from '@reef-chain/util-lib/dist/dts/extension'
@@ -20,15 +20,13 @@ const getIpfsGatewayUrl = (hash: string): string => {
     return ret;
 };
 
+
 let flutterWsProvider;
 let flutterWsReq$;
 
-export const initFlutterApi = async (flutterJS: FlutterJS) => {
-    try {
-        console.log("INIT FLUTTER JS API util-lib v1.0.0-rc1");
-        const signingKey = getFlutterSigningKey(flutterJS);
-        
-        (window as any).jsApi = {
+export const initApi = ()=>{
+    (window as any).reefStateInitMethods = {
+
 
             initWsBridge: (networkName: NetworkName) => {
                 const rpcUrl=AVAILABLE_NETWORKS[networkName].rpcUrl
@@ -67,21 +65,6 @@ export const initFlutterApi = async (flutterJS: FlutterJS) => {
                     destroyFn();
                 }, false);
             }
-        };
-        // testReefObservables();
-        accountApi.innitApi(signingKey);
-        transferApi.initApi(signingKey);
-        swapApi.initApi(signingKey);
-        signApi.initApi(signingKey);
-        utilsApi.initApi();
-        metadataApi.initApi();
-//         reefStateInitMethodsApi.initApi();
-    } catch (e) {
-        console.log("INIT FLUTTER JS API ERROR=", e.message);
-    }
-};
 
-function getFlutterSigningKey (flutterJS: FlutterJS) {
-        let sendRequest = getSignatureSendRequest(flutterJS);
-        return  new Signer(sendRequest);
+    }
 }
