@@ -20,9 +20,9 @@ class WebSocketService {
   void _listen() {
     _channel.stream.listen(
       (message) {
-        final String jsFunctionCall = 'window.reefStateInitMethods.onFlutterWsResponse("${(json.decode(message))}")';
+final String jsFunctionCall = "window.reefStateInitMethods.onFlutterWsResponse(`$message`)";
 
-        jsApiService.jsPromise(jsFunctionCall);
+jsApiService.jsPromise(jsFunctionCall);
       },
       onError: (error) {
         print('Error: $error');
@@ -34,6 +34,7 @@ class WebSocketService {
   }
 
   void send(Map<String, dynamic> data) {
+    print("sending on ${this.url}");
     _channel.sink.add(data['data'].toString());
   }
 

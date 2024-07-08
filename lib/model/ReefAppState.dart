@@ -114,7 +114,6 @@ class ReefAppState {
     var wsReqStream = jsApiService.jsObservable('reefStateInitMethods.wsBridgeReq.flutterWsReq');
     // wsReqStream must subscribe before websocket connects otherwise it will NOT receive messages from beginning
     wsReqStream.listen((data){
-      print("!!!!!!!WSSSSSSS RRRRRRRRRRREQ= $data");
       WebSocketService(currentNetwork.name,jsApiService).send(data);
     });
 
