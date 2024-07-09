@@ -74,6 +74,9 @@ class NavigationCtrl with NavSwipeCompute {
                       color: Styles.whiteColor,
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: SendPage(
                   preselected,
@@ -102,6 +105,9 @@ class NavigationCtrl with NavSwipeCompute {
                       color: Styles.whiteColor
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               backgroundColor: Styles.greyColor,
               body: 
@@ -131,6 +137,9 @@ class NavigationCtrl with NavSwipeCompute {
                       color: Styles.whiteColor
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: Padding(
                 padding:
@@ -148,6 +157,9 @@ class NavigationCtrl with NavSwipeCompute {
               appBar: AppBar(
                 title: Text(AppLocalizations.of(context)!.swap_tokens,style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: Padding(
                 padding:
@@ -164,6 +176,9 @@ class NavigationCtrl with NavSwipeCompute {
               appBar: AppBar(
                 title: Text("WalletConnect",style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
                 leading: SvgPicture.asset('assets/images/walletconnect.svg'),
               ),
               body: const Padding(
@@ -182,6 +197,9 @@ class NavigationCtrl with NavSwipeCompute {
               appBar: AppBar(
                 title: Text("WalletConnect",style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: const Padding(
                 padding:

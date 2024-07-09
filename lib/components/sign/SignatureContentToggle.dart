@@ -65,6 +65,9 @@ class SignatureContentToggle extends StatelessObserverWidget {
             padding: const EdgeInsets.all(6),
             child: Image.asset('assets/images/reef.png')),
         backgroundColor: Styles.primaryBackgroundColor,
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         elevation: 0.0,
       ),
       body: Column(
