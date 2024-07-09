@@ -102,7 +102,7 @@ class JsApiService {
     return null;
   }
 
-  Future jsPromise<T>(String jsObsRefName) async {
+  Future<T> jsPromise<T>(String jsObsRefName) async {
     dynamic res = await jsObservable(jsObsRefName).first;
     return T == bool?resolveBooleanValue(res) : res;
   }

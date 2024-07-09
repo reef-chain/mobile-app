@@ -114,7 +114,7 @@ class ReefAppState {
     var wsReqStream = jsApiService.jsObservable('reefStateInitMethods.wsBridgeReq.flutterWsReq');
     // wsReqStream must subscribe before websocket connects otherwise it will NOT receive messages from beginning
     wsReqStream.listen((data){
-      WebSocketService(currentNetwork.name,jsApiService).send(data);
+      NetworkWs.getConnectedChannel(currentNetwork.name, jsApiService).send(data)(data, currentNetwork.name, jsApiService, "window.reefStateInitMethods.onFlutterWsResponse");
     });
 
     var accounts = await accountCtrl.getStorageAccountsList();

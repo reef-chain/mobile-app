@@ -92,6 +92,12 @@ export const initApi = () => {
             return reefState.setSelectedNetwork(net);
         },
 
+        getNetworkWsUrl: (networkName: string) => {
+            const net: network.Network = network.AVAILABLE_NETWORKS[networkName];
+            console.log('getAvailableNetworkConfig=', net)
+            return net?.rpcUrl;
+        },
+
         bytesString: (bytes: string) => {
             return isAscii(bytes) ? u8aToString(u8aUnwrapBytes(bytes)) : bytes;
         },
