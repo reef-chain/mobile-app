@@ -160,10 +160,13 @@ class _ActivityViewState extends State<ActivityView> {
                     }),
                     const SizedBox(width: 4),
                     if (mimetype != 'video/mp4')
-                      IconFromUrl(
-                        IpfsUtils.resolveIpfsHash(iconUrl!),
-                        size: isTokenNFT! ? 45 : 18,
-                      ),
+                        ClipOval(
+                          child: SizedBox(
+                            width: isTokenNFT! ? 45 : 18,
+                            height: isTokenNFT! ? 45 : 18,
+                            child: IconFromUrl(IpfsUtils.resolveIpfsHash(iconUrl!), size: isTokenNFT! ? 45 : 18)
+                          ),
+                        ),
                     if (mimetype == 'video/mp4')
                       CircleAvatar(
                         backgroundColor: Styles.primaryAccentColor,

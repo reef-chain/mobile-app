@@ -667,7 +667,13 @@ class _SendPageState extends State<SendPage> {
               children: [
                 Row(
                   children: [
-                    IconFromUrl(selectedToken.iconUrl, size: 48),
+                      ClipOval(
+                        child: SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: IconFromUrl(selectedToken.iconUrl, size: 48)
+                        )
+                      ),
                     const Gap(13),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -173,7 +173,9 @@ class TokenSelectionState extends State<TokenSelection> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(children: [
-                                    IconFromUrl(e.iconUrl),
+                                    ClipOval(
+                                      child: IconFromUrl(e.iconUrl),
+                                    ),
                                     const Gap(12),
                                     Column(
                                       crossAxisAlignment:
