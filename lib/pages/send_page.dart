@@ -466,7 +466,7 @@ class _SendPageState extends State<SendPage> {
               child: Text(AppLocalizations.of(context)!.connecting,style: Theme.of(context).textTheme.bodyLarge,)),
             Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
                 child: Column(
           children: [
             Observer(builder: (_) {

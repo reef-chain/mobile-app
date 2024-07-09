@@ -134,7 +134,7 @@ class NavigationCtrl with NavSwipeCompute {
               ),
               body: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
                 child: TxInfo(unparsedTimestamp, imageUrl, iconUrl, mimetype),
               ),
               backgroundColor: Styles.greyColor,
@@ -151,7 +151,7 @@ class NavigationCtrl with NavSwipeCompute {
               ),
               body: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                 child: SwapPage(preselectedTop: preselectedTop,preselectedBottom:preselectedBottom),
               ),
               backgroundColor: Styles.greyColor,
@@ -201,7 +201,7 @@ class NavigationCtrl with NavSwipeCompute {
               ),
               body: const Padding(
                 padding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                 child: PoolsPage(),
               ),
               backgroundColor: Styles.greyColor,
