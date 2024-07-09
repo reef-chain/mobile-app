@@ -17,10 +17,6 @@ class PoolsCtrl{
     return await jsApi.jsPromise('window.utils.getPools(10,0,"","")');
   }
 
-  Future<dynamic> getWsBridge()async{
-    return jsApi.jsObservable('window.wsBridge.getWsBridgeObs()');
-  }
-
   List<dynamic> getCachedPools(){
     return poolsModel.pools;
   }

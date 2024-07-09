@@ -17,6 +17,7 @@ import 'package:reef_mobile_app/model/swap/PoolsCtrl.dart';
 import 'package:reef_mobile_app/model/swap/SwapCtrl.dart';
 import 'package:reef_mobile_app/model/tokens/TokensCtrl.dart';
 import 'package:reef_mobile_app/model/transfer/TransferCtrl.dart';
+import 'package:reef_mobile_app/model/wsBridge/WebSocketService.dart';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/service/WalletConnectService.dart';
@@ -113,7 +114,7 @@ class ReefAppState {
     var wsReqStream = jsApiService.jsObservable('reefStateInitMethods.wsBridgeReq.flutterWsReq');
     // wsReqStream must subscribe before websocket connects otherwise it will NOT receive messages from beginning
     wsReqStream.listen((data){
-      print("!!!!!!!WSSSSSSS RRRRRRRRRRREQ= $data");
+      WebSocketService(currentNetwork.name,jsApiService).send(data);
     });
 
     var accounts = await accountCtrl.getStorageAccountsList();

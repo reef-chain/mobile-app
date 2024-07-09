@@ -38,8 +38,9 @@ export const initApi = (signingKey: Signer)=>{
 
             // TODO call this from dart ws response handler
             onFlutterWsResponse: (data)=>{
-                flutterWs.flutterWsProvider.getFlutterWs().onFlutterWsMessage(data);
+                  flutterWs.flutterWsProvider.getFlutterWs().onFlutterWsMessage({data:data});
             },
+
 
             initReefState: async (networkName, accounts: Account[]) => {
 
