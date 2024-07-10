@@ -1,89 +1,97 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
-class NetworkWs {
-  static NetworkChannel? _connectedChannel;
+class ActiveNetworkWs {
+  static RpcWsNativeChannel? _connectedChannel;
 
-  static void send(Map<String, dynamic> data, String network, JsApiService jsApiService, String jsResponseFn){
-    // TODO
-    // need to check if WebSocketService.activeChannel has same network - if not close current activeChannel and listen to new network
-    // so we have one channel open/saved for last send network request and we can use static context for that
-    //
-    // we need to make sure we don't connect again when connection is in progress so would need to get channel from method that awaits
-    getConnectedChannel(network, jsApiService).send(data);
-  }
-
-  static NetworkChannel getConnectedChannel(String network, JsApiService jsApiService) {
-    if(_connectedChannel==null) {
-      _connectedChannel = NetworkChannel(network, jsApiService);
-    } else if ( _connectedChannel!.network != network){
-        _connectedChannel!.close();
-        _connectedChannel = NetworkChannel(network, jsApiService);
+  static RpcWsNativeChannel getConnectedChannel(
+      String rpcUrl, JsApiService jsApiService, String jsResponseHandlerFn) {
+    if (_connectedChannel == null) {
+      _connectedChannel =
+          RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
+    } else if (_connectedChannel!.rpcUrl != rpcUrl) {
+      _connectedChannel!.close();
+      _connectedChannel =
+          RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
     }
     return _connectedChannel!;
   }
 }
 
-class NetworkChannel {
-  final String network;
-  final String _url;
+class RpcWsNativeChannel {
+  final String rpcUrl;
+  final String _jsResponseHandlerFn;
   final JsApiService _jsApiService;
   WebSocketChannel? _channel;
-  bool isBuffering = true;
-  List<dynamic> bufferingData = [];
+  bool _isBuffering = true;
+  List<dynamic> _bufferingData = [];
 
-  NetworkChannel(this.network, this._jsApiService): _url = network == 'mainnet'
-      ? 'wss://rpc.reefscan.com/ws'
-      : 'wss://rpc-testnet.reefscan.com/ws'{
+  RpcWsNativeChannel(
+      this.rpcUrl, this._jsApiService, this._jsResponseHandlerFn) {
     this._connect();
   }
 
-  void send(data){
-    if(isBuffering) {
-      bufferingData!.add(data);
+  void send(data) {
+    if (_isBuffering) {
+      _bufferingData.add(data);
       return;
     }
 
-    print("sending on ${this._url}");
+    print("sending on ${this.rpcUrl}");
     _channel?.sink.add(data['data'].toString());
-
   }
 
-  void sendBufferData(){
-    isBuffering=false;
-    for (var data in bufferingData) {
+  void sendBufferData() {
+    _isBuffering = false;
+    for (var data in _bufferingData) {
       send(data);
     }
+    _bufferingData.clear();
   }
 
   Future<void> _connect() async {
-    _channel = WebSocketChannel.connect(Uri.parse(_url));
-    _listen(_channel!, _jsApiService);
-    await _channel!.ready;
+    _channel = WebSocketChannel.connect(Uri.parse(rpcUrl));
+    _listen(_channel!, _jsApiService, rpcUrl);
+    try {
+      await _channel!.ready;
+    } on SocketException catch (e) {
+      // TODO Handle the exception - call _jsErrorHandlerFn(err, rpcUrl)
+
+      return;
+    } on WebSocketChannelException catch (e) {
+      //TODO Handle the exception - call _jsErrorHandlerFn(err, rpcUrl)
+
+      return;
+    }
+    // TODO Handle the open - call _jsOpenHandlerFn(rpcUrl)
+
     sendBufferData();
   }
 
-  close(){
+  close() {
     _channel?.sink.close(status.goingAway);
   }
 
-  void _listen(WebSocketChannel channel, JsApiService jsApiService) {
+  void _listen(
+      WebSocketChannel channel, JsApiService jsApiService, String rpcUrl) {
     channel.stream.listen(
-          (message) {
-        final String jsFunctionCall = "window.reefStateInitMethods.onFlutterWsResponse(`$message`)";
+      (message) {
+        final String jsFunctionCall =
+            "$_jsResponseHandlerFn(`$message`, `${rpcUrl}`)";
         jsApiService.jsCallVoidReturn(jsFunctionCall);
       },
       onError: (error) {
         print('ActiveChannel Error: $error');
+        // TODO Handle the exception - call _jsErrorHandlerFn(err, rpcUrl)
       },
       onDone: () {
         print('ActiveChannel Connection closed.');
+        // TODO Handle the close - call _jsCloseHandlerFn(rpcUrl)
       },
     );
   }
-
-
 }

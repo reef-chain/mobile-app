@@ -13,13 +13,6 @@ class NetworkCtrl {
   final JsApiService jsApi;
   NetworkModel networkModel;
 
-  //TODO set on model from js available networks
-  static getNetworkWsUrl(String networkName) {
-    return networkName == 'mainnet'
-        ? 'wss://rpc.reefscan.com/ws'
-        : 'wss://rpc-testnet.reefscan.com/ws';
-  }
-
   NetworkCtrl(this.storage, this.jsApi, this.networkModel) {
     jsApi
         .jsObservable('window.reefState.selectedNetwork\$')
@@ -49,8 +42,8 @@ class NetworkCtrl {
     jsApi.jsCallVoidReturn('window.utils.reconnectProvider()');
   }
 
-  Future<String> getNetworkWsUrl(Network network){
-    return jsApi.jsPromise<String>("window.utils.getNetworkWsUrl('${network.name}')");
+  Future<String?> getNetworkWsUrl(Network network){
+    return jsApi.jsPromise<String?>("window.utils.getNetworkWsUrl('${network.name}')");
   }
 
 }

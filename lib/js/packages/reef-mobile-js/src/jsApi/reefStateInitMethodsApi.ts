@@ -27,18 +27,16 @@ export const initApi = (signingKey: Signer)=>{
     (window as any).reefStateInitMethods = {
 
 
-            initWsBridge: (networkName: NetworkName) => {
-                const rpcUrl=AVAILABLE_NETWORKS[networkName].rpcUrl
-                const wsSendSubj = new Subject<any>();
+            initWsBridge: (rpcUrl: string) => {
+              const wsSendSubj = new Subject<any>();
                 flutterWs.flutterWsProvider = new FlutterWsProvider(rpcUrl, wsSendSubj);
                 flutterWs.flutterWsReq = wsSendSubj;
             },
             // this evaluates on init call so need an object reference (if null value is set not referenced) to set property later and access it in dart
             wsBridgeReq: flutterWs,
 
-            // TODO call this from dart ws response handler
-            onFlutterWsResponse: (data)=>{
-                  flutterWs.flutterWsProvider.getFlutterWs().onFlutterWsMessage({data:data});
+            onNativeWsChannelResponse: (data, rpcUrl)=>{
+                  flutterWs.flutterWsProvider.getFlutterWs().onFlutterWsMessage({data:data}, rpcUrl);
             },
 
 

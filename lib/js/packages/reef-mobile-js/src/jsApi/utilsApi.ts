@@ -94,7 +94,6 @@ export const initApi = () => {
 
         getNetworkWsUrl: (networkName: string) => {
             const net: network.Network = network.AVAILABLE_NETWORKS[networkName];
-            console.log('getAvailableNetworkConfig=', net)
             return net?.rpcUrl;
         },
 

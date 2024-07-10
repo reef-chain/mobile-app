@@ -91,7 +91,11 @@ class ReefAppState {
             ? Network.testnet
             : Network.mainnet;
     try {
-      await _initReefState(jsApi, currentNetwork);
+      String? rpcWsUrl = await networkCtrl.getNetworkWsUrl(currentNetwork);
+      if(rpcWsUrl==null) {
+        throw "No rpc ws url for network=$currentNetwork";
+      }
+      await _initReefState(jsApi, currentNetwork, rpcWsUrl);
     } catch (e){
       this.initStatusStream.add("error state= ${e.toString()}");
     }
@@ -107,14 +111,14 @@ class ReefAppState {
     this.initStatusStream.add("complete");
   }
 
-  _initReefState(JsApiService jsApiService, Network currentNetwork) async {
+  _initReefState(JsApiService jsApiService, Network currentNetwork, String rpcWsUrl) async {
 
     await jsApiService.jsPromise(
-        'window.reefStateInitMethods.initWsBridge("${currentNetwork.name}")');
+        'window.reefStateInitMethods.initWsBridge("${rpcWsUrl}")');
     var wsReqStream = jsApiService.jsObservable('reefStateInitMethods.wsBridgeReq.flutterWsReq');
     // wsReqStream must subscribe before websocket connects otherwise it will NOT receive messages from beginning
     wsReqStream.listen((data){
-      NetworkWs.getConnectedChannel(currentNetwork.name, jsApiService).send(data)(data, currentNetwork.name, jsApiService, "window.reefStateInitMethods.onFlutterWsResponse");
+      ActiveNetworkWs.getConnectedChannel(rpcWsUrl, jsApiService, "window.reefStateInitMethods.onNativeWsChannelResponse").send(data);//(data, currentNetwork.name, jsApiService, "window.reefStateInitMethods.onFlutterWsResponse");
     });
 
     var accounts = await accountCtrl.getStorageAccountsList();
