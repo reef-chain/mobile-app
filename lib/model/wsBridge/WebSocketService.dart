@@ -10,14 +10,14 @@ class ActiveNetworkWs {
 
   static RpcWsNativeChannel getConnectedChannel(
       String rpcUrl, JsApiService jsApiService, String jsResponseHandlerFn) {
-    if (_connectedChannel == null) {
+    // if (_connectedChannel == null) {
+    //   _connectedChannel =
+    //       RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
+    // } else if (_connectedChannel!.rpcUrl != rpcUrl) {
+    //   _connectedChannel!.close();
       _connectedChannel =
           RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
-    } else if (_connectedChannel!.rpcUrl != rpcUrl) {
-      _connectedChannel!.close();
-      _connectedChannel =
-          RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
-    }
+    // }
     return _connectedChannel!;
   }
 }

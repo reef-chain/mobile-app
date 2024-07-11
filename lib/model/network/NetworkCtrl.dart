@@ -43,7 +43,7 @@ class NetworkCtrl {
   }
 
   Future<String?> getNetworkWsUrl(Network network){
-    return jsApi.jsPromise<String?>("window.utils.getNetworkWsUrl('${network.name}')");
+    return jsApi.jsPromise<String?>('window.utils.getNetworkWsUrl("${network.name}")');
   }
 
 }
