@@ -10,14 +10,14 @@ class ActiveNetworkWs {
 
   static RpcWsNativeChannel getConnectedChannel(
       String rpcUrl, JsApiService jsApiService, String jsResponseHandlerFn) {
-    // if (_connectedChannel == null) {
-    //   _connectedChannel =
-    //       RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
-    // } else if (_connectedChannel!.rpcUrl != rpcUrl) {
-    //   _connectedChannel!.close();
+    if (_connectedChannel == null) {
       _connectedChannel =
           RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
-    // }
+    } else if (_connectedChannel!.rpcUrl != rpcUrl) {
+      _connectedChannel!.close();
+      _connectedChannel =
+          RpcWsNativeChannel(rpcUrl, jsApiService, jsResponseHandlerFn);
+    }
     return _connectedChannel!;
   }
 }
@@ -54,7 +54,10 @@ class RpcWsNativeChannel {
   }
 
   Future<void> _connect() async {
-    _channel = WebSocketChannel.connect(Uri.parse(rpcUrl));
+    //var rpcUrl="wss://rpc.reefscan.com/ws";
+    var uri = Uri.parse(rpcUrl);
+    print("rrrrrrrr= $rpcUrl");
+    _channel = WebSocketChannel.connect(uri);
     _listen(_channel!, _jsApiService, rpcUrl);
     try {
       await _channel!.ready;
