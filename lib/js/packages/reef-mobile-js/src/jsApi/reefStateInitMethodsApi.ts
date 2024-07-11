@@ -5,13 +5,14 @@ import * as swapApi from "./swapApi";
 import * as signApi from "./signApi";
 import * as utilsApi from "./utilsApi";
 import * as metadataApi from "./metadataApi";
-import * as reefStateInitMethodsApi from "./reefStateInitMethodsApi";
+import * as wsBridgeApi from "./wsBridgeApi";
 import {reefState, network} from "@reef-chain/util-lib";
 import {FlutterJS} from "flutter-js-bridge/src/FlutterJS";
 import {InjectedAccountWithMeta} from '@reef-chain/util-lib/dist/dts/extension'
-import Signer from "./background/Signer";
+// import Signer from "./background/Signer";
 import {getSignatureSendRequest} from "flutter-js-bridge/src/sendRequestSignature";
 import { Observable, Subject, firstValueFrom } from "rxjs";
+import Signer from "reef-mobile-js/src/jsApi/background/Signer";
 
 const {AVAILABLE_NETWORKS,FlutterWsProvider, NetworkName} = network;
 
@@ -20,68 +21,54 @@ const getIpfsGatewayUrl = (hash: string): string => {
     return ret;
 };
 
-let flutterWsProvider;
-let flutterWsReq$;
+let flutterWs = {};
 
-export const initFlutterApi = async (flutterJS: FlutterJS) => {
-    try {
-        console.log("INIT FLUTTER JS API util-lib v1.0.0-rc1");
-        const signingKey = getFlutterSigningKey(flutterJS);
-        
-        (window as any).jsApi = {
+export const initApi = (signingKey: Signer)=>{
+    (window as any).reefStateInitMethods = {
 
-            /* initWsBridge: (networkName: NetworkName) => {
-                const rpcUrl=AVAILABLE_NETWORKS[networkName].rpcUrl
-                flutterWsProvider = new FlutterWsProvider(rpcUrl);
-                flutterWsReq$ = flutterWsProvider.getSend$();
+
+            initWsBridge: (rpcUrl: string) => {
+              const wsSendSubj = new Subject<any>();
+                flutterWs.flutterWsProvider = new FlutterWsProvider(rpcUrl, wsSendSubj);
+                flutterWs.flutterWsReq = wsSendSubj;
+            },
+            // this evaluates on init call so need an object reference (if null value is set not referenced) to set property later and access it in dart
+            wsBridgeReq: flutterWs,
+
+            onNativeWsChannelResponse: (data, rpcUrl)=>{
+                  flutterWs.flutterWsProvider.getFlutterWs().onFlutterWsMessage({data:data}, rpcUrl);
             },
 
-            wsBridgeReq$: ()=>flutterWsReq$,
 
             initReefState: async (networkName, accounts: Account[]) => {
 
-                if(!flutterWsProvider){
+                if(!flutterWs.flutterWsProvider){
                 console.log('ERROR initReefState - no flutterWsProvider bridge');
                 throw new Error('no flutterWsProvider bridge initialized');
                 }
-
                 let accountsWithMeta: InjectedAccountWithMeta[] = await Promise.all(
                     accounts.map(async (account: Account) => {
                         return await buildAccountWithMeta(account.name, account.address);
                     }
                 ));
-                console.log("INIT REEF ACCOUNTS len=",accountsWithMeta.length);
+                console.log("INIT REEF ACCOUNTS len=",accountsWithMeta.length, AVAILABLE_NETWORKS[networkName].rpcUrl);
                 const destroyFn = await reefState.initReefState({
                     network: AVAILABLE_NETWORKS[networkName],
                     jsonAccounts: {accounts: accountsWithMeta, injectedSigner: signingKey},
                     ipfsHashResolverFn: getIpfsGatewayUrl,
-                    rpcConfig: { autoConnectMs:5000,customWsProvider: flutterWsProvider }
+                    rpcConfig: { autoConnectMs:5000,customWsProvider: flutterWs.flutterWsProvider }
                 });
+
                 // TODO check if it's really destroyed
-                 *//*setTimeout((  )=>{
+                /*setTimeout((  )=>{
                     destroyFn();
                     console.log('destroyed')
-                },5000)*//*
+                },5000)*/
                 window.addEventListener("beforeunload", function(e){
                     console.log('DESTROY Reef Api');
                     destroyFn();
                 }, false);
-            } */
-        };
-        // testReefObservables();
-        accountApi.innitApi(signingKey);
-        transferApi.initApi(signingKey);
-        swapApi.initApi(signingKey);
-        signApi.initApi(signingKey);
-        utilsApi.initApi();
-        metadataApi.initApi();
-        reefStateInitMethodsApi.initApi(signingKey);
-    } catch (e) {
-        console.log("INIT FLUTTER JS API ERROR=", e.message);
-    }
-};
+            }
 
-function getFlutterSigningKey (flutterJS: FlutterJS) {
-        let sendRequest = getSignatureSendRequest(flutterJS);
-        return  new Signer(sendRequest);
+    }
 }

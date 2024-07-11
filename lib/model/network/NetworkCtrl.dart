@@ -42,4 +42,8 @@ class NetworkCtrl {
     jsApi.jsCallVoidReturn('window.utils.reconnectProvider()');
   }
 
+  Future<String?> getNetworkWsUrl(Network network){
+    return jsApi.jsPromise<String?>('window.utils.getNetworkWsUrl("${network.name}")');
+  }
+
 }

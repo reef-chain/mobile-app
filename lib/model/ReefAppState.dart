@@ -17,6 +17,7 @@ import 'package:reef_mobile_app/model/swap/PoolsCtrl.dart';
 import 'package:reef_mobile_app/model/swap/SwapCtrl.dart';
 import 'package:reef_mobile_app/model/tokens/TokensCtrl.dart';
 import 'package:reef_mobile_app/model/transfer/TransferCtrl.dart';
+import 'package:reef_mobile_app/model/wsBridge/WebSocketService.dart';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/service/WalletConnectService.dart';
@@ -90,7 +91,11 @@ class ReefAppState {
             ? Network.testnet
             : Network.mainnet;
     try {
-      await _initReefState(jsApi, currentNetwork);
+      String? rpcWsUrl = await networkCtrl.getNetworkWsUrl(currentNetwork);
+      if(rpcWsUrl==null) {
+        throw "No rpc ws url for network=$currentNetwork";
+      }
+      await _initReefState(jsApi, currentNetwork, rpcWsUrl);
     } catch (e){
       this.initStatusStream.add("error state= ${e.toString()}");
     }
@@ -106,10 +111,19 @@ class ReefAppState {
     this.initStatusStream.add("complete");
   }
 
-  _initReefState(JsApiService jsApiService, Network currentNetwork) async {
+  _initReefState(JsApiService jsApiService, Network currentNetwork, String rpcWsUrl) async {
+
+    await jsApiService.jsPromise(
+        'window.reefStateInitMethods.initWsBridge("${rpcWsUrl}")');
+    var wsReqStream = jsApiService.jsObservable('reefStateInitMethods.wsBridgeReq.flutterWsReq');
+    // wsReqStream must subscribe before websocket connects otherwise it will NOT receive messages from beginning
+    wsReqStream.listen((data){
+      ActiveNetworkWs.getConnectedChannel(rpcWsUrl, jsApiService, "window.reefStateInitMethods.onNativeWsChannelResponse").send(data);//(data, currentNetwork.name, jsApiService, "window.reefStateInitMethods.onFlutterWsResponse");
+    });
+
     var accounts = await accountCtrl.getStorageAccountsList();
     await jsApiService.jsPromise(
-        'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
+        'window.reefStateInitMethods.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
   }
 
   _initReefObservables(JsApiService reefAppJsApiService) async {

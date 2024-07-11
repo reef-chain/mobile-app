@@ -51,6 +51,10 @@ export const initApi = () => {
                 )
             );
         },
+        getNetworkWsUrl: (networkName: any) => {
+            const net: network.Network = network.AVAILABLE_NETWORKS[networkName];
+            return net?.rpcUrl;
+        },
         getTxInfo: async (timestamp: string) => {
             return firstValueFrom(
                 combineLatest([graphql.httpClientInstance$]).pipe(
@@ -91,16 +95,13 @@ export const initApi = () => {
             console.log('setSelectedNetwork=', net)
             return reefState.setSelectedNetwork(net);
         },
-
         bytesString: (bytes: string) => {
             return isAscii(bytes) ? u8aToString(u8aUnwrapBytes(bytes)) : bytes;
         },
-
         providerConnState$: reefState.providerConnState$.pipe(
             switchMap(lagWhenDisconnected()),
             shareReplay(1)
         ),
-
         indexerConnState$: reefState.getIndexerConnState$().pipe(
             map(v=>!!v.isConnected),
             shareReplay(1)
