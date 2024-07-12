@@ -28,6 +28,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 color: Styles.whiteColor
               )),
           backgroundColor: Colors.deepPurple.shade700,
+          iconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
         ),
         body: WebView(
           initialUrl: widget.url,

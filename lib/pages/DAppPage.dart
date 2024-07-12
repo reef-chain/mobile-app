@@ -45,6 +45,9 @@ print('TODO dapp injection not working check js build !!!!!!!!');
     return SignatureContentToggle(Scaffold(
       appBar: AppBar(
         title: const Text('DApp'),
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
       ),
       body: Center(
           child: dappJsApi != null
