@@ -13,6 +13,7 @@ import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
+import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
@@ -835,8 +836,8 @@ class _SendPageState extends State<SendPage> {
     ];
   }
 
-  Column buildSendStatusButton(TokenWithAmount selectedToken) {
-    return Column(
+  ConnectWrapperButton buildSendStatusButton(TokenWithAmount selectedToken) {
+    return ConnectWrapperButton(child: Column(
       children: [
         SizedBox(
           width: double.infinity,
@@ -935,7 +936,7 @@ class _SendPageState extends State<SendPage> {
                 
         ),
       ],
-    );
+    ));
   }
 
   String getSliderValues(double newRating, TokenWithAmount selectedToken) {
