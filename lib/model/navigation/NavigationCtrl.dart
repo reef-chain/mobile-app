@@ -74,6 +74,9 @@ class NavigationCtrl with NavSwipeCompute {
                       color: Styles.whiteColor,
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: SendPage(
                   preselected,
@@ -102,6 +105,9 @@ class NavigationCtrl with NavSwipeCompute {
                       color: Styles.whiteColor
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               backgroundColor: Styles.greyColor,
               body: 
@@ -131,10 +137,13 @@ class NavigationCtrl with NavSwipeCompute {
                       color: Styles.whiteColor
                     )),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
                 child: TxInfo(unparsedTimestamp, imageUrl, iconUrl, mimetype),
               ),
               backgroundColor: Styles.greyColor,
@@ -148,10 +157,13 @@ class NavigationCtrl with NavSwipeCompute {
               appBar: AppBar(
                 title: Text(AppLocalizations.of(context)!.swap_tokens,style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                 child: SwapPage(preselectedTop: preselectedTop,preselectedBottom:preselectedBottom),
               ),
               backgroundColor: Styles.greyColor,
@@ -164,6 +176,9 @@ class NavigationCtrl with NavSwipeCompute {
               appBar: AppBar(
                 title: Text("WalletConnect",style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
                 leading: SvgPicture.asset('assets/images/walletconnect.svg'),
               ),
               body: const Padding(
@@ -182,6 +197,9 @@ class NavigationCtrl with NavSwipeCompute {
               appBar: AppBar(
                 title: Text("WalletConnect",style: TextStyle(color: Styles.whiteColor),),
                 backgroundColor: Colors.deepPurple.shade700,
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ),
               ),
               body: const Padding(
                 padding:
@@ -201,7 +219,7 @@ class NavigationCtrl with NavSwipeCompute {
               ),
               body: const Padding(
                 padding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                 child: PoolsPage(),
               ),
               backgroundColor: Styles.greyColor,

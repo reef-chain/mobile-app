@@ -7,6 +7,7 @@ import 'package:reef_mobile_app/components/NFT_videoplayer.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
+import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
@@ -92,25 +93,25 @@ class _SendNFTState extends State<SendNFT> {
   getSendBtnLabel(SendStatus validation) {
     switch (validation) {
       case SendStatus.NO_ADDRESS:
-        return "Missing destination address";
+        return AppLocalizations.of(context)!.missing_destination;
       case SendStatus.NO_AMT:
-        return "Insert amount";
+        return AppLocalizations.of(context)!.insert_amount;
       case SendStatus.AMT_TOO_HIGH:
-        return "Amount too high";
+        return AppLocalizations.of(context)!.amount_too_high;
       case SendStatus.NO_EVM_CONNECTED:
-        return "Target not EVM";
+        return AppLocalizations.of(context)!.target_not_evm;
       case SendStatus.ADDR_NOT_VALID:
-        return "Enter a valid address";
+        return AppLocalizations.of(context)!.enter_valid_address;
       case SendStatus.ADDR_NOT_EXIST:
-        return "Unknown address";
+        return AppLocalizations.of(context)!.unknown_address;
       case SendStatus.SIGNING:
-        return "Signing transaction ...";
+        return AppLocalizations.of(context)!.sending_transaction;
       case SendStatus.SENDING:
-        return "Sending ...";
+        return AppLocalizations.of(context)!.sending;
       case SendStatus.READY:
-        return "Confirm Send";
+        return AppLocalizations.of(context)!.confirm_send;
       default:
-        return "Not Valid";
+        return AppLocalizations.of(context)!.not_valid;
     }
   }
 
@@ -322,8 +323,8 @@ class _SendNFTState extends State<SendNFT> {
       ];
     }
 
-    SizedBox buildSendStatusButton() {
-      return SizedBox(
+    ConnectWrapperButton buildSendStatusButton() {
+      return ConnectWrapperButton(child: SizedBox(
         width: double.infinity,
         child: statusValue != SendStatus.SIGNING
             ? ElevatedButton(
@@ -418,8 +419,9 @@ class _SendNFTState extends State<SendNFT> {
                   )
                 ],
               ),
-      );
-    }
+      ),
+    );
+      }
 
     void _onFocusChange() {
       setState(() {
