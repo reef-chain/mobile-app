@@ -91,8 +91,17 @@ export class FlutterJS {
             const isFn = observableRefName.indexOf('(');
             let observableRef;
             if (isFn > 0) {
+                try{
                 observableRef = (window as any).eval(observableRefName);
+                }catch(e){
+                    const error = 'ERROR calling JAVASCRIPT "'+observableRefName+'" error ='+ e.message;
+                    console.log(error);
+                    // we don't call sendToFlutterStream() so the dart Future await never finishes - otherwise would need to have some error message identifier and parse on Dart side
+                    // this.sendToFlutterStream(subscriptionId, "ERROR="+e.message");
+                    return JSON.stringify({error});
+                }
             } else {
+
                 const splitRefName = observableRefName.split('.');
                 observableRef = splitRefName.reduce((state, curr) => {
                     if (!state) {
@@ -100,19 +109,22 @@ export class FlutterJS {
                     }
                     return state[curr] || undefined;
                 }, window) as Observable<any>;
+
+                if (!observableRef) {
+                    const error = "JS object ref not found= window." + observableRefName;
+                    console.log(error);
+                    // we don't call sendToFlutterStream() so the dart Future await never finishes - otherwise would need to have some error message identifier and parse on Dart side
+                    return JSON.stringify({error});
+                }
             }
 
-            if (!observableRef) {
-                console.log("observable JS object ref not found= window." + observableRefName);
-                return false;
-            }
-            if (!!observableRef.subscribe || !!observableRef.then) {
+            if (!!observableRef?.subscribe || !!observableRef?.then) {
                 // TODO unsubscribe
                 from(observableRef).subscribe((value) => this.sendToFlutterStream(subscriptionId, value));
             } else {
                 this.sendToFlutterStream(subscriptionId, observableRef);
             }
-            return true;
+            return JSON.stringify({success: true});
         };
     }
 }
