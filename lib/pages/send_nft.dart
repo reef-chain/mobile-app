@@ -1088,7 +1088,7 @@ List<ReefStep> steps(SendStatus stat, int index) => [
                   ),*/
                 Flexible(
                     child: Text(
-                  "After this transaction has unreversible finality.",
+                  "After this transaction has irreversible finality.",
                   style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
                 )),
               ],
