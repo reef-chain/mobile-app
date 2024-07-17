@@ -1,9 +1,8 @@
-import { graphql, reefState } from '@reef-chain/util-lib';
+import { reefState,tokenIconUtils } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
-import { firstValueFrom, skip } from 'rxjs';
-import { getDexUrl, getExplorerUrl } from './utils/networkUtils';
-
+import { firstValueFrom } from 'rxjs';
+import { getDexUrl } from './utils/networkUtils';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
   return {
@@ -74,49 +73,6 @@ const getTokenInfoQuery = (tokenAddr) => {
       }
     `
   }
-};
-
-const getTokenIconQuery = (tokenAddresses: string[]) => {
-  const formattedAddresses = tokenAddresses.map(address => `"${address}"`).join(", ");
-  return {
-    query: `
-    query TokenIconQuery {
-      verifiedContracts(where: { id_in: [${formattedAddresses}] }) {
-        contractData
-        id
-      }
-    }
-    `
-  };
-};
-
-const getExplorerTokenIcon = async (nwName: string, tokenAddresses: string[]) => {
-  const response = await fetch(getExplorerUrl(nwName), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(getTokenIconQuery(tokenAddresses)),
-  });
-
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-
-  const { data } = await response.json();
-  const tokenIconMap = {};
-  data.verifiedContracts.forEach((v) => {
-    if (v.contractData && v.contractData['iconUrl']) {
-      const iconUrl = v.contractData['iconUrl'].startsWith("ipfs://")
-          ? "https://reef.infura-ipfs.io/ipfs/" + v.contractData['iconUrl'].split("ipfs://")[1]
-          : v.contractData['iconUrl'];
-          tokenIconMap[v.id] =iconUrl;
-  } else {
-    tokenIconMap[v.id] =v.contractData['iconUrl'];
-  }
-  })
-
-  return tokenIconMap;
 };
 
 
@@ -223,7 +179,7 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       }
     }
 
-    const tokenIconMap = await getExplorerTokenIcon(selectedNw.name, tokenAddresess);
+    const tokenIconMap = await tokenIconUtils.resolveTokenUrl(tokenAddresess);
 
     const pools = data.allPoolsList.map((pool) => ({
       ...pool,
@@ -310,7 +266,7 @@ export const getTokenInfo = async (tokenAddr: string) => {
       }
     }
 
-    const tokenIconMap = await getExplorerTokenIcon(selectedNw.name, tokenAddresess);
+    const tokenIconMap = await tokenIconUtils.resolveTokenUrl(tokenAddresess);
 
 
     let token;
