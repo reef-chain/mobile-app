@@ -53,15 +53,10 @@ class _TokenViewState extends State<TokenView> {
                               '$name ${AppLocalizations.of(context)!.contract} \n(${AppLocalizations.of(context)!.dont_send_funds_here} )',
                               address);
                         },
-                        child: 
-                          ClipOval(
-                            child: SizedBox(
-                              height: 48,
-                              width: 48,
-                              child: IconFromUrl(iconURL)
-                            )
-                          )
-                    ),
+                        child: SizedBox(
+                            height: 48,
+                            width: 48,
+                            child: IconFromUrl(iconURL))),
                     const SizedBox(width: 15),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

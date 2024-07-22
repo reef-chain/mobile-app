@@ -13,135 +13,130 @@ class AddAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...getDivider(),
-            MaterialButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () {
-                Navigator.of(context).pop();
-                callback('addAccount');
-                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("create-new-account");
-              },
-              padding: const EdgeInsets.all(2),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.add_circle_rounded,
-                    color: Styles.primaryAccentColor,
-                    size: 22,
-                  ),
-                  const Gap(8),
-                  Builder(builder: (context) {
-                    return Text(
-                        AppLocalizations.of(context)!.create_new_account,
-                        style: Theme.of(context).textTheme.bodyMedium);
-                  }),
-                ],
-              ),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...getDivider(),
+          MaterialButton(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: () {
+              Navigator.of(context).pop();
+              callback('addAccount');
+              ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("create-new-account");
+            },
+            padding: const EdgeInsets.all(2),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.add_circle_rounded,
+                  color: Styles.primaryAccentColor,
+                  size: 22,
+                ),
+                const Gap(8),
+                Text(
+                  AppLocalizations.of(context)!.create_new_account,
+                  style: Theme.of(context).textTheme.bodyMedium
+                ),
+              ],
             ),
-            ...getDivider(),
-            MaterialButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () {
-                Navigator.of(context).pop();
-                callback('importAccount');
-                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("import-account");
-              },
-              padding: const EdgeInsets.all(2),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.key,
-                    color: Styles.primaryAccentColor,
-                    size: 22,
+          ),
+          ...getDivider(),
+          MaterialButton(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: () {
+              Navigator.of(context).pop();
+              callback('importAccount');
+              ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("import-account");
+            },
+            padding: const EdgeInsets.all(2),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.key,
+                  color: Styles.primaryAccentColor,
+                  size: 22,
+                ),
+                const Gap(8),
+                Flexible(
+                  child: Text(
+                    AppLocalizations.of(context)!.import_account_from_pre_existing_seed,
+                    style: Theme.of(context).textTheme.bodyMedium
                   ),
-                  const Gap(8),
-                  Flexible(
-                    child: Builder(builder: (context) {
-                      return Text(
-                          AppLocalizations.of(context)!
-                              .import_account_from_pre_existing_seed,
-                          style: Theme.of(context).textTheme.bodyMedium);
-                    }),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            ...getDivider(),
-            MaterialButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () {
-                Navigator.of(context).pop();
-                callback('restoreJSON');
-                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("restore-account-json");
-              },
-              padding: const EdgeInsets.all(2),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.settings_backup_restore,
-                    color: Styles.primaryAccentColor,
-                    size: 22,
+          ),
+          ...getDivider(),
+          MaterialButton(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: () {
+              Navigator.of(context).pop();
+              callback('restoreJSON');
+              ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("restore-account-json");
+            },
+            padding: const EdgeInsets.all(2),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.settings_backup_restore,
+                  color: Styles.primaryAccentColor,
+                  size: 22,
+                ),
+                const Gap(8),
+                Flexible(
+                  child: Text(
+                    AppLocalizations.of(context)!.restore_from_json,
+                    style: Theme.of(context).textTheme.bodyMedium
                   ),
-                  const Gap(8),
-                  Flexible(
-                    child: Builder(
-                      builder: (context) {
-                        return Text(AppLocalizations.of(context)!.restore_from_json,
-                            style: Theme.of(context).textTheme.bodyMedium);
-                      }
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            ...getDivider(),
-            MaterialButton(
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () {
-                Navigator.of(context).pop();
-                callback('importFromQR');
-                ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("import-account-qr");
-              },
-              padding: const EdgeInsets.all(2),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.crop_free,
-                    color: Styles.primaryAccentColor,
-                    size: 22,
+          ),
+          ...getDivider(),
+          MaterialButton(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onPressed: () {
+              Navigator.of(context).pop();
+              callback('importFromQR');
+              ReefAppState.instance.firebaseAnalyticsCtrl.logAnalytics("import-account-qr");
+            },
+            padding: const EdgeInsets.all(2),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.crop_free,
+                  color: Styles.primaryAccentColor,
+                  size: 22,
+                ),
+                const Gap(8),
+                Flexible(
+                  child: Text(
+                    AppLocalizations.of(context)!.import_from_qr_code,
+                    style: Theme.of(context).textTheme.bodyMedium
                   ),
-                  const Gap(8),
-                  Flexible(
-                    child: Builder(
-                      builder: (context) {
-                        return Text(AppLocalizations.of(context)!.import_from_qr_code,
-                            style: Theme.of(context).textTheme.bodyMedium);
-                      }
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }
 
-void showAddAccountModal(String title, Function(String) callback,
-    {BuildContext? context}) {
+void showAddAccountModal(String title, Function(String) callback, {BuildContext? context}) {
   showModal(context ?? navigatorKey.currentContext,
       child: AddAccount(callback: callback), headText: title);
 }
 
 List<Widget> getDivider(){
-  return [const Gap(7),
+  return [
+    const Gap(7),
     const Divider(
       color: Styles.textLightColor,
       thickness: 1,
     ),
-    const Gap(7)];
+    const Gap(7)
+  ];
 }

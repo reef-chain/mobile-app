@@ -340,9 +340,8 @@ class _SwapPageState extends State<SwapPage> {
                                             if (selectedTopToken == null)
                                               const Text("Select token")
                                             else ...[
-                                              ClipOval(
-                                                child: IconFromUrl(selectedTopToken!.iconUrl),
-                                              ),
+                                              IconFromUrl(
+                                                  selectedTopToken!.iconUrl),
                                               const Gap(4),
                                               Text(selectedTopToken!.symbol),
                                             ],
@@ -460,9 +459,8 @@ class _SwapPageState extends State<SwapPage> {
                                     children: [
                                       Row(
                                         children: [
-                                          ClipOval(
-                                            child:IconFromUrl(selectedTopToken?.iconUrl, size: 48)
-                                          ),
+                                          IconFromUrl(selectedTopToken?.iconUrl,
+                                              size: 48),
                                           const Gap(13),
                                           Column(
                                             crossAxisAlignment:
@@ -596,9 +594,8 @@ class _SwapPageState extends State<SwapPage> {
                                             if (selectedBottomToken == null)
                                               const Text("Select token")
                                             else ...[
-                                              ClipOval(
-                                                child: IconFromUrl(selectedBottomToken!.iconUrl)
-                                              ),                                                  
+                                              IconFromUrl(
+                                                  selectedBottomToken!.iconUrl),
                                               const Gap(4),
                                               Text(selectedBottomToken!.symbol),
                                             ],
@@ -698,9 +695,9 @@ class _SwapPageState extends State<SwapPage> {
                                     children: [
                                       Row(
                                         children: [
-                                          ClipOval(
-                                            child: IconFromUrl(selectedBottomToken?.iconUrl, size: 48),
-                                          ),
+                                          IconFromUrl(
+                                              selectedBottomToken?.iconUrl,
+                                              size: 48),
                                           const Gap(13),
                                           Column(
                                             crossAxisAlignment:

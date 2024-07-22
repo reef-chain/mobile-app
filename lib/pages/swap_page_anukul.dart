@@ -292,7 +292,7 @@ class _SwapPageState extends State<SwapPage> {
               preloader = true;
               preloaderMessage =
                   "waiting for ${selectedTopToken?.name} approval";
-              preloaderChild = ClipOval( child: IconFromUrl(selectedTopToken!.iconUrl));
+              preloaderChild = IconFromUrl(selectedTopToken!.iconUrl);
             }
             if (txResponse['status'] == "approve-started") {
               btnLabel = "Approving";
@@ -301,7 +301,7 @@ class _SwapPageState extends State<SwapPage> {
               btnLabel = "Waiting to Swap";
               preloaderMessage =
                   "waiting for swap transaction\n(${selectedTopToken?.name} - ${selectedBottomToken?.name})";
-              preloaderChild = ClipOval( child: IconFromUrl(selectedBottomToken!.iconUrl));
+              preloaderChild = IconFromUrl(selectedBottomToken!.iconUrl);
             }
             if (txResponse['status'] == "_canceled") {
               preloader = false;
@@ -680,13 +680,7 @@ class _SwapPageState extends State<SwapPage> {
                     if (selectedTokenWithAmount == null)
                       const Text("Select token")
                     else ...[
-                      ClipOval(
-                        child: SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: IconFromUrl(selectedTokenWithAmount!.iconUrl),
-                        ),
-                      ),                      
+                      IconFromUrl(selectedTokenWithAmount!.iconUrl),
                       const Gap(4),
                       Text(selectedTokenWithAmount!.symbol),
                     ],
@@ -834,13 +828,7 @@ class _SwapPageState extends State<SwapPage> {
             children: [
               Row(
                 children: [
-                  ClipOval(
-                    child: SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: IconFromUrl(token!.iconUrl, size: 48),
-                    ),
-                  ),
+                  IconFromUrl(token!.iconUrl, size: 48),
                   const Gap(13),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
