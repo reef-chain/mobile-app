@@ -23,6 +23,9 @@ class Styles {
   static const Color textLightColor = Color(0xff8890ab);
   static const Color errorColor = Color(0xFFCC0B0B);
   static LinearGradient buttonGradient = LinearGradient(
-  colors: [purpleColorLight, secondaryAccentColorDark],
+    colors: [purpleColorLight, secondaryAccentColorDark],
+  );
+  static LinearGradient buttonDisable = const LinearGradient(
+    colors: [textColor, textLightColor],
   );
 }

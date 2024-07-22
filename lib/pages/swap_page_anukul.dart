@@ -86,7 +86,7 @@ class _SwapPageState extends State<SwapPage> {
 
   //available swap pairs
   List<dynamic> availableTokens=[];
-
+  
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -1084,12 +1084,16 @@ class _SwapPageState extends State<SwapPage> {
       children: [
         GestureDetector(
           onTap: () {
+            if(selectedBottomToken == null) return;
             _reversePair();
           },
           child: Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                gradient: Styles.buttonGradient),
+                gradient: selectedBottomToken == null 
+                  ? Styles.buttonDisable
+                  : Styles.buttonGradient
+            ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Icon(
@@ -1103,7 +1107,7 @@ class _SwapPageState extends State<SwapPage> {
         Gap(8.0),
         Expanded(
           child: SliderStandAlone(
-              isDisabled: txInProgress,
+              isDisabled: selectedBottomToken == null ? true : txInProgress,
               rating: rating,
               onChanged: (newRating) async {
                 setState(() {
