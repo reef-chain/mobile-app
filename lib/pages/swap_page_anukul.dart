@@ -833,18 +833,30 @@ class _SwapPageState extends State<SwapPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        token != null ? token!.name : 'Select',
-                        style: const TextStyle(
+                      Container(
+                        constraints: BoxConstraints(maxWidth: 120), // Adjust the width accordingly
+                        child: Text(
+                          token != null ? token!.name : 'Select',
+                          style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
-                            color: Color(0xff19233c)),
+                            color: Color(0xff19233c),
+                          ),
+                          softWrap: true,  // Enable soft wrapping
+                        ),
                       ),
-                      Text(
-                        "${toAmountDisplayBigInt(token!.balance)} ${token!.name.toUpperCase()}",
-                        style: TextStyle(
-                            color: Styles.textLightColor, fontSize: 12),
-                      )
+
+                      Container(
+                        constraints: BoxConstraints(maxWidth: 120), // Adjust the width accordingly
+                        child: Text(
+                          "${toAmountDisplayBigInt(token!.balance)} ${token!.name.toUpperCase()}",
+                          style: TextStyle(
+                            color: Styles.textLightColor,
+                            fontSize: 12,
+                          ),
+                          softWrap: true,  // Enable soft wrapping
+                        ),
+                      ),
                     ],
                   ),
                 ],
