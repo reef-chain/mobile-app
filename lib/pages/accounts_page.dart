@@ -107,7 +107,9 @@ class _AccountsPageState extends State<AccountsPage> {
     ));
   }
 
-  Padding buildHeader(BuildContext context) {
+  Widget buildHeader(BuildContext context) {
+  return Observer(builder: (_) {
+    final accsFeedbackDataModel = ReefAppState.instance.model.accounts.accountsFDM;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -134,6 +136,7 @@ class _AccountsPageState extends State<AccountsPage> {
                   }),
                 ],
               ),
+              if (accsFeedbackDataModel.data.isNotEmpty)
               Row(
                 children: [
                   MaterialButton(
@@ -174,8 +177,47 @@ class _AccountsPageState extends State<AccountsPage> {
             ],
           ),
           if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18))) InsufficientBalance(),
+          if (accsFeedbackDataModel.data.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              child: createAccountBox(context),
+            ),
         ],
       ),
     );
+  });
   }
+
+    Widget createAccountBox(BuildContext context) => Flex(
+        direction: Axis.vertical,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 20),
+          Text(
+            AppLocalizations.of(context)!.no_account_currently,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Builder(builder: (context) {
+            return ElevatedButton.icon(
+                style: ButtonStyle(
+                  iconColor: MaterialStateProperty.resolveWith(
+                        (states) => Styles.whiteColor),
+                    backgroundColor: MaterialStateProperty.resolveWith(
+                        (states) => Styles.purpleColor)),
+                        
+                onPressed: () {
+                  showAddAccountModal(
+                      AppLocalizations.of(context)!.add_account, openModal,
+                      context: context);
+                },
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                label: Text(AppLocalizations.of(context)!.add_account,style: TextStyle(color: Styles.whiteColor),));
+          }),
+        ],
+      );
 }
