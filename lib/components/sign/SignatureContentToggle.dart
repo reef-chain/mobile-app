@@ -13,6 +13,7 @@ import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/signing/signature_request.dart';
 import 'package:reef_mobile_app/model/signing/signer_payload_json.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
+import 'package:reef_mobile_app/service/TransactionDescService.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
 import '../../utils/functions.dart';
@@ -100,6 +101,30 @@ class SignatureContentToggle extends StatelessObserverWidget {
                   style:
                       const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const Gap(24),
+            FutureBuilder<String?>(
+                    future: TransactionDescService.getTransactionDesc(context, signatureRequest),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // While the future is unresolved, show a loading indicator
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.hasError) {
+                        // If there was an error, show an error message
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+
+                      // Display the resulting message or a fallback message if null
+                      return Center(
+                        child: Text(
+                          snapshot.data ?? 'No recognizable transaction data available',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),          
+            const Gap(15),
             MethodDataLoadingIndicator(signatureRequest),
             signatureRequest?.payload.type == "bytes"
                 ? MethodBytesDataDisplay(

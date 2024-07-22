@@ -201,5 +201,11 @@
   "send_nft":"Send NFT",
   "scan_qr_code":"Scan QR Code",
   "create_new_connection": "Create new connection",
-  "no_active_sessions": "No active sessions"
+  "no_active_sessions": "No active sessions",
+  "approveTransaction": "Approve {amount} {tokenSymbol} to {recipientAddress}",
+  "swapTransaction": "Swap {amount} {tokenSymbol} with {recipientAddress}",
+  "transferTransaction": "Transfer {amount} to {recipientAddress}",
+  "sendErc20Transaction": "Send {amount} {tokenSymbol} to {recipientAddress}",
+  "sendNftTransaction": "Send NFT {tokenId} to {recipientAddress}",
+  "bindAccountTransaction": "Bind account with {accountDetails}"
 }

@@ -109,5 +109,11 @@
   "invalid_qr_code":"Codice QR non valido",
   "invalid_qr_msg1":"Questo è un codice QR non valido!",
   "invalid_qr_msg2":"Puoi saperne di più su questo codice QR dall'opzione 'Scansiona QR' in Impostazioni",
-   "get_qr_information":"Ottieni informazioni QR"
+   "get_qr_information":"Ottieni informazioni QR",
+  "approveTransaction": "Approva {amount} {tokenSymbol} a {recipientAddress}",
+  "swapTransaction": "Scambia {amount} {tokenSymbol} con {recipientAddress}",
+  "transferTransaction": "Trasferisci {amount} a {recipientAddress}",
+  "sendErc20Transaction": "Invia {amount} {tokenSymbol} a {recipientAddress}",
+  "sendNftTransaction": "Invia NFT {tokenId} a {recipientAddress}",
+  "bindAccountTransaction": "Collega account con {accountDetails}"
 }
