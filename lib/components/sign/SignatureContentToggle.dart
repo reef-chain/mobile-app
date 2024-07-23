@@ -109,15 +109,15 @@ class SignatureContentToggle extends StatelessObserverWidget {
                         return Center(child: CircularProgressIndicator());
                       }
 
-                      if (snapshot.hasError) {
-                        // If there was an error, show an error message
-                        return Center(child: Text('Error: ${snapshot.error}'));
+                      if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+                        // If there was an error, skip display
+                        return const SizedBox.shrink();
                       }
 
                       // Display the resulting message or a fallback message if null
                       return Center(
                         child: Text(
-                          snapshot.data ?? 'No recognizable transaction data available',
+                          snapshot.data!,
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                           textAlign: TextAlign.center,
                         ),
