@@ -4,9 +4,10 @@ import { Contract} from "ethers";
 import { ReefswapRouter } from "./abi/ReefswapRouter";
 import { Observable, combineLatest, firstValueFrom } from "rxjs";
 import { calculateAmount, calculateAmountWithPercentage, calculateDeadline, getInputAmount, getOutputAmount } from "./utils/math";
-import { approveTokenAmount } from './utils/tokenUtils';
+import { approveTokenAmount, getREEF20Contract } from './utils/tokenUtils';
 import { getPoolReserves } from './utils/poolUtils';
 import Signer from "./background/Signer";
+import { toBN } from '@reef-chain/evm-provider/utils';
 
 interface SwapSettings {
     deadline: number;
@@ -24,6 +25,32 @@ const resolveSettings = (
     deadline: Number.isNaN(deadline) ? defaultSwapSettings.deadline : deadline,
     slippageTolerance: Number.isNaN(slippageTolerance) ? defaultSwapSettings.slippageTolerance : slippageTolerance,
   });
+
+const hexToAscii = (str1: string): string => {
+    const hex = str1.toString();
+    let str = '';
+    for (let n = 0; n < hex.length; n += 2) {
+        str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+    }
+    return str;
+};
+
+const captureError = (events: Event[]): string|undefined => {
+    for (const event of events) {
+      const eventCompression = `${(event as any).event.section.toString()}.${(event as any).event.method.toString()}`;
+      if (eventCompression === 'evm.ExecutedFailed') {
+        const eventData = ((event as any).event.data.toJSON() as any[]);
+        let message = eventData[eventData.length - 2];
+        if (typeof message === 'string' || message instanceof String) {
+          message = hexToAscii(message.substring(138));
+        } else {
+          message = JSON.stringify(message);
+        }
+        return message;
+      }
+    }
+    return undefined;
+  };
 
 export const initApi = (signingKey: Signer) => {
     (window as any).swap = {
@@ -54,6 +81,7 @@ export const initApi = (signingKey: Signer) => {
                         );
         
                         const signer = await getAccountSigner(reefSigner.address, provider, signingKey);
+
                         const swapRouter = new Contract(
                             nw.getReefswapNetworkConfig(network).routerAddress,
                             ReefswapRouter,
@@ -62,31 +90,84 @@ export const initApi = (signingKey: Signer) => {
         
                         try {
                             observer.next({ status: 'approve-started' });
+
                             // Approve token1
-                            await approveTokenAmount(
-                                token1.address,
-                                sellAmount,
-                                nw.getReefswapNetworkConfig(network).routerAddress,
-                                signer,
-                            );
+                            const tokenContract = await getREEF20Contract(token1.address, signer);
+                            let approveTransaction = 
+                                await tokenContract
+                                    .populateTransaction
+                                    .approve(
+                                        nw.getReefswapNetworkConfig(network).routerAddress,
+                                        sellAmount
+                                    );
+
                             observer.next({ status: 'approved' });
-                            console.log("Token approved");
         
                             // Swap
-                            console.log("Waiting for confirmation of swap...");
-                            const tx = await swapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                            const tradeTransaction = await swapRouter.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
                                 sellAmount,
                                 minBuyAmount,
                                 [token1.address, token2.address],
                                 reefSigner.evmAddress,
                                 calculateDeadline(settings.deadline)
                             );
-                            observer.next({ status: 'broadcast', transactionResponse: tx });
+
+
+                            const approveResources = await signer.provider.estimateResources(approveTransaction);
         
-                            const receipt = await tx.wait();
-                            console.log("SWAP RESULT=", receipt);
-                            observer.next({ status: 'included-in-block', transactionReceipt: receipt });
-                            observer.next({ status: 'finalized', transactionReceipt: receipt });
+                            const approveExtrinsic = signer.provider.api.tx.evm.call(
+                                approveTransaction.to,
+                                approveTransaction.data,
+                                toBN(approveTransaction.value || 0),
+                                toBN(approveResources.gas),
+                                approveResources.storage.lt(0) ? toBN(0) : toBN(approveResources.storage),
+                            );
+
+                            const tradeExtrinsic = signer.provider.api.tx.evm.call(
+                                tradeTransaction.to,
+                                tradeTransaction.data,
+                                toBN(tradeTransaction.value || 0),
+                                toBN(582938 * 2), // hardcoded gas estimation, multiply by 2 as a safety margin
+                                toBN(64 * 2), // hardcoded storage estimation, multiply by 2 as a safety margin
+                              );
+                        
+                              // Batching extrinsics
+                              const batch = signer.provider.api.tx.utility.batchAll([
+                                approveExtrinsic,
+                                tradeExtrinsic,
+                              ]);
+                        
+                              // Signing and awaiting when data comes in block
+                              const signAndSend = new Promise<void>((resolve, reject): void => {
+                                batch.signAndSend(
+                                    reefSigner.address,
+                                  { signer: signer.signingKey },
+                                  (status: any) => {
+                                    const err = captureError(status.events);
+                                    if (err) {
+                                      reject({ message: err });
+                                    }
+                                    if (status.dispatchError) {
+                                      reject({ message: status.dispatchError.toString() });
+                                    }
+                                    if (status.status.isInBlock) {
+                                      resolve();
+                                    }
+                                    // If you want to await until block is finalized use below if
+                                    if (status.status.isFinalized) {
+                                        
+                                    }
+                                  },
+                                );
+                              });
+                            await signAndSend;
+
+                            // observer.next({ status: 'broadcast', transactionResponse: tx });
+        
+                            // const receipt = await tx.wait();
+                            // console.log("SWAP RESULT=", receipt);
+                            observer.next({ status: 'included-in-block', transactionReceipt: "receipt" });
+                            observer.next({ status: 'finalized', transactionReceipt: "receipt" });
                             observer.complete();
         
                         } catch (e) {
