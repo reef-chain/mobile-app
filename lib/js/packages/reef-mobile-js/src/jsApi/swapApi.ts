@@ -191,7 +191,6 @@ export const initApi = (signingKey: Signer) => {
                                 toBN(64 * 2), // hardcoded storage estimation, multiply by 2 as a safety margin
                               );
                         
-                              console.log("signer.provider.api.tx.utility.batchAll===",Object.keys(signer.provider.api.tx.balances))
                               // Batching extrinsics
                               const batch = signer.provider.api.tx.utility.batchAll([
                                 approveExtrinsic,
