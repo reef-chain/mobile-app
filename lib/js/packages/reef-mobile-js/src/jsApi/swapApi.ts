@@ -1,13 +1,15 @@
 import { reefState ,network as nw, getAccountSigner} from '@reef-chain/util-lib';
 import { switchMap, take } from "rxjs/operators";
-import { Contract} from "ethers";
+import { BigNumber, Contract} from "ethers";
 import { ReefswapRouter } from "./abi/ReefswapRouter";
 import { Observable, combineLatest, firstValueFrom } from "rxjs";
 import { calculateAmount, calculateAmountWithPercentage, calculateDeadline, getInputAmount, getOutputAmount } from "./utils/math";
 import { approveTokenAmount, getREEF20Contract } from './utils/tokenUtils';
 import { getPoolReserves } from './utils/poolUtils';
 import Signer from "./background/Signer";
+import { Signer as ReefSigner } from '@reef-chain/evm-provider';
 import { toBN } from '@reef-chain/evm-provider/utils';
+import { extension as extReef } from '@reef-chain/util-lib';
 
 interface SwapSettings {
     deadline: number;
@@ -52,6 +54,64 @@ const captureError = (events: Event[]): string|undefined => {
     return undefined;
   };
 
+  const getReefCoinBalance = async (
+    address: string,
+    provider: any,
+  ): Promise<any> => {
+    const balance = await provider.api.derive.balances
+      .all(address as any)
+      .then((res: any) => BigNumber.from(res.freeBalance.toString(10)));
+    return balance;
+  };
+
+  const signerToReefSigner = async (
+    signer: ReefSigner,
+    provider: any,
+    {
+      address, name, source, genesisHash,
+    }: any,
+  ): Promise<any> => {
+    const evmAddress = await signer.getAddress();
+    const isEvmClaimed = await signer.isClaimed();
+    let inj;
+    try {
+      inj = await extReef.web3FromAddress(address);
+    } catch (e) {
+      // when web3Enable() is not called before
+    }
+    const balance = await getReefCoinBalance(address, provider);
+    return {
+      signer,
+      balance,
+      evmAddress,
+      isEvmClaimed,
+      name,
+      address,
+      source,
+      genesisHash: genesisHash!,
+      sign: inj?.signer,
+    };
+  };
+
+  const accountToSigner = async (
+    account: any,
+    provider: any,
+    sign: any,
+    source: string,
+  ): Promise<any> => {
+    const signer = new ReefSigner(provider, account.address, sign);
+    return signerToReefSigner(
+      signer,
+      provider,
+      {
+        source,
+        address: account.address,
+        name: account.name || '',
+        genesisHash: account.genesisHash || '',
+      },
+    );
+  };
+
 export const initApi = (signingKey: Signer) => {
     (window as any).swap = {
         // Executes a swap
@@ -79,8 +139,8 @@ export const initApi = (signingKey: Signer) => {
                             { decimals: token2.decimals, amount: token2.amount },
                             settings.slippageTolerance
                         );
-        
-                        const signer = await getAccountSigner(reefSigner.address, provider, signingKey);
+                        const {signer} = await accountToSigner(reefSigner, provider, signingKey,"injected");
+                      
 
                         const swapRouter = new Contract(
                             nw.getReefswapNetworkConfig(network).routerAddress,
@@ -131,6 +191,7 @@ export const initApi = (signingKey: Signer) => {
                                 toBN(64 * 2), // hardcoded storage estimation, multiply by 2 as a safety margin
                               );
                         
+                              console.log("signer.provider.api.tx.utility.batchAll===",Object.keys(signer.provider.api.tx.balances))
                               // Batching extrinsics
                               const batch = signer.provider.api.tx.utility.batchAll([
                                 approveExtrinsic,
