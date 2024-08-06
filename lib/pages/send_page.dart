@@ -615,7 +615,7 @@ class _SendPageState extends State<SendPage> {
                   onPressed: () {
                     showQrTypeDataModal(
                         AppLocalizations.of(context)!.scan_address, context,
-                        expectedType: ReefQrCodeType.address);
+                        expectedType: ReefQrCodeType.address,preselectedTokenAddress: selectedToken.address);
                   },
                   child: const Icon(
                     Icons.qr_code_scanner_sharp,
