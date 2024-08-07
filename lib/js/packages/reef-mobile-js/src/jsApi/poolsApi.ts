@@ -1,9 +1,8 @@
-import { reefState,tokenIconUtils } from '@reef-chain/util-lib';
+import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
 import { firstValueFrom } from 'rxjs';
 import { getDexUrl } from './utils/networkUtils';
-import { getReefTokenPrice } from './utils/priceUtils';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
   return {
@@ -116,13 +115,6 @@ const calculate24hVolumeUSD = ({
   return dv1.plus(dv2);
 };
 
-function mapTokensToPrices(tokens) {
-  return tokens.reduce((prices, token) => {
-    prices[token.address] = token.price;
-    return prices;
-  }, {});
-}
-
 const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   const current = calculate24hVolumeUSD(pool, tokenPrices, true);
   const previous = calculate24hVolumeUSD(pool, tokenPrices, false);
@@ -133,43 +125,11 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   return res.toNumber();
 };
 
-function calculateTokenPrices(pairs, tokenPrices) {
-  let updated = false;
-
-  pairs.forEach(pair => {
-    const { token1, token2, reserved1, reserved2 } = pair;
-    const reserve1 = parseFloat(reserved1);
-    const reserve2 = parseFloat(reserved2);
-
-    if (tokenPrices[token1] !== undefined && tokenPrices[token2] === undefined) {
-      tokenPrices[token2] = (reserve1 / reserve2) * tokenPrices[token1];
-      updated = true;
-    } else if (tokenPrices[token2] !== undefined && tokenPrices[token1] === undefined) {
-      tokenPrices[token1] = (reserve2 / reserve1) * tokenPrices[token2];
-      updated = true;
-    }
-  });
-
-  if (updated) {
-    calculateTokenPrices(pairs, tokenPrices);
-  } else {
-    pairs.forEach(pair => {
-      const { token1, token2 } = pair;
-      if (tokenPrices[token1] === undefined) {
-        tokenPrices[token1] = 0;
-      }
-      if (tokenPrices[token2] === undefined) {
-        tokenPrices[token2] = 0;
-      }
-    });
-  }
-}
-
 export const fetchAllPools = async (limit: number, offset: number, search: string, signerAddress: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
-    let reefPrice = await getReefTokenPrice();
-
+    let reefPrice = await firstValueFrom(tokenUtil.reefPrice$);
+   
     let tokenPrices = {
       "0x0000000000000000000000000000000001000000" : reefPrice 
     };
@@ -188,7 +148,7 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
 
     const { data } = await response.json();
 
-    calculateTokenPrices(data.allPoolsList,tokenPrices);
+    tokenPriceUtils.calculateTokenPrices(data.allPoolsList,tokenPrices);
 
     let tokenAddresess = [];
 

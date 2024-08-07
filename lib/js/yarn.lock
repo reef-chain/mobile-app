@@ -3725,10 +3725,28 @@
     blakejs "~1.2.1"
     ethers "~5.5.0"
 
-"@reef-chain/util-lib@^2.5.10", "@reef-chain/util-lib@^2.5.12":
+"@reef-chain/util-lib@^2.5.10":
   version "2.5.12"
   resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.5.12.tgz#23d4007149806770cbfa5f7df0789921fa25c329"
   integrity sha512-CDlhESSOwN6tU1AYW9SttpBOr0mi/vud8xkTNA4UiDOyULNA3BDc9wcetwSWa/MzBUaENm2b5x9kGREQg0c3vg==
+  dependencies:
+    "@metamask/providers" "^14.0.2"
+    "@polkadot/api" "^10.11.2"
+    "@polkadot/extension-inject" "^0.46.6"
+    "@polkadot/types" "^10.11.2"
+    "@reef-chain/evm-provider" "^2.0.2"
+    "@walletconnect/sign-client" "^2.12.2"
+    "@walletconnect/utils" "^2.12.2"
+    axios "^1.6.2"
+    bignumber.js "^9.1.2"
+    ethers "~5.5.4"
+    graphql "^16.8.1"
+    mqtt "^5.3.5"
+
+"@reef-chain/util-lib@^2.6.1":
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-2.6.1.tgz#94c654fe03d0e37b766bc9f0ad95627430aa3ab9"
+  integrity sha512-4tXZS5ZABvwCQQbR/EDNvOUf2ZO+DC/vfEivyvmabXtPAQUw4g9MHEbnQxZnx/tfyvcWh9DfxeeIQ0G19lvrkQ==
   dependencies:
     "@metamask/providers" "^14.0.2"
     "@polkadot/api" "^10.11.2"
