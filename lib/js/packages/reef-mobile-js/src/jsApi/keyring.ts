@@ -200,12 +200,13 @@ function changeAccountPassword (address:string, newPass:string, oldPass:string )
   }
 
 
-function formatBalance(value:string,price:number): string  {
+function formatBalance(value:string,price:number|any): string  {
     try {
         return balanceUtils.formatDisplayBalance(value,4,{
-            price:price
+            price:price??0.0
         })
     } catch (error) {
+        console.log("formatBalance===",error);
         return "";
     }
 }
