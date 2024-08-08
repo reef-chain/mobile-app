@@ -1,7 +1,8 @@
+import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, skipWhile } from 'rxjs';
 import { getDexUrl } from './utils/networkUtils';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
@@ -128,11 +129,16 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
 export const fetchAllPools = async (limit: number, offset: number, search: string, signerAddress: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
-    let reefPrice = await firstValueFrom(tokenUtil.reefPrice$);
-   
+    let {data:reefPrice} = await firstValueFrom(tokenUtil.reefPrice$.pipe(skipWhile(
+      value =>
+        !value.hasStatus(reefState.FeedbackStatusCode.COMPLETE_DATA) ||
+        value.getStatusList().length != 1
+    )));
+
     let tokenPrices = {
-      "0x0000000000000000000000000000000001000000" : reefPrice 
+      "0x0000000000000000000000000000000001000000" : reefPrice
     };
+
     const response = await fetch(getDexUrl(selectedNw.name), {
       method: 'POST',
       headers: {
@@ -144,7 +150,6 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
-
 
     const { data } = await response.json();
 
