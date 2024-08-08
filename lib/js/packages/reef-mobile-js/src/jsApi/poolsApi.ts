@@ -1,4 +1,5 @@
 import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
+import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
 import { firstValueFrom, skipWhile } from 'rxjs';
@@ -137,7 +138,7 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
     let tokenPrices = {
       "0x0000000000000000000000000000000001000000" : reefPrice
     };
-    
+
     const response = await fetch(getDexUrl(selectedNw.name), {
       method: 'POST',
       headers: {
@@ -150,12 +151,9 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       throw new Error('Network response was not ok');
     }
 
-
     const { data } = await response.json();
 
     tokenPriceUtils.calculateTokenPrices(data.allPoolsList,tokenPrices);
-
-    console.log("tokenPrices===",tokenPrices);
 
     let tokenAddresess = [];
 
