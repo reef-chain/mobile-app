@@ -1,7 +1,7 @@
-import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
+import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
-import { firstValueFrom, skip } from 'rxjs';
+import { firstValueFrom, skip, skipWhile } from 'rxjs';
 import { getDexUrl } from './utils/networkUtils';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
@@ -128,7 +128,11 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
 export const fetchAllPools = async (limit: number, offset: number, search: string, signerAddress: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
-    let {data:reefPrice} = await firstValueFrom(tokenUtil.reefPrice$.pipe(skip(1)));
+    let {data:reefPrice} = await firstValueFrom(tokenUtil.reefPrice$.pipe(skipWhile(
+      value =>
+        !value.hasStatus(reefState.FeedbackStatusCode.COMPLETE_DATA) ||
+        value.getStatusList().length != 1
+    )));
 
     let tokenPrices = {
       "0x0000000000000000000000000000000001000000" : reefPrice
