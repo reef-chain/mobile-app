@@ -1,7 +1,7 @@
 import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
-import { firstValueFrom, skip, skipWhile } from 'rxjs';
+import { firstValueFrom, skipWhile } from 'rxjs';
 import { getDexUrl } from './utils/networkUtils';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
