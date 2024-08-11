@@ -97,16 +97,6 @@ class StorageService {
       Hive.registerAdapter(AuthUrlAdapter());
     }
 
-      if (!Hive.isAdapterRegistered(1)) {
-    Hive.registerAdapter(StoredAccountAdapter());
-      }
-      if (!Hive.isAdapterRegistered(2)) {
-        Hive.registerAdapter(MetadataAdapter());
-      }
-      if (!Hive.isAdapterRegistered(3)) {
-        Hive.registerAdapter(AuthUrlAdapter());
-      }
-
     mainBox.complete(Hive.openBox('ReefChainBox'));
     metadataBox.complete(Hive.openBox('MetadataBox'));
     authUrlsBox.complete(Hive.openBox('AuthUrlsBox'));
