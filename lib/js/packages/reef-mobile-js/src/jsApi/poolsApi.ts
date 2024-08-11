@@ -59,11 +59,11 @@ const getPoolPairsQuery = (tokenAddr, limit, offset) => {
   }
 };
 
-const getTokenInfoQuery = (tokenAddr) => {
+const getTokenInfoQuery = (tokenAddr:string) => {
   return {
     query: `
     query TokenQuery {
-        tokens(where: {id_eq: "${tokenAddr}"}) {
+        tokens(where: {id_containsInsensitive: "${tokenAddr}"}, limit: 1) {
           decimals
           iconUrl
           id

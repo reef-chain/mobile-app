@@ -115,12 +115,10 @@ class SignatureContentToggle extends StatelessObserverWidget {
                       }
 
                       // Display the resulting message or a fallback message if null
-                      return Center(
-                        child: Text(
-                          snapshot.data!,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                          textAlign: TextAlign.center,
-                        ),
+                      return Text(
+                        snapshot.data!,
+                        style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 14),
+                        textAlign: TextAlign.center,
                       );
                     },
                   ),          
