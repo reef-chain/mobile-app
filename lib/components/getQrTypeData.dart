@@ -17,8 +17,9 @@ import 'package:barcode_finder/barcode_finder.dart';
 
 class QrDataDisplay extends StatefulWidget {
   ReefQrCodeType? expectedType;
+  String? preselectedTokenAddress;
 
-  QrDataDisplay(this.expectedType, {Key? key}) : super(key: key);
+  QrDataDisplay(this.expectedType,this.preselectedTokenAddress, {Key? key}) : super(key: key);
 
   @override
   State<QrDataDisplay> createState() => _QrDataDisplayState();
@@ -67,7 +68,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
         }
         ReefAppState.instance.navigationCtrl.navigateToSendPage(
             context: context,
-            preselected: Constants.REEF_TOKEN_ADDRESS,
+            preselected: widget.preselectedTokenAddress ?? Constants.REEF_TOKEN_ADDRESS,
             preSelectedTransferAddress: qrCode.data);
         break;
       case ReefQrCodeType.accountJson:
@@ -133,9 +134,6 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
 
   void qr(QRViewController controller) async {
     this.controller = controller;
-    /*controller.scannedDataStream.listen((event) {
-      handleQrCodeData(event.code!);
-    });*/
     var scanRes = await controller.scannedDataStream.first;
     await handleQrCodeData(scanRes.code!);
     this.controller?.dispose();
@@ -286,8 +284,8 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
 }
 
 void showQrTypeDataModal(String title, BuildContext context,
-    {ReefQrCodeType? expectedType}) {
-  showModal(context, child: QrDataDisplay(expectedType), headText: title);
+    {ReefQrCodeType? expectedType,String? preselectedTokenAddress}) {
+  showModal(context, child: QrDataDisplay(expectedType,preselectedTokenAddress), headText: title);
 }
 
 class ReefQrCode {

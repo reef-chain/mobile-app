@@ -1,7 +1,8 @@
-import { reefState,tokenIconUtils } from '@reef-chain/util-lib';
+import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
+import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, skipWhile } from 'rxjs';
 import { getDexUrl } from './utils/networkUtils';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
@@ -115,13 +116,6 @@ const calculate24hVolumeUSD = ({
   return dv1.plus(dv2);
 };
 
-function mapTokensToPrices(tokens) {
-  return tokens.reduce((prices, token) => {
-    prices[token.address] = token.price;
-    return prices;
-  }, {});
-}
-
 const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   const current = calculate24hVolumeUSD(pool, tokenPrices, true);
   const previous = calculate24hVolumeUSD(pool, tokenPrices, false);
@@ -135,7 +129,16 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
 export const fetchAllPools = async (limit: number, offset: number, search: string, signerAddress: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
-    let tokenPrices = {};
+    let {data:reefPrice} = await firstValueFrom(tokenUtil.reefPrice$.pipe(skipWhile(
+      value =>
+        !value.hasStatus(reefState.FeedbackStatusCode.COMPLETE_DATA) ||
+        value.getStatusList().length != 1
+    )));
+
+    let tokenPrices = {
+      "0x0000000000000000000000000000000001000000" : reefPrice
+    };
+
     const response = await fetch(getDexUrl(selectedNw.name), {
       method: 'POST',
       headers: {
@@ -148,25 +151,9 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       throw new Error('Network response was not ok');
     }
 
-    const subscription = reefState.selectedTokenPrices$.subscribe({
-      next: (tokens) => {
-        if (tokens && tokens.length > 0) {
-          tokenPrices = mapTokensToPrices(tokens);
-          console.log('Token Prices updated:', tokenPrices);
-        } else {
-          console.log('No tokens available');
-          tokenPrices = {};
-        }
-      },
-      error: (err) => {
-        console.error('Error receiving token prices:', err);
-      },
-      complete: () => {
-        console.log('Subscription completed');
-      }
-    });
-
     const { data } = await response.json();
+
+    tokenPriceUtils.calculateTokenPrices(data.allPoolsList,tokenPrices);
 
     let tokenAddresess = [];
 
@@ -189,7 +176,6 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
       volumeChange24h: calculateVolumeChange(pool, tokenPrices),
     }));
-    subscription.unsubscribe();
     return pools;
   } catch (error) {
     console.log(error);

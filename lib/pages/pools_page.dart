@@ -62,18 +62,17 @@ class _PoolsPageState extends State<PoolsPage> {
 
   void _fetchUserBalance() {
     try {
-      
-    var selectedAccount = ReefAppState.instance.model.accounts.accountsList
-        .firstWhere((account) =>
-            account.address ==
-            ReefAppState.instance.model.accounts.selectedAddress);
-    if (selectedAccount.balance > BigInt.zero) {
-      setState(() {
-        hasReef = true;
-      });
-    }
+      var selectedAccount = ReefAppState.instance.model.accounts.accountsList
+          .firstWhere((account) =>
+              account.address ==
+              ReefAppState.instance.model.accounts.selectedAddress);
+      if (selectedAccount.balance > BigInt.zero) {
+        setState(() {
+          hasReef = true;
+        });
+      }
     } catch (e) {
-     print("error in fetching selected account ${e}"); 
+      print("error in fetching selected account ${e}");
     }
   }
 
@@ -156,7 +155,29 @@ class _PoolsPageState extends State<PoolsPage> {
                 ),
               ),
               title: Text('${pool['name1']} - ${pool['name2']}'),
-              trailing: Text('${pool['symbol1']}/${pool['symbol2']}'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${pool['symbol1']}/${pool['symbol2']}'),
+                  SizedBox(width: 4),
+                  Tooltip(
+                    message: '${pool['token1']}/\n${pool['token2']}',
+                    textStyle: TextStyle(
+                      fontSize: 12.0,
+                      color: Colors.white,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(
+                      Icons.help_outline,
+                      size: 18.0,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -505,13 +526,13 @@ class _PoolsPageState extends State<PoolsPage> {
                               itemBuilder: (context, index) {
                                 var pool = searchedPools![index];
                                 if (hasReef) {
-                                    if (hasBalance(pool['token1']) ||
-                                        hasBalance(pool['token2']))
-                                      return getPoolCard(pool);
-                                    else
-                                      return Container();
-                                  }
-                                  // return getPoolCard(pool);
+                                  if (hasBalance(pool['token1']) ||
+                                      hasBalance(pool['token2']))
+                                    return getPoolCard(pool);
+                                  else
+                                    return Container();
+                                }
+                                // return getPoolCard(pool);
                               },
                             ),
                           )

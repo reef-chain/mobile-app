@@ -85,11 +85,17 @@ class StorageService {
     final prefs = await SharedPreferences.getInstance();
     var dir = await getApplicationDocumentsDirectory();
     var path = "${dir.path}/hive_store";
-    Hive
-      ..init(path)
-      ..registerAdapter(StoredAccountAdapter())
-      ..registerAdapter(MetadataAdapter())
-      ..registerAdapter(AuthUrlAdapter());
+    Hive.init(path);
+
+    if (!Hive.isAdapterRegistered(1)) {
+    Hive.registerAdapter(StoredAccountAdapter());
+    }
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(MetadataAdapter());
+    }
+    if (!Hive.isAdapterRegistered(3)) {
+      Hive.registerAdapter(AuthUrlAdapter());
+    }
 
     mainBox.complete(Hive.openBox('ReefChainBox'));
     metadataBox.complete(Hive.openBox('MetadataBox'));
@@ -123,7 +129,7 @@ class StorageService {
       // We didn't ask for permission yet or the permission has been denied before but not permanently.
       if (await Permission.storage.request().isGranted) {
         print("PERMISSION GRANTED");
-        return true;
+        return true; 
       } else {
         print("PERMISSION DENIED");
         return true;
