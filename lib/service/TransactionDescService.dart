@@ -113,7 +113,7 @@ class TransactionDescService {
             var nativeMethodName = decodedData["Method Name"];
 
             if(nativeMethodName=="balances.transfer"){
-              return loc.sending_native_transaction(decodedData["value"]!, toShortDisplay(decodedData["dest.Id"]));
+              return loc.sending_native_transaction(toShortDisplay(decodedData["dest.Id"]), decodedData["value"]!);
             }else if(nativeMethodName=="evmAccounts.claimDefaultAccount"){
               return loc.claiming_default_account;
             }
