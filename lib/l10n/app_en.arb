@@ -204,7 +204,7 @@
   "no_active_sessions": "No active sessions",
   "approveTransaction": "Approving {amount} {tokenSymbol} to {recipientAddress}",
   "send_transaction": "Sending {amount} {symbol} to {to}",
-  "swap_transaction": "Swapping {token1} token1 for {token2} token2",
+  "swap_transaction": "Swapping {token1_amount} {token1_name} for {token2_amount} {token2_name}",
   "nft_transfer":"Transfering {amount} NFT with ID: {id} to {to}",
   "sending_native_transaction":"Sending {value} to {dest} natively.",
   "claiming_default_account":"Claiming default EVM Address"
