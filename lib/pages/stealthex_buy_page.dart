@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/utils/styles.dart';
 
 class StealthexBuyPage extends StatefulWidget {
   const StealthexBuyPage({super.key});
@@ -34,7 +35,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
         final symbolLower = currency['symbol'].toLowerCase();
         final queryLower = query.toLowerCase();
 
-        return nameLower.contains(queryLower) || symbolLower.contains(queryLower);
+        return nameLower.contains(queryLower) ||
+            symbolLower.contains(queryLower);
       }).toList();
     });
   }
@@ -43,67 +45,77 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: currencyController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: 'Select Currency',
-                  suffixIcon: Icon(Icons.arrow_drop_down),
-                ),
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return Column(
-                            children: [
-                              Expanded(
-                                child: currencies.isEmpty?
-                                CircularProgressIndicator()
-                                : Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: ListView.builder(
-                                    itemCount: currencies.length,
-                                    itemBuilder: (context, index) {
-                                      var currency = currencies[index];
-                                      return ListTile(
-                                        leading: SvgPicture.network(currency['icon_url'], width: 24, height: 24),
-                                        title: Text(currency['name']),
-                                        subtitle: Text(currency['symbol']),
-                                        onTap: () {
-                                          setState(() {
-                                            selectedCurrency = currency['symbol'];
-                                            currencyController.text = currency['symbol'];
-                                          });
-                                          Navigator.pop(context);
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: currencyController,
+              readOnly: true,
+              decoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                  border: InputBorder.none,
+                  hintText: "Select Currency",
+                  hintStyle: TextStyle(color: Styles.textLightColor)),
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return Column(
+                          children: [
+                            Expanded(
+                              child: currencies.isEmpty
+                                  ? CircularProgressIndicator()
+                                  : Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: ListView.builder(
+                                        itemCount: currencies.length,
+                                        itemBuilder: (context, index) {
+                                          var currency = currencies[index];
+                                          return ListTile(
+                                            leading: SvgPicture.network(
+                                                currency['icon_url'],
+                                                width: 24,
+                                                height: 24),
+                                            title: Text(currency['name']),
+                                            subtitle: Text(currency['symbol']),
+                                            onTap: () {
+                                              setState(() {
+                                                selectedCurrency =
+                                                    currency['symbol'];
+                                                currencyController.text =
+                                                    currency['symbol'];
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                          );
                                         },
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: amountController,
-                decoration: InputDecoration(
-                  labelText: 'Enter Amount',
-                ),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+            SizedBox(height: 8.0),
+            TextField(
+              controller: amountController,
+              decoration: InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                  border: InputBorder.none,
+                  hintText: "Enter Amount",
+                  hintStyle: TextStyle(color: Styles.textLightColor)),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
       ],
     );
   }
