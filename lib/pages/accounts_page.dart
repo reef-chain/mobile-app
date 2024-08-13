@@ -108,6 +108,7 @@ class _AccountsPageState extends State<AccountsPage> {
   }
 
   Padding buildHeader(BuildContext context) {
+    final accsFeedbackDataModel = ReefAppState.instance.model.accounts.accountsFDM;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -173,7 +174,9 @@ class _AccountsPageState extends State<AccountsPage> {
               ),
             ],
           ),
-          if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18))) InsufficientBalance(),
+          //if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
+          if (accsFeedbackDataModel.data.isNotEmpty)
+          InsufficientBalance()        
         ],
       ),
     );
