@@ -67,17 +67,17 @@ class TransactionDescService {
             var contractDetails = await ReefAppState.instance.tokensCtrl.getTokenInfo(contractAddress!);
 
             if(methodName=="transfer"){
-              return loc.send_transaction(BigInt.parse(decodedData["amount"]!)~/BigInt.from(1e18),contractDetails["symbol"],toShortDisplay(decodedData["to"]));
+              return loc.send_transaction((BigInt.parse(decodedData["amount"]!).toDouble() / 1e18).toStringAsFixed(2),contractDetails["symbol"],toShortDisplay(decodedData["to"]));
             }
             else if(methodName=="approve"){
               return loc.approveTransaction(
-            BigInt.parse(decodedData["amount"]!)~/BigInt.from(1e18),toShortDisplay(decodedData["spender"]),contractDetails["symbol"]);
+            (BigInt.parse(decodedData["amount"]!).toDouble() / 1e18).toStringAsFixed(2),toShortDisplay(decodedData["spender"]),contractDetails["symbol"]);
             }else if(methodName=="swapExactTokensForTokensSupportingFeeOnTransferTokens"){
 
             var token1 = await ReefAppState.instance.tokensCtrl.getTokenInfo(decodedData["path"]?.split("[")[1].trim()??"");
             var token2 = await ReefAppState.instance.tokensCtrl.getTokenInfo(decodedData["to"]?.split("]")[0].trim()??"");;
 
-              return loc.swap_transaction(BigInt.parse(decodedData["amountIn"]!)~/BigInt.from(1e18),token1["name"], BigInt.parse(decodedData["amountOutMin"]!)~/BigInt.from(1e18),token2["name"]);
+              return loc.swap_transaction((BigInt.parse(decodedData["amountIn"]!).toDouble() / 1e18).toStringAsFixed(2),token1["name"], (BigInt.parse(decodedData["amountOutMin"]!).toDouble()/1e18).toStringAsFixed(2),token2["name"]);
             }else if(methodName=="safeTransferFrom"){
               return loc.nft_transfer(decodedData["amount"]!,decodedData["id"]!,toShortDisplay(decodedData["to"]));
             }
