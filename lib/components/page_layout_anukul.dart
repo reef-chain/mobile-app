@@ -14,6 +14,7 @@ import 'package:reef_mobile_app/pages/accounts_page.dart';
 import 'package:reef_mobile_app/pages/home_page.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/settings_page.dart';
+import 'package:reef_mobile_app/pages/stealthex_buy_page.dart';
 import 'package:reef_mobile_app/pages/swap_page.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
@@ -38,6 +39,11 @@ List<BarItemNavigationPage> bottomNavigationBarItems = const [
     icon: Icon(Icons.cached),
     page: NavigationPage.pools,
     label: 'Pools',
+  ),
+  BarItemNavigationPage(
+    icon: Icon(Icons.monetization_on_outlined),
+    page: NavigationPage.buy,
+    label: 'Buy Reef',
   ),
 
   BarItemNavigationPage(
@@ -161,7 +167,12 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }
 
   Widget getMainNavPages() {
-    var pages = [const HomePage(key: PageStorageKey("homepage")),AccountsPage(key: const PageStorageKey("accountPage")),const PoolsPage(key: const PageStorageKey("poolsPage")),const SettingsPage(key: PageStorageKey("settingsPage"))];
+    var pages = [
+      const HomePage(key: PageStorageKey("homepage")),
+      AccountsPage(key: const PageStorageKey("accountPage")),
+      const PoolsPage(key: const PageStorageKey("poolsPage")),
+      const StealthexBuyPage(key: const PageStorageKey("stealthexBuyPage")),
+      const SettingsPage(key: PageStorageKey("settingsPage"))];
    
     return pages[selectedPageIndex];
   }
