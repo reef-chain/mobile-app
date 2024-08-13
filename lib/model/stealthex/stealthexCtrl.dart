@@ -13,8 +13,8 @@ class StealthexCtrl {
     bearerToken = "4500da35-f5d0-4783-873e-8677f85e4f21";
   }
 
-   Future<dynamic> listExchanges() async {
-    await _jsApi.jsCallVoidReturn(
-        'window.stealthex.listExchanges("${bearerToken}")');
+   Future<dynamic> listCurrencies() async {
+   return _jsApi.jsPromise(
+        'window.stealthex.listCurrencies("${bearerToken}")');
   }
 }

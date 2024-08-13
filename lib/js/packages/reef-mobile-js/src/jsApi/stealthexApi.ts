@@ -8,15 +8,16 @@ const getOptions = (bearerToken:string,url:string)=>{
       };
 }
 
-const listExchanges = async(bearerToken:string)=>{
+const listCurrencies = async(bearerToken:string)=>{
     try {
-        const { data } = await axios.request(getOptions(bearerToken,'https://api.stealthex.io/v4/currencies/'));
-        console.log(data);
+        const { data } = await axios.request(getOptions(bearerToken,'https://api.stealthex.io/v4/currencies?network=mainnet&limit=250'));
+        return data;
     } catch (error) {
         console.error(error);
+        return [];
     }
 }
 
 export default{
-    listExchanges
+    listCurrencies
 }
