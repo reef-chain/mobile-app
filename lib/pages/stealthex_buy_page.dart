@@ -75,49 +75,64 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                         return StatefulBuilder(
                           builder:
                               (BuildContext context, StateSetter setState) {
-                            return Column(
-                              children: [
-                                Expanded(
-                                  child: currencies.isEmpty
-                                      ? Center(
-                                          child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            CircularProgressIndicator(),
-                                            Gap(8.0),
-                                            Text("Fetching Currencies")
-                                          ],
-                                        ))
-                                      : Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: ListView.builder(
-                                            itemCount: currencies.length,
-                                            itemBuilder: (context, index) {
-                                              var currency = currencies[index];
-                                              return ListTile(
-                                                leading: SvgPicture.network(
-                                                    currency['icon_url'],
-                                                    width: 24,
-                                                    height: 24),
-                                                title: Text(currency['name']),
-                                                subtitle:
-                                                    Text(currency['symbol']),
-                                                onTap: () {
-                                                  setState(() {
-                                                    selectedCurrency =
-                                                        currency['symbol'];
-                                                    currencyController.text =
-                                                        currency['symbol'];
-                                                  });
-                                                  Navigator.pop(context);
-                                                },
-                                              );
-                                            },
+                            return Container(
+                              color: Styles.darkBackgroundColor,
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: currencies.isEmpty
+                                        ? Center(
+                                            child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              CircularProgressIndicator(),
+                                              Gap(8.0),
+                                              Text(
+                                                "Fetching Currencies",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ],
+                                          ))
+                                        : Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: ListView.builder(
+                                              itemCount: currencies.length,
+                                              itemBuilder: (context, index) {
+                                                var currency =
+                                                    currencies[index];
+                                                return ListTile(
+                                                  leading: SvgPicture.network(
+                                                      currency['icon_url'],
+                                                      width: 24,
+                                                      height: 24),
+                                                  title: Text(
+                                                    currency['name'],
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                  subtitle: Text(
+                                                    currency['symbol'],
+                                                    style: TextStyle(
+                                                        color: Colors.white70),
+                                                  ),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      selectedCurrency =
+                                                          currency['symbol'];
+                                                      currencyController.text =
+                                                          currency['symbol'];
+                                                    });
+                                                    Navigator.pop(context);
+                                                  },
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                ),
-                              ],
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         );
