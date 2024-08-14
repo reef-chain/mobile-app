@@ -13,7 +13,7 @@ class StealthexBuyPage extends StatefulWidget {
 
 class _StealthexBuyPageState extends State<StealthexBuyPage> {
   List<dynamic> currencies = [];
-  String selectedCurrency = '';
+  Map<String, dynamic>? selectedCurrency;
   TextEditingController currencyController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   bool _isValueEditing = false;
@@ -22,8 +22,10 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
 
   @override
   void initState() {
-    _focusNode.addListener(_onFocusChange);
     super.initState();
+    _focusNode.addListener(_onFocusChange);
+
+    // Fetch the list of currencies
     ReefAppState.instance.stealthexCtrl.listCurrencies().then((val) {
       setState(() {
         currencies = val;
@@ -43,38 +45,11 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     _focusNode.removeListener(_onFocusChange);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0x00d7d1e9)),
-                  borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xffE7E2F2),
-                ),
-                child: TextField(
-                  controller: currencyController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                      border: InputBorder.none,
-                      hintText: "Select Currency",
-                      hintStyle: TextStyle(color: Styles.textLightColor)),
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return StatefulBuilder(
-                          builder:
-                              (BuildContext context, StateSetter setState) {
+  void openDropdown() async{
+                      if (currencies.length > 0) {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
                             return Container(
                               color: Styles.darkBackgroundColor,
                               child: Column(
@@ -113,14 +88,16 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                                                         color: Colors.white),
                                                   ),
                                                   subtitle: Text(
-                                                    currency['symbol'],
+                                                    currency['symbol']
+                                                        .toString()
+                                                        .toUpperCase(),
                                                     style: TextStyle(
                                                         color: Colors.white70),
                                                   ),
                                                   onTap: () {
                                                     setState(() {
                                                       selectedCurrency =
-                                                          currency['symbol'];
+                                                          currency;
                                                       currencyController.text =
                                                           currency['symbol'];
                                                     });
@@ -136,11 +113,71 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                             );
                           },
                         );
-                      },
-                    );
-                  },
+                      } else {
+                        var res = await ReefAppState.instance.stealthexCtrl
+                            .listCurrencies();
+
+                             setState(() {
+                            currencies = res;
+                          });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text("Fetching currencies, Please try again!"),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (selectedCurrency != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0x00d7d1e9)),
+                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xffE7E2F2),
+                  ),
+                  child: Row(
+                    children: [
+                      SvgPicture.network(selectedCurrency!["icon_url"]),
+                      SizedBox(width: 10),
+                      Text(
+                        selectedCurrency!["symbol"],
+                        style: TextStyle(color: Styles.textLightColor),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              if (selectedCurrency == null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0x00d7d1e9)),
+                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xffE7E2F2),
+                  ),
+                  child: TextField(
+                    controller: currencyController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                        border: InputBorder.none,
+                        hintText: "Select Currency",
+                        hintStyle: TextStyle(color: Styles.textLightColor)),
+                    onTap: openDropdown,
+                  ),
+                ),
               SizedBox(height: 8.0),
               Container(
                 padding: const EdgeInsets.all(12),

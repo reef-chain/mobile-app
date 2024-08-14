@@ -14,7 +14,7 @@ class StealthexCtrl {
   }
 
    Future<dynamic> listCurrencies() async {
-   return _jsApi.jsPromise(
+   return await _jsApi.jsPromise(
         'window.stealthex.listCurrencies("${bearerToken}")');
   }
 }

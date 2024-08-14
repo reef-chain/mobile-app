@@ -11,6 +11,7 @@ const getOptions = (bearerToken:string,url:string)=>{
 const listCurrencies = async(bearerToken:string)=>{
     try {
         const { data } = await axios.request(getOptions(bearerToken,'https://api.stealthex.io/v4/currencies?network=mainnet&limit=250'));
+        console.log("data===",data)
         return data;
     } catch (error) {
         console.error(error);
