@@ -141,7 +141,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
             children: [
               if (selectedCurrency != null)
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     border: Border.all(color: const Color(0x00d7d1e9)),
                     borderRadius: BorderRadius.circular(12),
@@ -149,11 +149,22 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                   ),
                   child: Row(
                     children: [
-                      SvgPicture.network(selectedCurrency!["icon_url"]),
+                      SvgPicture.network(selectedCurrency!["icon_url"],width: 30,),
                       SizedBox(width: 10),
                       Text(
-                        selectedCurrency!["symbol"],
+                        '${selectedCurrency!["name"].toString().toUpperCase()} (${selectedCurrency!["symbol"].toString().toUpperCase()})',
                         style: TextStyle(color: Styles.textLightColor),
+                      ),
+                      Spacer(), 
+                      GestureDetector(
+                        onTap: openDropdown,
+                        child: const RotatedBox(
+                          
+                                        quarterTurns: 1,
+                                        child: Icon(
+                                          Icons.chevron_right_rounded,
+                                          color: Styles.textColor,
+                                        )),
                       ),
                     ],
                   ),
