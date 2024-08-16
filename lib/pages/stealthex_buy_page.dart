@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:reef_mobile_app/components/generateQrJsonValue.dart';
+import 'package:reef_mobile_app/components/getQrTypeData.dart';
+import 'package:reef_mobile_app/components/modals/show_qr_code.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
@@ -250,6 +253,12 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
         "${purchaseResponse!["deposit"]["address"]}",
         style: TextStyle(color: Styles.textLightColor),
         softWrap: true,
+      ),
+      GenerateQrJsonValue(
+        data: purchaseResponse!["deposit"]["address"],
+        type: ReefQrCodeType.address,
+        shouldDisplayValueOnly: true,
+        isStealthexQr: true,
       ),
       Gap(16.0),
       Divider(color: Colors.grey[300], thickness: 1.0),
