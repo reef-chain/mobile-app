@@ -254,11 +254,13 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
         style: TextStyle(color: Styles.textLightColor),
         softWrap: true,
       ),
-      GenerateQrJsonValue(
-        data: purchaseResponse!["deposit"]["address"],
-        type: ReefQrCodeType.address,
-        shouldDisplayValueOnly: true,
-        isStealthexQr: true,
+      Center(
+        child: GenerateQrJsonValue(
+          data: purchaseResponse!["deposit"]["address"],
+          type: ReefQrCodeType.address,
+          shouldDisplayValueOnly: true,
+          isStealthexQr: true,
+        ),
       ),
       Gap(16.0),
       Divider(color: Colors.grey[300], thickness: 1.0),
