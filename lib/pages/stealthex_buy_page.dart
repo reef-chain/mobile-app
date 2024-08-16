@@ -40,9 +40,17 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     });
   }
 
-  Future<void> fetchEstimatedReef(amount)async{
-    if(amount==Null || selectedCurrency==null)return;
-    var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(selectedCurrency!["legacy_symbol"],selectedCurrency!["network"],double.parse(amount));
+  Future<void> fetchEstimatedReef(amount) async {
+    if (amount == Null || selectedCurrency == null) return;
+    double amt = 0.0;
+    try {
+      amt= double.parse(amount);
+    } catch (e) {}
+    var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(
+        selectedCurrency!["legacy_symbol"],
+        selectedCurrency!["network"],
+        amt
+        );
     setState(() {
       estimatedReef = double.parse(res.toString());
     });
@@ -54,90 +62,80 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     _focusNode.removeListener(_onFocusChange);
   }
 
-  void openDropdown() async{
-                      if (currencies.length > 0) {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Container(
-                              color: Styles.darkBackgroundColor,
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: currencies.isEmpty
-                                        ? Center(
-                                            child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              CircularProgressIndicator(),
-                                              Gap(8.0),
-                                              Text(
-                                                "Fetching Currencies",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ],
-                                          ))
-                                        : Padding(
-                                            padding: const EdgeInsets.all(16.0),
-                                            child: ListView.builder(
-                                              itemCount: currencies.length,
-                                              itemBuilder: (context, index) {
-                                                var currency =
-                                                    currencies[index];
-                                                return ListTile(
-                                                  leading: SvgPicture.network(
-                                                      currency['icon_url'],
-                                                      width: 24,
-                                                      height: 24),
-                                                  title: Text(
-                                                    currency['name'],
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                  subtitle: Text(
-                                                    currency['symbol']
-                                                        .toString()
-                                                        .toUpperCase(),
-                                                    style: TextStyle(
-                                                        color: Colors.white70),
-                                                  ),
-                                                  onTap: () {
-                                                    setState(() {
-                                                      selectedCurrency =
-                                                          currency;
-                                                      currencyController.text =
-                                                          currency['symbol'];
-                                                    });
-                                                    Navigator.pop(context);
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      } else {
-                        var res = await ReefAppState.instance.stealthexCtrl
-                            .listCurrencies();
-
-                             setState(() {
-                            currencies = res;
-                          });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                Text("Fetching currencies, Please try again!"),
-                            duration: Duration(seconds: 2),
+  void openDropdown() async {
+    if (currencies.length > 0) {
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            color: Styles.darkBackgroundColor,
+            child: Column(
+              children: [
+                Expanded(
+                  child: currencies.isEmpty
+                      ? Center(
+                          child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                            Gap(8.0),
+                            Text(
+                              "Fetching Currencies",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ))
+                      : Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListView.builder(
+                            itemCount: currencies.length,
+                            itemBuilder: (context, index) {
+                              var currency = currencies[index];
+                              return ListTile(
+                                leading: SvgPicture.network(
+                                    currency['icon_url'],
+                                    width: 24,
+                                    height: 24),
+                                title: Text(
+                                  currency['name'],
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                subtitle: Text(
+                                  currency['symbol'].toString().toUpperCase(),
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    selectedCurrency = currency;
+                                    currencyController.text =
+                                        currency['symbol'];
+                                  });
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
                           ),
-                        );
-                      }
-                    }
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      var res = await ReefAppState.instance.stealthexCtrl.listCurrencies();
+
+      setState(() {
+        currencies = res;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Fetching currencies, Please try again!"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,22 +156,24 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                   ),
                   child: Row(
                     children: [
-                      SvgPicture.network(selectedCurrency!["icon_url"],width: 30,),
+                      SvgPicture.network(
+                        selectedCurrency!["icon_url"],
+                        width: 30,
+                      ),
                       SizedBox(width: 10),
                       Text(
                         '${selectedCurrency!["name"].toString().toUpperCase()} (${selectedCurrency!["symbol"].toString().toUpperCase()})',
                         style: TextStyle(color: Styles.textLightColor),
                       ),
-                      Spacer(), 
+                      Spacer(),
                       GestureDetector(
                         onTap: openDropdown,
                         child: const RotatedBox(
-                          
-                                        quarterTurns: 1,
-                                        child: Icon(
-                                          Icons.chevron_right_rounded,
-                                          color: Styles.textColor,
-                                        )),
+                            quarterTurns: 1,
+                            child: Icon(
+                              Icons.chevron_right_rounded,
+                              color: Styles.textColor,
+                            )),
                       ),
                     ],
                   ),
@@ -220,8 +220,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                 ),
                 child: TextField(
                   onChanged: (val) async {
-                      await fetchEstimatedReef(val);
-                    },
+                    await fetchEstimatedReef(val);
+                  },
                   focusNode: _focusNode,
                   controller: amountController,
                   decoration: InputDecoration(
@@ -234,6 +234,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                 ),
               ),
               Gap(16.0),
+              if(estimatedReef>0)
               Container(
                 child: Text("Estimated Reef ${estimatedReef}"),
               )
