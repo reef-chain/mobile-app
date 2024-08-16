@@ -270,7 +270,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Text(
-            "${purchaseResponse!["withdrawal"]["amount"]}",
+            "${purchaseResponse!["withdrawal"]["amount"]} ${purchaseResponse!["withdrawal"]["symbol"].toString().toUpperCase()}",
             style: TextStyle(color: Styles.textLightColor),
           ),
         ],
