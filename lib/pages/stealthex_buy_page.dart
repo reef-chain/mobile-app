@@ -194,7 +194,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return isPurchaseResponse ? Container(
+    return isPurchaseResponse ?Container(
   margin: EdgeInsets.all(16.0),
   padding: EdgeInsets.all(16.0),
   decoration: BoxDecoration(
@@ -242,22 +242,14 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
         ],
       ),
       Gap(8.0),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "To address:",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          SizedBox(width: 8.0),
-          Expanded(
-            child: Text(
-              "${purchaseResponse!["deposit"]["address"]}",
-              style: TextStyle(color: Styles.textLightColor),
-              softWrap: true,
-            ),
-          ),
-        ],
+      Text(
+        "To address:",
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      Text(
+        "${purchaseResponse!["deposit"]["address"]}",
+        style: TextStyle(color: Styles.textLightColor),
+        softWrap: true,
       ),
       Gap(16.0),
       Divider(color: Colors.grey[300], thickness: 1.0),
@@ -276,22 +268,14 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
         ],
       ),
       Gap(8.0),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Recipient Address:",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          SizedBox(width: 8.0),
-          Expanded(
-            child: Text(
-              "${purchaseResponse!["withdrawal"]["address"]}",
-              style: TextStyle(color: Styles.textLightColor),
-              softWrap: true,
-            ),
-          ),
-        ],
+      Text(
+        "Recipient Address:",
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      Text(
+        "${purchaseResponse!["withdrawal"]["address"]}",
+        style: TextStyle(color: Styles.textLightColor),
+        softWrap: true,
       ),
     ],
   ),
