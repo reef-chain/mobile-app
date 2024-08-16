@@ -3,6 +3,7 @@ import 'package:reef_mobile_app/model/appConfig/app_config_model.dart';
 import 'package:reef_mobile_app/model/locale/locale_model.dart';
 import 'package:reef_mobile_app/model/network/network_model.dart';
 import 'package:reef_mobile_app/model/signing/signature_requests.dart';
+import 'package:reef_mobile_app/model/stealthex/stealthex_model.dart';
 import 'package:reef_mobile_app/model/swap/pools_model.dart';
 import 'package:reef_mobile_app/model/swap/swap_settings.dart';
 import 'package:reef_mobile_app/model/tokens/token_model.dart';
@@ -21,4 +22,5 @@ class ViewModel {
   final navigationModel = NavigationModel();
   final homeNavigationModel = HomePageNavigationModel();
   final swapSettings = SwapSettings(1, 0.8);
+  final stealthexModel = StealthexModel();
 }
