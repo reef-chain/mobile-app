@@ -26,4 +26,9 @@ class StealthexCtrl {
    return await _jsApi.jsPromise(
         'window.stealthex.createExchange("${bearerToken}","${fromSymbol}","${fromNetwork}","${toSymbol}","${toNetwork}",${amount},"${address}")');
   }
+
+   Future<dynamic> setTransactionHash(String id,String tx_hash) async {
+   return await _jsApi.jsPromise(
+        'window.stealthex.setTransactionHash("${bearerToken}","${id}","${tx_hash}")');
+  }
 }

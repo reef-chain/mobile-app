@@ -210,7 +210,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     ),
     onPressed: ()async {
       if(txHash.length>8){
-    
+        var res = await ReefAppState.instance.stealthexCtrl.setTransactionHash(purchaseResponse!["id"], txHash);
+        print("res=== ${res}");
       }
     },
     child: Ink(

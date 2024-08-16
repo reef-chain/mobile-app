@@ -69,6 +69,23 @@ const getEstimatedExchange = async(bearerToken:string,sourceChain:string,sourceN
     }
 }
 
+const setTransactionHash = async(bearerToken:string,id:string,tx_hash:string)=>{
+    const options = {
+      method: 'PATCH',
+      url: `https://api.stealthex.io/v4/exchanges/${id}`,
+      headers: {'Content-Type': 'application/json', Authorization: `Bearer ${bearerToken}`},
+      data: {tx_hash}
+    };
+    
+    try {
+      const { data } = await axios.request(options);
+      console.log("setTransactionHash===",data);
+      return data;
+    } catch (error) {
+      console.error("setTransactionHash===",error);
+    }
+}
+
 const createExchange = async(bearerToken:string,fromSymbol:string,fromNetwork:string,toSymbol:string,toNetwork:string,amount:number,address:string)=>{
 const options = {
   method: 'POST',
@@ -98,5 +115,6 @@ try {
 export default{
     listCurrencies,
     getEstimatedExchange,
-    createExchange
+    createExchange,
+    setTransactionHash
 }
