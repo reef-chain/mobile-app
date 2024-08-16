@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/generateQrJsonValue.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/show_qr_code.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
 class StealthexBuyPage extends StatefulWidget {
@@ -211,7 +213,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     onPressed: ()async {
       if(txHash.length>8){
         var res = await ReefAppState.instance.stealthexCtrl.setTransactionHash(purchaseResponse!["id"], txHash);
-        print("res=== ${res}");
+        ReefAppState.instance.navigationCtrl
+        .navigate(NavigationPage.accounts);
       }
     },
     child: Ink(
@@ -366,12 +369,15 @@ setTxHashStealthex()
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Purchase REEFs",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Styles.textLightColor),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Text(
+                        "Purchase REEFs",
+                        style: GoogleFonts.spaceGrotesk(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 32,
+                            color: Styles.textColor),
+                      ),
               ),
               Gap(8.0),
               if (selectedCurrency != null)

@@ -82,7 +82,7 @@ const setTransactionHash = async(bearerToken:string,id:string,tx_hash:string)=>{
       console.log("setTransactionHash===",data);
       return data;
     } catch (error) {
-      console.error("setTransactionHash===",error);
+      console.error("setTransactionHash error===",error);
     }
 }
 
