@@ -26,6 +26,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   double inputAmount = 0.0;
   Map<String,dynamic>? purchaseResponse;
   bool isPurchaseResponse= false;
+  String txHash="";
 
   FocusNode _focusNode = FocusNode();
 
@@ -195,6 +196,47 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     ));
   }
 
+  SizedBox setTxHashStealthex() {
+    return SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shadowColor: const Color(0x559d6cff),
+      elevation: 0,
+      backgroundColor: !(txHash.length>8) ?Color.fromARGB(255, 125, 125, 125): Color.fromARGB(0, 215, 31, 31),
+      padding: const EdgeInsets.all(0),
+    ),
+    onPressed: ()async {
+      if(txHash.length>8){
+    
+      }
+    },
+    child: Ink(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+      decoration: BoxDecoration(
+        color: const Color(0xffe6e2f1),
+        gradient: !(txHash.length>8) ?null:Styles.buttonGradient,
+        borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+      ),
+      child: Center(
+        child: Text(
+          !(txHash.length>8) ? "Invalid Transaction Hash":"Submit",
+          style: TextStyle(
+            fontSize: 16,
+            color:!(txHash.length>8) ?const Color(0x65898e9c): Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    ),
+          ),
+        );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return isPurchaseResponse ?Container(
@@ -211,84 +253,110 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
       ),
     ],
   ),
-  child: Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "Status:",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text(
-            purchaseResponse!["status"] == "waiting" 
-                ? "Awaiting deposit" 
-                : purchaseResponse!["status"],
-            style: TextStyle(color: Styles.primaryAccentColor),
-          ),
-        ],
-      ),
-      Gap(8.0),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "You Send:",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text(
-            "${purchaseResponse!["deposit"]["amount"]} ${purchaseResponse!["deposit"]["symbol"].toString().toUpperCase()}",
-            style: TextStyle(color: Styles.textLightColor),
-          ),
-        ],
-      ),
-      Gap(8.0),
-      Text(
-        "To address:",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "${purchaseResponse!["deposit"]["address"]}",
-        style: TextStyle(color: Styles.textLightColor),
-        softWrap: true,
-      ),
-      Center(
-        child: GenerateQrJsonValue(
-          data: purchaseResponse!["deposit"]["address"],
-          type: ReefQrCodeType.address,
-          shouldDisplayValueOnly: true,
-          isStealthexQr: true,
+  child: SingleChildScrollView(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Status:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              purchaseResponse!["status"] == "waiting" 
+                  ? "Awaiting deposit" 
+                  : purchaseResponse!["status"],
+              style: TextStyle(color: Styles.primaryAccentColor),
+            ),
+          ],
         ),
-      ),
-      Gap(16.0),
-      Divider(color: Colors.grey[300], thickness: 1.0),
-      Gap(16.0),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "You Receive:",
-            style: TextStyle(fontWeight: FontWeight.bold),
+        Gap(8.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "You Send:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "${purchaseResponse!["deposit"]["amount"]} ${purchaseResponse!["deposit"]["symbol"].toString().toUpperCase()}",
+              style: TextStyle(color: Styles.textLightColor),
+            ),
+          ],
+        ),
+        Gap(8.0),
+        Text(
+          "To address:",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "${purchaseResponse!["deposit"]["address"]}",
+          style: TextStyle(color: Styles.textLightColor),
+          softWrap: true,
+        ),
+        Center(
+          child: GenerateQrJsonValue(
+            data: purchaseResponse!["deposit"]["address"],
+            type: ReefQrCodeType.address,
+            shouldDisplayValueOnly: true,
+            isStealthexQr: true,
           ),
-          Text(
-            "${purchaseResponse!["withdrawal"]["amount"]} ${purchaseResponse!["withdrawal"]["symbol"].toString().toUpperCase()}",
-            style: TextStyle(color: Styles.textLightColor),
-          ),
-        ],
-      ),
-      Gap(8.0),
-      Text(
-        "Recipient Address:",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "${purchaseResponse!["withdrawal"]["address"]}",
-        style: TextStyle(color: Styles.textLightColor),
-        softWrap: true,
-      ),
-    ],
+        ),
+        Gap(16.0),
+        Divider(color: Colors.grey[300], thickness: 1.0),
+        Gap(16.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "You Receive:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "${purchaseResponse!["withdrawal"]["amount"]} ${purchaseResponse!["withdrawal"]["symbol"].toString().toUpperCase()}",
+              style: TextStyle(color: Styles.textLightColor),
+            ),
+          ],
+        ),
+        Gap(8.0),
+        Text(
+          "Recipient Address:",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "${purchaseResponse!["withdrawal"]["address"]}",
+          style: TextStyle(color: Styles.textLightColor),
+          softWrap: true,
+        ),
+        Gap(16.0),
+         Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Styles.primaryAccentColor),
+                    borderRadius: BorderRadius.circular(12),
+                    color: Styles.whiteColor,
+                  ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                        border: InputBorder.none,
+                        hintText: "Paste Transaction Hash",
+                        hintStyle: TextStyle(color: Styles.textLightColor)),
+                        onChanged: (val){
+                          setState(() {
+                            txHash = val;
+                          });
+                        },
+                  ),
+                ),
+                Gap(8.0),
+setTxHashStealthex()
+      ],
+    ),
   ),
 ): Column(
       children: [
