@@ -20,6 +20,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   bool _isValueEditing = false;
   double estimatedReef = 0;
   bool isLoading = false;
+  double inputAmount = 0.0;
 
   FocusNode _focusNode = FocusNode();
 
@@ -51,6 +52,10 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     try {
       amt = double.parse(amount);
     } catch (e) {}
+
+    setState(() {
+      inputAmount=amt;
+    });
     var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(
         selectedCurrency!["legacy_symbol"], selectedCurrency!["network"], amt);
     setState(() {
@@ -150,7 +155,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           shadowColor: const Color(0x559d6cff),
           elevation: 0,
-          backgroundColor: Color.fromARGB(0, 215, 31, 31),
+          backgroundColor: selectedCurrency==null || double.parse(inputAmount.toString())<0.1 ?Color.fromARGB(255, 125, 125, 125): Color.fromARGB(0, 215, 31, 31),
           padding: const EdgeInsets.all(0),
         ),
         onPressed: () {
@@ -161,7 +166,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
           decoration: BoxDecoration(
             color: const Color(0xffe6e2f1),
-            gradient: Styles.buttonGradient,
+            gradient: selectedCurrency==null || double.parse(inputAmount.toString())<0.1?null:Styles.buttonGradient,
             borderRadius: const BorderRadius.all(Radius.circular(14.0)),
           ),
           child: Center(
@@ -169,7 +174,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
               "Purchase",
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.white,
+                color:selectedCurrency==null || double.parse(inputAmount.toString())<0.1?const Color(0x65898e9c): Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),

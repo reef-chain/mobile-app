@@ -67,7 +67,34 @@ const getEstimatedExchange = async(bearerToken:string,sourceChain:string,sourceN
     }
 }
 
+const createExchange = async(bearerToken:string,fromSymbol:string,fromNetwork:string,toSymbol:string,toNetwork:string,amount:number,address:string)=>{
+const options = {
+  method: 'POST',
+  url: 'https://api.stealthex.io/v4/exchanges/',
+  headers: {'Content-Type': 'application/json', Authorization: `Bearer ${bearerToken}`},
+  data: {
+    route: {
+      from: {symbol: fromSymbol, network: fromNetwork},
+      to: {symbol: toSymbol, network: toNetwork}
+    },
+    amount: amount,
+    estimation: 'direct',
+    rate: 'floating',
+    address
+  }
+};
+
+try {
+  const { data } = await axios.request(options);
+  console.log("createExchange===",data)
+  return data;
+} catch (error) {
+  console.error("createExchange===",error);
+}
+}
+
 export default{
     listCurrencies,
-    getEstimatedExchange
+    getEstimatedExchange,
+    createExchange
 }
