@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
@@ -18,6 +19,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   TextEditingController amountController = TextEditingController();
   bool _isValueEditing = false;
   double estimatedReef = 0;
+  bool isLoading = false;
 
   FocusNode _focusNode = FocusNode();
 
@@ -43,16 +45,17 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   Future<void> fetchEstimatedReef(amount) async {
     if (amount == Null || selectedCurrency == null) return;
     double amt = 0.0;
+    setState(() {
+      isLoading = true;
+    });
     try {
-      amt= double.parse(amount);
+      amt = double.parse(amount);
     } catch (e) {}
     var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(
-        selectedCurrency!["legacy_symbol"],
-        selectedCurrency!["network"],
-        amt
-        );
+        selectedCurrency!["legacy_symbol"], selectedCurrency!["network"], amt);
     setState(() {
       estimatedReef = double.parse(res.toString());
+      isLoading = false;
     });
   }
 
@@ -137,6 +140,45 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     }
   }
 
+  ConnectWrapperButton getPurchaseBtn() {
+    return ConnectWrapperButton(
+        child: SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shadowColor: const Color(0x559d6cff),
+          elevation: 0,
+          backgroundColor: Color.fromARGB(0, 215, 31, 31),
+          padding: const EdgeInsets.all(0),
+        ),
+        onPressed: () {
+          //anukulpandey
+        },
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+          decoration: BoxDecoration(
+            color: const Color(0xffe6e2f1),
+            gradient: Styles.buttonGradient,
+            borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+          ),
+          child: Center(
+            child: Text(
+              "Purchase",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -146,6 +188,14 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                "Purchase REEFs",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Styles.textLightColor),
+              ),
+              Gap(8.0),
               if (selectedCurrency != null)
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -234,33 +284,36 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                 ),
               ),
               Gap(16.0),
-              if(estimatedReef>0)
-              Container(
-  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12), 
-  decoration: BoxDecoration(
-    color: Colors.white, 
-    borderRadius: BorderRadius.circular(8),
-  ),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(
-        "Estimated Reefs:",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Styles.textColor,
-        ),
-      ),
-      Text(
-        "~${estimatedReef}",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Styles.primaryAccentColor,
-        ),
-      ),
-    ],
-  ),
-)
+              if (estimatedReef > 0)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Estimated Reefs:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Styles.textLightColor,
+                        ),
+                      ),
+                      Text(
+                        "~${estimatedReef}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Styles.primaryAccentColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (isLoading) Text("Loading..."),
+              Gap(8.0),
+              getPurchaseBtn()
             ],
           ),
         ),
