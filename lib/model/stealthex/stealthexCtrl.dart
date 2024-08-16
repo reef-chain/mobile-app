@@ -17,4 +17,9 @@ class StealthexCtrl {
    return await _jsApi.jsPromise(
         'window.stealthex.listCurrencies("${bearerToken}")');
   }
+
+   Future<dynamic> getEstimatedExchange(String sourceChain,String sourceNetwork,double amount) async {
+   return await _jsApi.jsPromise(
+        'window.stealthex.getEstimatedExchange("${bearerToken}","${sourceChain}","${sourceNetwork}",${amount})');
+  }
 }

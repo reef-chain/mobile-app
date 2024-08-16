@@ -1,24 +1,73 @@
 const axios = require('axios').default;
 
-const getOptions = (bearerToken:string,url:string)=>{
+const getOptions = (bearerToken:string,method:string,url:string,data:any)=>{
     return {
-        method: 'GET',
+        method,
         url,
-        headers: {Authorization: `Bearer ${bearerToken}`}
+        headers: {Authorization: `Bearer ${bearerToken}`},
+        data
       };
 }
 
 const listCurrencies = async(bearerToken:string)=>{
     try {
-        const { data } = await axios.request(getOptions(bearerToken,'https://api.stealthex.io/v4/currencies?network=mainnet&limit=250'));
-        console.log("data===",data)
-        return data;
+        const { data } = await axios.request(getOptions(bearerToken,'GET','https://api.stealthex.io/v4/currencies?include_available_routes=true&limit=250&network=mainnet',{}));
+        let reefNetwork = [];
+
+        // finding all routes for reef network
+        data.forEach((val)=>{
+            if(val["symbol"]=="reef"){
+                reefNetwork=val.available_routes;
+            }
+        })
+
+        // made a map for tracking the currency symbols
+        let availableNetworkRoutesMap = {};
+
+        reefNetwork.forEach((val)=>{
+            if(availableNetworkRoutesMap[val.network]){
+                availableNetworkRoutesMap[val.network].push(val.symbol);
+            }else{
+                availableNetworkRoutesMap[val.network] = [val.symbol];
+            }
+        })
+
+
+        let res=[];
+
+        data.forEach((val)=>{
+            if(availableNetworkRoutesMap[val.network] && availableNetworkRoutesMap[val.network].indexOf(val.symbol)){
+                res.push(val);
+            }
+        })
+
+        return res;
     } catch (error) {
-        console.error(error);
+        console.error("listCurrencies===",error);
         return [];
     }
 }
 
+const getEstimatedExchange = async(bearerToken:string,sourceChain:string,sourceNetwork:string,amount:number)=>{
+    try {
+        const { data } = await axios.request(getOptions(bearerToken,'POST','https://api.stealthex.io/v4/rates/estimated-amount',{
+            route: {
+              from: {symbol: sourceChain, network: sourceNetwork},
+              to: {symbol: 'reef', network: 'mainnet'}
+            },
+            estimation: 'direct',
+            rate: 'floating',
+            amount
+          }));
+          console.log("getEstimatedExchange===",data);
+        return data.estimated_amount;
+    } catch (error) {
+        console.log("getEstimatedExchange error===",sourceChain,sourceNetwork,error);
+        return 0;
+    }
+}
+
 export default{
-    listCurrencies
+    listCurrencies,
+    getEstimatedExchange
 }

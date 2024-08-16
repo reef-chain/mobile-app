@@ -17,6 +17,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   TextEditingController currencyController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   bool _isValueEditing = false;
+  double estimatedReef = 0;
 
   FocusNode _focusNode = FocusNode();
 
@@ -36,6 +37,14 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   void _onFocusChange() {
     setState(() {
       _isValueEditing = !_isValueEditing;
+    });
+  }
+
+  Future<void> fetchEstimatedReef(amount)async{
+    if(amount==Null || selectedCurrency==null)return;
+    var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(selectedCurrency!["legacy_symbol"],selectedCurrency!["network"],double.parse(amount));
+    setState(() {
+      estimatedReef = double.parse(res.toString());
     });
   }
 
@@ -210,6 +219,9 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                       : const Color(0xffE7E2F2),
                 ),
                 child: TextField(
+                  onChanged: (val) async {
+                      await fetchEstimatedReef(val);
+                    },
                   focusNode: _focusNode,
                   controller: amountController,
                   decoration: InputDecoration(
@@ -221,6 +233,10 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                   keyboardType: TextInputType.number,
                 ),
               ),
+              Gap(16.0),
+              Container(
+                child: Text("Estimated Reef ${estimatedReef}"),
+              )
             ],
           ),
         ),
