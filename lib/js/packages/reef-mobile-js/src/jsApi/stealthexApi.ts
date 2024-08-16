@@ -32,6 +32,7 @@ const listCurrencies = async(bearerToken:string)=>{
             }
         })
 
+        console.log(availableNetworkRoutesMap['mainnet'])
 
         let res=[];
 
@@ -49,6 +50,7 @@ const listCurrencies = async(bearerToken:string)=>{
 }
 
 const getEstimatedExchange = async(bearerToken:string,sourceChain:string,sourceNetwork:string,amount:number)=>{
+    console.log(sourceChain,sourceNetwork,amount);
     try {
         const { data } = await axios.request(getOptions(bearerToken,'POST','https://api.stealthex.io/v4/rates/estimated-amount',{
             route: {

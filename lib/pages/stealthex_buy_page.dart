@@ -21,6 +21,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   double estimatedReef = 0;
   bool isLoading = false;
   double inputAmount = 0.0;
+  Map<String,dynamic>? purchaseResponse;
+  bool isPurchaseResponse= false;
 
   FocusNode _focusNode = FocusNode();
 
@@ -50,7 +52,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
       isLoading = true;
     });
     try {
-      amt = double.parse(amount);
+      amt = double.parse(amount.toString());
     } catch (e) {}
 
     setState(() {
@@ -155,18 +157,24 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           shadowColor: const Color(0x559d6cff),
           elevation: 0,
-          backgroundColor: selectedCurrency==null || double.parse(inputAmount.toString())<0.1 ?Color.fromARGB(255, 125, 125, 125): Color.fromARGB(0, 215, 31, 31),
+          backgroundColor: !(estimatedReef>0) ?Color.fromARGB(255, 125, 125, 125): Color.fromARGB(0, 215, 31, 31),
           padding: const EdgeInsets.all(0),
         ),
-        onPressed: () {
-          //anukulpandey
+        onPressed: ()async {
+          if(estimatedReef>0.0){
+            var res = await ReefAppState.instance.stealthexCtrl.createExchange(selectedCurrency!["legacy_symbol"], selectedCurrency!["network"], "reef","mainnet", inputAmount,ReefAppState.instance.model.accounts.selectedAddress!);
+            setState(() {
+              purchaseResponse = res;
+              isPurchaseResponse=true;
+            });
+          }
         },
         child: Ink(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
           decoration: BoxDecoration(
             color: const Color(0xffe6e2f1),
-            gradient: selectedCurrency==null || double.parse(inputAmount.toString())<0.1?null:Styles.buttonGradient,
+            gradient: !(estimatedReef>0)?null:Styles.buttonGradient,
             borderRadius: const BorderRadius.all(Radius.circular(14.0)),
           ),
           child: Center(
@@ -174,7 +182,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
               "Purchase",
               style: TextStyle(
                 fontSize: 16,
-                color:selectedCurrency==null || double.parse(inputAmount.toString())<0.1?const Color(0x65898e9c): Colors.white,
+                color:!(estimatedReef>0)?const Color(0x65898e9c): Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -186,7 +194,90 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return isPurchaseResponse ? Container(
+  margin: EdgeInsets.all(16.0),
+  padding: EdgeInsets.all(16.0),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(12.0),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black12,
+        blurRadius: 8.0,
+        offset: Offset(0, 2),
+      ),
+    ],
+  ),
+  child: Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Status:",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            purchaseResponse!["status"] == "waiting" 
+                ? "Awaiting deposit" 
+                : purchaseResponse!["status"],
+            style: TextStyle(color: Styles.primaryAccentColor),
+          ),
+        ],
+      ),
+      Gap(8.0),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "You Send:",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "${purchaseResponse!["deposit"]["amount"]} ${purchaseResponse!["deposit"]["symbol"].toString().toUpperCase()}",
+            style: TextStyle(color: Styles.textLightColor),
+          ),
+        ],
+      ),
+      Gap(8.0),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "To address:",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              "${purchaseResponse!["deposit"]["address"]}",
+              style: TextStyle(color: Styles.textLightColor),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+      Gap(16.0),
+      Divider(color: Colors.grey[300], thickness: 1.0),
+      Gap(16.0),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "You Receive:",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "${purchaseResponse!["withdrawal"]["amount"]}",
+            style: TextStyle(color: Styles.textLightColor),
+          ),
+        ],
+      ),
+    ],
+  ),
+): Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(10.0),
@@ -285,7 +376,6 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                       border: InputBorder.none,
                       hintText: "Enter Amount",
                       hintStyle: TextStyle(color: Styles.textLightColor)),
-                  keyboardType: TextInputType.number,
                 ),
               ),
               Gap(16.0),
