@@ -275,6 +275,24 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
           ),
         ],
       ),
+      Gap(8.0),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Recipient Address:",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              "${purchaseResponse!["withdrawal"]["address"]}",
+              style: TextStyle(color: Styles.textLightColor),
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
     ],
   ),
 ): Column(
