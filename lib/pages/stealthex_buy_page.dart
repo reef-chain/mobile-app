@@ -236,8 +236,31 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
               Gap(16.0),
               if(estimatedReef>0)
               Container(
-                child: Text("Estimated Reef ${estimatedReef}"),
-              )
+  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12), 
+  decoration: BoxDecoration(
+    color: Colors.white, 
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        "Estimated Reefs:",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Styles.textColor,
+        ),
+      ),
+      Text(
+        "~${estimatedReef}",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Styles.primaryAccentColor,
+        ),
+      ),
+    ],
+  ),
+)
             ],
           ),
         ),
