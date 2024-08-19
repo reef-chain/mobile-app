@@ -85,10 +85,10 @@ class StorageService {
     final prefs = await SharedPreferences.getInstance();
     var dir = await getApplicationDocumentsDirectory();
     var path = "${dir.path}/hive_store";
-     Hive.init(path);
+    Hive.init(path);
 
     if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(StoredAccountAdapter());
+    Hive.registerAdapter(StoredAccountAdapter());
     }
     if (!Hive.isAdapterRegistered(2)) {
       Hive.registerAdapter(MetadataAdapter());
