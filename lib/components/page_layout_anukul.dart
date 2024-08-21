@@ -45,7 +45,6 @@ List<BarItemNavigationPage> bottomNavigationBarItems = const [
     page: NavigationPage.buy,
     label: 'Buy Reef',
   ),
-
   BarItemNavigationPage(
     icon: Icon(Icons.settings_outlined),
     page: NavigationPage.settings,

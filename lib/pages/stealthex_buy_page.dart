@@ -427,15 +427,6 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                             color: Styles.textColor),
                       ),
                     ),
-                    ElevatedButton(
-                        onPressed: () async {
-                          var res = await ReefAppState.instance.stealthexCtrl
-                              .getExchangeRange(selectedCurrency!["symbol"],
-                                  selectedCurrency!["network"]);
-
-                          print("res===${res}");
-                        },
-                        child: Text("test")),
                     Gap(8.0),
                     if (selectedCurrency != null)
                       GestureDetector(
