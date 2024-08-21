@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/generateQrJsonValue.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
+import 'package:reef_mobile_app/components/jumping_dots.dart';
 import 'package:reef_mobile_app/components/modals/show_qr_code.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -499,7 +500,7 @@ setTxHashStealthex()
                             ),
                           ),
                           Text(
-                            "${minAmount}",
+                            "${minAmount.toDouble().toStringAsFixed(2)} ${selectedCurrency!["symbol"].toString().toUpperCase()}s",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Styles.primaryAccentColor,
@@ -507,6 +508,7 @@ setTxHashStealthex()
                           ),
                         ],
                       ),
+                      Gap(4.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -517,6 +519,15 @@ setTxHashStealthex()
                               color: Styles.textLightColor,
                             ),
                           ),
+                          if(isLoading)JumpingDots(
+                                animationDuration:
+                                    const Duration(milliseconds: 200),
+                                verticalOffset: 5,
+                                radius: 5,
+                                color: Styles.purpleColor,
+                                innerPadding: 2,
+                              ),
+                              if(!isLoading)
                           Text(
                             "${estimatedReef}",
                             style: TextStyle(
@@ -529,7 +540,6 @@ setTxHashStealthex()
                     ],
                   ),
                 ),
-              if (isLoading) Text("Loading..."),
               Gap(8.0),
               getPurchaseBtn()
             ],
