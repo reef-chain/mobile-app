@@ -12,10 +12,6 @@ class StealthexCtrl {
   StealthexCtrl(this._jsApi,this.stealthexModel) {
     // bearerToken = const String.fromEnvironment("STEALTHEX_BEARER_TOKEN", defaultValue: "");
     bearerToken = "4500da35-f5d0-4783-873e-8677f85e4f21";
-
-    listCurrencies().then((_currencies){
-      stealthexModel.setCurrencies(_currencies);
-    });
   }
 
    Future<dynamic> listCurrencies() async {
@@ -40,5 +36,10 @@ class StealthexCtrl {
    Future<dynamic> setTransactionHash(String id,String tx_hash) async {
    return await _jsApi.jsPromise(
         'window.stealthex.setTransactionHash("${bearerToken}","${id}","${tx_hash}")');
+  }
+
+  Future<void> cacheCurrencies()async{
+    var currencies = await listCurrencies();
+    stealthexModel.setCurrencies(currencies);
   }
 }

@@ -61,9 +61,7 @@ class ReefAppState {
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
     firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("stealthex currencies...");
     stealthexCtrl = StealthexCtrl(jsApi,model.stealthexModel);
-    await Future.delayed(Duration(milliseconds: 600));
     this.initStatusStream.add("tokens...");
     tokensCtrl = TokenCtrl(jsApi, model.tokens);
     await Future.delayed(Duration(milliseconds: 100));

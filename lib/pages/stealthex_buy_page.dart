@@ -39,6 +39,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     super.initState();
     _focusNode.addListener(_onFocusChange);
 
+    ReefAppState.instance.stealthexCtrl.cacheCurrencies();
+    
     // Fetch the list of currencies
     setState(() {
         currencies = ReefAppState.instance.model.stealthexModel.currencies;
@@ -147,6 +149,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
         },
       );
     } else {
+      await ReefAppState.instance.stealthexCtrl.cacheCurrencies();
+
       var res = ReefAppState.instance.model.stealthexModel.currencies;
 
       setState(() {
