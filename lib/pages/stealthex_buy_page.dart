@@ -109,7 +109,7 @@ void openDropdown() async {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Ensure the column takes only the necessary space
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
