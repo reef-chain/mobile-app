@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/generateQrJsonValue.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/jumping_dots.dart';
+import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/show_qr_code.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -84,90 +85,75 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
 
   void openDropdown() async {
     if (currencies.length > 0) {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            color: Styles.darkBackgroundColor,
-            child: Column(
-              children: [
-                Expanded(
-                  child: currencies.isEmpty
-                      ? Center(
-                          child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(),
-                            Gap(8.0),
-                            Text(
-                              "Fetching Currencies",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ))
-                      : Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: ListView.builder(
-                            itemCount: currencies.length,
-                            itemBuilder: (context, index) {
-                              var currency = currencies[index];
-                              return ListTile(
-                                leading: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    border: Border.all(
-                                      color: const Color.fromARGB(
-                                          193, 255, 255, 255),
-                                      width: 1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: SvgPicture.network(
-                                      currency['icon_url'],
-                                      width: 24,
-                                      height: 24,
-                                    ),
-                                  ),
-                                ),
-                                title: Text(
-                                  currency['name'],
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                subtitle: Text(
-                                  currency['symbol'].toString().toUpperCase(),
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                                onTap: () async {
-                                  setState(() {
-                                    selectedCurrency = currency;
-                                    currencyController.text =
-                                        currency['symbol'];
-                                  });
-
-                                  var res = await ReefAppState
-                                      .instance.stealthexCtrl
-                                      .getExchangeRange(currency!["symbol"],
-                                          currency!["network"]);
-
-                                  setState(() {
-                                    minAmount = res["min_amount"];
-                                    Navigator.pop(context);
-                                  });
-                                },
-                              );
-                            },
+      showModal(context,headText: "Purchase using",child:Container(
+   decoration: BoxDecoration(
+    border: Border.all(
+      color: Colors.transparent,
+      width: 1,
+    ),
+    borderRadius: BorderRadius.circular(12),
+  ),
+        child:  Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                height: 400,
+                child: ListView.builder(
+                  itemCount: currencies.length,
+                  itemBuilder: (context, index) {
+                    var currency = currencies[index];
+                    return ListTile(
+                      iconColor: Styles.whiteColor,
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Styles.boxBackgroundColor,
+                          border: Border.all(
+                            color: const Color.fromARGB(
+                                193, 255, 255, 255),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.network(
+                            currency['icon_url'],
+                            width: 24,
+                            height: 24,
                           ),
                         ),
+                      ),
+                      title: Text(
+                        currency['name'],
+                        style: TextStyle(color: Styles.textColor),
+                      ),
+                      subtitle: Text(
+                        currency['symbol'].toString().toUpperCase(),
+                        style: TextStyle(color: Styles.textLightColor),
+                      ),
+                      onTap: () async {
+                        setState(() {
+                          selectedCurrency = currency;
+                          currencyController.text =
+                              currency['symbol'];
+                        });
+                      
+                        var res = await ReefAppState
+                            .instance.stealthexCtrl
+                            .getExchangeRange(currency!["symbol"],
+                                currency!["network"]);
+                      
+                        setState(() {
+                          minAmount = res["min_amount"];
+                          Navigator.pop(context);
+                        });
+                      },
+                    );
+                  },
                 ),
-              ],
-            ),
-          );
-        },
-      );
+              ),
+            )));
     } else {
       await ReefAppState.instance.stealthexCtrl.cacheCurrencies();
 
@@ -553,7 +539,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "Estimated Reefs:",
+                                  "Estimated Amount:",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Styles.textLightColor,
@@ -570,7 +556,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                                   ),
                                 if (!isLoading)
                                   Text(
-                                    "${estimatedReef}",
+                                    "${estimatedReef} REEFs",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Styles.primaryAccentColor,

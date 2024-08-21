@@ -40,7 +40,6 @@ List<BarItemNavigationPage> bottomNavigationBarItems = [
     page: NavigationPage.pools,
     label: 'Pools',
   ),
-  if(ReefAppState.instance.model.accounts.accountsList.isNotEmpty)
   BarItemNavigationPage(
     icon: Icon(Icons.monetization_on_outlined),
     page: NavigationPage.buy,
