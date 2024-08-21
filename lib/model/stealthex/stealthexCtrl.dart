@@ -27,6 +27,11 @@ class StealthexCtrl {
    return await _jsApi.jsPromise(
         'window.stealthex.getEstimatedExchange("${bearerToken}","${sourceChain}","${sourceNetwork}",${amount})');
   }
+
+   Future<dynamic> getExchangeRange(String fromSymbol,String fromNetwork) async {
+   return await _jsApi.jsPromise(
+        'window.stealthex.getExchangeRange("${bearerToken}","${fromSymbol}","${fromNetwork}")');
+  }
    Future<dynamic> createExchange(String fromSymbol,String fromNetwork,String toSymbol,String toNetwork,double amount,String address) async {
    return await _jsApi.jsPromise(
         'window.stealthex.createExchange("${bearerToken}","${fromSymbol}","${fromNetwork}","${toSymbol}","${toNetwork}",${amount},"${address}")');

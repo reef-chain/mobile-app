@@ -29,6 +29,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   Map<String,dynamic>? purchaseResponse;
   bool isPurchaseResponse= false;
   String txHash="";
+  double minAmount = 0;
 
   FocusNode _focusNode = FocusNode();
 
@@ -120,13 +121,19 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                                   currency['symbol'].toString().toUpperCase(),
                                   style: TextStyle(color: Colors.white70),
                                 ),
-                                onTap: () {
+                                onTap: ()async {
                                   setState(() {
                                     selectedCurrency = currency;
                                     currencyController.text =
                                         currency['symbol'];
                                   });
+
+                                  var res = await ReefAppState.instance.stealthexCtrl.getExchangeRange(currency!["symbol"],currency!["network"]);
+
+                                  setState(() {
+                                    minAmount = res["min_amount"];
                                   Navigator.pop(context);
+                                  });
                                 },
                               );
                             },
@@ -379,11 +386,10 @@ setTxHashStealthex()
                             color: Styles.textColor),
                       ),
               ),
-              ElevatedButton(onPressed: (){
-                print(selectedCurrency);
-                // for(var i=0;i<selectedCurrency!["available_routes"].length;i++){
-                //   print(selectedCurrency!["available_routes"][i]);
-                // }
+              ElevatedButton(onPressed: ()async{
+                var res = await ReefAppState.instance.stealthexCtrl.getExchangeRange(selectedCurrency!["symbol"],selectedCurrency!["network"]);
+
+                print("res===${res}");
               }, child: Text("test")),
               Gap(8.0),
               if (selectedCurrency != null)
@@ -473,29 +479,52 @@ setTxHashStealthex()
                 ),
               ),
               Gap(16.0),
-              if (estimatedReef > 0)
+              if (estimatedReef > 0 || minAmount>0)
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      Text(
-                        "Estimated Reefs:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Styles.textLightColor,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Minimum Purchase:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Styles.textLightColor,
+                            ),
+                          ),
+                          Text(
+                            "${minAmount}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Styles.primaryAccentColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        "~${estimatedReef}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Styles.primaryAccentColor,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Estimated Reefs:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Styles.textLightColor,
+                            ),
+                          ),
+                          Text(
+                            "${estimatedReef}",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Styles.primaryAccentColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
