@@ -57,7 +57,9 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     });
     try {
       amt = double.parse(amount.toString());
-    } catch (e) {}
+    } catch (e) {
+      print("encountered error in fetchingEstimatedReef");
+    }
 
     setState(() {
       inputAmount=amt;
@@ -377,6 +379,12 @@ setTxHashStealthex()
                             color: Styles.textColor),
                       ),
               ),
+              ElevatedButton(onPressed: (){
+                print(selectedCurrency);
+                // for(var i=0;i<selectedCurrency!["available_routes"].length;i++){
+                //   print(selectedCurrency!["available_routes"][i]);
+                // }
+              }, child: Text("test")),
               Gap(8.0),
               if (selectedCurrency != null)
                 Container(

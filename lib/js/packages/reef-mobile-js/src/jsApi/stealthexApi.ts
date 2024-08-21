@@ -1,5 +1,7 @@
 const axios = require('axios').default;
 
+const baseUrl = "https://api.stealthex.io/v4";
+
 const getOptions = (bearerToken:string,method:string,url:string,data:any)=>{
     return {
         method,
@@ -9,9 +11,20 @@ const getOptions = (bearerToken:string,method:string,url:string,data:any)=>{
       };
 }
 
-const listCurrencies = async(bearerToken:string)=>{
+const checkIfReefRouteExists=(availableRoutes:[{symbol:string,network:string}])=>{
+  let doesRouteExist = false;
+  availableRoutes.forEach((route)=>{
+    if(route.symbol=="reef" && route.network=="mainnet"){
+      doesRouteExist=true;
+    }
+  });
+  return doesRouteExist;
+}
+
+const listCurrencies = async(bearerToken:string)=>{  
+  
     try {
-        const { data } = await axios.request(getOptions(bearerToken,'GET','https://api.stealthex.io/v4/currencies?include_available_routes=true&limit=250&network=mainnet',{}));
+        const { data } = await axios.request(getOptions(bearerToken,'GET',`${baseUrl}/currencies?include_available_routes=true&limit=250&network=mainnet`,{}));
         let reefNetwork = [];
 
         // finding all routes for reef network
@@ -32,8 +45,6 @@ const listCurrencies = async(bearerToken:string)=>{
             }
         })
 
-        console.log(availableNetworkRoutesMap['mainnet'])
-
         let res=[];
 
         data.forEach((val)=>{
@@ -41,18 +52,41 @@ const listCurrencies = async(bearerToken:string)=>{
                 res.push(val);
             }
         })
-
-        return res;
+        return res.filter((v)=>checkIfReefRouteExists(v["available_routes"]));
     } catch (error) {
         console.error("listCurrencies===",error);
         return [];
     }
 }
 
+const getExchangeRange = async(
+  bearerToken:string,
+  fromSymbol:string,
+  fromNetwork:string,
+) =>{
+  try {
+    const { data } = await axios.request(getOptions(bearerToken,'POST',`${baseUrl}/rates/range`,{
+    route: {
+      from: {symbol: fromSymbol, network: fromNetwork},
+      to: {symbol: 'reef', network: 'mainnet'}
+    },
+    estimation: 'direct',
+    rate: 'floating'
+  }));
+    return data;
+  } catch (error) {
+    console.error(error);
+    return {
+      "min_amount": null,
+      "max_amount": null
+    }
+  }
+}
+
 const getEstimatedExchange = async(bearerToken:string,sourceChain:string,sourceNetwork:string,amount:number)=>{
     console.log(sourceChain,sourceNetwork,amount);
     try {
-        const { data } = await axios.request(getOptions(bearerToken,'POST','https://api.stealthex.io/v4/rates/estimated-amount',{
+        const { data } = await axios.request(getOptions(bearerToken,'POST',`${baseUrl}/rates/estimated-amount`,{
             route: {
               from: {symbol: sourceChain, network: sourceNetwork},
               to: {symbol: 'reef', network: 'mainnet'}
@@ -72,7 +106,7 @@ const getEstimatedExchange = async(bearerToken:string,sourceChain:string,sourceN
 const setTransactionHash = async(bearerToken:string,id:string,tx_hash:string)=>{
     const options = {
       method: 'PATCH',
-      url: `https://api.stealthex.io/v4/exchanges/${id}`,
+      url: `${baseUrl}/exchanges/${id}`,
       headers: {'Content-Type': 'application/json', Authorization: `Bearer ${bearerToken}`},
       data: {tx_hash}
     };
@@ -89,7 +123,7 @@ const setTransactionHash = async(bearerToken:string,id:string,tx_hash:string)=>{
 const createExchange = async(bearerToken:string,fromSymbol:string,fromNetwork:string,toSymbol:string,toNetwork:string,amount:number,address:string)=>{
 const options = {
   method: 'POST',
-  url: 'https://api.stealthex.io/v4/exchanges/',
+  url: `${baseUrl}/exchanges/`,
   headers: {'Content-Type': 'application/json', Authorization: `Bearer ${bearerToken}`},
   data: {
     route: {
@@ -116,5 +150,6 @@ export default{
     listCurrencies,
     getEstimatedExchange,
     createExchange,
-    setTransactionHash
+    setTransactionHash,
+    getExchangeRange
 }
