@@ -32,8 +32,12 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   bool isPurchaseResponse = false;
   String txHash = "";
   double minAmount = 0;
+  TextEditingController searchController = TextEditingController();
 
   FocusNode _focusNode = FocusNode();
+
+  ValueNotifier<List<dynamic>> _filteredCurrenciesNotifier = ValueNotifier([]);
+
 
   @override
   void initState() {
@@ -45,8 +49,18 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     // Fetch the list of currencies
     setState(() {
       currencies = ReefAppState.instance.model.stealthexModel.currencies;
+       _filteredCurrenciesNotifier.value = currencies;
     });
   }
+
+void _filterCurrencies() {
+  String searchText = searchController.text.toLowerCase();
+  _filteredCurrenciesNotifier.value = currencies
+      .where((currency) =>
+          currency['name'].toLowerCase().contains(searchText) ||
+          currency['symbol'].toLowerCase().contains(searchText))
+      .toList();
+}
 
   void _onFocusChange() {
     setState(() {
@@ -81,95 +95,119 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   void dispose() {
     super.dispose();
     _focusNode.removeListener(_onFocusChange);
+    searchController.dispose();
   }
 
-  void openDropdown() async {
-    if (currencies.length > 0) {
-      showModal(context,headText: "Purchase using",child:Container(
-   decoration: BoxDecoration(
-    border: Border.all(
-      color: Colors.transparent,
-      width: 1,
-    ),
-    borderRadius: BorderRadius.circular(12),
-  ),
-        child:  Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SizedBox(
-                height: 400,
-                child: ListView.builder(
-                  itemCount: currencies.length,
-                  itemBuilder: (context, index) {
-                    var currency = currencies[index];
-                    return ListTile(
-                      iconColor: Styles.whiteColor,
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Styles.boxBackgroundColor,
-                          border: Border.all(
-                            color: const Color.fromARGB(
-                                193, 255, 255, 255),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.network(
-                            currency['icon_url'],
-                            width: 24,
-                            height: 24,
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        currency['name'],
-                        style: TextStyle(color: Styles.textColor),
-                      ),
-                      subtitle: Text(
-                        currency['symbol'].toString().toUpperCase(),
-                        style: TextStyle(color: Styles.textLightColor),
-                      ),
-                      onTap: () async {
-                        setState(() {
-                          selectedCurrency = currency;
-                          currencyController.text =
-                              currency['symbol'];
-                        });
-                      
-                        var res = await ReefAppState
-                            .instance.stealthexCtrl
-                            .getExchangeRange(currency!["symbol"],
-                                currency!["network"]);
-                      
-                        setState(() {
-                          minAmount = res["min_amount"];
-                          Navigator.pop(context);
-                        });
-                      },
-                    );
-                  },
-                ),
-              ),
-            )));
-    } else {
-      await ReefAppState.instance.stealthexCtrl.cacheCurrencies();
-
-      var res = ReefAppState.instance.model.stealthexModel.currencies;
-
-      setState(() {
-        currencies = res;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Fetching currencies, Please try again!"),
-          duration: Duration(seconds: 2),
+void openDropdown() async {
+  if (currencies.length > 0) {
+    showModal(context, headText: "Purchase using", child: Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.transparent,
+          width: 1,
         ),
-      );
-    }
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // Ensure the column takes only the necessary space
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: searchController,
+              onChanged: (val){
+                _filterCurrencies();
+              },
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                hintText: "Search tokens",
+                hintStyle: TextStyle(color: Styles.textLightColor),
+              ),
+            ),
+          ),
+        ValueListenableBuilder<List<dynamic>>(
+  valueListenable: _filteredCurrenciesNotifier,
+  builder: (context, filteredCurrencies, child) {
+              return SizedBox(
+              height: 300,
+              child: ListView.builder(
+                  itemCount: filteredCurrencies.length,
+        itemBuilder: (context, index) {
+          var currency = filteredCurrencies[index];
+                  return ListTile(
+                    iconColor: Styles.whiteColor,
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Styles.boxBackgroundColor,
+                        border: Border.all(
+                          color: const Color.fromARGB(193, 255, 255, 255),
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.network(
+                          currency['icon_url'],
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      currency['name'],
+                      style: TextStyle(color: Styles.textColor),
+                    ),
+                    subtitle: Text(
+                      currency['symbol'].toString().toUpperCase(),
+                      style: TextStyle(color: Styles.textLightColor),
+                    ),
+                    onTap: () async {
+                      setState(() {
+                        selectedCurrency = currency;
+                        currencyController.text = currency['symbol'];
+                      });
+            
+                      var res = await ReefAppState
+                          .instance.stealthexCtrl
+                          .getExchangeRange(currency!["symbol"], currency!["network"]);
+            
+                      setState(() {
+                        minAmount = res["min_amount"];
+                        Navigator.pop(context);
+                      });
+                    },
+                  );
+                },
+              ),
+            );
+            }
+          ),
+        ],
+      ),
+    ));
+  } else {
+    await ReefAppState.instance.stealthexCtrl.cacheCurrencies();
+
+    var res = ReefAppState.instance.model.stealthexModel.currencies;
+
+    setState(() {
+      currencies = res;
+     _filteredCurrenciesNotifier.value = currencies;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Fetching currencies, Please try again!"),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
+}
 
   ConnectWrapperButton getPurchaseBtn() {
     return ConnectWrapperButton(
