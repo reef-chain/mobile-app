@@ -394,35 +394,38 @@ setTxHashStealthex()
               }, child: Text("test")),
               Gap(8.0),
               if (selectedCurrency != null)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0x00d7d1e9)),
-                    borderRadius: BorderRadius.circular(12),
-                    color: const Color(0xffE7E2F2),
-                  ),
-                  child: Row(
-                    children: [
-                      SvgPicture.network(
-                        selectedCurrency!["icon_url"],
-                        width: 30,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        '${selectedCurrency!["name"].toString().toUpperCase()} (${selectedCurrency!["symbol"].toString().toUpperCase()})',
-                        style: TextStyle(color: Styles.textLightColor),
-                      ),
-                      Spacer(),
-                      GestureDetector(
-                        onTap: openDropdown,
-                        child: const RotatedBox(
-                            quarterTurns: 1,
-                            child: Icon(
-                              Icons.chevron_right_rounded,
-                              color: Styles.textColor,
-                            )),
-                      ),
-                    ],
+                GestureDetector(
+                  onTap: openDropdown,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0x00d7d1e9)),
+                      borderRadius: BorderRadius.circular(12),
+                      color: const Color(0xffE7E2F2),
+                    ),
+                    child: Row(
+                      children: [
+                        SvgPicture.network(
+                          selectedCurrency!["icon_url"],
+                          width: 30,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          '${selectedCurrency!["name"].toString().toUpperCase()} (${selectedCurrency!["symbol"].toString().toUpperCase()})',
+                          style: TextStyle(color: Styles.textLightColor),
+                        ),
+                        Spacer(),
+                        GestureDetector(
+                          onTap: openDropdown,
+                          child: const RotatedBox(
+                              quarterTurns: 1,
+                              child: Icon(
+                                Icons.chevron_right_rounded,
+                                color: Styles.textColor,
+                              )),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               if (selectedCurrency == null)
