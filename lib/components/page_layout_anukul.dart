@@ -24,7 +24,7 @@ import 'package:restart_app/restart_app.dart';
 import '../pages/pools_page.dart';
 import 'sign/SignatureContentToggle.dart';
 
-List<BarItemNavigationPage> bottomNavigationBarItems = const [
+List<BarItemNavigationPage> bottomNavigationBarItems = [
   BarItemNavigationPage(
     icon: Icon(Icons.home_outlined),
     page: NavigationPage.home,
@@ -40,6 +40,7 @@ List<BarItemNavigationPage> bottomNavigationBarItems = const [
     page: NavigationPage.pools,
     label: 'Pools',
   ),
+  if(ReefAppState.instance.model.accounts.accountsList.isNotEmpty)
   BarItemNavigationPage(
     icon: Icon(Icons.monetization_on_outlined),
     page: NavigationPage.buy,
