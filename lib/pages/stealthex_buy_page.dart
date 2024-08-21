@@ -325,6 +325,20 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                     ],
                   ),
                   Gap(8.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Network:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "${selectedCurrency!["name"]} (${purchaseResponse!["deposit"]["network"].toString().toUpperCase()})",
+                        style: TextStyle(color: Styles.textLightColor),
+                      ),
+                    ],
+                  ),
+                  Gap(8.0),
                   Text(
                     "To address:",
                     style: TextStyle(fontWeight: FontWeight.bold),
