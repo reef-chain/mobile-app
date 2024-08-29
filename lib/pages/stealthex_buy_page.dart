@@ -30,6 +30,8 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   double inputAmount = 0.0;
   Map<String, dynamic>? purchaseResponse;
   bool isPurchaseResponse = false;
+  bool isCalculateBtn = false;
+  bool isCalculating = false;
   String txHash = "";
   double minAmount = 0;
   TextEditingController searchController = TextEditingController();
@@ -82,12 +84,15 @@ void _filterCurrencies() {
 
     setState(() {
       inputAmount = amt;
+      isCalculating=true;
     });
     var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(
         selectedCurrency!["legacy_symbol"], selectedCurrency!["network"], amt);
     setState(() {
       estimatedReef = double.parse(res.toString());
       isLoading = false;
+      isCalculateBtn=false;
+      isCalculating=false;
     });
   }
 
@@ -137,51 +142,63 @@ void openDropdown() async {
                   itemCount: filteredCurrencies.length,
         itemBuilder: (context, index) {
           var currency = filteredCurrencies[index];
-                  return ListTile(
-                    iconColor: Styles.whiteColor,
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Styles.boxBackgroundColor,
-                        border: Border.all(
-                          color: const Color.fromARGB(193, 255, 255, 255),
-                          width: 1,
+                  return Container(
+                     decoration: BoxDecoration(
+    border: Border.all(
+      color: (currency['symbol'].toString().toUpperCase() == 'ETH' || 
+              currency['symbol'].toString().toUpperCase() == 'BNB')
+          ? Styles.primaryAccentColor
+          : Colors.transparent,
+      width: 2,
+    ),
+    borderRadius: BorderRadius.circular(10),
+  ),
+                    child: ListTile(
+                      iconColor: Styles.whiteColor,
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Styles.boxBackgroundColor,
+                          border: Border.all(
+                            color: const Color.fromARGB(193, 255, 255, 255),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
                         ),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.network(
-                          currency['icon_url'],
-                          width: 24,
-                          height: 24,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.network(
+                            currency['icon_url'],
+                            width: 24,
+                            height: 24,
+                          ),
                         ),
                       ),
+                      title: Text(
+                        currency['name'],
+                        style: TextStyle(color: Styles.textColor),
+                      ),
+                      subtitle: Text(
+                        currency['symbol'].toString().toUpperCase(),
+                        style: TextStyle(color: Styles.textLightColor),
+                      ),
+                      onTap: () async {
+                        setState(() {
+                          selectedCurrency = currency;
+                          currencyController.text = currency['symbol'];
+                        });
+                                
+                        var res = await ReefAppState
+                            .instance.stealthexCtrl
+                            .getExchangeRange(currency!["symbol"], currency!["network"]);
+                                
+                        setState(() {
+                          minAmount = res["min_amount"];
+                          Navigator.pop(context);
+                        });
+                      },
                     ),
-                    title: Text(
-                      currency['name'],
-                      style: TextStyle(color: Styles.textColor),
-                    ),
-                    subtitle: Text(
-                      currency['symbol'].toString().toUpperCase(),
-                      style: TextStyle(color: Styles.textLightColor),
-                    ),
-                    onTap: () async {
-                      setState(() {
-                        selectedCurrency = currency;
-                        currencyController.text = currency['symbol'];
-                      });
-            
-                      var res = await ReefAppState
-                          .instance.stealthexCtrl
-                          .getExchangeRange(currency!["symbol"], currency!["network"]);
-            
-                      setState(() {
-                        minAmount = res["min_amount"];
-                        Navigator.pop(context);
-                      });
-                    },
                   );
                 },
               ),
@@ -219,13 +236,18 @@ void openDropdown() async {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           shadowColor: const Color(0x559d6cff),
           elevation: 0,
-          backgroundColor: !(estimatedReef > 0)
+          backgroundColor: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount)
               ? Color.fromARGB(255, 125, 125, 125)
               : Color.fromARGB(0, 215, 31, 31),
           padding: const EdgeInsets.all(0),
         ),
         onPressed: () async {
-          if (estimatedReef > 0.0) {
+          if(inputAmount>minAmount){
+
+          if(isCalculateBtn){
+            await fetchEstimatedReef(inputAmount);
+          }
+          else if (estimatedReef > 0.0) {
             var res = await ReefAppState.instance.stealthexCtrl.createExchange(
                 selectedCurrency!["legacy_symbol"],
                 selectedCurrency!["network"],
@@ -237,6 +259,7 @@ void openDropdown() async {
               purchaseResponse = res;
               isPurchaseResponse = true;
             });
+          }else{ }
           }
         },
         child: Ink(
@@ -244,15 +267,15 @@ void openDropdown() async {
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
           decoration: BoxDecoration(
             color: const Color(0xffe6e2f1),
-            gradient: !(estimatedReef > 0) ? null : Styles.buttonGradient,
+            gradient: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount) ? null : Styles.buttonGradient,
             borderRadius: const BorderRadius.all(Radius.circular(14.0)),
           ),
           child: Center(
             child: Text(
-              "Purchase",
+              isCalculateBtn? inputAmount>minAmount?"Calculate":"Minimum amount is ${minAmount}":"Purchase",
               style: TextStyle(
                 fontSize: 16,
-                color: !(estimatedReef > 0)
+                color: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount)
                     ? const Color(0x65898e9c)
                     : Colors.white,
                 fontWeight: FontWeight.w700,
@@ -544,9 +567,14 @@ void openDropdown() async {
                       ),
                       child: TextField(
                         onChanged: (val) async {
-                          await fetchEstimatedReef(val);
+                          setState(() {
+                            inputAmount = double.tryParse(val)??0.0;
+                            isCalculateBtn = true;
+                          });
+                          
                         },
                         focusNode: _focusNode,
+                        readOnly: isCalculating,
                         controller: amountController,
                         decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(
@@ -578,7 +606,7 @@ void openDropdown() async {
                                   ),
                                 ),
                                 Text(
-                                  "${minAmount.toDouble().toStringAsFixed(2)} ${selectedCurrency!["symbol"].toString().toUpperCase()}s",
+                                  "${minAmount.toDouble().toStringAsFixed(4)} ${selectedCurrency!["symbol"].toString().toUpperCase()}s",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Styles.primaryAccentColor,
