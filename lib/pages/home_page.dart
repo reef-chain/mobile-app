@@ -267,29 +267,6 @@ class _HomePageState extends State<HomePage> {
             ))));
   }
 
-
-  // TODO convert modal name to Enum vlaue
-  void openModal(String modalName) {
-    switch (modalName) {
-      case 'addAccount':
-        showCreateAccountModal(context);
-        break;
-      case 'importAccount':
-        showCreateAccountModal(context, fromMnemonic: true);
-        break;
-      case 'restoreJSON':
-        showRestoreJson(context);
-        break;
-      case 'importFromQR':
-        showQrTypeDataModal(
-            AppLocalizations.of(context)!.import_the_account, context,
-            expectedType: ReefQrCodeType.accountJson);
-        break;
-      default:
-        break;
-    }
-  }
-
   void showCreateAccountModal(BuildContext context,
       {bool fromMnemonic = false}) {
     showModal(context,
