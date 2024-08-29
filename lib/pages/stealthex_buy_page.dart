@@ -98,7 +98,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     searchController.dispose();
   }
 
-  void fetchEstimations(currency) async {
+  void resetUi(currency) async {
     setState(() {
       isMinAmountLoading = true;
     });
@@ -107,6 +107,9 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     setState(() {
       minAmount = res["min_amount"];
       isMinAmountLoading=false;
+      amountController.text="";
+      inputAmount=0;
+      estimatedReef=0;
     });
   }
 
@@ -192,7 +195,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                                 Navigator.pop(context);
 
                                 // preloader here
-                                fetchEstimations(currency);
+                                resetUi(currency);
                               },
                             );
                           },
