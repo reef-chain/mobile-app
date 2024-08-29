@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/generateQrJsonValue.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/jumping_dots.dart';
@@ -20,7 +21,7 @@ class StealthexBuyPage extends StatefulWidget {
 }
 
 class _StealthexBuyPageState extends State<StealthexBuyPage> {
-  List<dynamic> currencies = [];
+  List<dynamic> currencies = ReefAppState.instance.model.stealthexModel.currencies;
   Map<String, dynamic>? selectedCurrency;
   TextEditingController currencyController = TextEditingController();
   TextEditingController amountController = TextEditingController();
@@ -44,12 +45,12 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     super.initState();
     _focusNode.addListener(_onFocusChange);
 
-    ReefAppState.instance.stealthexCtrl.cacheCurrencies();
-
+     ReefAppState.instance.stealthexCtrl.cacheCurrencies().then((v)=>{
     // Fetch the list of currencies
     setState(() {
       currencies = ReefAppState.instance.model.stealthexModel.currencies;
        _filteredCurrenciesNotifier.value = currencies;
+    })
     });
   }
 
@@ -448,7 +449,20 @@ void openDropdown() async {
               ),
             ),
           )
-        : Column(
+        : currencies.isEmpty ?Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              Gap(12.0),
+              Text("Fetching Currencies",style: GoogleFonts.poppins(
+                          color: Styles.textLightColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),),
+            ],
+          ),
+        ):Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(10.0),
