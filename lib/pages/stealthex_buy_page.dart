@@ -31,6 +31,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   Map<String, dynamic>? purchaseResponse;
   bool isPurchaseResponse = false;
   bool isCalculateBtn = false;
+  bool isCalculating = false;
   String txHash = "";
   double minAmount = 0;
   TextEditingController searchController = TextEditingController();
@@ -83,6 +84,7 @@ void _filterCurrencies() {
 
     setState(() {
       inputAmount = amt;
+      isCalculating=true;
     });
     var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(
         selectedCurrency!["legacy_symbol"], selectedCurrency!["network"], amt);
@@ -90,6 +92,7 @@ void _filterCurrencies() {
       estimatedReef = double.parse(res.toString());
       isLoading = false;
       isCalculateBtn=false;
+      isCalculating=false;
     });
   }
 
@@ -221,13 +224,15 @@ void openDropdown() async {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           shadowColor: const Color(0x559d6cff),
           elevation: 0,
-          backgroundColor: !(estimatedReef > 0 || isCalculateBtn)
+          backgroundColor: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount)
               ? Color.fromARGB(255, 125, 125, 125)
               : Color.fromARGB(0, 215, 31, 31),
           padding: const EdgeInsets.all(0),
         ),
         onPressed: () async {
-          if(isCalculateBtn && inputAmount>minAmount){
+          if(inputAmount>minAmount){
+
+          if(isCalculateBtn){
             await fetchEstimatedReef(inputAmount);
           }
           else if (estimatedReef > 0.0) {
@@ -242,8 +247,7 @@ void openDropdown() async {
               purchaseResponse = res;
               isPurchaseResponse = true;
             });
-          }else{
-            
+          }else{ }
           }
         },
         child: Ink(
@@ -251,7 +255,7 @@ void openDropdown() async {
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
           decoration: BoxDecoration(
             color: const Color(0xffe6e2f1),
-            gradient: !(estimatedReef > 0 || (isCalculateBtn && inputAmount>minAmount)) ? null : Styles.buttonGradient,
+            gradient: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount) ? null : Styles.buttonGradient,
             borderRadius: const BorderRadius.all(Radius.circular(14.0)),
           ),
           child: Center(
@@ -259,7 +263,7 @@ void openDropdown() async {
               isCalculateBtn? inputAmount>minAmount?"Calculate":"Minimum amount is ${minAmount}":"Purchase",
               style: TextStyle(
                 fontSize: 16,
-                color: !(estimatedReef > 0 || (isCalculateBtn && inputAmount>minAmount))
+                color: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount)
                     ? const Color(0x65898e9c)
                     : Colors.white,
                 fontWeight: FontWeight.w700,
@@ -558,6 +562,7 @@ void openDropdown() async {
                           
                         },
                         focusNode: _focusNode,
+                        readOnly: isCalculating,
                         controller: amountController,
                         decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(
