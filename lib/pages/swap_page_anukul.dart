@@ -1096,18 +1096,22 @@ class _SwapPageState extends State<SwapPage> {
       children: [
         GestureDetector(
           onTap: () {
+            if(selectedBottomToken !=null && selectedBottomToken!.balance>BigInt.zero){
             _reversePair();
+            }
           },
           child: Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                gradient: Styles.buttonGradient),
+                color: const Color(0xffe6e2f1),
+                gradient: selectedBottomToken !=null && selectedBottomToken!.balance>BigInt.zero? Styles.buttonGradient: null
+                ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Icon(
                 Icons.repeat,
                 size: 18,
-                color: Styles.whiteColor,
+                color: selectedBottomToken !=null && selectedBottomToken!.balance>BigInt.zero? Styles.whiteColor:const Color(0x65898e9c),
               ),
             ),
           ),
