@@ -18,6 +18,7 @@ import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
+import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/swap/swap_settings.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
@@ -89,7 +90,7 @@ class _SwapPageState extends State<SwapPage> {
   List<dynamic> availableTokens=[];
 
   // checking evm bind state of selected account
-  var selectedAccount;
+  ReefAccount? selectedAccount;
   bool isEvmBinded = false;
 
   @override
@@ -304,6 +305,7 @@ class _SwapPageState extends State<SwapPage> {
     executeTransactionFeedbackStream.listen(
       (txResponse) {
         print('TRANSACTION RESPONSE anukul=$txResponse');
+        print('balance===${selectedAccount!.balance}');
         if (txResponse != null) {
           setState(() {
             txInProgress = true;
@@ -333,7 +335,11 @@ class _SwapPageState extends State<SwapPage> {
               if(txResponse['status']=="-32603: execution fatal: Module { index: 6, error: 3, message: None }" && !isEvmBinded){
                 btnLabel = "EVM not binded";
                 preloaderMessage="Transaction Failed as EVM is not binded for account";
-              }else{
+              }else if(selectedAccount!.balance<BigInt.from(1000).pow(18)){
+                 btnLabel = "Balance too low for swap";
+                preloaderMessage="Minimum 1000 REEFs required for Swap Transaction.";
+              }
+                else{
                 btnLabel = "Encountered an error";
                 preloaderMessage="Encountered an error";
               }
