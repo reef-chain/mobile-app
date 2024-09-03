@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
+import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
@@ -87,6 +88,10 @@ class _SwapPageState extends State<SwapPage> {
   //available swap pairs
   List<dynamic> availableTokens=[];
 
+  // checking evm bind state of selected account
+  var selectedAccount;
+  bool isEvmBinded = false;
+
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -100,6 +105,16 @@ class _SwapPageState extends State<SwapPage> {
         .any((token) => token.address == widget.preselectedBottom);
 
     setState(() {
+      // setting state of evm
+      selectedAccount = ReefAppState
+                        .instance.model.accounts.accountsList
+                        .firstWhere((account) => account.address == ReefAppState.instance.model.accounts.selectedAddress);
+      isEvmBinded = ReefAppState
+                        .instance.model.accounts.accountsList
+                        .firstWhere((account) => account.address == ReefAppState.instance.model.accounts.selectedAddress).isEvmClaimed;
+
+      
+
       // setting fixed component
       isPreselectedTopExists = checkPreselection;
       isPreselectedBottomExists = checkPreselectionBottom;
@@ -254,7 +269,12 @@ class _SwapPageState extends State<SwapPage> {
                 preloader=false;
                 rating=0.0;
               });
-            }, child: Text("Retry",style: TextStyle(fontSize: 12,color: Styles.whiteColor)))
+              if(!isEvmBinded){
+                showBindEvmModal(context, bindFor: selectedAccount,callback: ()async{
+             
+              });
+              }
+            }, child: Text("${isEvmBinded?"Retry":"Claim EVM"}",style: TextStyle(fontSize: 12,color: Styles.whiteColor)))
           ],
         ),
       ),
@@ -309,11 +329,18 @@ class _SwapPageState extends State<SwapPage> {
               txInProgress = false;
             }
             if (txResponse['status'].toString().contains("-32603")) {
+
+              if(txResponse['status']=="-32603: execution fatal: Module { index: 6, error: 3, message: None }" && !isEvmBinded){
+                btnLabel = "EVM not binded";
+                preloaderMessage="Transaction Failed as EVM is not binded for account";
+              }else{
+                btnLabel = "Encountered an error";
+                preloaderMessage="Encountered an error";
+              }
               preloader = true;
-              btnLabel = "Encountered an error";
               isError=true;
               preloaderChild=Icon(Icons.error_outline);
-              preloaderMessage="Encountered an error";
+              
             }
           });
           handleEvmTransactionResponse(txResponse);
