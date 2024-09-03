@@ -177,6 +177,7 @@
   "generating_signature":"Generating Signature",
   "select":"Select",
   "missing_destination":"Missing destination address",
+  "recipient_not_binded":"Recipient EVM not binded",
   "insert_amount":"Insert amount",
   "amount_too_high":"Amount too high",
   "target_not_evm":"Target not EVM",
