@@ -339,7 +339,7 @@ class _SendPageState extends State<SendPage> {
         isFormDisabled = false;
         statusValue = txResponse['data'] == '_canceled'
             ? SendStatus.READY
-            : SendStatus.ERROR;
+            : txResponse['data']=="-32603: execution fatal: Module { index: 6, error: 3, message: None }"? SendStatus.EVM_NOT_BINDED:SendStatus.ERROR;
       });
       return true;
     }
