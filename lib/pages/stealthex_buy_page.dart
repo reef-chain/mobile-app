@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -574,6 +575,11 @@ void openDropdown() async {
                           
                         },
                         focusNode: _focusNode,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))
+                        ],
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
                         readOnly: isCalculating,
                         controller: amountController,
                         decoration: InputDecoration(
