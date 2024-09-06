@@ -21,43 +21,54 @@ const checkIfReefRouteExists=(availableRoutes:[{symbol:string,network:string}])=
   return doesRouteExist;
 }
 
-const listCurrencies = async(bearerToken:string)=>{  
-  
-    try {
-        const { data } = await axios.request(getOptions(bearerToken,'GET',`${baseUrl}/currencies?include_available_routes=true&limit=250&network=mainnet`,{}));
-        let reefNetwork = [];
+const listCurrencies = async (bearerToken: string) => {
+  try {
+    const { data } = await axios.request(getOptions(bearerToken, 'GET', `${baseUrl}/currencies?include_available_routes=true&limit=250&network=mainnet`, {}));
+    let reefNetwork = [];
 
-        // finding all routes for reef network
-        data.forEach((val)=>{
-            if(val["symbol"]=="reef"){
-                reefNetwork=val.available_routes;
-            }
-        })
+    // Finding all routes for reef network
+    data.forEach((val) => {
+      if (val["symbol"] === "reef") {
+        reefNetwork = val.available_routes;
+      }
+    });
 
-        // made a map for tracking the currency symbols
-        let availableNetworkRoutesMap = {};
+    // Map for tracking the currency symbols
+    let availableNetworkRoutesMap = {};
 
-        reefNetwork.forEach((val)=>{
-            if(availableNetworkRoutesMap[val.network]){
-                availableNetworkRoutesMap[val.network].push(val.symbol);
-            }else{
-                availableNetworkRoutesMap[val.network] = [val.symbol];
-            }
-        })
+    reefNetwork.forEach((val) => {
+      if (availableNetworkRoutesMap[val.network]) {
+        availableNetworkRoutesMap[val.network].push(val.symbol);
+      } else {
+        availableNetworkRoutesMap[val.network] = [val.symbol];
+      }
+    });
 
-        let res=[];
+    let res = [];
 
-        data.forEach((val)=>{
-            if(availableNetworkRoutesMap[val.network] && availableNetworkRoutesMap[val.network].indexOf(val.symbol)){
-                res.push(val);
-            }
-        })
-        return res.filter((v)=>checkIfReefRouteExists(v["available_routes"]));
-    } catch (error) {
-        console.error("listCurrencies===",error);
-        return [];
-    }
-}
+    data.forEach((val) => {
+      if (availableNetworkRoutesMap[val.network] && availableNetworkRoutesMap[val.network].indexOf(val.symbol) !== -1) {
+        res.push(val);
+      }
+    });
+
+    res = res.filter((v) => checkIfReefRouteExists(v["available_routes"]));
+
+    res.sort((a, b) => {
+      if (a.symbol === "eth") return -1;
+      if (b.symbol === "eth") return 1;
+      if (a.symbol === "bnb") return -1;
+      if (b.symbol === "bnb") return 1;
+      return 0;
+    });
+
+    return res;
+  } catch (error) {
+    console.error("listCurrencies===", error);
+    return [];
+  }
+};
+
 
 const getExchangeRange = async(
   bearerToken:string,
