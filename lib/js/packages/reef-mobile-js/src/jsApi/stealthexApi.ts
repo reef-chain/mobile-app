@@ -64,7 +64,7 @@ const listCurrencies = async (bearerToken: string) => {
 
     return res;
   } catch (error) {
-    console.error("listCurrencies===", error);
+    console.log("listCurrencies===", error);
     return [];
   }
 };
@@ -86,7 +86,7 @@ const getExchangeRange = async(
   }));
     return data;
   } catch (error) {
-    console.error(error);
+    console.log(error);
     return {
       "min_amount": null,
       "max_amount": null
@@ -127,7 +127,7 @@ const setTransactionHash = async(bearerToken:string,id:string,tx_hash:string)=>{
       console.log("setTransactionHash===",data);
       return data;
     } catch (error) {
-      console.error("setTransactionHash error===",error);
+      console.log("setTransactionHash error===",error);
     }
 }
 
@@ -153,7 +153,7 @@ try {
   console.log("createExchange===",data)
   return data;
 } catch (error) {
-  console.error("createExchange===",error);
+  console.log("createExchange===",error);
 }
 }
 
