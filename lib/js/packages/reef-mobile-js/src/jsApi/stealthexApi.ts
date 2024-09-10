@@ -1,15 +1,4 @@
-const axios = require('axios').default;
-
-const getOptions = (bearerToken:string,method:string,url:string,data:any)=>{
-    return {
-        method,
-        url,
-        headers: {Authorization: `Bearer ${bearerToken}`},
-        data
-      };
-}
-
-const baseUrl = "http://localhost:3002/stealthex";
+const baseUrl = "https://api.reefscan.com/stealthex";
 
 const listCurrencies = async () => {
   try {
