@@ -48,7 +48,7 @@ const getExchangeRange = async(
   }
 }
 
-const getEstimatedExchange = async(bearerToken:string,sourceChain:string,sourceNetwork:string,amount:number)=>{
+const getEstimatedExchange = async(sourceChain:string,sourceNetwork:string,amount:number)=>{
   try {
     const response = await fetch(`${baseUrl}/estimated-exchange/${sourceChain}/${sourceNetwork}/${amount}`, {
       method: 'GET',
