@@ -1,5 +1,4 @@
 import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
-import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
 import { firstValueFrom, skipWhile } from 'rxjs';
@@ -116,6 +115,17 @@ const calculate24hVolumeUSD = ({
   return dv1.plus(dv2);
 };
 
+const iconUrlResolver = (poolAddress:string,poolIconUrl:string,tokenIconMap:any)=>{
+  if(poolIconUrl===""){
+    if(tokenIconMap[poolAddress] != '' && tokenIconMap[poolAddress]){
+      return tokenIconMap[poolAddress];
+    }else{
+      return getIconUrl(poolAddress)
+    }
+  }
+  return poolIconUrl;
+}
+
 const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   const current = calculate24hVolumeUSD(pool, tokenPrices, true);
   const previous = calculate24hVolumeUSD(pool, tokenPrices, false);
@@ -170,8 +180,8 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
 
     const pools = data.allPoolsList.map((pool) => ({
       ...pool,
-      iconUrl1: pool.iconUrl1 === '' ? tokenIconMap[pool.token1] != '' && tokenIconMap[pool.token1] ? tokenIconMap[pool.token1] : getIconUrl(pool.token1) : pool.iconUrl1,
-      iconUrl2: pool.iconUrl2 === '' ? tokenIconMap[pool.token2] != '' && tokenIconMap[pool.token2] ? tokenIconMap[pool.token2] : getIconUrl(pool.token2) : pool.iconUrl2,
+      iconUrl1: iconUrlResolver(pool.token1,pool.iconUrl1,tokenIconMap),
+      iconUrl2: iconUrlResolver(pool.token2,pool.iconUrl2,tokenIconMap),
       tvl: calculateUSDTVL({ reserved1: pool.reserved1, reserved2: pool.reserved2, decimals1: pool.decimals1, decimals2: pool.decimals2, token1: pool.token1, token2: pool.token2 }, tokenPrices),
       volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
       volumeChange24h: calculateVolumeChange(pool, tokenPrices),
@@ -260,7 +270,7 @@ export const getTokenInfo = async (tokenAddr: string) => {
       token = {
         ...data.tokens[0],
         address: data.tokens[0].id,
-        iconUrl: data.tokens[0]['iconUrl'] == '' ?tokenIconMap[data.tokens[0].id]!='' && tokenIconMap[data.tokens[0].id]? tokenIconMap[data.tokens[0].id]: getIconUrl(data.tokens[0]['id']) : data.tokens[0]['iconUrl']
+        iconUrl: iconUrlResolver(data.tokens[0]['id'],data.tokens[0]['iconUrl'],tokenIconMap)
       };
     }
     return token;
