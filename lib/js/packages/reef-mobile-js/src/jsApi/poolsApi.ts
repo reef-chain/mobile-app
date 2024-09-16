@@ -116,14 +116,17 @@ const calculate24hVolumeUSD = ({
 };
 
 const iconUrlResolver = (poolAddress:string,poolIconUrl:string,tokenIconMap:any)=>{
+  let res = poolIconUrl;
   if(poolIconUrl===""){
     if(tokenIconMap[poolAddress] != '' && tokenIconMap[poolAddress]){
-      return tokenIconMap[poolAddress];
+      res= tokenIconMap[poolAddress];
     }else{
-      return getIconUrl(poolAddress)
+      res= getIconUrl(poolAddress)
     }
   }
-  return poolIconUrl;
+  
+  if(res.includes("cloudflare-ipfs.com"))return res.replace("cloudflare-ipfs.com","reef.infura-ipfs.io")
+  return res;
 }
 
 const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
@@ -186,6 +189,7 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
       volumeChange24h: calculateVolumeChange(pool, tokenPrices),
     }));
+
     return pools;
   } catch (error) {
     console.log(error);
