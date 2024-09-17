@@ -82,6 +82,10 @@ class TokenCtrl {
     return jsApi.jsPromise('window.utils.getPools(10,${offset},"","")');
   }
 
+  Future<dynamic> getMarketCap() async {
+    return jsApi.jsPromise('window.utils.getMarketCap()');
+  }
+
   Future<dynamic> getPoolPairs(String tokenAddress) async {
     return jsApi.jsPromise('window.utils.getPoolPairs("${tokenAddress}")');
   }
