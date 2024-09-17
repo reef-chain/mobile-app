@@ -532,7 +532,6 @@ class _PoolsPageState extends State<PoolsPage> {
                                   else
                                     return Container();
                                 }
-                                // return getPoolCard(pool);
                               },
                             ),
                           )
@@ -542,10 +541,6 @@ class _PoolsPageState extends State<PoolsPage> {
                                 itemCount: _pools.length,
                                 itemBuilder: (context, index) {
                                   var pool = _pools[index];
-                                  //                             if(filterSwappable){
-                                  //   if(hasBalance(pool['token1']) || hasBalance(pool['token2']))return getPoolCard(pool);
-                                  //   else return Container();
-                                  // }else{
                                   if (hasReef) {
                                     if (hasBalance(pool['token1']) ||
                                         hasBalance(pool['token2']))
