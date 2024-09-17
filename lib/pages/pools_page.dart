@@ -38,6 +38,9 @@ class _PoolsPageState extends State<PoolsPage> {
   // filtering pools
   bool hasReef = false; //if user has reef display only swappable
 
+  //market cap
+  String marketCap = "0";
+
   // search input listeners
   bool _isSearchEditing = false;
 
@@ -58,6 +61,15 @@ class _PoolsPageState extends State<PoolsPage> {
     });
     _fetchUserBalance();
     _fetchTokensAndPools();
+    _fetchMc();
+  }
+
+  void _fetchMc(){
+    ReefAppState.instance.tokensCtrl.getMarketCap().then((v)=>{
+      setState(() {
+        marketCap=v;
+      })
+    });
   }
 
   void _fetchUserBalance() {
@@ -386,104 +398,8 @@ class _PoolsPageState extends State<PoolsPage> {
                         color: Colors.grey.shade100,
                       ),
                     ),
-                    Row(
-                      children: [
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     setState(() {
-                        //       filterSwappable = true;
-                        //     });
-                        //   },
-                        //   child: Container(
-                        //     decoration: BoxDecoration(
-                        //       borderRadius: BorderRadius.circular(20),
-                        //       color: Styles.boxBackgroundColor,
-                        //     ),
-                        //     child: Padding(
-                        //       padding: const EdgeInsets.all(8.0),
-                        //       child: Icon(
-                        //         Icons.sort,
-                        //         size: 18,
-                        //         color: Styles.textLightColor,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        // Gap(8.0),
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     setState(() {
-                        //       displaySearchModal = true;
-                        //     });
-                        //   },
-                        //   child: Container(
-                        //     decoration: BoxDecoration(
-                        //         borderRadius: BorderRadius.circular(20),
-                        //         gradient: Styles.buttonGradient),
-                        //     child: Padding(
-                        //       padding: const EdgeInsets.all(8.0),
-                        //       child: Icon(
-                        //         Icons.search,
-                        //         size: 18,
-                        //         color: Styles.whiteColor,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                      ],
-                    ),
                   ],
                 ),
-                // if(filterSwappable)
-                // Container(
-                //   padding: EdgeInsets.only(bottom: 4.0),
-                //   child: Row(
-                //     children: [
-                //       Text(
-                //         "Filter applied ",
-                //         style: TextStyle(
-                //             color: Styles.textLightColor,
-                //             fontWeight: FontWeight.bold),
-                //       ),
-                //       Container(
-                //         padding: EdgeInsets.only(
-                //             top: 4.0, bottom: 4.0, left: 12.0, right: 12.0),
-                //         decoration: BoxDecoration(
-                //           color: Styles.whiteColor,
-                //           borderRadius: BorderRadius.circular(12.0),
-                //         ),
-                //         child: Row(
-                //           children: [
-                //             Text(
-                //               "can swap",
-                //               style: TextStyle(
-                //                   color: Styles.textLightColor,
-                //                   fontSize: 12,
-                //                   fontWeight: FontWeight.w600),
-                //             ),
-                //             Gap(8.0),
-                //             GestureDetector(
-                //               onTap: (){
-                //                 setState(() {
-                //                   filterSwappable=false;
-                //                 });
-                //               },
-                //                 child: Container(
-                //               decoration: BoxDecoration(
-                //                   color: Styles.greyColor,
-                //                   borderRadius: BorderRadius.circular(20)),
-                //               child: Padding(
-                //                 padding: const EdgeInsets.all(2.0),
-                //                 child: Icon(CupertinoIcons.xmark,
-                //                     color: Colors.black87, size: 12),
-                //               ),
-                //             )),
-                //           ],
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
                 if (hasReef)
                   Column(
                     children: [
@@ -508,6 +424,23 @@ class _PoolsPageState extends State<PoolsPage> {
                       ],
                     ),
                   ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Total Supply",style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 22,
+                        color: Colors.grey.shade100,
+                      ),),
+                    Text("\$ ${marketCap}",style: GoogleFonts.spaceGrotesk(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18,
+                        color:Styles.textLightColor,
+                      ),),
+                      Gap(4.0)
+                  ],
+                ),
                 Flexible(
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification scrollInfo) {

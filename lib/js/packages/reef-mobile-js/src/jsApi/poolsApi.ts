@@ -1,9 +1,9 @@
 import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
-import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
 import { firstValueFrom, skipWhile } from 'rxjs';
 import { getDexUrl } from './utils/networkUtils';
+import { BigNumber as BN } from 'bignumber.js';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
   return {
@@ -60,6 +60,23 @@ const getPoolPairsQuery = (tokenAddr, limit, offset) => {
   }
 };
 
+const getPoolTotalValueLockedQry = (toTime: string): any => ({
+  query: `
+  query totalSupply($toTime: String!) {
+    totalSupply(toTime: $toTime) {
+      pool {
+        address
+        token1
+        token2
+      }
+      reserved1
+      reserved2
+    }
+  }
+`,
+  variables: { toTime },
+});
+
 const getTokenInfoQuery = (tokenAddr:string) => {
   return {
     query: `
@@ -75,7 +92,6 @@ const getTokenInfoQuery = (tokenAddr:string) => {
     `
   }
 };
-
 
 const calculateUSDTVL = ({
   reserved1,
@@ -126,6 +142,18 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   return res.toNumber();
 };
 
+const getTokenPrice = (address: string, prices: any): BN => new BN(
+  prices[address] && !Number.isNaN(prices[address])
+    ? prices[address]
+    : 0,
+);
+
+let tvl = '0';
+
+export const getMarketCap = ()=>{
+  return tvl;
+}
+
 export const fetchAllPools = async (limit: number, offset: number, search: string, signerAddress: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
@@ -154,6 +182,36 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
     const { data } = await response.json();
 
     tokenPriceUtils.calculateTokenPrices(data.allPoolsList,tokenPrices);
+
+    const toTime = new Date();
+
+    const marketCapResponse = await fetch(getDexUrl(selectedNw.name), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(getPoolTotalValueLockedQry(toTime.toISOString())),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const { data:marketCapData } = await marketCapResponse.json();
+    
+    if (!marketCapData || marketCapData.totalSupply.length === 0) {
+      tvl= '0';
+    }
+  
+    const totalSupply = marketCapData.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
+      const tokenPrice1 = getTokenPrice(token1, tokenPrices);
+      const tokenPrice2 = getTokenPrice(token2, tokenPrices);
+      const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
+      const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
+      return acc.plus(r1).plus(r2);
+    }, new BigNumber(0));
+  
+    tvl = parseFloat(totalSupply.toString()).toFixed(4).toString();
 
     let tokenAddresess = [];
 
