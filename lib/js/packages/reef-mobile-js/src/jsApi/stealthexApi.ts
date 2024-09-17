@@ -1,4 +1,4 @@
-const baseUrl = "http://api.reefscan.com/stealthex";
+const baseUrl = "https://api.reefscan.com/stealthex";
 
 const listCurrencies = async () => {
   try {
