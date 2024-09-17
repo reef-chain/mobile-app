@@ -15,7 +15,7 @@ const listCurrencies = async () => {
     const { data } = await response.json();
     return data;
   } catch (error) {
-    console.error("listCurrencies===", error);
+   console.log("listCurrencies===", error);
     return [];
   }
 };
@@ -68,46 +68,40 @@ const getEstimatedExchange = async(sourceChain:string,sourceNetwork:string,amoun
     }
 }
 
-const setTransactionHash = async(bearerToken:string,id:string,tx_hash:string)=>{
-    const options = {
-      method: 'PATCH',
-      url: `${baseUrl}/exchanges/${id}`,
-      headers: {'Content-Type': 'application/json', Authorization: `Bearer ${bearerToken}`},
-      data: {tx_hash}
-    };
-    
-    try {
-      const { data } = await axios.request(options);
-      console.log("setTransactionHash===",data);
-      return data;
-    } catch (error) {
-      console.error("setTransactionHash error===",error);
+const setTransactionHash = async(id:string,tx_hash:string)=>{
+  const options = {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    data: {
+      id,tx_hash
     }
+  };
+  
+  try {
+    const response = await fetch(`${baseUrl}/set-tx-hash/`, options);
+    const {data} = await response.json();
+    return data;
+  } catch (error) {
+   console.log("setTransactionHash===",error);
+  }
 }
 
-const createExchange = async(bearerToken:string,fromSymbol:string,fromNetwork:string,toSymbol:string,toNetwork:string,amount:number,address:string)=>{
+const createExchange = async(fromSymbol:string,fromNetwork:string,toSymbol:string,toNetwork:string,amount:number,address:string)=>{
 const options = {
   method: 'POST',
-  url: `${baseUrl}/exchanges/`,
-  headers: {'Content-Type': 'application/json', Authorization: `Bearer ${bearerToken}`},
+  headers: {'Content-Type': 'application/json'},
   data: {
-    route: {
-      from: {symbol: fromSymbol, network: fromNetwork},
-      to: {symbol: toSymbol, network: toNetwork}
-    },
-    amount: amount,
-    estimation: 'direct',
-    rate: 'floating',
-    address
+    fromSymbol,fromNetwork,toSymbol,toNetwork,amount,address
   }
 };
 
 try {
-  const { data } = await axios.request(options);
-  console.log("createExchange===",data)
-  return data;
+  const response = await fetch(`${baseUrl}/create-exchange`, options);
+  const reefApiResponse = await response.json();
+  return reefApiResponse;
 } catch (error) {
-  console.error("createExchange===",error);
+ console.log("createExchange===",error.message);
+  return {};
 }
 }
 
