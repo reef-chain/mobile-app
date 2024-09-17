@@ -97,8 +97,8 @@ const options = {
 
 try {
   const response = await fetch(`${baseUrl}/create-exchange`, options);
-  const reefApiResponse = await response.json();
-  return reefApiResponse;
+  const {data} = await response.json();
+  return data;
 } catch (error) {
  console.log("createExchange===",error.message);
   return {};
