@@ -1,18 +1,15 @@
+import axios from "axios";
 const baseUrl = "https://api.reefscan.com/stealthex";
 
 const listCurrencies = async () => {
   try {
-    const response = await fetch(`${baseUrl}/listcurrencies`, {
+    const { data } = await axios.request({
+      url:`${baseUrl}/listcurrencies`,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const { data } = await response.json();
     return data;
   } catch (error) {
    console.log("listCurrencies===", error);
