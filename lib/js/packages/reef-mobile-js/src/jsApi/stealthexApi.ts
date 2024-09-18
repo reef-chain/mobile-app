@@ -49,7 +49,7 @@ const getEstimatedExchange = async(sourceChain:string,sourceNetwork:string,amoun
         'Content-Type': 'application/json',
       },
     });
-    return data;
+    return data.data;
   } catch (error) {
         return 0;
     }
@@ -75,6 +75,7 @@ const setTransactionHash = async(id:string,tx_hash:string)=>{
 
 const createExchange = async(fromSymbol:string,fromNetwork:string,toSymbol:string,toNetwork:string,amount:number,address:string)=>{
 const options = {
+  url:`${baseUrl}/create-exchange`,
   method: 'POST',
   headers: {'Content-Type': 'application/json'},
   data: {
@@ -83,9 +84,8 @@ const options = {
 };
 
 try {
-  const response = await fetch(`${baseUrl}/create-exchange`, options);
-  const {data} = await response.json();
-  return data;
+  const {data} =  await axios.request(options);
+  return data.data;
 } catch (error) {
  console.log("createExchange===",error.message);
   return {};
