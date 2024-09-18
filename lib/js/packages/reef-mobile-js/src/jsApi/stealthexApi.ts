@@ -1,19 +1,16 @@
+import axios from "axios";
 const baseUrl = "https://api.reefscan.com/stealthex";
 
 const listCurrencies = async () => {
   try {
-    const response = await fetch(`${baseUrl}/listcurrencies`, {
+    const { data } = await axios.request({
+      url:`${baseUrl}/listcurrencies`,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const { data } = await response.json();
-    return data;
+    return data.data;
   } catch (error) {
    console.log("listCurrencies===", error);
     return [];
@@ -26,19 +23,14 @@ const getExchangeRange = async(
   fromNetwork:string,
 ) =>{
   try {
-    const response = await fetch(`${baseUrl}/exchange-rate/${fromSymbol}/${fromNetwork}`, {
+    const {data} = await axios.request({
+      url:`${baseUrl}/exchange-rate/${fromSymbol}/${fromNetwork}`,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const { data } = await response.json();
-    return data;
+    return data.data;
   } catch (error) {
     console.log(error);
     return {
@@ -50,19 +42,14 @@ const getExchangeRange = async(
 
 const getEstimatedExchange = async(sourceChain:string,sourceNetwork:string,amount:number)=>{
   try {
-    const response = await fetch(`${baseUrl}/estimated-exchange/${sourceChain}/${sourceNetwork}/${amount}`, {
+    const { data } = await axios.request({
+      url:`${baseUrl}/estimated-exchange/${sourceChain}/${sourceNetwork}/${amount}`,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const { data } = await response.json();
-    return data;
+    return data.data;
   } catch (error) {
         return 0;
     }
@@ -70,6 +57,7 @@ const getEstimatedExchange = async(sourceChain:string,sourceNetwork:string,amoun
 
 const setTransactionHash = async(id:string,tx_hash:string)=>{
   const options = {
+    url:`${baseUrl}/set-tx-hash/`,
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     data: {
@@ -78,9 +66,8 @@ const setTransactionHash = async(id:string,tx_hash:string)=>{
   };
   
   try {
-    const response = await fetch(`${baseUrl}/set-tx-hash/`, options);
-    const {data} = await response.json();
-    return data;
+    const {data} =  await axios.request(options);
+    return data.data;
   } catch (error) {
    console.log("setTransactionHash===",error);
   }
@@ -88,6 +75,7 @@ const setTransactionHash = async(id:string,tx_hash:string)=>{
 
 const createExchange = async(fromSymbol:string,fromNetwork:string,toSymbol:string,toNetwork:string,amount:number,address:string)=>{
 const options = {
+  url:`${baseUrl}/create-exchange`,
   method: 'POST',
   headers: {'Content-Type': 'application/json'},
   data: {
@@ -96,9 +84,8 @@ const options = {
 };
 
 try {
-  const response = await fetch(`${baseUrl}/create-exchange`, options);
-  const {data} = await response.json();
-  return data;
+  const {data} =  await axios.request(options);
+  return data.data;
 } catch (error) {
  console.log("createExchange===",error.message);
   return {};

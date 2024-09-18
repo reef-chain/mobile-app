@@ -80,7 +80,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
       isLoading = true;
     });
     try {
-      amt = double.parse(amount.toString());
+      amt = double.tryParse(amount.toString())??0.0;
     } catch (e) {
       print("encountered error in fetchingEstimatedReef");
     }
@@ -91,8 +91,9 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     });
     var res = await ReefAppState.instance.stealthexCtrl.getEstimatedExchange(
         selectedCurrency!["legacy_symbol"], selectedCurrency!["network"], amt);
+
     setState(() {
-      estimatedReef = double.parse(res.toString());
+      estimatedReef = double.tryParse(res.toString())??0.0;
       isLoading = false;
       isCalculateBtn=false;
       isCalculating=false;
@@ -586,10 +587,9 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
                       child: TextField(
                         onChanged: (val) async {
                           setState(() {
-                            inputAmount = double.tryParse(val)??0.0;
+                            inputAmount = double.tryParse(val.toString())??0.0;
                             isCalculateBtn = true;
                           });
-
                         },
                         focusNode: _focusNode,
                         inputFormatters: [
