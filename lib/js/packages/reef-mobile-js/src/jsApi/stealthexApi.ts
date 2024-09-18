@@ -57,6 +57,7 @@ const getEstimatedExchange = async(sourceChain:string,sourceNetwork:string,amoun
 
 const setTransactionHash = async(id:string,tx_hash:string)=>{
   const options = {
+    url:`${baseUrl}/set-tx-hash/`,
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     data: {
@@ -65,9 +66,8 @@ const setTransactionHash = async(id:string,tx_hash:string)=>{
   };
   
   try {
-    const response = await fetch(`${baseUrl}/set-tx-hash/`, options);
-    const {data} = await response.json();
-    return data;
+    const {data} =  await axios.request(options);
+    return data.data;
   } catch (error) {
    console.log("setTransactionHash===",error);
   }
