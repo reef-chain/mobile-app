@@ -42,18 +42,13 @@ const getExchangeRange = async(
 
 const getEstimatedExchange = async(sourceChain:string,sourceNetwork:string,amount:number)=>{
   try {
-    const response = await fetch(`${baseUrl}/estimated-exchange/${sourceChain}/${sourceNetwork}/${amount}`, {
+    const { data } = await axios.request({
+      url:`${baseUrl}/estimated-exchange/${sourceChain}/${sourceNetwork}/${amount}`,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const { data } = await response.json();
     return data;
   } catch (error) {
         return 0;
