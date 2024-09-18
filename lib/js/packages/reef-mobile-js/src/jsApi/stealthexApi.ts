@@ -10,7 +10,7 @@ const listCurrencies = async () => {
         'Content-Type': 'application/json',
       },
     });
-    return data;
+    return data.data;
   } catch (error) {
    console.log("listCurrencies===", error);
     return [];
@@ -23,19 +23,14 @@ const getExchangeRange = async(
   fromNetwork:string,
 ) =>{
   try {
-    const response = await fetch(`${baseUrl}/exchange-rate/${fromSymbol}/${fromNetwork}`, {
+    const {data} = await axios.request({
+      url:`${baseUrl}/exchange-rate/${fromSymbol}/${fromNetwork}`,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const { data } = await response.json();
-    return data;
+    return data.data;
   } catch (error) {
     console.log(error);
     return {
