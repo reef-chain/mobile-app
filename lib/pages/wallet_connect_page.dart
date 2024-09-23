@@ -12,6 +12,7 @@ import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:reef_mobile_app/utils/account_box.dart';
 
 class WalletConnectPage extends StatefulWidget {
   const WalletConnectPage({Key? key}) : super(key: key);
@@ -34,27 +35,6 @@ class _WalletConnectPageState extends State<WalletConnectPage> {
     ReefAppState.instance.storage.getAllAccounts().then((value) => setState(() {
           hasAccounts = value.isNotEmpty;
         }));
-  }
-
-  void openModal(String modalName) {
-    switch (modalName) {
-      case 'addAccount':
-        showCreateAccountModal(context);
-        break;
-      case 'importAccount':
-        showCreateAccountModal(context, fromMnemonic: true);
-        break;
-      case 'restoreJSON':
-        showRestoreJson(context);
-        break;
-      case 'importFromQR':
-        showQrTypeDataModal(
-            AppLocalizations.of(context)!.import_the_account, context,
-            expectedType: ReefQrCodeType.accountJson);
-        break;
-      default:
-        break;
-    }
   }
 
   @override

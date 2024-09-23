@@ -11,12 +11,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
+import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
+import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/swap/swap_settings.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
@@ -87,6 +89,10 @@ class _SwapPageState extends State<SwapPage> {
   //available swap pairs
   List<dynamic> availableTokens=[];
 
+  // checking evm bind state of selected account
+  ReefAccount? selectedAccount;
+  bool isEvmBinded = false;
+
   @override
   void initState() {
     _focusTop.addListener(_onFocusTopChange);
@@ -100,6 +106,16 @@ class _SwapPageState extends State<SwapPage> {
         .any((token) => token.address == widget.preselectedBottom);
 
     setState(() {
+      // setting state of evm
+      selectedAccount = ReefAppState
+                        .instance.model.accounts.accountsList
+                        .firstWhere((account) => account.address == ReefAppState.instance.model.accounts.selectedAddress);
+      isEvmBinded = ReefAppState
+                        .instance.model.accounts.accountsList
+                        .firstWhere((account) => account.address == ReefAppState.instance.model.accounts.selectedAddress).isEvmClaimed;
+
+      
+
       // setting fixed component
       isPreselectedTopExists = checkPreselection;
       isPreselectedBottomExists = checkPreselectionBottom;
@@ -254,7 +270,12 @@ class _SwapPageState extends State<SwapPage> {
                 preloader=false;
                 rating=0.0;
               });
-            }, child: Text("Retry",style: TextStyle(fontSize: 12,color: Styles.whiteColor)))
+              if(!isEvmBinded){
+                showBindEvmModal(context, bindFor: selectedAccount,callback: ()async{
+             
+              });
+              }
+            }, child: Text("${isEvmBinded?"Retry":"Claim EVM"}",style: TextStyle(fontSize: 12,color: Styles.whiteColor)))
           ],
         ),
       ),
@@ -284,6 +305,7 @@ class _SwapPageState extends State<SwapPage> {
     executeTransactionFeedbackStream.listen(
       (txResponse) {
         print('TRANSACTION RESPONSE anukul=$txResponse');
+        print('balance===${selectedAccount!.balance}');
         if (txResponse != null) {
           setState(() {
             txInProgress = true;
@@ -309,11 +331,22 @@ class _SwapPageState extends State<SwapPage> {
               txInProgress = false;
             }
             if (txResponse['status'].toString().contains("-32603")) {
+
+              if(txResponse['status']=="-32603: execution fatal: Module { index: 6, error: 3, message: None }" && !isEvmBinded){
+                btnLabel = "EVM not binded";
+                preloaderMessage="Transaction Failed as EVM is not binded for account";
+              }else if(selectedAccount!.balance<BigInt.from(1000).pow(18)){
+                 btnLabel = "Balance too low for swap";
+                preloaderMessage="Minimum 1000 REEFs required for Swap Transaction.";
+              }
+                else{
+                btnLabel = "Encountered an error";
+                preloaderMessage="Encountered an error";
+              }
               preloader = true;
-              btnLabel = "Encountered an error";
               isError=true;
               preloaderChild=Icon(Icons.error_outline);
-              preloaderMessage="Encountered an error";
+              
             }
           });
           handleEvmTransactionResponse(txResponse);
@@ -1096,18 +1129,22 @@ class _SwapPageState extends State<SwapPage> {
       children: [
         GestureDetector(
           onTap: () {
+            if(selectedBottomToken !=null && selectedBottomToken!.balance>BigInt.zero){
             _reversePair();
+            }
           },
           child: Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                gradient: Styles.buttonGradient),
+                color: const Color(0xffe6e2f1),
+                gradient: selectedBottomToken !=null && selectedBottomToken!.balance>BigInt.zero? Styles.buttonGradient: null
+                ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Icon(
                 Icons.repeat,
                 size: 18,
-                color: Styles.whiteColor,
+                color: selectedBottomToken !=null && selectedBottomToken!.balance>BigInt.zero? Styles.whiteColor:const Color(0x65898e9c),
               ),
             ),
           ),

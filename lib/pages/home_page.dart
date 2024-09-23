@@ -7,6 +7,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:reef_mobile_app/components/CreateAccount.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/home/NFT_view.dart';
 import 'package:reef_mobile_app/components/home/activity_view.dart';
@@ -246,7 +247,7 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 40, vertical: 12),
                         sliver: SliverToBoxAdapter(
-                          child: createAccountBox(context),
+                          child: CreateAccountBox(),
                         ));
                   }
                   // return Text('len=${accsFeedbackDataModel.data.length}');
@@ -264,64 +265,6 @@ class _HomePageState extends State<HomePage> {
                 // test()
               ],
             ))));
-  }
-
-  Widget createAccountBox(BuildContext context) => Flex(
-        direction: Axis.vertical,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 20),
-          Text(
-            AppLocalizations.of(context)!.no_account_currently,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Builder(builder: (context) {
-            return ElevatedButton.icon(
-                style: ButtonStyle(
-                  iconColor: MaterialStateProperty.resolveWith(
-                        (states) => Styles.whiteColor),
-                    backgroundColor: MaterialStateProperty.resolveWith(
-                        (states) => Styles.purpleColor)),
-                        
-                onPressed: () {
-                  showAddAccountModal(
-                      AppLocalizations.of(context)!.add_account, openModal,
-                      parentContext: context);
-                },
-                icon: const Icon(Icons.account_balance_wallet_outlined),
-                label: Text(AppLocalizations.of(context)!.add_account,style: TextStyle(color: Styles.whiteColor),));
-          }),
-        ],
-      );
-
-  void showAddAccountModal(String title, Function(String) callback,
-      {BuildContext? parentContext}) {
-    showModal(parentContext ?? context,
-        child: AddAccount(callback: callback), headText: title);
-  }
-
-  // TODO convert modal name to Enum vlaue
-  void openModal(String modalName) {
-    switch (modalName) {
-      case 'addAccount':
-        showCreateAccountModal(context);
-        break;
-      case 'importAccount':
-        showCreateAccountModal(context, fromMnemonic: true);
-        break;
-      case 'restoreJSON':
-        showRestoreJson(context);
-        break;
-      case 'importFromQR':
-        showQrTypeDataModal(
-            AppLocalizations.of(context)!.import_the_account, context,
-            expectedType: ReefQrCodeType.accountJson);
-        break;
-      default:
-        break;
-    }
   }
 
   void showCreateAccountModal(BuildContext context,

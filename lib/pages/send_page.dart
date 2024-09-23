@@ -333,13 +333,23 @@ class _SendPageState extends State<SendPage> {
     });
   }
 
+  SendStatus handleErrorResponse(String response){
+    if(response=="-32603: execution fatal: Module { index: 6, error: 3, message: None }"){
+      return SendStatus.EVM_NOT_BINDED;
+    }else if(response =='invalid address (argument="address", value="", code=INVALID_ARGUMENT, version=address/5.7.0) (argument="recipient", value="", code=INVALID_ARGUMENT, version=abi/5.7.0)'){
+      return SendStatus.RECIPIENT_NOT_BINDED;
+    }
+    return SendStatus.ERROR;
+  }
+
   bool handleExceptionResponse(txResponse) {
     if (txResponse == null || txResponse['success'] != true) {
+      print("txResponse===${address}");
       setState(() {
         isFormDisabled = false;
         statusValue = txResponse['data'] == '_canceled'
             ? SendStatus.READY
-            : SendStatus.ERROR;
+            : handleErrorResponse(txResponse['data']);
       });
       return true;
     }
@@ -443,6 +453,8 @@ class _SendPageState extends State<SendPage> {
         return AppLocalizations.of(context)!.evm_not_connected;
       case SendStatus.CONNECTING:
         return  AppLocalizations.of(context)!.connecting.capitalize();
+      case SendStatus.RECIPIENT_NOT_BINDED:
+        return  AppLocalizations.of(context)!.recipient_not_binded;
       case SendStatus.READY:
         return AppLocalizations.of(context)!.confirm_send;
       default:
@@ -1204,5 +1216,6 @@ enum SendStatus {
   FINALIZED,
   NOT_FINALIZED,
   EVM_NOT_BINDED,
+  RECIPIENT_NOT_BINDED,
   CONNECTING
 }

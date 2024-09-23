@@ -152,5 +152,6 @@
   "go_to_binance":"बिनेंस कनेक्ट पर जाएं",
   "biometric_auth":"बायोमेट्रिक प्रमाणीकरण",
   "dont_send_funds_here":"यहां पैसे मत भेजो",
-  "account_imported_successfully":"अपर्याप्त धन! कृपया अपना रीफ वॉलेट भरें"
+  "account_imported_successfully":"अपर्याप्त धन! कृपया अपना रीफ वॉलेट भरें",
+  "approveTransaction": "{amount} {tokenSymbol} को {recipientAddress} को स्वीकृत करें"
 }

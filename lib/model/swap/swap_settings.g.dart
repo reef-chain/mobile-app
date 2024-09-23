@@ -41,6 +41,20 @@ mixin _$SwapSettings on _SwapSettings, Store {
     });
   }
 
+  late final _$_SwapSettingsActionController =
+      ActionController(name: '_SwapSettings', context: context);
+
+  @override
+  void setSlippageTolerance(double newSlippageTolerance) {
+    final _$actionInfo = _$_SwapSettingsActionController.startAction(
+        name: '_SwapSettings.setSlippageTolerance');
+    try {
+      return super.setSlippageTolerance(newSlippageTolerance);
+    } finally {
+      _$_SwapSettingsActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
