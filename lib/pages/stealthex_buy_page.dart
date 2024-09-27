@@ -249,6 +249,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
           padding: const EdgeInsets.all(0),
         ),
         onPressed: () async {
+          if(isPurchasing)return;
           if(inputAmount>minAmount){
 
           if(isCalculateBtn){
