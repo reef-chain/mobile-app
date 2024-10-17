@@ -159,6 +159,16 @@ Future<dynamic> listenBindActivity(String address) async {
         .jsPromise('window.account.resolveFromEvmAddress("$evmAddress")');
   }
 
+   Future<String?> resolveToRns(String evmAddress) async {
+    return await _jsApi
+        .jsPromise('window.account.fetchRns("$evmAddress")');
+  }
+
+  Future<String?> resolveEvmFromRns(String rns) async {
+    return await _jsApi
+        .jsPromise('window.account.fetchEvmAddressFromRns("$rns")');
+  }
+
   Future<String> sanitizeEvmAddress(String evmAddress) async{
     return await _jsApi.jsPromise('window.utils.sanitizeInput("$evmAddress")');
   }

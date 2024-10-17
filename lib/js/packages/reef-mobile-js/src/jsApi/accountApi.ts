@@ -1,14 +1,15 @@
-import {AddressName, getAccountSigner, ReefAccount, reefState, addressUtils, network} from '@reef-chain/util-lib';
-import {combineLatest, map, switchMap, take} from "rxjs/operators";
-import {firstValueFrom} from 'rxjs';
+import { AddressName, getAccountSigner, ReefAccount, reefState, addressUtils, network } from '@reef-chain/util-lib';
+import { combineLatest, map, switchMap, take } from "rxjs/operators";
+import { firstValueFrom } from 'rxjs';
 import { extension } from '@reef-chain/util-lib';
 import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-chain/evm-provider/utils";
-import {Provider} from "@reef-chain/evm-provider";
+import { Provider } from "@reef-chain/evm-provider";
 import Signer from "./background/Signer";
-import {ethers} from 'ethers';
+import { Contract, ethers } from 'ethers';
 import type { InjectedAccountWithMeta } from '@reef-chain/util-lib/dist/dts/extension';
+import { ReefNameService, RnsAddress } from './abi/ReefNameService';
 
-const {REEF_EXTENSION_IDENT} = extension;
+const { REEF_EXTENSION_IDENT } = extension;
 
 export const buildAccountWithMeta = async (name: string, address: string): Promise<InjectedAccountWithMeta> => {
     const acountWithMeta: InjectedAccountWithMeta = {
@@ -49,15 +50,15 @@ export const innitApi = (signingKey: Signer) => {
                 accounts.map(async (account: AddressName) => {
                     return await buildAccountWithMeta(account.name, account.address);
                 }
-            ));
-            console.log("updateAccounts=",accountsWithMeta);
+                ));
+            console.log("updateAccounts=", accountsWithMeta);
             reefState.setAccounts(accountsWithMeta);
         },
         claimEvmAccount: async (nativeAddress: string) => {
             return firstValueFrom(reefState.accounts$.pipe(
                 take(1),
                 map((accounts: ReefAccount[]) => {
-                    return accounts.find((s)=> s.address === nativeAddress);
+                    return accounts.find((s) => s.address === nativeAddress);
                 }),
                 combineLatest([reefState.selectedProvider$]),
                 switchMap(async ([signer, provider]: [ReefAccount | undefined, Provider]) => {
@@ -79,7 +80,7 @@ export const innitApi = (signingKey: Signer) => {
                             address,
                             type: reefState.UpdateDataType.ACCOUNT_NATIVE_BALANCE,
                         } as reefState.UpdateAction);
-                        reefState.onTxUpdateResetSigners({isInBlock: true, txTypeEvm: false}, updateActions);
+                        reefState.onTxUpdateResetSigners({ isInBlock: true, txTypeEvm: false }, updateActions);
                         return true;
                     } catch (e) {
                         console.log('account.claimEvmAccount() - ', e.message);
@@ -89,32 +90,60 @@ export const innitApi = (signingKey: Signer) => {
                 take(1)
             ));
         },
-        toReefEVMAddressWithNotification: (evmAddress: string)=>{
+        fetchRns: async (evmAddress: string) => {
+            const provider = await firstValueFrom(reefState.selectedProvider$);
+            const rnsContract = new Contract(RnsAddress, ReefNameService, provider);
+            try {
+                const rns = await rnsContract.userToRns(evmAddress);
+                return rns;
+            } catch (error) {
+                console.log({
+                    name: "fetchRns",
+                    error: error.message
+                });
+                return ""
+            }
+        },
+        fetchEvmAddressFromRns: async (reefName: string) => {
+            const provider = await firstValueFrom(reefState.selectedProvider$);
+            const rnsContract = new Contract(RnsAddress, ReefNameService, provider);
+            try {
+                const addr = await rnsContract.rnsToUser(reefName);
+                return addr;
+            } catch (error) {
+                console.log({
+                    name: "fetchEvmAddressFromRns",
+                    error: error.message
+                });
+                return ""
+            }
+        },
+        toReefEVMAddressWithNotification: (evmAddress: string) => {
             return addressUtils.addReefSpecificStringFromAddress(evmAddress);
         },
 
-        toReefEVMAddressNoNotification: (evmAddressMsg: string)=>{
+        toReefEVMAddressNoNotification: (evmAddressMsg: string) => {
             return addressUtils.removeReefSpecificStringFromAddress(evmAddressMsg);
         },
 
-        resolveEvmAddress:async(nativeAddress:string)=>{
+        resolveEvmAddress: async (nativeAddress: string) => {
             const provider = await firstValueFrom(reefState.selectedProvider$);
-            return utilsResolveEvmAddr(provider,nativeAddress);
+            return utilsResolveEvmAddr(provider, nativeAddress);
         },
 
-        resolveFromEvmAddress:async(evmAddress:string)=>{
+        resolveFromEvmAddress: async (evmAddress: string) => {
             const provider = await firstValueFrom(reefState.selectedProvider$);
-            const nativeAddress=await utilsResolveToNativeAddress(provider,evmAddress);
-            return nativeAddress||null;
+            const nativeAddress = await utilsResolveToNativeAddress(provider, evmAddress);
+            return nativeAddress || null;
         },
 
-        isValidEvmAddress: (address: string) =>  ethers.utils.isAddress(address),
+        isValidEvmAddress: (address: string) => ethers.utils.isAddress(address),
 
         isValidSubstrateAddress: (address: string) => isSubstrateAddress(address),
 
         listenBindActivity: (address: string) => {
             return network.getLatestBlockAccountUpdates$([address])
-        }        
+        }
     };
 }
 
