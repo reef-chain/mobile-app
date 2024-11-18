@@ -13,7 +13,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/password_manager.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:barcode_finder/barcode_finder.dart';
+import 'package:qr_code_tools/qr_code_tools.dart';
 
 class QrDataDisplay extends StatefulWidget {
   ReefQrCodeType? expectedType;
@@ -299,15 +299,21 @@ class ReefQrCode {
 
 Future<String?> scanFile() async {
   // Used to pick a file from device storage
-  final pickedFile = await FilePicker.platform
+  try {
+    final pickedFile = await FilePicker.platform
       .pickFiles(type: FileType.image); //can pick image files only
   if (pickedFile != null) {
     final filePath = pickedFile.files.single.path;
     if (filePath != null) {
-      final res = await BarcodeFinder.scanFile(path: filePath);
+      //@anukulpandey replace this with some other sttuff later
+      var res = await QrCodeToolsPlugin.decodeFrom(filePath);
       return res;
     }
   }
+  } catch (e) {
+    print("scanFile ERR===${e}");
+  }
+  
 }
 
 enum ReefQrCodeType { address, accountJson, info, walletConnect, invalid }
