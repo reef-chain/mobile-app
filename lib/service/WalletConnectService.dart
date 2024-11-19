@@ -10,6 +10,7 @@ import 'package:reef_mobile_app/service/AppLifecycleManager.dart';
 import 'package:reef_mobile_app/service/LocalNotificationService.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 const String PROJECT_ID = 'b20768c469f63321e52923a168155240';
 const String SIGN_TX_METHOD = 'reef_signTransaction';
@@ -231,7 +232,7 @@ class WalletConnectService {
   void _onSessionRequest(SessionRequestEvent? event) async {
     if (_web3Wallet == null) return;
     if (event == null) return;
-    if(!AppLifecycleManager().isAppInForeground){
+    if(!AppLifecycleManager().isAppInForeground && await Permission.scheduleExactAlarm.isGranted){
         NotificationService()
                   .showNotification(title: 'WalletConnect Request', body: 'Approve the transaction using WalletConnect');
     }

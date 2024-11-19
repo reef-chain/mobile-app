@@ -1,9 +1,9 @@
-import { graphql, reefState } from '@reef-chain/util-lib';
+import { reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
+import { network, reefState,tokenIconUtils,tokenPriceUtils,tokenUtil } from '@reef-chain/util-lib';
 import BigNumber from 'bignumber.js';
 import { getIconUrl } from './utils/poolUtils';
-import { firstValueFrom, skip } from 'rxjs';
-import { getDexUrl, getExplorerUrl } from './utils/networkUtils';
-
+import { firstValueFrom, skipWhile } from 'rxjs';
+import { getDexUrl } from './utils/networkUtils';
 
 const getAllPoolsQuery = (limit: number, offset: number, search: string, signerAddress: string) => {
   return {
@@ -60,11 +60,11 @@ const getPoolPairsQuery = (tokenAddr, limit, offset) => {
   }
 };
 
-const getTokenInfoQuery = (tokenAddr) => {
+const getTokenInfoQuery = (tokenAddr:string) => {
   return {
     query: `
     query TokenQuery {
-        tokens(where: {id_eq: "${tokenAddr}"}) {
+        tokens(where: {id_containsInsensitive: "${tokenAddr}"}, limit: 1) {
           decimals
           iconUrl
           id
@@ -74,49 +74,6 @@ const getTokenInfoQuery = (tokenAddr) => {
       }
     `
   }
-};
-
-const getTokenIconQuery = (tokenAddresses: string[]) => {
-  const formattedAddresses = tokenAddresses.map(address => `"${address}"`).join(", ");
-  return {
-    query: `
-    query TokenIconQuery {
-      verifiedContracts(where: { id_in: [${formattedAddresses}] }) {
-        contractData
-        id
-      }
-    }
-    `
-  };
-};
-
-const getExplorerTokenIcon = async (nwName: string, tokenAddresses: string[]) => {
-  const response = await fetch(getExplorerUrl(nwName), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(getTokenIconQuery(tokenAddresses)),
-  });
-
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-
-  const { data } = await response.json();
-  const tokenIconMap = {};
-  data.verifiedContracts.forEach((v) => {
-    if (v.contractData && v.contractData['iconUrl']) {
-      const iconUrl = v.contractData['iconUrl'].startsWith("ipfs://")
-          ? "https://reef.infura-ipfs.io/ipfs/" + v.contractData['iconUrl'].split("ipfs://")[1]
-          : v.contractData['iconUrl'];
-          tokenIconMap[v.id] =iconUrl;
-  } else {
-    tokenIconMap[v.id] =v.contractData['iconUrl'];
-  }
-  })
-
-  return tokenIconMap;
 };
 
 
@@ -159,13 +116,6 @@ const calculate24hVolumeUSD = ({
   return dv1.plus(dv2);
 };
 
-function mapTokensToPrices(tokens) {
-  return tokens.reduce((prices, token) => {
-    prices[token.address] = token.price;
-    return prices;
-  }, {});
-}
-
 const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
   const current = calculate24hVolumeUSD(pool, tokenPrices, true);
   const previous = calculate24hVolumeUSD(pool, tokenPrices, false);
@@ -179,7 +129,16 @@ const calculateVolumeChange = (pool: any, tokenPrices: any): number => {
 export const fetchAllPools = async (limit: number, offset: number, search: string, signerAddress: string) => {
   try {
     const selectedNw = await firstValueFrom(reefState.selectedNetwork$);
-    let tokenPrices = {};
+    let {data:reefPrice} = await firstValueFrom(tokenUtil.reefPrice$.pipe(skipWhile(
+      value =>
+        !value.hasStatus(reefState.FeedbackStatusCode.COMPLETE_DATA) ||
+        value.getStatusList().length != 1
+    )));
+
+    let tokenPrices = {
+      "0x0000000000000000000000000000000001000000" : reefPrice
+    };
+
     const response = await fetch(getDexUrl(selectedNw.name), {
       method: 'POST',
       headers: {
@@ -192,25 +151,9 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       throw new Error('Network response was not ok');
     }
 
-    const subscription = reefState.selectedTokenPrices$.subscribe({
-      next: (tokens) => {
-        if (tokens && tokens.length > 0) {
-          tokenPrices = mapTokensToPrices(tokens);
-          console.log('Token Prices updated:', tokenPrices);
-        } else {
-          console.log('No tokens available');
-          tokenPrices = {};
-        }
-      },
-      error: (err) => {
-        console.error('Error receiving token prices:', err);
-      },
-      complete: () => {
-        console.log('Subscription completed');
-      }
-    });
-
     const { data } = await response.json();
+
+    tokenPriceUtils.calculateTokenPrices(data.allPoolsList,tokenPrices);
 
     let tokenAddresess = [];
 
@@ -223,7 +166,7 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       }
     }
 
-    const tokenIconMap = await getExplorerTokenIcon(selectedNw.name, tokenAddresess);
+    const tokenIconMap = await tokenIconUtils.resolveTokenUrl(tokenAddresess);
 
     const pools = data.allPoolsList.map((pool) => ({
       ...pool,
@@ -233,7 +176,6 @@ export const fetchAllPools = async (limit: number, offset: number, search: strin
       volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
       volumeChange24h: calculateVolumeChange(pool, tokenPrices),
     }));
-    subscription.unsubscribe();
     return pools;
   } catch (error) {
     console.log(error);
@@ -310,7 +252,7 @@ export const getTokenInfo = async (tokenAddr: string) => {
       }
     }
 
-    const tokenIconMap = await getExplorerTokenIcon(selectedNw.name, tokenAddresess);
+    const tokenIconMap = await tokenIconUtils.resolveTokenUrl(tokenAddresess);
 
 
     let token;

@@ -11,6 +11,7 @@ import 'package:reef_mobile_app/model/metadata/MetadataCtrl.dart';
 import 'package:reef_mobile_app/model/navigation/NavigationCtrl.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
+import 'package:reef_mobile_app/model/stealthex/stealthexCtrl.dart';
 import 'package:reef_mobile_app/model/storage/StorageCtrl.dart';
 import 'package:reef_mobile_app/model/signing/SigningCtrl.dart';
 import 'package:reef_mobile_app/model/swap/PoolsCtrl.dart';
@@ -43,6 +44,7 @@ class ReefAppState {
   late AppConfigCtrl appConfigCtrl;
   late StorageCtrl storageCtrl;
   late FirebaseAnalyticsCtrl firebaseAnalyticsCtrl;
+  late StealthexCtrl stealthexCtrl;
   StreamController<String> initStatusStream = StreamController<String>();
 
   ReefAppState._();
@@ -59,6 +61,7 @@ class ReefAppState {
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
     firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
+    stealthexCtrl = StealthexCtrl(jsApi,model.stealthexModel);
     this.initStatusStream.add("tokens...");
     tokensCtrl = TokenCtrl(jsApi, model.tokens);
     await Future.delayed(Duration(milliseconds: 100));

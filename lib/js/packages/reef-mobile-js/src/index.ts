@@ -6,6 +6,7 @@ import {initFlutterApi} from "./jsApi/initFlutterApi";
 import Keyring from "./jsApi/keyring";
 import Signer from "./jsApi/signing/signer";
 import Firebase from "./jsApi/firebaseApi";
+import Stealthex from './jsApi/stealthexApi';
 
 polyfill;
 window['flutterJS'] = new FlutterJS(initFlutterApi);
@@ -14,5 +15,6 @@ window['tokenUtil'] = tokenUtil;
 window['keyring'] = Keyring;
 window['signer'] = Signer;
 window['firebase'] = Firebase;
+window['stealthex'] = Stealthex;
 window['getReefJsVer'] = ()=>({reefAppJs:'0.0.1', utilLib:version});
 window['isJsConn'] = ()=>{return true};

@@ -153,25 +153,29 @@ class _TokenViewState extends State<TokenView> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                    ElevatedButton.icon(
-                      icon: const Icon(
+                      icon:  Icon(
                         CupertinoIcons.repeat,
-                        color: Color(0xffa93185),
+                        color: price==0 || isLoading?Color(0xFF898e9c):Color(0xffa93185),
                         size: 16.0,
                       ),
                       style: ElevatedButton.styleFrom(
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          backgroundColor: const Color(0xffe7def0),
+                          backgroundColor:price==0 || isLoading?  Color(0xFFd8dce6):const Color(0xffe7def0),
                           shape: const StadiumBorder(),
                           elevation: 0),
-                      label: const Text(
+                      label: Text(
                         'Swap',
                         style: TextStyle(
-                            color: Color(0xffa93185),
+                            color:price==0 || isLoading?Color(0xFF898e9c): Color(0xffa93185),
                             fontWeight: FontWeight.w700),
                       ),
                       onPressed: () {
+                        if(price==0 || isLoading){
+
+                        }else{
                         ReefAppState.instance.navigationCtrl
                             .navigateToSwapPage(context: context,preselectedTop: address);
+                        }
                       },
                     ),
                     const SizedBox(width: 15),
@@ -240,7 +244,7 @@ class _TokenViewState extends State<TokenView> {
             //         onPressed: ReefAppState.instance.tokensCtrl.reload,
             //         child: const Text("ReloadTEST"))),
 
-            if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
+            //if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
               Column(
                 children: [
                   Container(

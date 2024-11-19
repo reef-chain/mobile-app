@@ -13,6 +13,7 @@ import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
+import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
@@ -332,13 +333,23 @@ class _SendPageState extends State<SendPage> {
     });
   }
 
+  SendStatus handleErrorResponse(String response){
+    if(response=="-32603: execution fatal: Module { index: 6, error: 3, message: None }"){
+      return SendStatus.EVM_NOT_BINDED;
+    }else if(response =='invalid address (argument="address", value="", code=INVALID_ARGUMENT, version=address/5.7.0) (argument="recipient", value="", code=INVALID_ARGUMENT, version=abi/5.7.0)'){
+      return SendStatus.RECIPIENT_NOT_BINDED;
+    }
+    return SendStatus.ERROR;
+  }
+
   bool handleExceptionResponse(txResponse) {
     if (txResponse == null || txResponse['success'] != true) {
+      print("txResponse===${address}");
       setState(() {
         isFormDisabled = false;
         statusValue = txResponse['data'] == '_canceled'
             ? SendStatus.READY
-            : SendStatus.ERROR;
+            : handleErrorResponse(txResponse['data']);
       });
       return true;
     }
@@ -442,6 +453,8 @@ class _SendPageState extends State<SendPage> {
         return AppLocalizations.of(context)!.evm_not_connected;
       case SendStatus.CONNECTING:
         return  AppLocalizations.of(context)!.connecting.capitalize();
+      case SendStatus.RECIPIENT_NOT_BINDED:
+        return  AppLocalizations.of(context)!.recipient_not_binded;
       case SendStatus.READY:
         return AppLocalizations.of(context)!.confirm_send;
       default:
@@ -466,7 +479,7 @@ class _SendPageState extends State<SendPage> {
               child: Text(AppLocalizations.of(context)!.connecting,style: Theme.of(context).textTheme.bodyLarge,)),
             Padding(
                 padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
                 child: Column(
           children: [
             Observer(builder: (_) {
@@ -614,7 +627,7 @@ class _SendPageState extends State<SendPage> {
                   onPressed: () {
                     showQrTypeDataModal(
                         AppLocalizations.of(context)!.scan_address, context,
-                        expectedType: ReefQrCodeType.address);
+                        expectedType: ReefQrCodeType.address,preselectedTokenAddress: selectedToken.address);
                   },
                   child: const Icon(
                     Icons.qr_code_scanner_sharp,
@@ -835,8 +848,8 @@ class _SendPageState extends State<SendPage> {
     ];
   }
 
-  Column buildSendStatusButton(TokenWithAmount selectedToken) {
-    return Column(
+  ConnectWrapperButton buildSendStatusButton(TokenWithAmount selectedToken) {
+    return ConnectWrapperButton(child: Column(
       children: [
         SizedBox(
           width: double.infinity,
@@ -935,7 +948,7 @@ class _SendPageState extends State<SendPage> {
                 
         ),
       ],
-    );
+    ));
   }
 
   String getSliderValues(double newRating, TokenWithAmount selectedToken) {
@@ -1203,5 +1216,6 @@ enum SendStatus {
   FINALIZED,
   NOT_FINALIZED,
   EVM_NOT_BINDED,
+  RECIPIENT_NOT_BINDED,
   CONNECTING
 }

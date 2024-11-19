@@ -140,11 +140,13 @@ class _SplashAppState extends State<SplashApp> {
           password = _passwordController.text;
         });
       });
-    Timer(const Duration(milliseconds: 3830), () {
-      setState(() {
-        _isGifFinished = true;
-      });
-    });
+      if(mounted){
+        Timer(const Duration(milliseconds: 3830), () {
+          setState(() {
+            _isGifFinished = true;
+          });
+        });
+      }
 
     super.initState();
   }

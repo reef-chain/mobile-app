@@ -8,7 +8,8 @@ class GenerateQrJsonValue extends StatelessWidget {
   final ReefQrCodeType type;
   final String data;
   final bool? shouldDisplayValueOnly;
-  const GenerateQrJsonValue({super.key,required this.type,required this.data,this.shouldDisplayValueOnly=false});
+  final bool? isStealthexQr;
+  const GenerateQrJsonValue({super.key,required this.type,required this.data,this.shouldDisplayValueOnly=false,this.isStealthexQr=false});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class GenerateQrJsonValue extends StatelessWidget {
             gapless: false,
             foregroundColor: Colors.black,
             //conditionally showing the REEF icon because the importAccount QR code is really sensitive as it consists of long string as data
-            embeddedImage: type!=ReefQrCodeType.accountJson?const AssetImage('assets/images/reef.png'):null,
+            embeddedImage:isStealthexQr! ? null: type!=ReefQrCodeType.accountJson ? const AssetImage('assets/images/reef.png'):null,
             embeddedImageStyle: type!=ReefQrCodeType.accountJson?QrEmbeddedImageStyle(
               size: const Size(40, 40),
             ):null,

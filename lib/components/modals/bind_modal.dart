@@ -735,6 +735,9 @@ void showBindEvmModal(BuildContext context, {required bindFor,callback}) {
           ),
           title: Text(AppLocalizations.of(context)!.connect_evm,style: TextStyle(color: Styles.whiteColor),),
           backgroundColor: Colors.purple,
+          iconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
         ),
         body: BindEvm(bindFor: bindFor,callback: callback,)),
   ));

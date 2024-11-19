@@ -3,7 +3,7 @@ import 'package:mobx/mobx.dart';
 part 'navigation_model.g.dart';
 
 // bottomNavigationBarItems in page_layout should be placed in the same order as they appear
-enum NavigationPage { home, pools, accounts, settings }
+enum NavigationPage { home, pools, accounts, settings, buy }
 
 class NavigationModel = _NavigationModel with _$NavigationModel;
 
