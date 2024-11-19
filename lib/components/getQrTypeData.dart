@@ -305,7 +305,6 @@ Future<String?> scanFile() async {
   if (pickedFile != null) {
     final filePath = pickedFile.files.single.path;
     if (filePath != null) {
-      //@anukulpandey replace this with some other sttuff later
       var res = await QrCodeToolsPlugin.decodeFrom(filePath);
       return res;
     }
