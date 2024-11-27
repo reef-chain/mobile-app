@@ -111,10 +111,10 @@ class JsApiService {
     String ident = Random().nextInt(9999999).toString();
 
     jsCall(
-        "window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName', '$ident')").then((res){
-      var err = jsonDecode(res)['error'];
-      if(err!=null) {
-        print("ERROR while calling JS ${jsObsRefName} ///// err=$err");
+        "window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName','$ident')").then((res){
+      var err = res.toString().indexOf('error');
+      if(err>0) {
+        print("ERROR while calling JS ${jsObsRefName} ///// response=$err");
       }
     }).catchError((err){
       print("ERROR evaluating = $jsObsRefName ///// uncaught exception - ${err}");
