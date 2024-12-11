@@ -65,7 +65,7 @@ dependencies:
   video_player: ^2.5.1
   file_picker:
   walletconnect_flutter_v2: ^2.2.3
-  flutter_local_notifications: ^13.0.0
+  flutter_local_notifications: ^18.0.1
   qr_code_tools: ^0.1.0
   sizer: ^2.0.15
   #freezed: ^2.0.3+1 #immutable classes
