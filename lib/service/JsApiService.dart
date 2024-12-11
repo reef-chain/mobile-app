@@ -49,7 +49,7 @@ class JsApiService {
       hidden: hiddenWidget,
       controller: controllerInit,
       loaded: jsApiLoaded,
-      jsChannels: _createJavascriptChannels(),
+      getJsChannels: _createJavascriptChannels,
     );
   }
 
@@ -84,13 +84,13 @@ class JsApiService {
 
   // for js methods with no return value
   Future<void> jsCallVoidReturn(String executeJs) {
-    return _controller.then((ctrl) => ctrl.runJavascript(executeJs));
+    return _controller.then((ctrl) => ctrl.runJavaScript(executeJs));
   }
 
   Future<dynamic> jsCall<T>(String executeJs) async {
     try {
       dynamic res = await _controller
-          .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
+          .then((ctrl) => ctrl.runJavaScriptReturningResult(executeJs));
       return T == bool ? resolveBooleanValue(res) : res;
     }catch(e){
       print('JS LOST ctrl ERROR=${e.toString()}');
@@ -177,11 +177,10 @@ class JsApiService {
     });
   }
 
-  Set<JavascriptChannel> _createJavascriptChannels() {
+  Map<String,dynamic> _createJavascriptChannels() {
     return {
-      JavascriptChannel(
-        name: REEF_MOBILE_CHANNEL_NAME,
-        onMessageReceived: (message) {
+        'name': REEF_MOBILE_CHANNEL_NAME,
+        'onMessageReceived': (message) {
           JsApiMessage apiMsg =
               JsApiMessage.fromJson(jsonDecode(message.message));
           if (apiMsg.streamId == LOG_STREAM_ID) {
@@ -198,7 +197,6 @@ class JsApiService {
             jsMessageSubj.add(apiMsg);
           }
         },
-      ),
     };
   }
 

@@ -12,14 +12,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class WebViewFlutterJS extends StatefulWidget {
   final Completer<WebViewController> controller;
   final Completer<void> loaded;
-  final Set<JavascriptChannel> jsChannels;
+  final dynamic getJsChannels;
   final bool hidden;
 
   WebViewFlutterJS({
     required this.hidden,
     required this.controller,
     required this.loaded,
-    required this.jsChannels,
+    required this.getJsChannels,
     Key? key,
   }) : super(key: key); // Modify
 
@@ -80,29 +80,50 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
                     )),
               ])),
         Expanded(
-            child: WebView(
-          javascriptMode: JavascriptMode.unrestricted,
-          javascriptChannels: widget.jsChannels,
-          onWebViewCreated: (webViewController) {
-            _controller = webViewController;
-            if (!widget.controller.isCompleted) {
-              widget.controller.complete(_controller);
-            }
-          },
-          onPageFinished: (url) {
-            var strippedUrl = stripUrl(url);
-            if (strippedUrl.isNotEmpty) {
-              ReefAppState.instance.storage
-                  .getAuthUrl(strippedUrl)
-                  .then((authUrl) {
-                if (authUrl != null && !authUrl.isAllowed) {
-                  _setAuthUrl(true, strippedUrl);
+            child: WebViewWidget(
+          controller: WebViewController()
+          ..addJavaScriptChannel(widget.getJsChannels()['name'],onMessageReceived: widget.getJsChannels()['onMessageReceived'])
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..setNavigationDelegate(
+              NavigationDelegate(
+                onProgress: (int progress) {},
+                onPageStarted: (String url) {},
+                onPageFinished: (String url) {
+                  var strippedUrl = stripUrl(url);
+                if (strippedUrl.isNotEmpty) {
+                  ReefAppState.instance.storage
+                      .getAuthUrl(strippedUrl)
+                      .then((authUrl) {
+                    if (authUrl != null && !authUrl.isAllowed) {
+                      _setAuthUrl(true, strippedUrl);
+                    }
+                  });
                 }
-              });
-            }
-            widget.loaded.complete(_controller);
-          },
-        )),
+                widget.loaded.complete(_controller);
+                },
+                onHttpError: (HttpResponseError error) {},
+                onWebResourceError: (WebResourceError error) {},
+                onNavigationRequest: (NavigationRequest request) {
+                  if (request.url.startsWith('https://www.youtube.com/')) {
+                    return NavigationDecision.prevent;
+                  }
+                  return NavigationDecision.navigate;
+                },
+              ),
+            )
+            ..loadRequest(Uri.parse('https://app.reef.io')),
+        )
+            //     WebView(
+            // 
+            //   javascriptChannels: widget.jsChannels,
+            //   onWebViewCreated: (webViewController) {
+            //     _controller = webViewController;
+            //     if (!widget.controller.isCompleted) {
+            //       widget.controller.complete(_controller);
+            //     }
+            //   },
+            // )
+            ),
       ]),
     );
   }
