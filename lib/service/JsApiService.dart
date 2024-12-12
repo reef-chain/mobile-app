@@ -55,17 +55,18 @@ class JsApiService {
             print("here i am anukul");
           },
           onPageFinished: (String url) async {
+            await controller.runJavaScript('reefMobileChannel.postMessage(`testingggggg`)');
             await controller.runJavaScript("""
               window.flutterJS.init( 
-                  '$REEF_MOBILE_CHANNEL_NAME', 
-                  '$LOG_STREAM_ID', 
-                  '$FLUTTER_SUBSCRIBE_METHOD_NAME', 
-                  '$API_READY_STREAM_ID', 
-                  '$TX_SIGNATURE_CONFIRMATION_STREAM_ID', 
-                  '$TX_SIGN_CONFIRMATION_JS_FN_NAME',
-                  '$DAPP_MSG_CONFIRMATION_STREAM_ID', 
-                  '$DAPP_MSG_CONFIRMATION_JS_FN_NAME',
-                  );
+                '$REEF_MOBILE_CHANNEL_NAME', 
+                '$LOG_STREAM_ID', 
+                '$FLUTTER_SUBSCRIBE_METHOD_NAME', 
+                '$API_READY_STREAM_ID', 
+                '$TX_SIGNATURE_CONFIRMATION_STREAM_ID', 
+                '$TX_SIGN_CONFIRMATION_JS_FN_NAME',
+                '$DAPP_MSG_CONFIRMATION_STREAM_ID', 
+                '$DAPP_MSG_CONFIRMATION_JS_FN_NAME',
+                );
               """);
           },
           onHttpError: (HttpResponseError error) {},
@@ -74,6 +75,7 @@ class JsApiService {
       )
       ..addJavaScriptChannel(REEF_MOBILE_CHANNEL_NAME,
           onMessageReceived: (message) {
+            print("message-----${message}");
         JsApiMessage apiMsg =
             JsApiMessage.fromJson(jsonDecode(message.message));
         if (apiMsg.streamId == LOG_STREAM_ID) {
@@ -203,16 +205,6 @@ class JsApiService {
     window.global = window;
     </script>
     <script>${jsScript}</script>
-    <script>window.flutterJS.init( 
-    '$REEF_MOBILE_CHANNEL_NAME', 
-    '$LOG_STREAM_ID', 
-    '$FLUTTER_SUBSCRIBE_METHOD_NAME', 
-    '$API_READY_STREAM_ID', 
-    '$TX_SIGNATURE_CONFIRMATION_STREAM_ID', 
-    '$TX_SIGN_CONFIRMATION_JS_FN_NAME',
-    '$DAPP_MSG_CONFIRMATION_STREAM_ID', 
-    '$DAPP_MSG_CONFIRMATION_JS_FN_NAME',
-    )</script>
     """;
   }
 
