@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
@@ -12,30 +12,83 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class WebViewFlutterJS extends StatefulWidget {
   final Completer<WebViewController> controller;
   final Completer<void> loaded;
-  final Set<JavascriptChannel> jsChannels;
+  final Map<String, dynamic> jsChannels;
   final bool hidden;
+  final dynamic getFlutterJsHeaderTags;
 
   WebViewFlutterJS({
     required this.hidden,
     required this.controller,
     required this.loaded,
     required this.jsChannels,
+    required this.getFlutterJsHeaderTags,
     Key? key,
-  }) : super(key: key); // Modify
+  }) : super(key: key);
 
   @override
   State<WebViewFlutterJS> createState() => _WebViewFlutterJSState();
 }
 
 class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
-  WebViewController? _controller;
   bool urlDisallowed = false;
   String url = '';
+  bool isControllerInit = false;
+  late WebViewController controller;
 
   _setAuthUrl(bool _urlDisallowed, String _url) {
     setState(() {
       urlDisallowed = _urlDisallowed;
       url = _url;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.getFlutterJsHeaderTags('lib/js/packages/reef-mobile-js/dist/index.js').then((val) {
+      controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onProgress: (int progress) {
+              print("Progress: $progress%");
+            },
+            onPageStarted: (String url) {
+              print("Page started loading: $url");
+            },
+            onPageFinished: (String url) {
+              print("Page finished loading: $url");
+              setState(() {
+                isControllerInit = true;
+              });
+            },
+            onHttpError: (HttpResponseError error) {
+              print("HTTP error: ${error}");
+            },
+            onWebResourceError: (WebResourceError error) {
+              print("Web resource error: ${error.description}");
+            },
+          ),
+        )
+        ..addJavaScriptChannel(
+          'reefMobileChannel',
+          onMessageReceived: (message) {
+            print("JavaScript message: ${message.message}");
+          },
+        )
+        ..loadHtmlString("""
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Injected JS</title>
+          </head>
+          <body>
+            <script type="text/javascript">
+              $val
+            </script>
+          </body>
+          </html>
+        """);
     });
   }
 
@@ -61,7 +114,6 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
                       await ReefAppState.instance.storage
                           .saveAuthUrl(AuthUrl(url, true));
                       _setAuthUrl(false, url);
-                      _controller!.reload();
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.black26,
@@ -80,29 +132,10 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
                     )),
               ])),
         Expanded(
-            child: WebView(
-          javascriptMode: JavascriptMode.unrestricted,
-          javascriptChannels: widget.jsChannels,
-          onWebViewCreated: (webViewController) {
-            _controller = webViewController;
-            if (!widget.controller.isCompleted) {
-              widget.controller.complete(_controller);
-            }
-          },
-          onPageFinished: (url) {
-            var strippedUrl = stripUrl(url);
-            if (strippedUrl.isNotEmpty) {
-              ReefAppState.instance.storage
-                  .getAuthUrl(strippedUrl)
-                  .then((authUrl) {
-                if (authUrl != null && !authUrl.isAllowed) {
-                  _setAuthUrl(true, strippedUrl);
-                }
-              });
-            }
-            widget.loaded.complete(_controller);
-          },
-        )),
+          child: isControllerInit
+              ? WebViewWidget(controller: controller)
+              : const Center(child: CircularProgressIndicator()),
+        ),
       ]),
     );
   }
@@ -110,6 +143,6 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
   @override
   void dispose() {
     super.dispose();
-    print('WEBVIEW DISPOSEDDDDD');
+    print('WEBVIEW DISPOSED');
   }
 }

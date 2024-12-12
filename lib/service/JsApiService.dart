@@ -9,8 +9,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class JsApiService {
-
-  static bool resolveBooleanValue(dynamic res){
+  static bool resolveBooleanValue(dynamic res) {
     return res == true ||
         res == 'true' ||
         res == 1 ||
@@ -33,8 +32,6 @@ class JsApiService {
   final jsApiLoaded = Completer<WebViewController>();
 
   // when web page loads
-  final jsApiReady = Completer<WebViewController>();
-
   final jsMessageSubj = BehaviorSubject<JsApiMessage>();
   final jsTxSignatureConfirmationMessageSubj = BehaviorSubject<JsApiMessage>();
   final jsDAppMsgSubj = BehaviorSubject<JsApiMessage>();
@@ -50,10 +47,28 @@ class JsApiService {
       controller: controllerInit,
       loaded: jsApiLoaded,
       jsChannels: _createJavascriptChannels(),
+      getFlutterJsHeaderTags:getFlutterJsHeaderTags,
     );
   }
 
-  Future<WebViewController> get _controller => jsApiReady.future;
+  Future<WebViewController> _controller() async {
+    var val = await getFlutterJsHeaderTags("lib/js/packages/reef-mobile-js/dist/index.js");
+    return WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {},
+          onPageStarted: (String url) {},
+          onPageFinished: (url) {},
+          onHttpError: (HttpResponseError error) {},
+          onWebResourceError: (WebResourceError error) {},
+        ),
+      )
+      ..addJavaScriptChannel('reefMobileChannel', onMessageReceived: (message) {
+        print("message===${message}");
+      })
+      ..loadHtmlString(val);
+  }
 
   JsApiService._(bool this.hiddenWidget, String this.flutterJsFilePath,
       {String? url, String? html, Function()? onErrorCb}) {
@@ -62,11 +77,12 @@ class JsApiService {
     _renderWithFlutterJS(flutterJsFilePath, html, url);
   }
 
-  JsApiService.reefAppJsApi({Function()? onErrorCb })
+  JsApiService.reefAppJsApi({Function()? onErrorCb})
       : this._(true, 'lib/js/packages/reef-mobile-js/dist/index.js',
             url: 'https://app.reef.io', onErrorCb: onErrorCb);
 
-  JsApiService.dAppInjectedHtml(String html, String? baseUrl, Function()? onErrorCb)
+  JsApiService.dAppInjectedHtml(
+      String html, String? baseUrl, Function()? onErrorCb)
       : this._(false, 'lib/js/packages/dApp-js/dist/index.js',
             html: html, url: baseUrl, onErrorCb: onErrorCb);
 
@@ -74,7 +90,7 @@ class JsApiService {
       String fJsFilePath, String? htmlString, String? baseUrl) {
     htmlString ??= "<html><head></head><body></body></html>";
     controllerInit.future.then((ctrl) {
-      return _getFlutterJsHeaderTags(fJsFilePath).then((headerTags) {
+      return getFlutterJsHeaderTags(fJsFilePath).then((headerTags) {
         return _insertHeaderTags(htmlString!, headerTags);
       }).then((htmlString) {
         return _renderHtml(ctrl, htmlString, baseUrl);
@@ -84,17 +100,18 @@ class JsApiService {
 
   // for js methods with no return value
   Future<void> jsCallVoidReturn(String executeJs) {
-    return _controller.then((ctrl) => ctrl.runJavascript(executeJs));
+    return _controller().then((ctrl) => ctrl.runJavaScript(executeJs));
   }
 
   Future<dynamic> jsCall<T>(String executeJs) async {
     try {
-      dynamic res = await _controller
-          .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
+      dynamic res = await _controller().then((ctrl) {
+        return ctrl.runJavaScriptReturningResult(executeJs);
+      });
       return T == bool ? resolveBooleanValue(res) : res;
-    }catch(e){
+    } catch (e) {
       print('JS LOST ctrl ERROR=${e.toString()}');
-      if(this.onJsConnectionError!=null) {
+      if (this.onJsConnectionError != null) {
         this.onJsConnectionError!();
       }
       throw e;
@@ -104,20 +121,21 @@ class JsApiService {
 
   Future jsPromise<T>(String jsObsRefName) async {
     dynamic res = await jsObservable(jsObsRefName).first;
-    return T == bool?resolveBooleanValue(res) : res;
+    return T == bool ? resolveBooleanValue(res) : res;
   }
 
   Stream jsObservable(String jsObsRefName) {
     String ident = Random().nextInt(9999999).toString();
 
-    jsCall(
-        "window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName','$ident')").then((res){
+    jsCall("window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName','$ident')")
+        .then((res) {
       var err = res.toString().indexOf('error');
-      if(err>0) {
+      if (err > 0) {
         print("ERROR while calling JS ${jsObsRefName} ///// response=$err");
       }
-    }).catchError((err){
-      print("ERROR evaluating = $jsObsRefName ///// uncaught exception - ${err}");
+    }).catchError((err) {
+      print(
+          "ERROR evaluating = $jsObsRefName ///// uncaught exception - ${err}");
     });
 
     // stream not emitting or if awaiting Future stuck if error in js - we'd need to async this method and return stream in then() fn above or close stream immediately on error
@@ -127,14 +145,15 @@ class JsApiService {
   }
 
   void confirmTxSignature(String reqId, String? mnemonic) {
-    jsCallVoidReturn('${TX_SIGN_CONFIRMATION_JS_FN_NAME}("$reqId", "${mnemonic ?? ''}")');
+    jsCallVoidReturn(
+        '${TX_SIGN_CONFIRMATION_JS_FN_NAME}("$reqId", "${mnemonic ?? ''}")');
   }
 
   void sendDappMsgResponse(String reqId, dynamic value) {
     jsCall('${DAPP_MSG_CONFIRMATION_JS_FN_NAME}(`$reqId`, `$value`)');
   }
 
-  Future<String> _getFlutterJsHeaderTags(String assetsFilePath) async {
+  Future<String> getFlutterJsHeaderTags(String assetsFilePath) async {
     var jsScript = await rootBundle.loadString(assetsFilePath, cache: true);
     return """
     <script>
@@ -177,28 +196,26 @@ class JsApiService {
     });
   }
 
-  Set<JavascriptChannel> _createJavascriptChannels() {
+  Map<String, dynamic> _createJavascriptChannels() {
     return {
-      JavascriptChannel(
-        name: REEF_MOBILE_CHANNEL_NAME,
-        onMessageReceived: (message) {
-          JsApiMessage apiMsg =
-              JsApiMessage.fromJson(jsonDecode(message.message));
-          if (apiMsg.streamId == LOG_STREAM_ID) {
-            print('$LOG_STREAM_ID= ${apiMsg.value}');
-          } else if (apiMsg.streamId == API_READY_STREAM_ID) {
-            jsApiLoaded.future.then((ctrl) => jsApiReady.complete(ctrl));
-          } else if (apiMsg.streamId == TX_SIGNATURE_CONFIRMATION_STREAM_ID) {
-            jsTxSignatureConfirmationMessageSubj.add(apiMsg);
-          } else if (apiMsg.streamId == DAPP_MSG_CONFIRMATION_STREAM_ID) {
-            jsDAppMsgSubj.add(apiMsg);
-          } else if (int.tryParse(apiMsg.streamId) == null) {
-            jsMessageUnknownSubj.add(apiMsg);
-          } else {
-            jsMessageSubj.add(apiMsg);
-          }
-        },
-      ),
+      'name': REEF_MOBILE_CHANNEL_NAME,
+      'onMessageReceived': (message) {
+        JsApiMessage apiMsg =
+            JsApiMessage.fromJson(jsonDecode(message.message));
+        if (apiMsg.streamId == LOG_STREAM_ID) {
+          print('$LOG_STREAM_ID= ${apiMsg.value}');
+        } else if (apiMsg.streamId == API_READY_STREAM_ID) {
+          // jsApiLoaded.future.then((ctrl) => jsApiReady.complete(ctrl));
+        } else if (apiMsg.streamId == TX_SIGNATURE_CONFIRMATION_STREAM_ID) {
+          jsTxSignatureConfirmationMessageSubj.add(apiMsg);
+        } else if (apiMsg.streamId == DAPP_MSG_CONFIRMATION_STREAM_ID) {
+          jsDAppMsgSubj.add(apiMsg);
+        } else if (int.tryParse(apiMsg.streamId) == null) {
+          jsMessageUnknownSubj.add(apiMsg);
+        } else {
+          jsMessageSubj.add(apiMsg);
+        }
+      },
     };
   }
 
