@@ -10,16 +10,12 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WebViewFlutterJS extends StatefulWidget {
-  final Completer<WebViewController> controller;
-  final Completer<void> loaded;
-  final Set<JavascriptChannel> jsChannels;
+  final Widget webviewFlutterWidget;
   final bool hidden;
 
   WebViewFlutterJS({
     required this.hidden,
-    required this.controller,
-    required this.loaded,
-    required this.jsChannels,
+    required this.webviewFlutterWidget,
     Key? key,
   }) : super(key: key); // Modify
 
@@ -28,7 +24,7 @@ class WebViewFlutterJS extends StatefulWidget {
 }
 
 class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
-  WebViewController? _controller;
+  // WebViewController? _controller;
   bool urlDisallowed = false;
   String url = '';
 
@@ -37,6 +33,13 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
       urlDisallowed = _urlDisallowed;
       url = _url;
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print("WEBVIEW INIT");
   }
 
   @override
@@ -61,7 +64,7 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
                       await ReefAppState.instance.storage
                           .saveAuthUrl(AuthUrl(url, true));
                       _setAuthUrl(false, url);
-                      _controller!.reload();
+                      // _controller!.reload();
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.black26,
@@ -80,29 +83,31 @@ class _WebViewFlutterJSState extends State<WebViewFlutterJS> {
                     )),
               ])),
         Expanded(
-            child: WebView(
-          javascriptMode: JavascriptMode.unrestricted,
-          javascriptChannels: widget.jsChannels,
-          onWebViewCreated: (webViewController) {
-            _controller = webViewController;
-            if (!widget.controller.isCompleted) {
-              widget.controller.complete(_controller);
-            }
-          },
-          onPageFinished: (url) {
-            var strippedUrl = stripUrl(url);
-            if (strippedUrl.isNotEmpty) {
-              ReefAppState.instance.storage
-                  .getAuthUrl(strippedUrl)
-                  .then((authUrl) {
-                if (authUrl != null && !authUrl.isAllowed) {
-                  _setAuthUrl(true, strippedUrl);
-                }
-              });
-            }
-            widget.loaded.complete(_controller);
-          },
-        )),
+            child: widget.webviewFlutterWidget
+        //     WebView(
+        //   javascriptMode: JavascriptMode.unrestricted,
+        //   javascriptChannels: widget.jsChannels,
+        //   onWebViewCreated: (webViewController) {
+        //     _controller = webViewController;
+        //     if (!widget.controller.isCompleted) {
+        //       widget.controller.complete(_controller);
+        //     }
+        //   },
+        //   onPageFinished: (url) {
+        //     var strippedUrl = stripUrl(url);
+        //     if (strippedUrl.isNotEmpty) {
+        //       ReefAppState.instance.storage
+        //           .getAuthUrl(strippedUrl)
+        //           .then((authUrl) {
+        //         if (authUrl != null && !authUrl.isAllowed) {
+        //           _setAuthUrl(true, strippedUrl);
+        //         }
+        //       });
+        //     }
+        //     widget.loaded.complete(_controller);
+        //   },
+        // )
+        ),
       ]),
     );
   }

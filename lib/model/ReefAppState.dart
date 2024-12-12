@@ -95,8 +95,10 @@ class ReefAppState {
     try {
       await _initReefState(jsApi, currentNetwork);
     } catch (e){
+       print("here i am anukul22222");
       this.initStatusStream.add("error state= ${e.toString()}");
     }
+     print("here i am anukul3333");
     this.initStatusStream.add("config...");
     appConfigCtrl = AppConfigCtrl(storage, model.appConfig);
     await Future.delayed(Duration(milliseconds: 100));
