@@ -51,7 +51,7 @@ class ReefAppState {
 
   static ReefAppState get instance => _instance ??= ReefAppState._();
 
-  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
+  init(JsReefApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
     this.storage = storage;
     this.walletConnect = walletConnect;
     this.initStatusStream.add("observables...");
@@ -109,13 +109,13 @@ class ReefAppState {
     this.initStatusStream.add("complete");
   }
 
-  _initReefState(JsApiService jsApiService, Network currentNetwork) async {
+  _initReefState(JsReefApiService jsApiService, Network currentNetwork) async {
     var accounts = await accountCtrl.getStorageAccountsList();
     await jsApiService.jsPromise(
         'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
   }
 
-  _initReefObservables(JsApiService reefAppJsApiService) async {
+  _initReefObservables(JsReefApiService reefAppJsApiService) async {
     reefAppJsApiService.jsMessageUnknownSubj.listen((JsApiMessage value) {
       print('jsMSG not handled id=${value.streamId}');
     });

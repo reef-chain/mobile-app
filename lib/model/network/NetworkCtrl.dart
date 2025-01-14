@@ -10,7 +10,7 @@ enum Network { mainnet, testnet }
 
 class NetworkCtrl {
   final StorageService storage;
-  final JsApiService jsApi;
+  final JsReefApiService jsApi;
   NetworkModel networkModel;
 
   NetworkCtrl(this.storage, this.jsApi, this.networkModel) {

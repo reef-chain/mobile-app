@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:reef_mobile_app/components/WebViewFlutterJS.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class JsApiService {
+// Import for Android features.
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
-  static bool resolveBooleanValue(dynamic res){
+// Import for iOS/macOS features.
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
+
+class JsReefApiService {
+  static bool resolveBooleanValue(dynamic res) {
     return res == true ||
         res == 'true' ||
         res == 1 ||
@@ -19,7 +23,6 @@ class JsApiService {
   }
 
   final flutterJsFilePath;
-  final bool hiddenWidget;
   final LOG_STREAM_ID = '_console.log';
   final API_READY_STREAM_ID = '_windowApisReady';
   final TX_SIGNATURE_CONFIRMATION_STREAM_ID = '_txSignStreamId';
@@ -28,6 +31,8 @@ class JsApiService {
   final DAPP_MSG_CONFIRMATION_JS_FN_NAME = '_dAppMsgConfirmationJsFnName';
   final REEF_MOBILE_CHANNEL_NAME = 'reefMobileChannel';
   final FLUTTER_SUBSCRIBE_METHOD_NAME = 'flutterSubscribe';
+
+  late final WebViewController controller;
 
   final controllerInit = Completer<WebViewController>();
   final jsApiLoaded = Completer<WebViewController>();
@@ -40,61 +45,124 @@ class JsApiService {
   final jsDAppMsgSubj = BehaviorSubject<JsApiMessage>();
   final jsMessageUnknownSubj = BehaviorSubject<JsApiMessage>();
 
-  late Widget _wdg;
   late Function()? onJsConnectionError;
 
-  get widget {
-    // print('JS API SERVICE GET WIDGET $flutterJsFilePath');
-    return WebViewFlutterJS(
-      hidden: hiddenWidget,
-      controller: controllerInit,
-      loaded: jsApiLoaded,
-      jsChannels: _createJavascriptChannels(),
-    );
-  }
-
-  Future<WebViewController> get _controller => jsApiReady.future;
-
-  JsApiService._(bool this.hiddenWidget, String this.flutterJsFilePath,
+  JsReefApiService._(String this.flutterJsFilePath,
       {String? url, String? html, Function()? onErrorCb}) {
-    this.onJsConnectionError = onErrorCb;
+    // #docregion platform_features
+    var ctrl = _createController();
+    // #enddocregion platform_features
+
     // print('JS API SERVICE CREATE $flutterJsFilePath');
-    _renderWithFlutterJS(flutterJsFilePath, html, url);
+    _renderWithFlutterJS(ctrl, flutterJsFilePath, html, url)
+        .then((v) => debugPrint("WV controller set"));
+    this.controller = ctrl;
+    this.onJsConnectionError = onErrorCb;
   }
 
-  JsApiService.reefAppJsApi({Function()? onErrorCb })
-      : this._(true, 'lib/js/packages/reef-mobile-js/dist/index.js',
+  JsReefApiService.customJsApi(String assetsJsPath,
+      {String? host, Function()? onErrorCb})
+      : this._(assetsJsPath, url: host, onErrorCb: onErrorCb);
+
+  JsReefApiService.reefAppJsApi({Function()? onErrorCb})
+      : this._('lib/js/packages/reef-mobile-js/dist/index.js',
             url: 'https://app.reef.io', onErrorCb: onErrorCb);
 
-  JsApiService.dAppInjectedHtml(String html, String? baseUrl, Function()? onErrorCb)
-      : this._(false, 'lib/js/packages/dApp-js/dist/index.js',
+  JsReefApiService.dAppInjectedHtml(
+      String html, String? baseUrl, Function()? onErrorCb)
+      : this._('lib/js/packages/dApp-js/dist/index.js',
             html: html, url: baseUrl, onErrorCb: onErrorCb);
 
-  void _renderWithFlutterJS(
-      String fJsFilePath, String? htmlString, String? baseUrl) {
-    htmlString ??= "<html><head></head><body></body></html>";
-    controllerInit.future.then((ctrl) {
-      return _getFlutterJsHeaderTags(fJsFilePath).then((headerTags) {
-        return _insertHeaderTags(htmlString!, headerTags);
-      }).then((htmlString) {
-        return _renderHtml(ctrl, htmlString, baseUrl);
-      });
+  WebViewController _createController() {
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    var controller = WebViewController.fromPlatformCreationParams(params);
+
+    controller
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            debugPrint('WebView is loading (progress : $progress%)');
+          },
+          onPageStarted: (String url) {
+            debugPrint('Page started loading: $url');
+          },
+          onPageFinished: (String url) {
+            debugPrint('Page finished loading: $url');
+          },
+          onWebResourceError: (WebResourceError error) {
+            debugPrint('''
+Page resource error:
+  code: ${error.errorCode}
+  description: ${error.description}
+  errorType: ${error.errorType}
+  isForMainFrame: ${error.isForMainFrame}
+          ''');
+          },
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('https://www.youtube.com/')) {
+              debugPrint('blocking navigation to ${request.url}');
+              return NavigationDecision.prevent;
+            }
+            debugPrint('allowing navigation to ${request.url}');
+            return NavigationDecision.navigate;
+          },
+          onHttpError: (HttpResponseError error) {
+            debugPrint('Error occurred on page: ${error.response?.statusCode}');
+          },
+          onUrlChange: (UrlChange change) {
+            debugPrint('url change to ${change.url}');
+          },
+          onHttpAuthRequest: (HttpAuthRequest request) {
+            // openDialog(request);
+            debugPrint("http auth req");
+          },
+        ),
+      );
+
+    controller.setOnConsoleMessage((JavaScriptConsoleMessage consoleMessage) {
+      debugPrint(
+          '== JS == ${consoleMessage.level.name}: ${consoleMessage.message}');
     });
+
+    _getJavascriptChannels().forEach((jsChanParam) =>
+        controller.addJavaScriptChannel(jsChanParam.name,
+            onMessageReceived: jsChanParam.onMessageReceived));
+
+    debugPrint("js controller set");
+
+    return controller;
+  }
+
+  Future<void> _renderWithFlutterJS(WebViewController ctrl, String fJsFilePath,
+      String? htmlString, String? baseUrl) async {
+    htmlString ??= "<html><head></head><body></body></html>";
+    var headerTags = await _getFlutterJsHeaderTags(fJsFilePath);
+    htmlString = _insertHeaderTags(htmlString, headerTags);
+    _renderHtml(ctrl, htmlString, baseUrl);
   }
 
   // for js methods with no return value
   Future<void> jsCallVoidReturn(String executeJs) {
-    return _controller.then((ctrl) => ctrl.runJavascript(executeJs));
+    return controller.runJavaScript(executeJs);
   }
 
   Future<dynamic> jsCall<T>(String executeJs) async {
     try {
-      dynamic res = await _controller
-          .then((ctrl) => ctrl.runJavascriptReturningResult(executeJs));
+      dynamic res = await controller.runJavaScriptReturningResult(executeJs);
       return T == bool ? resolveBooleanValue(res) : res;
-    }catch(e){
+    } catch (e) {
       print('JS LOST ctrl ERROR=${e.toString()}');
-      if(this.onJsConnectionError!=null) {
+      if (this.onJsConnectionError != null) {
         this.onJsConnectionError!();
       }
       throw e;
@@ -104,20 +172,21 @@ class JsApiService {
 
   Future jsPromise<T>(String jsObsRefName) async {
     dynamic res = await jsObservable(jsObsRefName).first;
-    return T == bool?resolveBooleanValue(res) : res;
+    return T == bool ? resolveBooleanValue(res) : res;
   }
 
   Stream jsObservable(String jsObsRefName) {
     String ident = Random().nextInt(9999999).toString();
 
-    jsCall(
-        "window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName','$ident')").then((res){
+    jsCall("window['$FLUTTER_SUBSCRIBE_METHOD_NAME']('$jsObsRefName','$ident')")
+        .then((res) {
       var err = res.toString().indexOf('error');
-      if(err>0) {
+      if (err > 0) {
         print("ERROR while calling JS ${jsObsRefName} ///// response=$err");
       }
-    }).catchError((err){
-      print("ERROR evaluating = $jsObsRefName ///// uncaught exception - ${err}");
+    }).catchError((err) {
+      print(
+          "ERROR evaluating = $jsObsRefName ///// uncaught exception - ${err}");
     });
 
     // stream not emitting or if awaiting Future stuck if error in js - we'd need to async this method and return stream in then() fn above or close stream immediately on error
@@ -127,7 +196,8 @@ class JsApiService {
   }
 
   void confirmTxSignature(String reqId, String? mnemonic) {
-    jsCallVoidReturn('${TX_SIGN_CONFIRMATION_JS_FN_NAME}("$reqId", "${mnemonic ?? ''}")');
+    jsCallVoidReturn(
+        '${TX_SIGN_CONFIRMATION_JS_FN_NAME}("$reqId", "${mnemonic ?? ''}")');
   }
 
   void sendDappMsgResponse(String reqId, dynamic value) {
@@ -169,17 +239,27 @@ class JsApiService {
 
   void _renderHtml(
       WebViewController ctrl, String htmlString, String? baseUrl) async {
-    ctrl
-        .loadHtmlString(htmlString, baseUrl: baseUrl)
-        .then((value) => ctrl)
-        .catchError((err) {
-      print('Error loading HTML=$err');
-    });
+    if (Platform.isIOS &&
+        Platform.operatingSystemVersion.indexOf("Version 16.0") >= 0) {
+      ctrl
+          .loadFlutterAsset("lib/js/packages/reef-mobile-js/dist/index.js")
+          .then((value) => ctrl)
+          .catchError((err) {
+        debugPrint('Error loading HTML=$err');
+      });
+    } else {
+      ctrl
+          .loadHtmlString(htmlString, baseUrl: baseUrl)
+          .then((value) => ctrl)
+          .catchError((err) {
+        debugPrint('Error loading HTML=$err');
+      });
+    }
   }
 
-  Set<JavascriptChannel> _createJavascriptChannels() {
+  Set<JsChannParam> _getJavascriptChannels() {
     return {
-      JavascriptChannel(
+      JsChannParam(
         name: REEF_MOBILE_CHANNEL_NAME,
         onMessageReceived: (message) {
           JsApiMessage apiMsg =
@@ -205,6 +285,13 @@ class JsApiService {
   void rejectTxSignature(String signatureIdent) {
     confirmTxSignature(signatureIdent, '_canceled');
   }
+}
+
+class JsChannParam {
+  late String name;
+  late void Function(JavaScriptMessage) onMessageReceived;
+
+  JsChannParam({required this.name, required this.onMessageReceived});
 }
 
 class JsApiMessage {

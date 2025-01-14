@@ -6,7 +6,7 @@ import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
 class SwapCtrl {
-  final JsApiService jsApi;
+  final JsReefApiService jsApi;
   final SwapSettings swapSettings;
 
   SwapCtrl(this.jsApi,this.swapSettings);

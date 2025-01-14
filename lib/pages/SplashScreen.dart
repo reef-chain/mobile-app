@@ -28,9 +28,6 @@ typedef WidgetCallback = Widget Function();
 final navigatorKey = GlobalKey<NavigatorState>();
 
 class SplashApp extends StatefulWidget {
-  final JsApiService reefJsApiService = JsApiService.reefAppJsApi(onErrorCb: (){
-    print('JS CONNECTION ERRORORRRRR - RESET');
-  });
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
@@ -51,6 +48,9 @@ class SplashApp extends StatefulWidget {
 }
 
 class _SplashAppState extends State<SplashApp> {
+  final JsReefApiService reefJsReefApiService = JsReefApiService.reefAppJsApi(onErrorCb: (){
+    print('JS CONNECTION ERRORORRRRR - RESET');
+  });
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
 
   setLocale(String locale) {
@@ -166,7 +166,7 @@ class _SplashAppState extends State<SplashApp> {
   Future<void> _initializeAsyncDependencies() async {
     final storageService = StorageService();
     final walletConnectService = WalletConnectService();
-    await ReefAppState.instance.init(widget.reefJsApiService, storageService, walletConnectService);
+    await ReefAppState.instance.init(reefJsReefApiService, storageService, walletConnectService);
     setState(() {
       appReady = true;
     });
@@ -206,7 +206,7 @@ class _SplashAppState extends State<SplashApp> {
     //TODO: Initialise the widget back
 
     return Stack(children: <Widget>[
-      widget.reefJsApiService.widget,
+      // reefJsApiService.widget,
       if ( (appReady == false || _isAuthenticated == false) ||
           _isFirstLaunch == null)
         Stack(

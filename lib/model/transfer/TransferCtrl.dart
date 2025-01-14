@@ -2,7 +2,7 @@ import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 
 class TransferCtrl {
-  final JsApiService jsApi;
+  final JsReefApiService jsApi;
 
   TransferCtrl(this.jsApi);
 

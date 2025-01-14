@@ -23,7 +23,7 @@ class DAppPage extends StatefulWidget {
 }
 
 class _DAppPageState extends State<DAppPage> {
-  JsApiService? dappJsApi;
+  JsReefApiService? dappJsApi;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _DAppPageState extends State<DAppPage> {
 print('TODO dapp injection not working check js build !!!!!!!!');
     widget._getHtml(widget.url).then((html) {
       setState(() {
-        dappJsApi = JsApiService.dAppInjectedHtml(html, widget.url, null);
+        dappJsApi = JsReefApiService.dAppInjectedHtml(html, widget.url, null);
         dappJsApi?.jsDAppMsgSubj.listen((value) {
           widget.dAppRequestService
               .handleDAppMsgRequest(value, dappJsApi!.sendDappMsgResponse);
@@ -50,9 +50,11 @@ print('TODO dapp injection not working check js build !!!!!!!!');
         ),
       ),
       body: Center(
-          child: dappJsApi != null
-              ? dappJsApi!.widget
-              : const CircularProgressIndicator()),
+          child: 
+          // dappJsApi != null
+          //     ? dappJsApi!.widget
+          //     : 
+              const CircularProgressIndicator()),
     ));
   }
 }

@@ -14,7 +14,7 @@ abstract class _AccountModel with Store {
   @observable
   StatusDataObject<List<StatusDataObject<ReefAccount>>> accountsFDM =
       StatusDataObject(
-          [], [FeedbackStatus(StatusCode.loading, 'Initializing')]);
+          [], [FeedbackStatus(StatusCode.loading, 'Initializing accounts')]);
 
   @action
   void setSelectedAddress(String addr) {

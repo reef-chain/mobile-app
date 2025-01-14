@@ -37,9 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   mobx: ^2.0.7+2
   flutter_mobx: ^2.0.6+1
-  webview_flutter: ^3.0.4
+  rxdart: ^0.28.0
+  webview_flutter: ^4.10.0
   shared_preferences: ^2.0.17
-  rxdart: ^0.27.4
   google_fonts: ^4.0.4
   gap: ^3.0.1
   # We added jovial_svg for SVGs from URL, as flutter_svg does not offer support support <style> elements
@@ -65,9 +65,11 @@ dependencies:
   video_player: ^2.5.1
   file_picker:
   walletconnect_flutter_v2: ^2.2.3
-  flutter_local_notifications: ^13.0.0
+  flutter_local_notifications: ^18.0.1
   qr_code_tools: ^0.1.0
   sizer: ^2.0.15
+  reef_chain_flutter:
+    path: /Users/anukul/Desktop/reef-chain-flutter
   #freezed: ^2.0.3+1 #immutable classes
 
 dev_dependencies:

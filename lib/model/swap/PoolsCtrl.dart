@@ -2,7 +2,7 @@ import 'package:reef_mobile_app/model/swap/pools_model.dart';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 
 class PoolsCtrl{
-  final JsApiService jsApi;
+  final JsReefApiService jsApi;
   final PoolsModel poolsModel;
 
   PoolsCtrl( this.jsApi, this.poolsModel){

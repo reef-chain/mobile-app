@@ -16,7 +16,7 @@ class AccountCtrl {
   final AccountModel _accountModel;
 
   // TODO check/make these props are private in other Ctrl classes
-  final JsApiService _jsApi;
+  final JsReefApiService _jsApi;
   final StorageService _storage;
 
   AccountCtrl(this._jsApi, this._storage, this._accountModel) {
@@ -172,7 +172,7 @@ Future<dynamic> listenBindActivity(String address) async {
     return _jsApi.jsObservable('window.reefState.accounts\$');
   }
 
-  void _initJsObservables(JsApiService jsApi, StorageService storage) {
+  void _initJsObservables(JsReefApiService jsApi, StorageService storage) {
     jsApi
         .jsObservable('window.reefState.selectedAddress\$')
         .listen((address) async {
@@ -220,7 +220,7 @@ Future<dynamic> listenBindActivity(String address) async {
     }
   }
 
-  void _initWasm(JsApiService _jsApi) async {
+  void _initWasm(JsReefApiService _jsApi) async {
     await _jsApi.jsPromise('window.keyring.initWasm()');
   }
 

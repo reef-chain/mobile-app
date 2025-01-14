@@ -5,7 +5,7 @@ import 'package:reef_mobile_app/service/JsApiService.dart';
 
 
 class StealthexCtrl {
-  final JsApiService _jsApi;
+  final JsReefApiService _jsApi;
   final StealthexModel stealthexModel;
 
   StealthexCtrl(this._jsApi,this.stealthexModel) {}

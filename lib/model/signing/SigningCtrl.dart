@@ -22,7 +22,7 @@ class SigningCtrl {
   static final SIGN_ERR_CANCELED = "_canceled";
   static final SIGN_ERR_EMPTY_MNEMONIC = "_empty-mnemonic-value";
   final SignatureRequests signatureRequests;
-  final JsApiService jsApi;
+  final JsReefApiService jsApi;
   final StorageService storage;
   static final LocalAuthentication localAuth = LocalAuthentication();
   final AccountModel accountModel;

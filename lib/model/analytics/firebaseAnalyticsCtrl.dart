@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/service/JsApiService.dart';
 
 
 class FirebaseAnalyticsCtrl {
-  final JsApiService _jsApi;
+  final JsReefApiService _jsApi;
   Map<String,String>? _config;
 
   FirebaseAnalyticsCtrl(this._jsApi) {
@@ -20,7 +21,11 @@ class FirebaseAnalyticsCtrl {
   }
 
    Future<dynamic> logAnalytics(String eventName) async {
-    await _jsApi.jsCallVoidReturn(
+    try {  
+      await _jsApi.jsCallVoidReturn(
         'window.firebase.logFirebaseAnalytic(${jsonEncode(_config)},"$eventName")');
+    } catch (e) {
+      debugPrint("unable to log to firebase");
+    }
   }
 }

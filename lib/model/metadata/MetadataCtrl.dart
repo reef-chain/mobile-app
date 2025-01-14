@@ -5,7 +5,7 @@ import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MetadataCtrl {
-  final JsApiService jsApi;
+  final JsReefApiService jsApi;
 
   final StreamController<bool> _jsConnStreamCtrl = new StreamController();
   late Stream<bool> _jsStream;
@@ -28,7 +28,7 @@ class MetadataCtrl {
         if (kDebugMode) {
           print('JS CONN=$value');
         }
-        return JsApiService.resolveBooleanValue(value);
+        return JsReefApiService.resolveBooleanValue(value);
       }).onError((error, stackTrace) => false);
 
   Future<Stream<bool>> getJsConnStream() async {

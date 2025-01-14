@@ -9,7 +9,7 @@ import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'token_model.dart';
 
 class TokenCtrl {
-  final JsApiService jsApi;
+  final JsReefApiService jsApi;
 
   TokenCtrl(this.jsApi, TokenModel tokenModel) {
     jsApi
