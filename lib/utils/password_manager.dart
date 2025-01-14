@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 
 class PasswordManager {
   static Future<bool> checkIfPassword() async {

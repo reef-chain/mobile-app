@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/service/DAppRequestService.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:http/http.dart' as http;
 
 import '../components/sign/SignatureContentToggle.dart';

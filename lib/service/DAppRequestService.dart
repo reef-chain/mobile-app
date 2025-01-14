@@ -1,12 +1,11 @@
 import 'dart:convert';
 
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/components/modals/auth_url_aproval_modal.dart';
 import 'package:reef_mobile_app/components/modals/metadata_aproval_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
 import 'package:reef_mobile_app/model/metadata/metadata.dart';
-
-import 'JsApiService.dart';
 
 enum AuthUrlStatus {
   authorized,
