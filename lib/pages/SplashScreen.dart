@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/components/introduction_page/hero_video.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/locale/LocaleCtrl.dart';
@@ -31,6 +32,12 @@ class SplashApp extends StatefulWidget {
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
+  final JsApiService reefJsApiService = JsApiService.reefAppJsApi(onErrorCb: (){
+    print('JS CONNECTION ERRORORRRRR - RESET');
+  });
+
+  final ReefChainApi reefChainApi = ReefChainApi();
+  
   SplashApp({
     required Key key,
     required this.displayOnInit,
@@ -48,9 +55,6 @@ class SplashApp extends StatefulWidget {
 }
 
 class _SplashAppState extends State<SplashApp> {
-  final JsApiService reefJsReefApiService = JsApiService.reefAppJsApi(onErrorCb: (){
-    print('JS CONNECTION ERRORORRRRR - RESET');
-  });
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
 
   setLocale(String locale) {
@@ -166,7 +170,7 @@ class _SplashAppState extends State<SplashApp> {
   Future<void> _initializeAsyncDependencies() async {
     final storageService = StorageService();
     final walletConnectService = WalletConnectService();
-    await ReefAppState.instance.init(reefJsReefApiService, storageService, walletConnectService);
+    await ReefAppState.instance.init(widget.reefJsApiService, storageService, walletConnectService,widget.reefChainApi);
     setState(() {
       appReady = true;
     });

@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/network/network.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
+import 'package:reef_chain_flutter/reef_state/account/account.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/ViewModel.dart';
 import 'package:reef_mobile_app/model/analytics/firebaseAnalyticsCtrl.dart';
@@ -45,17 +48,18 @@ class ReefAppState {
   late StorageCtrl storageCtrl;
   late FirebaseAnalyticsCtrl firebaseAnalyticsCtrl;
   late StealthexCtrl stealthexCtrl;
+  late ReefChainApi reefChainApi;
   StreamController<String> initStatusStream = StreamController<String>();
 
   ReefAppState._();
 
   static ReefAppState get instance => _instance ??= ReefAppState._();
 
-  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
+  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect,ReefChainApi _reefChainApi) async {
     this.storage = storage;
+    this.reefChainApi = _reefChainApi;
     this.walletConnect = walletConnect;
     this.initStatusStream.add("observables...");
-    await _initReefObservables(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("network...");
     networkCtrl = NetworkCtrl(storage, jsApi, model.network);
@@ -93,7 +97,7 @@ class ReefAppState {
             ? Network.testnet
             : Network.mainnet;
     try {
-      await _initReefState(jsApi, currentNetwork);
+      await _initReefState(jsApi, currentNetwork,_reefChainApi);
     } catch (e){
       this.initStatusStream.add("error state= ${e.toString()}");
     }
@@ -109,15 +113,18 @@ class ReefAppState {
     this.initStatusStream.add("complete");
   }
 
-  _initReefState(JsApiService jsApiService, Network currentNetwork) async {
+  _initReefState(JsApiService jsApiService, Network currentNetwork,ReefChainApi _reefChainApi) async {
     var accounts = await accountCtrl.getStorageAccountsList();
+    jsApiService
+        .jsCall("window.isJsConn()")
+        .then((v) => debugPrint(v.toString()));
+
+     jsApiService
+        .jsPromise("window.futureFn(\"fltrrr\")")
+        .then((v) => debugPrint(v.toString()));
+
     await jsApiService.jsPromise(
         'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
   }
 
-  _initReefObservables(JsApiService reefAppJsApiService) async {
-    reefAppJsApiService.jsMessageUnknownSubj.listen((JsApiMessage value) {
-      print('jsMSG not handled id=${value.streamId}');
-    });
-  }
 }
