@@ -1,8 +1,8 @@
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 
 class TransferCtrl {
-  final JsReefApiService jsApi;
+  final JsApiService jsApi;
 
   TransferCtrl(this.jsApi);
 

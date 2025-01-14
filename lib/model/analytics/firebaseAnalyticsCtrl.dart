@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 
 
 class FirebaseAnalyticsCtrl {
-  final JsReefApiService _jsApi;
+  final JsApiService _jsApi;
   Map<String,String>? _config;
 
   FirebaseAnalyticsCtrl(this._jsApi) {

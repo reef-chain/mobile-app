@@ -13,7 +13,7 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 // Import for iOS/macOS features.
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
-class JsReefApiService {
+class JsApiService {
   static bool resolveBooleanValue(dynamic res) {
     return res == true ||
         res == 'true' ||
@@ -47,7 +47,7 @@ class JsReefApiService {
 
   late Function()? onJsConnectionError;
 
-  JsReefApiService._(String this.flutterJsFilePath,
+  JsApiService._(String this.flutterJsFilePath,
       {String? url, String? html, Function()? onErrorCb}) {
     // #docregion platform_features
     var ctrl = _createController();
@@ -60,15 +60,15 @@ class JsReefApiService {
     this.onJsConnectionError = onErrorCb;
   }
 
-  JsReefApiService.customJsApi(String assetsJsPath,
+  JsApiService.customJsApi(String assetsJsPath,
       {String? host, Function()? onErrorCb})
       : this._(assetsJsPath, url: host, onErrorCb: onErrorCb);
 
-  JsReefApiService.reefAppJsApi({Function()? onErrorCb})
+  JsApiService.reefAppJsApi({Function()? onErrorCb})
       : this._('lib/js/packages/reef-mobile-js/dist/index.js',
             url: 'https://app.reef.io', onErrorCb: onErrorCb);
 
-  JsReefApiService.dAppInjectedHtml(
+  JsApiService.dAppInjectedHtml(
       String html, String? baseUrl, Function()? onErrorCb)
       : this._('lib/js/packages/dApp-js/dist/index.js',
             html: html, url: baseUrl, onErrorCb: onErrorCb);

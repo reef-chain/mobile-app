@@ -1,12 +1,12 @@
 import 'dart:convert';
 
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/swap/swap_settings.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
 class SwapCtrl {
-  final JsReefApiService jsApi;
+  final JsApiService jsApi;
   final SwapSettings swapSettings;
 
   SwapCtrl(this.jsApi,this.swapSettings);

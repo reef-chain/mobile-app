@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/components/introduction_page/hero_video.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/locale/LocaleCtrl.dart';
@@ -18,7 +19,6 @@ import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
 
 import '../main.dart';
 import '../model/ReefAppState.dart';
-import '../service/JsApiService.dart';
 import '../service/StorageService.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -48,7 +48,7 @@ class SplashApp extends StatefulWidget {
 }
 
 class _SplashAppState extends State<SplashApp> {
-  final JsReefApiService reefJsReefApiService = JsReefApiService.reefAppJsApi(onErrorCb: (){
+  final JsApiService reefJsReefApiService = JsApiService.reefAppJsApi(onErrorCb: (){
     print('JS CONNECTION ERRORORRRRR - RESET');
   });
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;

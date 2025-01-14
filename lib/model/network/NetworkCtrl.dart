@@ -1,16 +1,16 @@
 import 'dart:convert';
 
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/network/network_model.dart';
 import 'package:reef_mobile_app/model/network/ws-conn-state.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 
 enum Network { mainnet, testnet }
 
 class NetworkCtrl {
   final StorageService storage;
-  final JsReefApiService jsApi;
+  final JsApiService jsApi;
   NetworkModel networkModel;
 
   NetworkCtrl(this.storage, this.jsApi, this.networkModel) {

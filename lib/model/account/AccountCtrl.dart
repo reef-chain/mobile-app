@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 
@@ -16,7 +16,7 @@ class AccountCtrl {
   final AccountModel _accountModel;
 
   // TODO check/make these props are private in other Ctrl classes
-  final JsReefApiService _jsApi;
+  final JsApiService _jsApi;
   final StorageService _storage;
 
   AccountCtrl(this._jsApi, this._storage, this._accountModel) {
@@ -172,7 +172,7 @@ Future<dynamic> listenBindActivity(String address) async {
     return _jsApi.jsObservable('window.reefState.accounts\$');
   }
 
-  void _initJsObservables(JsReefApiService jsApi, StorageService storage) {
+  void _initJsObservables(JsApiService jsApi, StorageService storage) {
     jsApi
         .jsObservable('window.reefState.selectedAddress\$')
         .listen((address) async {
@@ -220,7 +220,7 @@ Future<dynamic> listenBindActivity(String address) async {
     }
   }
 
-  void _initWasm(JsReefApiService _jsApi) async {
+  void _initWasm(JsApiService _jsApi) async {
     await _jsApi.jsPromise('window.keyring.initWasm()');
   }
 

@@ -1,8 +1,8 @@
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/swap/pools_model.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 
 class PoolsCtrl{
-  final JsReefApiService jsApi;
+  final JsApiService jsApi;
   final PoolsModel poolsModel;
 
   PoolsCtrl( this.jsApi, this.poolsModel){

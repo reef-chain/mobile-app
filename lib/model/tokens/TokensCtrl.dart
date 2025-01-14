@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/model/tokens/TokenActivity.dart';
 import 'package:reef_mobile_app/model/tokens/TokenNFT.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 
 import 'token_model.dart';
 
 class TokenCtrl {
-  final JsReefApiService jsApi;
+  final JsApiService jsApi;
 
   TokenCtrl(this.jsApi, TokenModel tokenModel) {
     jsApi

@@ -1,11 +1,11 @@
 import 'dart:convert';
 
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/stealthex/stealthex_model.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 
 
 class StealthexCtrl {
-  final JsReefApiService _jsApi;
+  final JsApiService _jsApi;
   final StealthexModel stealthexModel;
 
   StealthexCtrl(this._jsApi,this.stealthexModel) {}

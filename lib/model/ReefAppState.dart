@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/ViewModel.dart';
 import 'package:reef_mobile_app/model/analytics/firebaseAnalyticsCtrl.dart';
@@ -18,7 +19,6 @@ import 'package:reef_mobile_app/model/swap/PoolsCtrl.dart';
 import 'package:reef_mobile_app/model/swap/SwapCtrl.dart';
 import 'package:reef_mobile_app/model/tokens/TokensCtrl.dart';
 import 'package:reef_mobile_app/model/transfer/TransferCtrl.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/service/WalletConnectService.dart';
 
@@ -51,7 +51,7 @@ class ReefAppState {
 
   static ReefAppState get instance => _instance ??= ReefAppState._();
 
-  init(JsReefApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
+  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
     this.storage = storage;
     this.walletConnect = walletConnect;
     this.initStatusStream.add("observables...");
@@ -109,13 +109,13 @@ class ReefAppState {
     this.initStatusStream.add("complete");
   }
 
-  _initReefState(JsReefApiService jsApiService, Network currentNetwork) async {
+  _initReefState(JsApiService jsApiService, Network currentNetwork) async {
     var accounts = await accountCtrl.getStorageAccountsList();
     await jsApiService.jsPromise(
         'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
   }
 
-  _initReefObservables(JsReefApiService reefAppJsApiService) async {
+  _initReefObservables(JsApiService reefAppJsApiService) async {
     reefAppJsApiService.jsMessageUnknownSubj.listen((JsApiMessage value) {
       print('jsMSG not handled id=${value.streamId}');
     });

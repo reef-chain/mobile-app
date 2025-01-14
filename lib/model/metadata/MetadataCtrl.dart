@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MetadataCtrl {
-  final JsReefApiService jsApi;
+  final JsApiService jsApi;
 
   final StreamController<bool> _jsConnStreamCtrl = new StreamController();
   late Stream<bool> _jsStream;
@@ -28,7 +28,7 @@ class MetadataCtrl {
         if (kDebugMode) {
           print('JS CONN=$value');
         }
-        return JsReefApiService.resolveBooleanValue(value);
+        return JsApiService.resolveBooleanValue(value);
       }).onError((error, stackTrace) => false);
 
   Future<Stream<bool>> getJsConnStream() async {

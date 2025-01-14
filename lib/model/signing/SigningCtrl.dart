@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:local_auth/local_auth.dart';
 import 'package:mobx/src/api/store.dart';
+import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/signing/signature_request.dart';
@@ -11,7 +12,6 @@ import 'package:reef_mobile_app/model/signing/signer_payload_json.dart';
 import 'package:reef_mobile_app/model/signing/signer_payload_raw.dart';
 import 'package:reef_mobile_app/model/signing/tx_decoded_data.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
-import 'package:reef_mobile_app/service/JsApiService.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
@@ -22,7 +22,7 @@ class SigningCtrl {
   static final SIGN_ERR_CANCELED = "_canceled";
   static final SIGN_ERR_EMPTY_MNEMONIC = "_empty-mnemonic-value";
   final SignatureRequests signatureRequests;
-  final JsReefApiService jsApi;
+  final JsApiService jsApi;
   final StorageService storage;
   static final LocalAuthentication localAuth = LocalAuthentication();
   final AccountModel accountModel;
