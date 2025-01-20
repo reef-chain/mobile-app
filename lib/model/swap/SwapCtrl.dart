@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/swap/swap_settings.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
@@ -8,8 +9,9 @@ import 'package:reef_mobile_app/utils/functions.dart';
 class SwapCtrl {
   final JsApiService jsApi;
   final SwapSettings swapSettings;
+  final ReefChainApi reefChainApi;
 
-  SwapCtrl(this.jsApi,this.swapSettings);
+  SwapCtrl(this.jsApi,this.swapSettings,this.reefChainApi);
 
   Future<dynamic> swapTokens(String signerAddress, TokenWithAmount token1,
       TokenWithAmount token2, SwapSettings settings) async {
@@ -23,19 +25,17 @@ class SwapCtrl {
       'decimals': token2.decimals,
       'amount': toAmountDisplayBigInt(token2.amount, decimals: token2.decimals, fractionDigits: token2.decimals),
     };
-    return jsApi.jsObservable(
-        'window.swap.execute("$signerAddress", ${jsonEncode(mappedToken1)}, ${jsonEncode(mappedToken2)}, ${jsonEncode(settings.toJson())})');
+
+    return reefChainApi.reefState.swapApi.swapTokens(signerAddress, mappedToken1, mappedToken2, settings);
   }
 
   Future<dynamic> getPoolReserves(
       String token1Address, String token2Address) async {
-    return jsApi
-        .jsPromise('window.swap.getPoolReserves("$token1Address", "$token2Address")');
+    return reefChainApi.reefState.swapApi.getPoolReserves(token1Address, token2Address);
   }
 
   dynamic getSwapAmount(String tokenAmount, bool buy,
       TokenWithAmount token1Reserve, TokenWithAmount token2Reserve) {
-    return jsApi.jsCall(
-        'window.swap.getSwapAmount($tokenAmount, $buy, ${jsonEncode(token1Reserve.toJsonSkinny())}, ${jsonEncode(token2Reserve.toJsonSkinny())})');
+   return reefChainApi.reefState.swapApi.getSwapAmount(tokenAmount, buy,token1Reserve,token2Reserve);
   }
 }

@@ -35,12 +35,12 @@ class NetworkCtrl {
     jsApi.jsCallVoidReturn('window.utils.setSelectedNetwork(`${network.name}`)');
   }
 
-  Stream<bool?> getIndexerConnected()=> jsApi.jsObservable('window.utils.indexerConnState\$').map((event)=>event==true);
+  Stream<bool?> getIndexerConnected()=> reefChainApi.getIndexerConnected().map((event)=>event==true);
 
-  Stream<WsConnState?> getProviderConnLogs()=> jsApi.jsObservable('window.utils.providerConnState\$').map((event) => WsConnState.fromJson(event));
+  Stream<WsConnState?> getProviderConnLogs()=> reefChainApi.getProviderConnLogs().map((event) => WsConnState.fromJson(event));
 
   Future<void> reconnectProvider() async {
-    jsApi.jsCallVoidReturn('window.utils.reconnectProvider()');
+    reefChainApi.reconnectProvider();
   }
 
 }

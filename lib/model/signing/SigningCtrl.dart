@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:local_auth/local_auth.dart';
 import 'package:mobx/src/api/store.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/signing/signature_request.dart';
@@ -26,8 +27,9 @@ class SigningCtrl {
   final StorageService storage;
   static final LocalAuthentication localAuth = LocalAuthentication();
   final AccountModel accountModel;
+  final ReefChainApi reefChainApi;
 
-  SigningCtrl(this.jsApi, this.storage, this.signatureRequests, this.accountModel) {
+  SigningCtrl(this.jsApi, this.storage, this.signatureRequests, this.accountModel,this.reefChainApi) {
     jsApi.jsTxSignatureConfirmationMessageSubj.listen((jsApiMessage) {
       var signatureRequest = _buildSignatureRequest(jsApiMessage);
       if (signatureRequest.payload is SignerPayloadJSON) {
@@ -55,16 +57,16 @@ class SigningCtrl {
   }
 
   Future<dynamic> signRaw(String address, String message) =>
-      jsApi.jsPromise('window.signApi.signRawPromise(`$address`, `$message`);');
+      reefChainApi.reefState.signingApi.signRaw(address, message);
 
   Future<dynamic> signPayload(String address, Map<String, dynamic> payload) =>
-      jsApi.jsPromise(
-          'window.signApi.signPayloadPromise(`$address`, ${jsonEncode(payload)})');
+      reefChainApi.reefState.signingApi.signPayload(address, payload);
 
-  Future<dynamic> decodeMethod(String data, {dynamic types})=>types==null?jsApi.jsPromise('window.utils.decodeMethod(`$data`)') : jsApi.jsPromise('window.utils.decodeMethod(`$data`, ${jsonEncode(types)})');
+  Future<dynamic> decodeMethod(String data, {dynamic types})=>types==null?reefChainApi.reefState.signingApi.decodeMethod(data) : 
+  reefChainApi.reefState.signingApi.decodeMethod(data,types:jsonEncode(types));
 
   Future<dynamic> bytesString(String bytes) =>
-      jsApi.jsPromise('window.utils.bytesString("$bytes")');
+      reefChainApi.reefState.signingApi.bytesString(bytes);
 
   Future<void> _confirmSignature(
       String sigConfirmationIdent, String address) async {
@@ -79,8 +81,7 @@ class SigningCtrl {
 
   Future<dynamic> sendNFT(String unresolvedFrom, String nftContractAddress,
       String from, String to, int nftAmount, int nftId) async {
-    return jsApi.jsObservable(
-        'window.transfer.sendNft("${unresolvedFrom}","${from}","${to}",${nftAmount},${nftId},"${nftContractAddress}")');
+    return reefChainApi.reefState.signingApi.sendNFT(unresolvedFrom, nftContractAddress, from, to, nftAmount, nftId);
   }
 
   Future<dynamic> getTypes(String genesisHash, String specVersion)async{

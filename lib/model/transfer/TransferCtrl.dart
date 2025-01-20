@@ -1,25 +1,27 @@
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 
 class TransferCtrl {
   final JsApiService jsApi;
+  final ReefChainApi reefChainApi;
 
-  TransferCtrl(this.jsApi);
+  TransferCtrl(this.jsApi,this.reefChainApi);
 
   Stream<dynamic> transferTokensStream(
       String fromAddress, String toAddress, TokenWithAmount token) {
     // print(
     //     "$fromAddress | $toAddress | ${token.amount.toString()} | ${token.decimals}  | ${token.address}");
-    return jsApi.jsObservable(
-        'window.transfer.sendObs("$fromAddress", "$toAddress", "${token.amount.toString()}", ${token.decimals}, "${token.address}")');
+    return reefChainApi.reefState.transferApi.transferTokensStream(fromAddress, toAddress, token);
   }
 
   Future<dynamic> transferTokens(
       String fromAddress, String toAddress, TokenWithAmount token) async {
     // print(
     //     "$fromAddress | $toAddress | ${token.amount.toString()} | ${token.decimals}  | ${token.address}");
-    return jsApi.jsPromise(
-        'window.transfer.sendPromise("$fromAddress", "$toAddress", "${token.amount.toString()}", ${token.decimals}, "${token.address}")');
+    // return jsApi.jsPromise(
+    //     'window.transfer.sendPromise("$fromAddress", "$toAddress", "${token.amount.toString()}", ${token.decimals}, "${token.address}")');
+    return reefChainApi.reefState.transferApi.transferTokens(fromAddress, toAddress, token);
   }
 
   /*Future<dynamic> testTransferTokens(String from) async {

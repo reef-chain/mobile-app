@@ -65,7 +65,7 @@ class ReefAppState {
     networkCtrl = NetworkCtrl(storage, jsApi, model.network,_reefChainApi);
     firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi,_reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
-    stealthexCtrl = StealthexCtrl(jsApi,model.stealthexModel);
+    stealthexCtrl = StealthexCtrl(jsApi,model.stealthexModel,_reefChainApi);
     this.initStatusStream.add("tokens...");
     tokensCtrl = TokenCtrl(jsApi, model.tokens);
     await Future.delayed(Duration(milliseconds: 100));
@@ -73,19 +73,19 @@ class ReefAppState {
     accountCtrl = AccountCtrl(jsApi, storage, model.accounts,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("signer...");
-    signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
+    signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("transfers...");
-    transferCtrl = TransferCtrl(jsApi);
+    transferCtrl = TransferCtrl(jsApi,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("swap...");
-    swapCtrl = SwapCtrl(jsApi,model.swapSettings);
+    swapCtrl = SwapCtrl(jsApi,model.swapSettings,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("pools...");
-    poolsCtrl = PoolsCtrl(jsApi,model.pools);
+    poolsCtrl = PoolsCtrl(jsApi,model.pools,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("metadata...");
-    metadataCtrl = MetadataCtrl(jsApi);
+    metadataCtrl = MetadataCtrl(jsApi,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("navigation...");
     navigationCtrl =
