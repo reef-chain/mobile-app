@@ -59,6 +59,18 @@ class ReefAppState {
     this.storage = storage;
     this.reefChainApi = _reefChainApi;
     this.walletConnect = walletConnect;
+
+        Network currentNetwork =
+        await storage.getValue(StorageKey.network.name) == Network.testnet.name
+            ? Network.testnet
+            : Network.mainnet;
+
+    try {
+      await _initReefState(jsApi, currentNetwork,_reefChainApi);
+    } catch (e){
+      this.initStatusStream.add("error state= ${e.toString()}");
+    }
+
     this.initStatusStream.add("observables...");
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("network...");
@@ -92,15 +104,8 @@ class ReefAppState {
         NavigationCtrl(model.navigationModel, model.homeNavigationModel);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("state...");
-    Network currentNetwork =
-        await storage.getValue(StorageKey.network.name) == Network.testnet.name
-            ? Network.testnet
-            : Network.mainnet;
-    try {
-      await _initReefState(jsApi, currentNetwork,_reefChainApi);
-    } catch (e){
-      this.initStatusStream.add("error state= ${e.toString()}");
-    }
+
+
     this.initStatusStream.add("config...");
     appConfigCtrl = AppConfigCtrl(storage, model.appConfig);
     await Future.delayed(Duration(milliseconds: 100));
@@ -115,16 +120,9 @@ class ReefAppState {
 
   _initReefState(JsApiService jsApiService, Network currentNetwork,ReefChainApi _reefChainApi) async {
     var accounts = await accountCtrl.getStorageAccountsList();
-    jsApiService
-        .jsCall("window.isJsConn()")
-        .then((v) => debugPrint(v.toString()));
 
-     jsApiService
-        .jsPromise("window.futureFn(\"fltrrr\")")
-        .then((v) => debugPrint(v.toString()));
-
-    await jsApiService.jsPromise(
-        'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
+    // await jsApiService.jsPromise(
+    //     'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
+    await _reefChainApi.reefState.init(currentNetwork.name=="mainnet"?ReefNetowrk.mainnet:ReefNetowrk.testnet, accounts);
   }
-
 }

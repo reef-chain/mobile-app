@@ -32,7 +32,7 @@ class NetworkCtrl {
 
   Future<void> setNetwork(Network network) async {
     networkModel.setSelectedNetworkSwitching(true);
-    jsApi.jsCallVoidReturn('window.utils.setSelectedNetwork(`${network.name}`)');
+    reefChainApi.reefState.networkApi.setNetwork(network.name);
   }
 
   Stream<bool?> getIndexerConnected()=> reefChainApi.getIndexerConnected().map((event)=>event==true);
