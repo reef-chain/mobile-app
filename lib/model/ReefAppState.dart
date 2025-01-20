@@ -67,7 +67,7 @@ class ReefAppState {
     await Future.delayed(Duration(milliseconds: 100));
     stealthexCtrl = StealthexCtrl(jsApi,model.stealthexModel,_reefChainApi);
     this.initStatusStream.add("tokens...");
-    tokensCtrl = TokenCtrl(jsApi, model.tokens);
+    tokensCtrl = TokenCtrl(jsApi, model.tokens,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("account...");
     accountCtrl = AccountCtrl(jsApi, storage, model.accounts,reefChainApi);
