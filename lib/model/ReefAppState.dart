@@ -62,15 +62,15 @@ class ReefAppState {
     this.initStatusStream.add("observables...");
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("network...");
-    networkCtrl = NetworkCtrl(storage, jsApi, model.network);
-    firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi);
+    networkCtrl = NetworkCtrl(storage, jsApi, model.network,_reefChainApi);
+    firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi,_reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     stealthexCtrl = StealthexCtrl(jsApi,model.stealthexModel);
     this.initStatusStream.add("tokens...");
     tokensCtrl = TokenCtrl(jsApi, model.tokens);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("account...");
-    accountCtrl = AccountCtrl(jsApi, storage, model.accounts);
+    accountCtrl = AccountCtrl(jsApi, storage, model.accounts,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("signer...");
     signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);

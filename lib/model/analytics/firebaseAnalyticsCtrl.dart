@@ -2,13 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 
 
 class FirebaseAnalyticsCtrl {
   final JsApiService _jsApi;
+  final ReefChainApi _reefChainApi;
   Map<String,String>? _config;
 
-  FirebaseAnalyticsCtrl(this._jsApi) {
+  FirebaseAnalyticsCtrl(this._jsApi,this._reefChainApi) {
    _config ={
       'apiKey': const String.fromEnvironment("FIREBASE_API_KEY", defaultValue: ""),
       'authDomain': const String.fromEnvironment("FIREBASE_AUTH_DOMAIN", defaultValue: ""),
@@ -21,11 +23,6 @@ class FirebaseAnalyticsCtrl {
   }
 
    Future<dynamic> logAnalytics(String eventName) async {
-    try {  
-      await _jsApi.jsCallVoidReturn(
-        'window.firebase.logFirebaseAnalytic(${jsonEncode(_config)},"$eventName")');
-    } catch (e) {
-      debugPrint("unable to log to firebase");
-    }
+    return await _reefChainApi.reefState.firebaseApi.logAnalytics(eventName, _config);
   }
 }

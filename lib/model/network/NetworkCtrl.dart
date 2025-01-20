@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/network/network_model.dart';
 import 'package:reef_mobile_app/model/network/ws-conn-state.dart';
@@ -11,11 +12,11 @@ enum Network { mainnet, testnet }
 class NetworkCtrl {
   final StorageService storage;
   final JsApiService jsApi;
+  final ReefChainApi reefChainApi;
   NetworkModel networkModel;
 
-  NetworkCtrl(this.storage, this.jsApi, this.networkModel) {
-    jsApi
-        .jsObservable('window.reefState.selectedNetwork\$')
+  NetworkCtrl(this.storage, this.jsApi, this.networkModel,this.reefChainApi) {
+     reefChainApi.reefState.networkApi.selectedNetwork$
         .listen((network) async {
       networkModel.setSelectedNetworkSwitching(false);
       if (network != null && network['name'] != null) {
