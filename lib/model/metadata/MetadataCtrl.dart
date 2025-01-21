@@ -8,6 +8,14 @@ import 'package:rxdart/rxdart.dart';
 class MetadataCtrl {
   final ReefChainApi _reefChainApi;
 
+  bool resolveBooleanValue(dynamic res) {
+    return res == true ||
+        res == 'true' ||
+        res == 1 ||
+        res == '1' ||
+        res == '"true"';
+  }
+
   final StreamController<bool> _jsConnStreamCtrl = new StreamController();
   late Stream<bool> _jsStream;
   bool _jsConn = false;
@@ -28,7 +36,7 @@ class MetadataCtrl {
         if (kDebugMode) {
           print('JS CONN=$value');
         }
-        return JsApiService.resolveBooleanValue(value);
+        return resolveBooleanValue(value);
       }).onError((error, stackTrace) => false);
 
   Future<Stream<bool>> getJsConnStream() async {
