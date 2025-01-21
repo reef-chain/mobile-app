@@ -124,20 +124,7 @@ class ReefAppState {
 
   _initReefState(JsApiService jsApiService, Network currentNetwork,ReefChainApi _reefChainApi) async {
     var accounts = await accountCtrl.getStorageAccountsList();
-    // await _reefChainApi.reefState.init(ReefNetowrk.mainnet, accounts);
-// jsApiService
-//         .jsCall("window.isJsConn()")
-//         .then((v) => debugPrint("jsConn anukul===${v.toString()}"));
-    // widget.reefJsApiService.jsCall("window.test()").then((v)=>debugPrint(v.toString()));
-// jsApiService
-//         .jsPromise("window.futureFn(\"fltrrr\")")
-//         .then((v) => debugPrint(v.toString()));
-
-        //     await jsApiService.jsPromise(
-        // 'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
-    // widget.reefJsApiService.jsObservable("window.testObs()").listen((v)=>debugPrint(v.toString()));
-
-    // await reefChainApi.reefState.init(ReefNetowrk.mainnet, accounts);
+  
     List<ReefAccount> parsedAccounts = [];
 
     for(var i=0;i<accounts.length;i++){
