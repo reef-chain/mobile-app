@@ -1,15 +1,12 @@
 import 'dart:convert';
-
-import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/stealthex/stealthex_model.dart';
 
 class StealthexCtrl {
-  final JsApiService _jsApi;
   final StealthexModel stealthexModel;
   final ReefChainApi _reefChainApi;
 
-  StealthexCtrl(this._jsApi, this.stealthexModel, this._reefChainApi) {}
+  StealthexCtrl(this.stealthexModel, this._reefChainApi) {}
 
   Future<dynamic> listCurrencies() async {
     return await _reefChainApi.reefState.stealthexApi.listCurrencies();

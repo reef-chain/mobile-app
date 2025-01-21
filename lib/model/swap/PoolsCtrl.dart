@@ -3,11 +3,10 @@ import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/swap/pools_model.dart';
 
 class PoolsCtrl{
-  final JsApiService jsApi;
   final PoolsModel poolsModel;
   final ReefChainApi reefChainApi;
 
-  PoolsCtrl( this.jsApi, this.poolsModel,this.reefChainApi){
+  PoolsCtrl(  this.poolsModel,this.reefChainApi){
     fetchPools().then((pools) {
       poolsModel.setPools(pools);
       });

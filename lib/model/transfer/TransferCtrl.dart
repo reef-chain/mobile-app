@@ -3,10 +3,9 @@ import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 
 class TransferCtrl {
-  final JsApiService jsApi;
   final ReefChainApi reefChainApi;
 
-  TransferCtrl(this.jsApi,this.reefChainApi);
+  TransferCtrl(this.reefChainApi);
 
   Stream<dynamic> transferTokensStream(
       String fromAddress, String toAddress, TokenWithAmount token) {

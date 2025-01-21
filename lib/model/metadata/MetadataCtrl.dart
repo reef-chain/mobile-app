@@ -6,14 +6,13 @@ import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MetadataCtrl {
-  final JsApiService jsApi;
   final ReefChainApi _reefChainApi;
 
   final StreamController<bool> _jsConnStreamCtrl = new StreamController();
   late Stream<bool> _jsStream;
   bool _jsConn = false;
 
-  MetadataCtrl(this.jsApi,this._reefChainApi) {
+  MetadataCtrl(this._reefChainApi) {
     _jsStream = _jsConnStreamCtrl.stream.asBroadcastStream();
     Timer.periodic(Duration(milliseconds: 5000), (timer) async {
       _jsConn = await this.isJsConn();

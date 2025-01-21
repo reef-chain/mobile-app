@@ -10,10 +10,9 @@ import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'token_model.dart';
 
 class TokenCtrl {
-  final JsApiService jsApi;
   final ReefChainApi reefChainApi;
 
-  TokenCtrl(this.jsApi, TokenModel tokenModel,this.reefChainApi) {
+  TokenCtrl( TokenModel tokenModel,this.reefChainApi) {
     reefChainApi.reefState.tokenApi.selectedTokenPrices_status$
         .listen((tokens) {
       ParseListFn<StatusDataObject<TokenWithAmount>> parsableListFn =

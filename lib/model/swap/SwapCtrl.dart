@@ -7,11 +7,10 @@ import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
 class SwapCtrl {
-  final JsApiService jsApi;
   final SwapSettings swapSettings;
   final ReefChainApi reefChainApi;
 
-  SwapCtrl(this.jsApi,this.swapSettings,this.reefChainApi);
+  SwapCtrl(this.swapSettings,this.reefChainApi);
 
   Future<dynamic> swapTokens(String signerAddress, TokenWithAmount token1,
       TokenWithAmount token2, SwapSettings settings) async {

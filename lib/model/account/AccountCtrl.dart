@@ -17,16 +17,15 @@ class AccountCtrl {
   final AccountModel _accountModel;
 
   // TODO check/make these props are private in other Ctrl classes
-  final JsApiService _jsApi;
   final StorageService _storage;
   final ReefChainApi _reefChainApi;
 
-  AccountCtrl(this._jsApi, this._storage, this._accountModel,this._reefChainApi) {
-    _initJsObservables(_jsApi, _storage);
+  AccountCtrl(this._storage, this._accountModel,this._reefChainApi) {
+    _initJsObservables(_storage);
     _initSavedDeviceAccountAddress(_storage);
   }
 
-  Future getStorageAccountsList() async {
+  Future<List> getStorageAccountsList() async {
     var accounts = [];
     (await _storage.getAllAccounts())
         .forEach(((account) => {accounts.add(account.toJsonSkinny())}));
@@ -88,6 +87,7 @@ Future<dynamic> listenBindActivity(String address) async {
   Future saveAccount(StoredAccount account) async {
     await _storage.saveAccount(account);
     await updateAccounts();
+    _initJsObservables(_storage);
     setSelectedAddress(account.address);
   }
 
@@ -143,7 +143,7 @@ Future<dynamic> listenBindActivity(String address) async {
 
 Stream get availableSignersStream => _reefChainApi.reefState.accountApi.availableSignersStream();
 
-  void _initJsObservables(JsApiService jsApi, StorageService storage) {
+  void _initJsObservables( StorageService storage) {
     _reefChainApi.reefState.accountApi.selectedAddressStream
         .listen((address) async {
       if (address == null || address == '') {
@@ -154,7 +154,8 @@ Stream get availableSignersStream => _reefChainApi.reefState.accountApi.availabl
       _accountModel.setSelectedAddress(address);
     });
 
-      _reefChainApi.reefState.accountApi.availableAccounts().listen((accs) async {
+      _reefChainApi.reefState.accountApi.availableAccounts.listen((accs) async {
+                  print("here i am accs===$accs");
       ParseListFn<StatusDataObject<ReefAccount>> parsableListFn =
           getParsableListFn(ReefAccount.fromJson);
       var accsListFdm = StatusDataObject.fromJsonList(accs, parsableListFn);

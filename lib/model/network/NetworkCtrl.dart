@@ -11,14 +11,14 @@ enum Network { mainnet, testnet }
 
 class NetworkCtrl {
   final StorageService storage;
-  final JsApiService jsApi;
   final ReefChainApi reefChainApi;
   NetworkModel networkModel;
 
-  NetworkCtrl(this.storage, this.jsApi, this.networkModel,this.reefChainApi) {
+  NetworkCtrl(this.storage,  this.networkModel,this.reefChainApi) {
      reefChainApi.reefState.networkApi.selectedNetwork$
         .listen((network) async {
-      networkModel.setSelectedNetworkSwitching(false);
+          print("selected network===$network");
+      // networkModel.setSelectedNetworkSwitching(false);
       if (network != null && network['name'] != null) {
         var nName = network['name'];
         await storage.setValue(StorageKey.network.name, nName);

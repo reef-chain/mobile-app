@@ -6,11 +6,10 @@ import 'package:reef_chain_flutter/reef_api.dart';
 
 
 class FirebaseAnalyticsCtrl {
-  final JsApiService _jsApi;
   final ReefChainApi _reefChainApi;
   Map<String,String>? _config;
 
-  FirebaseAnalyticsCtrl(this._jsApi,this._reefChainApi) {
+  FirebaseAnalyticsCtrl(this._reefChainApi) {
    _config ={
       'apiKey': const String.fromEnvironment("FIREBASE_API_KEY", defaultValue: ""),
       'authDomain': const String.fromEnvironment("FIREBASE_AUTH_DOMAIN", defaultValue: ""),
