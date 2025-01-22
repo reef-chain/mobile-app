@@ -81,7 +81,7 @@ class ReefAppState {
     } catch (e){
       this.initStatusStream.add("error state= ${e.toString()}");
     }
-    
+
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("signer...");
     signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
@@ -118,7 +118,7 @@ class ReefAppState {
   _initReefState(JsApiService jsApiService, Network currentNetwork) async {
     var accounts = await accountCtrl.getStorageAccountsList();
     await jsApiService.jsPromise(
-        'window.jsApi.initReefState("${"mainnet"}", ${jsonEncode(accounts)})');
+        'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
   }
 
   _initReefObservables(JsApiService reefAppJsApiService) async {
