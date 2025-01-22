@@ -154,8 +154,7 @@ Stream get availableSignersStream => _reefChainApi.reefState.accountApi.availabl
       _accountModel.setSelectedAddress(address);
     });
 
-      _reefChainApi.reefState.accountApi.availableAccounts.listen((accs) async {
-                  print("here i am accs===$accs");
+      _reefChainApi.reefState.accountApi.availableAccounts().listen((accs) async {
       ParseListFn<StatusDataObject<ReefAccount>> parsableListFn =
           getParsableListFn(ReefAccount.fromJson);
       var accsListFdm = StatusDataObject.fromJsonList(accs, parsableListFn);

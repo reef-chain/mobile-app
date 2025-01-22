@@ -61,7 +61,8 @@ class ReefAppState {
     this.walletConnect = walletConnect;
 
     // added initial delay so as to wait for the controller to set in ios
-    await Future.delayed(Duration(seconds: 5));
+    reefChainApi.ready.future.then((_)=>debugPrint("reefChainApi READYYYY"));
+    await reefChainApi.ready.future;
 
     this.initStatusStream.add("observables...");
     await Future.delayed(Duration(milliseconds: 100));
@@ -128,7 +129,7 @@ class ReefAppState {
     List<ReefAccount> parsedAccounts = [];
 
     for(var i=0;i<accounts.length;i++){
-      parsedAccounts.add(ReefAccount(accounts[i].name, accounts[i].address, false));
+      parsedAccounts.add(ReefAccount(accounts[i]['name'], accounts[i]['address'], false));
     }
 
     await reefChainApi.reefState.init(ReefNetowrk.mainnet, parsedAccounts);
