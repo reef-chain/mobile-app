@@ -54,6 +54,9 @@ class ReefAppState {
   init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
     this.storage = storage;
     this.walletConnect = walletConnect;
+
+    await Future.delayed(Duration(seconds: 3));
+
     this.initStatusStream.add("observables...");
     await _initReefObservables(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
@@ -67,6 +70,18 @@ class ReefAppState {
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("account...");
     accountCtrl = AccountCtrl(jsApi, storage, model.accounts);
+
+    this.initStatusStream.add("state...");
+    Network currentNetwork =
+        await storage.getValue(StorageKey.network.name) == Network.testnet.name
+            ? Network.testnet
+            : Network.mainnet;
+    try {
+      await _initReefState(jsApi, currentNetwork);
+    } catch (e){
+      this.initStatusStream.add("error state= ${e.toString()}");
+    }
+    
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("signer...");
     signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
@@ -87,16 +102,7 @@ class ReefAppState {
     navigationCtrl =
         NavigationCtrl(model.navigationModel, model.homeNavigationModel);
     await Future.delayed(Duration(milliseconds: 100));
-    this.initStatusStream.add("state...");
-    Network currentNetwork =
-        await storage.getValue(StorageKey.network.name) == Network.testnet.name
-            ? Network.testnet
-            : Network.mainnet;
-    try {
-      await _initReefState(jsApi, currentNetwork);
-    } catch (e){
-      this.initStatusStream.add("error state= ${e.toString()}");
-    }
+    
     this.initStatusStream.add("config...");
     appConfigCtrl = AppConfigCtrl(storage, model.appConfig);
     await Future.delayed(Duration(milliseconds: 100));
@@ -112,7 +118,7 @@ class ReefAppState {
   _initReefState(JsApiService jsApiService, Network currentNetwork) async {
     var accounts = await accountCtrl.getStorageAccountsList();
     await jsApiService.jsPromise(
-        'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
+        'window.jsApi.initReefState("${"mainnet"}", ${jsonEncode(accounts)})');
   }
 
   _initReefObservables(JsApiService reefAppJsApiService) async {
