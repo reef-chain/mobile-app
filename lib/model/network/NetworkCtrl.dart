@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/network/ws-conn-state.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/network/network_model.dart';
-import 'package:reef_mobile_app/model/network/ws-conn-state.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 
 enum Network { mainnet, testnet }
@@ -37,7 +37,7 @@ class NetworkCtrl {
 
   Stream<bool?> getIndexerConnected()=> reefChainApi.getIndexerConnected().map((event)=>event==true);
 
-  Stream<WsConnState?> getProviderConnLogs()=> reefChainApi.getProviderConnLogs().map((event) => WsConnState.fromJson(event));
+  Stream<WsConnState?> getProviderConnLogs()=> reefChainApi.getProviderConnLogs();
 
   Future<void> reconnectProvider() async {
     reefChainApi.reconnectProvider();
