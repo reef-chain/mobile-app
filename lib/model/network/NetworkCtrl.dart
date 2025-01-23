@@ -25,9 +25,6 @@ class NetworkCtrl {
         networkModel.setSelectedNetworkName(nName);
       }
     });
-
-    // need to listen here so other subscriptions immediately receive last value
-    getProviderConnLogs().listen((event) {print('PROV CONN=$event');});
   }
 
   Future<void> setNetwork(Network network) async {
