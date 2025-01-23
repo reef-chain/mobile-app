@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/network/network.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
+import 'package:reef_chain_flutter/reef_state/account/account.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/ViewModel.dart';
 import 'package:reef_mobile_app/model/analytics/firebaseAnalyticsCtrl.dart';
@@ -45,58 +48,57 @@ class ReefAppState {
   late StorageCtrl storageCtrl;
   late FirebaseAnalyticsCtrl firebaseAnalyticsCtrl;
   late StealthexCtrl stealthexCtrl;
+  late ReefChainApi reefChainApi;
   StreamController<String> initStatusStream = StreamController<String>();
 
   ReefAppState._();
 
   static ReefAppState get instance => _instance ??= ReefAppState._();
 
-  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect) async {
+  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect,ReefChainApi _reefChainApi) async {
     this.storage = storage;
+    this.reefChainApi = _reefChainApi;
     this.walletConnect = walletConnect;
+
+    // added initial delay so as to wait for the controller to set in ios
+    reefChainApi.ready.future.then((_)=>debugPrint("reefChainApi READYYYY"));
+    await reefChainApi.ready.future;
+
     this.initStatusStream.add("observables...");
-    await _initReefObservables(jsApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("network...");
-    networkCtrl = NetworkCtrl(storage, jsApi, model.network);
-    firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(jsApi);
+    networkCtrl = NetworkCtrl(storage, model.network,_reefChainApi);
+    firebaseAnalyticsCtrl = FirebaseAnalyticsCtrl(_reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
-    stealthexCtrl = StealthexCtrl(jsApi,model.stealthexModel);
+    stealthexCtrl = StealthexCtrl(model.stealthexModel,_reefChainApi);
     this.initStatusStream.add("tokens...");
-    tokensCtrl = TokenCtrl(jsApi, model.tokens);
+    tokensCtrl = TokenCtrl(model.tokens,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("account...");
-    accountCtrl = AccountCtrl(jsApi, storage, model.accounts);
+    accountCtrl = AccountCtrl(storage, model.accounts,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("signer...");
-    signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts);
+    signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("transfers...");
-    transferCtrl = TransferCtrl(jsApi);
+    transferCtrl = TransferCtrl(reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("swap...");
-    swapCtrl = SwapCtrl(jsApi,model.swapSettings);
+    swapCtrl = SwapCtrl(model.swapSettings,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("pools...");
-    poolsCtrl = PoolsCtrl(jsApi,model.pools);
+    poolsCtrl = PoolsCtrl(model.pools,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("metadata...");
-    metadataCtrl = MetadataCtrl(jsApi);
+    metadataCtrl = MetadataCtrl(reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("navigation...");
     navigationCtrl =
         NavigationCtrl(model.navigationModel, model.homeNavigationModel);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("state...");
-    Network currentNetwork =
-        await storage.getValue(StorageKey.network.name) == Network.testnet.name
-            ? Network.testnet
-            : Network.mainnet;
-    try {
-      await _initReefState(jsApi, currentNetwork);
-    } catch (e){
-      this.initStatusStream.add("error state= ${e.toString()}");
-    }
+
+
     this.initStatusStream.add("config...");
     appConfigCtrl = AppConfigCtrl(storage, model.appConfig);
     await Future.delayed(Duration(milliseconds: 100));
@@ -107,17 +109,29 @@ class ReefAppState {
     storageCtrl = StorageCtrl(storage);
     await Future.delayed(Duration(milliseconds: 200));
     this.initStatusStream.add("complete");
+
+
+        Network currentNetwork =
+        await storage.getValue(StorageKey.network.name) == Network.testnet.name
+            ? Network.testnet
+            : Network.mainnet;
+
+    try {
+      await _initReefState(jsApi,currentNetwork,_reefChainApi);
+    } catch (e){
+      this.initStatusStream.add("error state= ${e.toString()}");
+    }
   }
 
-  _initReefState(JsApiService jsApiService, Network currentNetwork) async {
+  _initReefState(JsApiService jsApiService, Network currentNetwork,ReefChainApi _reefChainApi) async {
     var accounts = await accountCtrl.getStorageAccountsList();
-    await jsApiService.jsPromise(
-        'window.jsApi.initReefState("${currentNetwork.name}", ${jsonEncode(accounts)})');
-  }
+  
+    List<ReefAccount> parsedAccounts = [];
 
-  _initReefObservables(JsApiService reefAppJsApiService) async {
-    reefAppJsApiService.jsMessageUnknownSubj.listen((JsApiMessage value) {
-      print('jsMSG not handled id=${value.streamId}');
-    });
+    for(var i=0;i<accounts.length;i++){
+      parsedAccounts.add(ReefAccount(accounts[i]['name'], accounts[i]['address'], false));
+    }
+
+    await reefChainApi.reefState.init(ReefNetowrk.mainnet, parsedAccounts);
   }
 }

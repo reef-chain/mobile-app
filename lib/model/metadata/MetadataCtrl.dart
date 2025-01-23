@@ -2,16 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MetadataCtrl {
-  final JsApiService jsApi;
+  final ReefChainApi _reefChainApi;
+
+  bool resolveBooleanValue(dynamic res) {
+    return res == true ||
+        res == 'true' ||
+        res == 1 ||
+        res == '1' ||
+        res == '"true"';
+  }
 
   final StreamController<bool> _jsConnStreamCtrl = new StreamController();
   late Stream<bool> _jsStream;
   bool _jsConn = false;
 
-  MetadataCtrl(this.jsApi) {
+  MetadataCtrl(this._reefChainApi) {
     _jsStream = _jsConnStreamCtrl.stream.asBroadcastStream();
     Timer.periodic(Duration(milliseconds: 5000), (timer) async {
       _jsConn = await this.isJsConn();
@@ -19,16 +28,15 @@ class MetadataCtrl {
     });
   }
 
-  Future<dynamic> getMetadata() =>
-      jsApi.jsPromise('window.metadata.getMetadata();');
+  Future<dynamic> getMetadata() => _reefChainApi.reefState.metadataApi.getMetadata();
 
-  Future<dynamic> getJsVersions() => jsApi.jsCall('window.getReefJsVer();');
+  Future<dynamic> getJsVersions() => _reefChainApi.reefState.metadataApi.getJsVersions();
 
-  Future<bool> isJsConn() => jsApi.jsCall('window.isJsConn();').then((value) {
+  Future<bool> isJsConn() => _reefChainApi.reefState.metadataApi.isJsConn().then((value) {
         if (kDebugMode) {
           print('JS CONN=$value');
         }
-        return JsApiService.resolveBooleanValue(value);
+        return resolveBooleanValue(value);
       }).onError((error, stackTrace) => false);
 
   Future<Stream<bool>> getJsConnStream() async {

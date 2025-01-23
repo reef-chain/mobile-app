@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/model/tokens/TokenActivity.dart';
@@ -9,11 +10,10 @@ import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'token_model.dart';
 
 class TokenCtrl {
-  final JsApiService jsApi;
+  final ReefChainApi reefChainApi;
 
-  TokenCtrl(this.jsApi, TokenModel tokenModel) {
-    jsApi
-        .jsObservable('window.reefState.selectedTokenPrices_status\$')
+  TokenCtrl( TokenModel tokenModel,this.reefChainApi) {
+    reefChainApi.reefState.tokenApi.selectedTokenPrices_status$
         .listen((tokens) {
       ParseListFn<StatusDataObject<TokenWithAmount>> parsableListFn =
           getParsableListFn(TokenWithAmount.fromJson);
@@ -34,8 +34,7 @@ class TokenCtrl {
       tokenModel.setSelectedErc20s(tokensListFdm);
     });
 
-    jsApi
-        .jsObservable('window.reefState.selectedNFTs_status\$')
+    reefChainApi.reefState.tokenApi.selectedNFTs_status$
         .listen((tokens) {
       ParseListFn<StatusDataObject<TokenNFT>> parsableListFn =
           getParsableListFn(TokenNFT.fromJson);
@@ -46,7 +45,7 @@ class TokenCtrl {
       tokenModel.setSelectedNFTs(tokensListFdm);
     });
 
-    jsApi.jsObservable('window.tokenUtil.reefPrice\$').listen((value) {
+    reefChainApi.reefState.tokenApi.reefPrice$.listen((value) {
       var fdm = StatusDataObject.fromJson(value, (v) => v);
       if (fdm != null && fdm.hasStatus(StatusCode.completeData)) {
         if (fdm.data is int) {
@@ -56,8 +55,7 @@ class TokenCtrl {
       }
     });
 
-    jsApi
-        .jsObservable('window.reefState.selectedTransactionHistory_status\$')
+    reefChainApi.reefState.tokenApi.selectedTransactionHistory$
         .listen((items) {
       parsableFn(accList) =>
           List<TokenActivity>.from(accList.map(TokenActivity.fromJson));
@@ -71,22 +69,23 @@ class TokenCtrl {
   }
 
   Future<dynamic> findToken(String address) async {
-    return jsApi.jsPromise('window.utils.findToken("$address")');
+    return reefChainApi.reefState.tokenApi.findToken(address);
   }
 
   Future<dynamic> getTxInfo(String timestamp) async {
-    return jsApi.jsPromise('window.utils.getTxInfo("$timestamp")');
+    return reefChainApi.reefState.tokenApi.getTxInfo(timestamp);
   }
 
   Future<dynamic> getPools(dynamic offset) async {
-    return jsApi.jsPromise('window.utils.getPools(10,${offset},"","")');
+    return reefChainApi.reefState.tokenApi.getPools(offset);
   }
 
   Future<dynamic> getPoolPairs(String tokenAddress) async {
-    return jsApi.jsPromise('window.utils.getPoolPairs("${tokenAddress}")');
+    return reefChainApi.reefState.tokenApi.getPoolPairs(tokenAddress);
   }
+
   Future<dynamic> getTokenInfo(String tokenAddress) async {
-    return jsApi.jsPromise('window.utils.getTokenInfo("${tokenAddress}")');
+   return reefChainApi.reefState.tokenApi.getTokenInfo(tokenAddress);
   }
 
   void reload(bool force) async {
@@ -96,10 +95,10 @@ class TokenCtrl {
       if (kDebugMode) {
         print('RELOADING TOKENS');
       }
-      jsApi.jsCallVoidReturn('window.reefState.reloadTokens()');
+      reefChainApi.reefState.tokenApi.reloadTokens();
     }
   }
   Future<dynamic> getNftInfo(String nftId, String ownerAddress) async {
-    return jsApi.jsPromise('window.utils.getNftInfo("$nftId","$ownerAddress")');
+    return reefChainApi.reefState.tokenApi.getNftInfo(nftId, ownerAddress);
   }
 }

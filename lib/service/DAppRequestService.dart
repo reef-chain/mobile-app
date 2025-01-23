@@ -51,7 +51,7 @@ class DAppRequestService {
       case 'pub(accounts.subscribe)':
         // TODO handle subscription
         ReefAppState.instance.accountCtrl
-            .availableSignersStream()
+            .availableSignersStream
             .listen((event) {
           print('accounts.subscribe event= $event');
         });

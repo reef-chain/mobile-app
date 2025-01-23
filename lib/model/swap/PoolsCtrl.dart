@@ -1,20 +1,21 @@
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/swap/pools_model.dart';
 
 class PoolsCtrl{
-  final JsApiService jsApi;
   final PoolsModel poolsModel;
+  final ReefChainApi reefChainApi;
 
-  PoolsCtrl( this.jsApi, this.poolsModel){
+  PoolsCtrl(  this.poolsModel,this.reefChainApi){
     fetchPools().then((pools) {
       poolsModel.setPools(pools);
       });
-    jsApi.jsObservable('window.reefState.selectedNetwork\$')
+    reefChainApi.reefState.networkApi.selectedNetwork$
         .listen((network)async{refetch(await fetchPools());});
   }
 
   Future<List<dynamic>>fetchPools()async{
-    return await jsApi.jsPromise('window.utils.getPools(10,0,"","")');
+    return await reefChainApi.reefState.poolsApi.fetchPools();
   }
 
   List<dynamic> getCachedPools(){
@@ -33,6 +34,6 @@ class PoolsCtrl{
   }
 
   Future<dynamic> getPools(dynamic offset,String search) async {
-    return jsApi.jsPromise('window.utils.getPools(10,${offset},"${search}","")');
+    return await reefChainApi.reefState.poolsApi.getPools(offset,search);
   }
 }

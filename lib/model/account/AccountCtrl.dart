@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
@@ -16,16 +17,15 @@ class AccountCtrl {
   final AccountModel _accountModel;
 
   // TODO check/make these props are private in other Ctrl classes
-  final JsApiService _jsApi;
   final StorageService _storage;
+  final ReefChainApi _reefChainApi;
 
-  AccountCtrl(this._jsApi, this._storage, this._accountModel) {
-    _initJsObservables(_jsApi, _storage);
+  AccountCtrl(this._storage, this._accountModel,this._reefChainApi) {
+    _initJsObservables(_storage);
     _initSavedDeviceAccountAddress(_storage);
-    _initWasm(_jsApi);
   }
 
-  Future getStorageAccountsList() async {
+  Future<List> getStorageAccountsList() async {
     var accounts = [];
     (await _storage.getAllAccounts())
         .forEach(((account) => {accounts.add(account.toJsonSkinny())}));
@@ -37,80 +37,57 @@ class AccountCtrl {
   }
 
   Future<void> setSelectedAddress(String address) {
-    return _jsApi
-        .jsCallVoidReturn('window.reefState.setSelectedAddress("$address")');
+    return _reefChainApi.reefState.accountApi.setSelectedAddress(address);
   }
 
   Future<String> generateAccount() async {
-    return await _jsApi.jsPromise('window.keyring.generate()');
+    return await _reefChainApi.reefState.accountApi.generateAccount();
   }
 
   Future<dynamic> restoreJson(
       Map<String, dynamic> file, String password) async {
-    return await _jsApi.jsPromise(
-        'window.keyring.restoreJson(${jsonEncode(file)},"$password")');
+    return await _reefChainApi.reefState.accountApi.restoreJson(file, password);
   }
 
   Future<String> formatBalance(
-      String value, double price) async {
-        try {   
-    return await _jsApi.jsPromise(
-        'window.keyring.formatBalance("$value",$price)');
-        } catch (e) {
-          print('window.keyring.formatBalance ERR=$e');
-          return "";
-        }
+      String value, double price) async { 
+    return await _reefChainApi.reefState.accountApi.formatBalance(value, price);
   }
 
 Future<dynamic> listenBindActivity(String address) async {
-  StreamController<dynamic> controller = StreamController<dynamic>();
-
-  StreamSubscription<dynamic> subscription;
-  subscription = _jsApi.jsObservable('window.account.listenBindActivity("$address")')
-    .listen((event) {
-      controller.add(event);
-      controller.close();
-    });
-
-  return controller.stream.first;
+  await _reefChainApi.reefState.accountApi.listenBindActivity(address);
 }
 
 
   Future<dynamic> exportAccountQr(String address, String password) async {
-    return await _jsApi
-        .jsPromise('window.keyring.exportAccountQr("$address","$password")');
+    return await _reefChainApi.reefState.accountApi.exportAccountQr(address,password);
   }
 
   Future<dynamic> changeAccountPassword(
       String address, String newPass, String oldPass) async {
-    return await _jsApi.jsPromise(
-        'window.keyring.changeAccountPassword("$address","$newPass","$oldPass")');
+    return await _reefChainApi.reefState.accountApi.changeAccountPassword(address, newPass, oldPass);
   }
 
   Future<dynamic> accountsCreateSuri(String mnemonic, String password) async {
-    return await _jsApi.jsPromise(
-        'window.keyring.accountsCreateSuri("$mnemonic","$password")');
+    return await _reefChainApi.reefState.accountApi.accountsCreateSuri(mnemonic, password);
   }
 
   Future<bool> checkMnemonicValid(String mnemonic) async {
-    var isValid = await _jsApi
-        .jsPromise('window.keyring.checkMnemonicValid("$mnemonic")');
-    return isValid == 'true';
+    return _reefChainApi.reefState.accountApi.checkMnemonicValid(mnemonic);
   }
 
   Future<dynamic> resolveEvmAddress(String nativeAddress) async {
-    return await _jsApi
-        .jsPromise('window.account.resolveEvmAddress("$nativeAddress")');
+    return _reefChainApi.reefState.accountApi.resolveEvmAddress(nativeAddress);
   }
 
   Future<String> accountFromMnemonic(String mnemonic) async {
-    return await _jsApi
-        .jsPromise('window.keyring.accountFromMnemonic("$mnemonic")');
+    return _reefChainApi.reefState.accountApi.accountFromMnemonic(mnemonic);
   }
 
   Future saveAccount(StoredAccount account) async {
     await _storage.saveAccount(account);
     await updateAccounts();
+    _initJsObservables(_storage);
     setSelectedAddress(account.address);
   }
 
@@ -136,31 +113,27 @@ Future<dynamic> listenBindActivity(String address) async {
     var accounts = [];
     (await _storage.getAllAccounts())
         .forEach(((account) => {accounts.add(account.toJsonSkinny())}));
-    return _jsApi
-        .jsPromise('window.account.updateAccounts(${jsonEncode(accounts)})');
+    return await _reefChainApi.reefState.accountApi.updateAccounts(accounts);
   }
 
   Future<dynamic> bindEvmAccount(String address) async {
-    return _jsApi.jsPromise('window.account.claimEvmAccount("$address")');
+    return await _reefChainApi.reefState.accountApi.bindEvmAccount(address);
   }
 
   Future<bool> isValidEvmAddress(String address) async {
-    return await _jsApi
-            .jsCall<bool>('window.account.isValidEvmAddress("$address")');
+    return await _reefChainApi.reefState.accountApi.isValidEvmAddress(address);
   }
 
   Future<bool> isValidSubstrateAddress(String address) async {
-    return await _jsApi.jsCall<bool>(
-            'window.account.isValidSubstrateAddress("$address")');
+    return await _reefChainApi.reefState.accountApi.isValidSubstrateAddress(address);
   }
 
   Future<String?> resolveToNativeAddress(String evmAddress) async {
-    return await _jsApi
-        .jsPromise('window.account.resolveFromEvmAddress("$evmAddress")');
+    return await _reefChainApi.reefState.accountApi.resolveToNativeAddress(evmAddress);
   }
 
   Future<String> sanitizeEvmAddress(String evmAddress) async{
-    return await _jsApi.jsPromise('window.utils.sanitizeInput("$evmAddress")');
+    return await _reefChainApi.reefState.accountApi.sanitizeEvmAddress(evmAddress);
   }
 
   Future<bool> isEvmAddressExist(String address) async {
@@ -168,13 +141,10 @@ Future<dynamic> listenBindActivity(String address) async {
     return res != null;
   }
 
-  Stream availableSignersStream() {
-    return _jsApi.jsObservable('window.reefState.accounts\$');
-  }
+Stream get availableSignersStream => _reefChainApi.reefState.accountApi.availableSignersStream();
 
-  void _initJsObservables(JsApiService jsApi, StorageService storage) {
-    jsApi
-        .jsObservable('window.reefState.selectedAddress\$')
+  void _initJsObservables( StorageService storage) {
+    _reefChainApi.reefState.accountApi.selectedAddressStream
         .listen((address) async {
       if (address == null || address == '') {
         return;
@@ -184,9 +154,7 @@ Future<dynamic> listenBindActivity(String address) async {
       _accountModel.setSelectedAddress(address);
     });
 
-    jsApi
-        .jsObservable('window.reefState.accounts_status\$')
-        .listen((accs) async {
+      _reefChainApi.reefState.accountApi.availableAccounts().listen((accs) async {
       ParseListFn<StatusDataObject<ReefAccount>> parsableListFn =
           getParsableListFn(ReefAccount.fromJson);
       var accsListFdm = StatusDataObject.fromJsonList(accs, parsableListFn);
@@ -220,18 +188,12 @@ Future<dynamic> listenBindActivity(String address) async {
     }
   }
 
-  void _initWasm(JsApiService _jsApi) async {
-    await _jsApi.jsPromise('window.keyring.initWasm()');
-  }
-
   Future<dynamic> toReefEVMAddressWithNotificationString(String evmAddress) async {
-    return await _jsApi.jsCall(
-        'window.account.toReefEVMAddressWithNotification("$evmAddress")');
+    return await _reefChainApi.reefState.accountApi.toReefEVMAddressWithNotificationString(evmAddress);
   }
 
   toReefEVMAddressNoNotificationString(String evmAddress) async {
-    return await _jsApi
-        .jsCall('window.account.toReefEVMAddressNoNotification("$evmAddress")');
+     return await _reefChainApi.reefState.accountApi.toReefEVMAddressWithNotificationString(evmAddress);
   }
 
   void _setAccountIconsFromStorage(

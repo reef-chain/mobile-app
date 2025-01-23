@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reef_chain_flutter/js_api_service.dart';
+import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/network/network_model.dart';
 import 'package:reef_mobile_app/model/network/ws-conn-state.dart';
@@ -10,14 +11,14 @@ enum Network { mainnet, testnet }
 
 class NetworkCtrl {
   final StorageService storage;
-  final JsApiService jsApi;
+  final ReefChainApi reefChainApi;
   NetworkModel networkModel;
 
-  NetworkCtrl(this.storage, this.jsApi, this.networkModel) {
-    jsApi
-        .jsObservable('window.reefState.selectedNetwork\$')
+  NetworkCtrl(this.storage,  this.networkModel,this.reefChainApi) {
+     reefChainApi.reefState.networkApi.selectedNetwork$
         .listen((network) async {
-      networkModel.setSelectedNetworkSwitching(false);
+          print("selected network===$network");
+      // networkModel.setSelectedNetworkSwitching(false);
       if (network != null && network['name'] != null) {
         var nName = network['name'];
         await storage.setValue(StorageKey.network.name, nName);
@@ -31,15 +32,15 @@ class NetworkCtrl {
 
   Future<void> setNetwork(Network network) async {
     networkModel.setSelectedNetworkSwitching(true);
-    jsApi.jsCallVoidReturn('window.utils.setSelectedNetwork(`${network.name}`)');
+    reefChainApi.reefState.networkApi.setNetwork(network.name);
   }
 
-  Stream<bool?> getIndexerConnected()=> jsApi.jsObservable('window.utils.indexerConnState\$').map((event)=>event==true);
+  Stream<bool?> getIndexerConnected()=> reefChainApi.getIndexerConnected().map((event)=>event==true);
 
-  Stream<WsConnState?> getProviderConnLogs()=> jsApi.jsObservable('window.utils.providerConnState\$').map((event) => WsConnState.fromJson(event));
+  Stream<WsConnState?> getProviderConnLogs()=> reefChainApi.getProviderConnLogs().map((event) => WsConnState.fromJson(event));
 
   Future<void> reconnectProvider() async {
-    jsApi.jsCallVoidReturn('window.utils.reconnectProvider()');
+    reefChainApi.reconnectProvider();
   }
 
 }
