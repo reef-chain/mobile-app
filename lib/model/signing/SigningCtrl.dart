@@ -23,14 +23,13 @@ class SigningCtrl {
   static final SIGN_ERR_CANCELED = "_canceled";
   static final SIGN_ERR_EMPTY_MNEMONIC = "_empty-mnemonic-value";
   final SignatureRequests signatureRequests;
-  final JsApiService jsApi;
   final StorageService storage;
   static final LocalAuthentication localAuth = LocalAuthentication();
   final AccountModel accountModel;
   final ReefChainApi reefChainApi;
 
-  SigningCtrl(this.jsApi, this.storage, this.signatureRequests, this.accountModel,this.reefChainApi) {
-    jsApi.jsTxSignatureConfirmationMessageSubj.listen((jsApiMessage) {
+  SigningCtrl(this.storage, this.signatureRequests, this.accountModel,this.reefChainApi) {
+    reefChainApi.reefState.signingApi.jsTxSignatureConfirmationMessageSubj.listen((jsApiMessage) {
       var signatureRequest = _buildSignatureRequest(jsApiMessage);
       if (signatureRequest.payload is SignerPayloadJSON) {
         signatureRequest.decodeMethod();
@@ -76,7 +75,7 @@ class SigningCtrl {
       return;
     }
     signatureRequests.remove(sigConfirmationIdent);
-    jsApi.confirmTxSignature(sigConfirmationIdent, account.mnemonic);
+    reefChainApi.reefState.signingApi.confirmTxSignature(sigConfirmationIdent, account.mnemonic);
   }
 
   Future<dynamic> sendNFT(String unresolvedFrom, String nftContractAddress,
@@ -123,7 +122,7 @@ class SigningCtrl {
 
   void rejectSignature(String signatureIdent) {
     signatureRequests.remove(signatureIdent);
-    jsApi.rejectTxSignature(signatureIdent);
+    reefChainApi.reefState.signingApi.rejectTxSignature(signatureIdent);
   }
 
   Future<TxDecodedData> getTxDecodedData(dynamic payload, dynamic decodedMethod) async {

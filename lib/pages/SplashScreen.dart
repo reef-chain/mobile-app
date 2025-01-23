@@ -32,10 +32,6 @@ class SplashApp extends StatefulWidget {
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
-  final JsApiService reefJsApiService = JsApiService.reefAppJsApi(onErrorCb: (){
-    print('JS CONNECTION ERRORORRRRR - RESET');
-  });
-
   final ReefChainApi reefChainApi = ReefChainApi();
   
   SplashApp({
@@ -170,7 +166,7 @@ class _SplashAppState extends State<SplashApp> {
   Future<void> _initializeAsyncDependencies() async {
     final storageService = StorageService();
     final walletConnectService = WalletConnectService();
-    await ReefAppState.instance.init(widget.reefJsApiService, storageService, walletConnectService,widget.reefChainApi);
+    await ReefAppState.instance.init(storageService, walletConnectService,widget.reefChainApi);
     setState(() {
       appReady = true;
     });

@@ -55,7 +55,7 @@ class ReefAppState {
 
   static ReefAppState get instance => _instance ??= ReefAppState._();
 
-  init(JsApiService jsApi, StorageService storage, WalletConnectService walletConnect,ReefChainApi _reefChainApi) async {
+  init(StorageService storage, WalletConnectService walletConnect,ReefChainApi _reefChainApi) async {
     this.storage = storage;
     this.reefChainApi = _reefChainApi;
     this.walletConnect = walletConnect;
@@ -78,7 +78,7 @@ class ReefAppState {
     accountCtrl = AccountCtrl(storage, model.accounts,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("signer...");
-    signingCtrl = SigningCtrl(jsApi, storage, model.signatureRequests, model.accounts,reefChainApi);
+    signingCtrl = SigningCtrl(storage, model.signatureRequests, model.accounts,reefChainApi);
     await Future.delayed(Duration(milliseconds: 100));
     this.initStatusStream.add("transfers...");
     transferCtrl = TransferCtrl(reefChainApi);
@@ -117,13 +117,13 @@ class ReefAppState {
             : Network.mainnet;
 
     try {
-      await _initReefState(jsApi,currentNetwork,_reefChainApi);
+      await _initReefState(currentNetwork,_reefChainApi);
     } catch (e){
       this.initStatusStream.add("error state= ${e.toString()}");
     }
   }
 
-  _initReefState(JsApiService jsApiService, Network currentNetwork,ReefChainApi _reefChainApi) async {
+  _initReefState(Network currentNetwork,ReefChainApi _reefChainApi) async {
     var accounts = await accountCtrl.getStorageAccountsList();
   
     List<ReefAccount> parsedAccounts = [];
