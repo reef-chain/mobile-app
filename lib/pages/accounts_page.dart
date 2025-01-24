@@ -23,6 +23,7 @@ import 'package:reef_mobile_app/utils/account_profile.dart';
 import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:reef_mobile_app/utils/account_box.dart';
+import 'package:restart_app/restart_app.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
 
@@ -56,11 +57,16 @@ class _AccountsPageState extends State<AccountsPage> {
             if (accsFeedbackDataModel.hasStatus(StatusCode.completeData)) {
               return const SizedBox.shrink();
             }
-            return SizedBox(
-                child: Text(
-              accsFeedbackDataModel.statusList[0].message ?? '',
-              style: TextStyle(fontSize: 16, color: Styles.textLightColor),
-            ));
+            return Column(
+              children: [
+                SizedBox(
+                    child: Text(
+                  accsFeedbackDataModel.statusList[0].message ?? '',
+                  style: TextStyle(fontSize: 16, color: Styles.textLightColor),
+                )),
+                if(accsFeedbackDataModel.statusList[0].message == "Request failed with status code 404")ElevatedButton(onPressed: (){Restart.restartApp();}, child: Text("Restart App"))
+              ],
+            );
           }),
           Observer(builder: (_) {
             final accsFeedbackDataModel =
