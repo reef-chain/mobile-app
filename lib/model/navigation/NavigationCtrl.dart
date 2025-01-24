@@ -230,11 +230,11 @@ class NavigationCtrl with NavSwipeCompute {
       {required int nr}) async {
     if(nr>0) {
       for (var i =0;i<nr; i++) {
-        await carouselKey!.currentState!.swipeXNext(x: nr);
+        await carouselKey?.currentState!.swipeXNext(x: nr);
       }
     }else {
       for (var i =0;i>nr; i--) {
-        await carouselKey!.currentState!.swipeXPrevious(x: nr);
+        await carouselKey?.currentState!.swipeXPrevious(x: nr);
       }
     }
     return true;

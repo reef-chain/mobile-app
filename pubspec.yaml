@@ -69,7 +69,8 @@ dependencies:
   qr_code_tools: ^0.1.0
   sizer: ^2.0.15
   reef_chain_flutter:
-    path: ../reef-chain-flutter
+    # path: ../reef-chain-flutter
+    path: /Users/anukul/Desktop/reef-chain-flutter #anukulpandey local
   #freezed: ^2.0.3+1 #immutable classes
 
 dev_dependencies:

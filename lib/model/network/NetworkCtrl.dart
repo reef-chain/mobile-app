@@ -18,7 +18,7 @@ class NetworkCtrl {
      reefChainApi.reefState.networkApi.selectedNetwork$
         .listen((network) async {
           print("selected network===$network");
-      // networkModel.setSelectedNetworkSwitching(false);
+      networkModel.setSelectedNetworkSwitching(false);
       if (network != null && network['name'] != null) {
         var nName = network['name'];
         await storage.setValue(StorageKey.network.name, nName);
@@ -28,6 +28,7 @@ class NetworkCtrl {
   }
 
   Future<void> setNetwork(Network network) async {
+    print("here i am");
     networkModel.setSelectedNetworkSwitching(true);
     reefChainApi.reefState.networkApi.setNetwork(network.name);
   }
