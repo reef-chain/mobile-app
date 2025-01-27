@@ -17,6 +17,7 @@ class NetworkCtrl {
   NetworkCtrl(this.storage,  this.networkModel,this.reefChainApi) {
      reefChainApi.reefState.networkApi.selectedNetwork$
         .listen((network) async {
+          print("selected network===$network");
       networkModel.setSelectedNetworkSwitching(false);
       if (network != null && network['name'] != null) {
         var nName = network['name'];
@@ -24,12 +25,10 @@ class NetworkCtrl {
         networkModel.setSelectedNetworkName(nName);
       }
     });
-
-    // need to listen here so other subscriptions immediately receive last value
-    getProviderConnLogs().listen((event) {print('PROV CONN=$event');});
   }
 
   Future<void> setNetwork(Network network) async {
+    print("here i am");
     networkModel.setSelectedNetworkSwitching(true);
     reefChainApi.reefState.networkApi.setNetwork(network.name);
   }

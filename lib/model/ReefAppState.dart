@@ -132,6 +132,6 @@ class ReefAppState {
       parsedAccounts.add(ReefAccount(accounts[i]['name'], accounts[i]['address'], false));
     }
 
-    await reefChainApi.reefState.init(ReefNetowrk.mainnet, parsedAccounts);
+    await reefChainApi.reefState.init(currentNetwork.name=="mainnet"?ReefNetowrk.mainnet:ReefNetowrk.testnet, parsedAccounts);
   }
 }

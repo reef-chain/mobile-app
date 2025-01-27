@@ -2,7 +2,7 @@ import {AddressName, getAccountSigner, ReefAccount, reefState, addressUtils, net
 import {combineLatest, map, switchMap, take} from "rxjs/operators";
 import {firstValueFrom} from 'rxjs';
 import { extension } from '@reef-chain/util-lib';
-import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-chain/evm-provider/utils";
+import { resolveEvmAddress as utilsResolveEvmAddr, resolveAddress as utilsResolveToNativeAddress, isSubstrateAddress } from "@reef-chain/evm-provider";
 import {Provider} from "@reef-chain/evm-provider";
 import Signer from "./background/Signer";
 import {ethers} from 'ethers';
