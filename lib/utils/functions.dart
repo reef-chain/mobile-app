@@ -16,16 +16,23 @@ double getBalanceValueBI(BigInt? balance, double? price) {
   if (price == null || balance == null) {
     return 0.0;
   }
-  var priceSplit = price.toString().split('.');
+
+  String formattedPrice = price.toStringAsFixed(18);
+
+  var priceSplit = formattedPrice.split('.');
   var decimalPlaces = priceSplit.length == 2 ? priceSplit[1].length : 0;
   var priceAfterDecimal = '';
+
   try {
     priceAfterDecimal = BigInt.parse(priceSplit[1]).toString();
-  } catch (e) {}
+  } catch (e) {
+    print('Error parsing BigInt: $e');
+  }
 
   var res = ((balance * BigInt.parse(priceSplit[0] + priceAfterDecimal)) /
           BigInt.from(10).pow(decimalPlaces)) /
       BigInt.from(10).pow(18).toDouble();
+
   return res;
 }
 

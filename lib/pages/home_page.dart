@@ -18,7 +18,7 @@ import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
 import 'package:reef_mobile_app/components/modals/restore_json_modal.dart';
 import 'package:reef_mobile_app/components/sign/SignatureContentToggle.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
-import 'package:reef_mobile_app/model/network/ws-conn-state.dart';
+import 'package:reef_chain_flutter/network/ws-conn-state.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
