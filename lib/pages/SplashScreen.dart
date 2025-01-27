@@ -51,12 +51,15 @@ class SplashApp extends StatefulWidget {
 }
 
 class _SplashAppState extends State<SplashApp> {
+  bool _isMounted = false; 
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
 
   setLocale(String locale) {
-    setState(() {
-      _locale = locale;
-    });
+    if(_isMounted){
+      setState(() {
+        _locale = locale;
+      });
+    }
   }
 
   static const _firstLaunch = "firstLaunch";
@@ -97,15 +100,19 @@ class _SplashAppState extends State<SplashApp> {
 
   Future<void> initAuthentication() async{
     var isFirstLaunch = await _checkIfFirstLaunch();
+    if(_isMounted){
     setState(() {
         _isFirstLaunch = isFirstLaunch;
     });
+    }
     //if firstLaunch or debugMode set authenticated to true
     if(isFirstLaunch || kDebugMode){
+      if(_isMounted){
       setState(() {
         _requiresAuth = false;
         _isAuthenticated = true;
       });
+      }
       return;
     }
     // check for bio auth
@@ -115,36 +122,45 @@ class _SplashAppState extends State<SplashApp> {
       var hasUserEnabledBioAuth = await ReefAppState.instance.storage.getValue("biometricAuth");
       if(hasUserEnabledBioAuth){
         authenticateWithBiometrics();
+        if(_isMounted){
         setState(() {
           _biometricsIsAvailable = true;
         });
+        }
         return;
       }
     }
     // check for password authentication
       var requiresPasswordAuth = await _checkRequiresPasswordAuth();
+      if(_isMounted){
       setState(() {
           _requiresAuth = requiresPasswordAuth;
           _isAuthenticated = !requiresPasswordAuth;
       });
+      }
   }
 
   @override
   void initState() {
     getLocale().then((value) => setLocale(value));
+    _isMounted = true;
 
     _initializeAsyncDependencies();
     initAuthentication();
     _passwordController.addListener(() {
+      if(_isMounted){
         setState(() {
           password = _passwordController.text;
         });
+      }
       });
       if(mounted){
         Timer(const Duration(milliseconds: 3830), () {
-          setState(() {
-            _isGifFinished = true;
-          });
+          if(_isMounted){
+            setState(() {
+              _isGifFinished = true;
+            });
+          }
         });
       }
 
@@ -153,6 +169,7 @@ class _SplashAppState extends State<SplashApp> {
 
   @override
   void dispose() {
+    _isMounted=false;
     super.dispose();
     _passwordController.dispose();
   }
@@ -168,7 +185,9 @@ class _SplashAppState extends State<SplashApp> {
     final walletConnectService = WalletConnectService();
     await ReefAppState.instance.init(storageService, walletConnectService,widget.reefChainApi);
     setState(() {
-      appReady = true;
+      if(_isMounted){
+        appReady = true;
+      }
     });
   }
 
@@ -293,7 +312,9 @@ class _SplashAppState extends State<SplashApp> {
           onDone: () async {
             await ReefAppState.instance.storage.setValue(_firstLaunch, false);
             setState(() {
+              if(_isMounted){
               _isFirstLaunch = false;
+              }
             });
           },
         )
@@ -306,14 +327,18 @@ class _SplashAppState extends State<SplashApp> {
     final storedPassword =
         await ReefAppState.instance.storage.getValue(StorageKey.password.name);
     if (storedPassword == value) {
+      if(_isMounted){
       setState(() {
         _wrongPassword = false;
         _isAuthenticated = true;
       });
+      }
     } else {
+      if(_isMounted){
       setState(() {
         _wrongPassword = true;
       });
+      }
     }
   }
 
@@ -324,8 +349,10 @@ class _SplashAppState extends State<SplashApp> {
             useErrorDialogs: true, stickyAuth: true, biometricOnly: true));
     if (isValid) {
       setState(() {
+        if(_isMounted){
         _wrongPassword = false;
         _isAuthenticated = true;
+        }
       });
     }
     else{
@@ -333,8 +360,10 @@ class _SplashAppState extends State<SplashApp> {
       var requiresPasswordAuth = await _checkRequiresPasswordAuth();
       if(requiresPasswordAuth){
         setState(() {
+          if(_isMounted){
           _requiresAuth = true;
           _isAuthenticated = false;
+          }
         });
       }else{
       // else recursive call
