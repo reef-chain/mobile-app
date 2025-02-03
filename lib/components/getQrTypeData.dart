@@ -13,7 +13,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/password_manager.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:qr_code_tools/qr_code_tools.dart';
+// import 'package:qr_code_tools/qr_code_tools.dart';
 
 class QrDataDisplay extends StatefulWidget {
   ReefQrCodeType? expectedType;
@@ -303,8 +303,8 @@ Future<String?> scanFile() async {
   if (pickedFile != null) {
     final filePath = pickedFile.files.single.path;
     if (filePath != null) {
-      var res = await QrCodeToolsPlugin.decodeFrom(filePath);
-      return res;
+      // var res = await QrCodeToolsPlugin.decodeFrom(filePath);
+      return "res";
     }
   }
   } catch (e) {

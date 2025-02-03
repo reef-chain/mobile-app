@@ -164,11 +164,15 @@ class _SplashAppState extends State<SplashApp> {
   }
 
   Future<void> _initializeAsyncDependencies() async {
+   final JsApiService reefJsApiService = JsApiService.reefAppJsApi(onErrorCb: () {
+    debugPrint('JS CONNECTION ERROR - RESET');
+  });
     final storageService = StorageService();
     final walletConnectService = WalletConnectService();
-    await ReefAppState.instance.init(storageService, walletConnectService,widget.reefChainApi);
+    ReefAppState.instance.init(reefJsApiService,storageService, walletConnectService,widget.reefChainApi).then((val){
     setState(() {
       appReady = true;
+    });
     });
   }
 
@@ -223,6 +227,7 @@ class _SplashAppState extends State<SplashApp> {
                     width: 128.0,
                   ),
                   const Gap(16),
+                  Text(appReady==true?"app is ready":"app not ready"),
                   Visibility(
                     maintainSize: true,
                     maintainAnimation: true,
