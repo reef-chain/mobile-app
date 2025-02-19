@@ -1,0 +1,8 @@
+R_DEF: Internal format may change without notice
+local
+drawable launch_background
+drawable reef
+mipmap ic_launcher
+mipmap reef_icon
+style LaunchTheme
+style NormalTheme

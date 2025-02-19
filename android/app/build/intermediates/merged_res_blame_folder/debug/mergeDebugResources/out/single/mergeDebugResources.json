@@ -1,0 +1,50 @@
+[
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-xhdpi_reef_icon.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-xhdpi/reef_icon.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-mdpi_reef_icon.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-mdpi/reef_icon.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-xxxhdpi_reef_icon.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-xxxhdpi/reef_icon.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-hdpi_reef_icon.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-hdpi/reef_icon.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-xxhdpi_reef_icon.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-xxhdpi/reef_icon.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/drawable-v21_launch_background.xml.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/drawable-v21/launch_background.xml"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "io.reef.reef_mobile_app-debug-68:/drawable_reef.png.flat",
+        "source": "io.reef.reef_mobile_app-main-70:/drawable/reef.png"
+    }
+]
