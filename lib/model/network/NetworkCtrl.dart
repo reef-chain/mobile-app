@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_chain_flutter/network/ws-conn-state.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
@@ -29,13 +30,17 @@ class NetworkCtrl {
 
   Future<void> setNetwork(Network network) async {
     print("here i am");
+    debugPrint("here i am");
     networkModel.setSelectedNetworkSwitching(true);
     reefChainApi.reefState.networkApi.setNetwork(network.name);
   }
 
   Stream<bool?> getIndexerConnected()=> reefChainApi.getIndexerConnected().map((event)=>event==true);
 
-  Stream<WsConnState?> getProviderConnLogs()=> reefChainApi.getProviderConnLogs();
+  Stream<WsConnState?> getProviderConnLogs()=> reefChainApi.getProviderConnLogs().handleError((value){
+    debugPrint('getProviderConnLogs error --------------> $value');
+    debugPrint('getProviderConnLogs error --------------> ${value.toString()}');
+  });
 
   Future<void> reconnectProvider() async {
     reefChainApi.reconnectProvider();

@@ -35,16 +35,16 @@ List<BarItemNavigationPage> bottomNavigationBarItems = [
     page: NavigationPage.accounts,
     label: 'Accounts',
   ),
-  BarItemNavigationPage(
+ if(Platform.isAndroid) BarItemNavigationPage(
     icon: Icon(Icons.cached),
     page: NavigationPage.pools,
     label: 'Pools',
   ),
-  BarItemNavigationPage(
-    icon: Icon(Icons.monetization_on_outlined),
-    page: NavigationPage.buy,
-    label: 'Buy Reef',
-  ),
+  // BarItemNavigationPage(
+  //   icon: Icon(Icons.monetization_on_outlined),
+  //   page: NavigationPage.buy,
+  //   label: 'Buy Reef',
+  // ),
   BarItemNavigationPage(
     icon: Icon(Icons.settings_outlined),
     page: NavigationPage.settings,
@@ -121,7 +121,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                           ),
                           child: topBar(context)),
                     ),
-                    Expanded(child:                                  getMainNavPages())
+                    Expanded(child:  getMainNavPages())
                   ],
                 ),
               ],
@@ -169,8 +169,8 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     var pages = [
       const HomePage(key: PageStorageKey("homepage")),
       AccountsPage(key: const PageStorageKey("accountPage")),
-      const PoolsPage(key: const PageStorageKey("poolsPage")),
-      const StealthexBuyPage(key: const PageStorageKey("stealthexBuyPage")),
+      if(Platform.isAndroid) const PoolsPage(key: const PageStorageKey("poolsPage")),
+      // const StealthexBuyPage(key: const PageStorageKey("stealthexBuyPage")),
       const SettingsPage(key: PageStorageKey("settingsPage"))];
    
     return pages[selectedPageIndex];

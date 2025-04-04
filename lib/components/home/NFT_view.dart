@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -96,7 +97,7 @@ class _NFTViewState extends State<NFTView> {
     final dialogKey = GlobalKey<AnimatedDialogState>();
     return Builder(
       builder: (context) => GestureDetector(
-        onTap: () async {
+        onTap: Platform.isAndroid ? () async {
           if (url != '') {
             ReefAppState.instance.navigationCtrl.navigateToSendNFTPage(
                 context: context,
@@ -106,7 +107,7 @@ class _NFTViewState extends State<NFTView> {
                 nftId: nftId,
                 mimetype: mimetype);
           }
-        },
+        } : (){},
         onLongPress: () {
           setState(() {
             _remountNFTsVideoPlayer = !_remountNFTsVideoPlayer;

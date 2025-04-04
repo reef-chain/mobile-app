@@ -58,11 +58,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    providerConnStateSubs = ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
-      setState(() {
-        providerConn = event;
+    try{
+      providerConnStateSubs = ReefAppState.instance.networkCtrl
+          .getProviderConnLogs()
+          .listen((event) {
+        setState(() {
+          providerConn = event;
+          debugPrint('providerConn event  ----> ${event?.isConnected}');
+        });
       });
-    });
+    } catch(e){
+  debugPrint('providerConn event  error ----> ${e}');
+  debugPrint('providerConn event  error ----> ${e.toString()}');
+
+  }
     super.initState();
   }
 

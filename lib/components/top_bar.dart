@@ -127,11 +127,16 @@ List<StreamSubscription> listeners=[];
 
   @override
   void initState() {
-    listeners.add(ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
-      setState(() {
-        this.providerConn = event != null && event.isConnected;
-      });
-    }));
+      listeners.add(
+          ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((
+              event) {
+            setState(() {
+              debugPrint('providerConn event  ----> ${event?.isConnected}');
+              this.providerConn = event != null && event.isConnected;
+            });
+          }
+
+          ));
     listeners.add(ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
       setState(() {
         this.indexerConn = event != null && event==true;
@@ -144,7 +149,6 @@ List<StreamSubscription> listeners=[];
         });
       }));
     });
-
     super.initState();
   }
 
@@ -162,6 +166,11 @@ List<StreamSubscription> listeners=[];
       color: isConnected?Styles.textColor:Styles.primaryAccentColor,
     );
     var title = isConnected?widget.title:AppLocalizations.of(context)!.connecting;
+
+    debugPrint('----> ${widget.title}');
+    debugPrint('isConnected ----> ${isConnected}');
+    debugPrint('providerConn ----> ${providerConn}');
+
     return ActionChip(
       avatar: icon,
       label: Text(

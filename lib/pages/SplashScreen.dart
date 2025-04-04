@@ -257,7 +257,6 @@ class _SplashAppState extends State<SplashApp> {
                         initialData: ".",
                         builder: (BuildContext context,AsyncSnapshot<String> snapshot) {
                           if(snapshot.hasData) {
-                            debugPrint('connectionState ----------> ${snapshot.connectionState}');
                             return Text(snapshot.data??"...",
                               style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w400,
