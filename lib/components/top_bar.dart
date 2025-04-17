@@ -71,32 +71,34 @@ Widget topBar(BuildContext context) {
                             children: [
                               AccountPill(selSignerList.first.name),
                               Gap(2.0),
-                             Material(
-  elevation: 4,
-  borderRadius: BorderRadius.circular(22.0),
-  child: InkWell(
-    onTap: () {
-      ReefAppState.instance.navigationCtrl
-                      .navigateToWalletConnectPage(context: context);
-    },
-    child: Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(
-        color: Styles.whiteColor,
-        borderRadius: BorderRadius.circular(22.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: SvgPicture.asset('assets/images/walletconnect.svg', width: 30,),
-      ),
-    ),
-  ),
-),
-
+                              Material(
+                                elevation: 4,
+                                borderRadius: BorderRadius.circular(22.0),
+                                child: InkWell(
+                                  onTap: () {
+                                    ReefAppState.instance.navigationCtrl
+                                        .navigateToWalletConnectPage(
+                                            context: context);
+                                  },
+                                  child: Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: Styles.whiteColor,
+                                      borderRadius: BorderRadius.circular(22.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: SvgPicture.asset(
+                                        'assets/images/walletconnect.svg',
+                                        width: 30,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
-                           
                         ],
                       ),
                     )
@@ -112,40 +114,38 @@ Widget topBar(BuildContext context) {
 
 class AccountPill extends StatefulWidget {
   final String title;
-  const AccountPill(this.title,{super.key});
+  const AccountPill(this.title, {super.key});
 
   @override
   State<AccountPill> createState() => _AccountPillState();
 }
 
 class _AccountPillState extends State<AccountPill> {
-var color = Styles.textColor;
-var indexerConn = false;
-var providerConn = false;
-var jsConn = false;
-List<StreamSubscription> listeners=[];
+  var color = Styles.textColor;
+  var indexerConn = false;
+  var providerConn = false;
+  var jsConn = false;
+  List<StreamSubscription> listeners = [];
 
   @override
   void initState() {
-      listeners.add(
-          ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((
-              event) {
-            setState(() {
-              debugPrint('providerConn event  ----> ${event?.isConnected}');
-              this.providerConn = event != null && event.isConnected;
-            });
-          }
-
-          ));
-    listeners.add(ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+    listeners.add(
+        ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
       setState(() {
-        this.indexerConn = event != null && event==true;
+        debugPrint('providerConn event  ----> ${event?.isConnected}');
+        this.providerConn = event != null && event.isConnected;
+      });
+    }));
+    listeners.add(
+        ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
+      setState(() {
+        this.indexerConn = event != null && event == true;
       });
     }));
     ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
       listeners.add(jsStream.listen((event) {
         setState(() {
-          this.jsConn = event != null && event==true;
+          this.jsConn = event != null && event == true;
         });
       }));
     });
@@ -160,37 +160,40 @@ List<StreamSubscription> listeners=[];
 
   @override
   Widget build(BuildContext context) {
-    var isConnected = jsConn&&indexerConn&&providerConn;
+    var isConnected = jsConn && indexerConn && providerConn;
     var icon = Icon(
-      isConnected?Icons.wallet: Icons.error_outline,
-      color: isConnected?Styles.textColor:Styles.primaryAccentColor,
+      isConnected ? Icons.wallet : Icons.error_outline,
+      color: isConnected ? Styles.textColor : Styles.primaryAccentColor,
     );
-    var title = isConnected?widget.title:AppLocalizations.of(context)!.connecting;
+    var title =
+        isConnected ? widget.title : AppLocalizations.of(context)!.connecting;
 
     debugPrint('----> ${widget.title}');
     debugPrint('isConnected ----> ${isConnected}');
     debugPrint('providerConn ----> ${providerConn}');
 
     return ActionChip(
-      avatar: icon,
-      label: Text(
-        title,
-        style: GoogleFonts.spaceGrotesk(
-            color: Styles.purpleColor,
-            fontSize: 18,
-            fontWeight: FontWeight.bold),
-        overflow: TextOverflow.fade,
-        maxLines: 1,
-        softWrap: false,
-      ),
-      backgroundColor: Styles.primaryBackgroundColor,
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      onPressed: () {
-        if(isConnected){
-        ReefAppState.instance.navigationCtrl.navigate(NavigationPage.accounts);
-        }else{
-         showReconnectProviderModal(AppLocalizations.of(context)!.connection_stats);
-        }
-      });
+        avatar: icon,
+        label: Text(
+          title,
+          style: GoogleFonts.spaceGrotesk(
+              color: Styles.purpleColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold),
+          overflow: TextOverflow.fade,
+          maxLines: 1,
+          softWrap: false,
+        ),
+        backgroundColor: Styles.primaryBackgroundColor,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        onPressed: () {
+          if (isConnected) {
+            ReefAppState.instance.navigationCtrl
+                .navigate(NavigationPage.accounts);
+          } else {
+            showReconnectProviderModal(
+                AppLocalizations.of(context)!.connection_stats);
+          }
+        });
   }
 }

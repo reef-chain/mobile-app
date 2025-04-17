@@ -38,7 +38,6 @@ class _SwitchNetworkState extends State<SwitchNetwork> {
                   style: Theme.of(context).textTheme.bodyMedium);
             }),
             Switch(
-              // TODO listen to currentNetwork from mobx model
               value: ReefAppState.instance.model.network.selectedNetworkName ==
                   Network.mainnet.name,
               onChanged: (value) {
