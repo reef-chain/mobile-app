@@ -127,6 +127,7 @@ class ReefAppState {
       _initCall!.complete(null);
     } catch (e){
       this.initStatusStream.add("error state= ${e.toString()}");
+      _initCall!.completeError(e); // Add this
     }
   }
 

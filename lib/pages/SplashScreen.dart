@@ -31,8 +31,7 @@ class SplashApp extends StatefulWidget {
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
-  final ReefChainApi reefChainApi = ReefChainApi();
-  
+
   SplashApp({
     required Key key,
     required this.displayOnInit,
@@ -51,12 +50,15 @@ class SplashApp extends StatefulWidget {
 
 class _SplashAppState extends State<SplashApp> {
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
+  late final ReefChainApi reefChainApi;
 
   setLocale(String locale) {
     setState(() {
       _locale = locale;
     });
   }
+
+  Timer? _gifTimer;
 
   static const _firstLaunch = "firstLaunch";
   bool _hasError = false;
@@ -65,7 +67,7 @@ class _SplashAppState extends State<SplashApp> {
   bool _isAuthenticated = false;
   bool _wrongPassword = false;
   bool _biometricsIsAvailable = false;
-  bool? _isFirstLaunch;
+  bool? _isFirstLaunch = false;
   Widget? onInitWidget;
 
   var appReady = false;
@@ -130,8 +132,10 @@ class _SplashAppState extends State<SplashApp> {
 
   @override
   void initState() {
-    getLocale().then((value) => setLocale(value));
-
+    getLocale().then((value) {
+      if (mounted) setLocale(value);
+    });
+    reefChainApi = ReefChainApi();
     _initializeAsyncDependencies();
       initAuthentication();
       _passwordController.addListener(() {
@@ -139,13 +143,21 @@ class _SplashAppState extends State<SplashApp> {
           password = _passwordController.text;
         });
       });
-      if(mounted){
-        Timer(const Duration(milliseconds: 3830), () {
-          setState(() {
-            _isGifFinished = true;
-          });
+
+    _gifTimer = Timer(const Duration(milliseconds: 3830), () {
+      if (mounted) {
+        setState(() {
+          _isGifFinished = true;
         });
       }
+    });
+      // if(mounted){
+      //   Timer(const Duration(milliseconds: 3830), () {
+      //     setState(() {
+      //       _isGifFinished = true;
+      //     });
+      //   });
+      // }
 
     super.initState();
   }
@@ -154,6 +166,7 @@ class _SplashAppState extends State<SplashApp> {
   void dispose() {
     super.dispose();
     _passwordController.dispose();
+    _gifTimer?.cancel();
   }
 
   Future<bool> _checkIfFirstLaunch() async {
@@ -165,7 +178,7 @@ class _SplashAppState extends State<SplashApp> {
   Future<void> _initializeAsyncDependencies() async {
        final storageService = StorageService();
        final walletConnectService = WalletConnectService();
-       await ReefAppState.instance.init(storageService, walletConnectService,widget.reefChainApi);
+       await ReefAppState.instance.init(storageService, walletConnectService, reefChainApi);
        setState(() {
          appReady = true;
        });
@@ -194,7 +207,11 @@ class _SplashAppState extends State<SplashApp> {
   }
 
   Widget _buildBody() {
-    debugPrint('----------> $_isGifFinished');
+    debugPrint('_isGifFinished ----------> $_isGifFinished');
+
+    debugPrint('appReady ----------> $appReady');
+    debugPrint('_isAuthenticated ----------> $_isAuthenticated');
+    debugPrint('_isFirstLaunch ----------> $_isFirstLaunch');
 
     if (_hasError) {
       return Center(
@@ -204,7 +221,6 @@ class _SplashAppState extends State<SplashApp> {
         ),
       );
     }
-    //TODO: Initialise the widget back
 
     return Stack(children: <Widget>[
       // reefJsApiService.widget,

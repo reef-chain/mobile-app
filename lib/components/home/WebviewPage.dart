@@ -34,6 +34,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
         body: WebViewWidget(
           controller: WebViewController()
             ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..addJavaScriptChannel('MyChannel', onMessageReceived: (JavaScriptMessage message) {
+              print(message.message);
+            },)
             ..setNavigationDelegate(
               NavigationDelegate(
                 onProgress: (int progress) {
