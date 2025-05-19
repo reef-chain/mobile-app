@@ -247,10 +247,10 @@ class _TokenViewState extends State<TokenView> {
             //if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
               Column(
                 children: [
-                  Container(
-                      margin:
-                          EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
-                      child: InsufficientBalance()),
+                  // Container(
+                  //     margin:
+                  //         EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
+                  //     child: InsufficientBalance()),
                 ],
               ),
             if (message != null)

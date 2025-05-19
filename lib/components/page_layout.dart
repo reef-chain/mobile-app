@@ -23,7 +23,7 @@ import 'package:restart_app/restart_app.dart';
 import '../pages/pools_page.dart';
 import 'sign/SignatureContentToggle.dart';
 
-List<BarItemNavigationPage> bottomNavigationBarItems = const [
+List<BarItemNavigationPage> bottomNavigationBarItems = [
   BarItemNavigationPage(
     icon: Icon(Icons.home_outlined),
     page: NavigationPage.home,
@@ -46,7 +46,7 @@ List<BarItemNavigationPage> bottomNavigationBarItems = const [
     // ),
     label: 'Accounts',
   ),
-  BarItemNavigationPage(
+  if (Platform.isAndroid) BarItemNavigationPage(
     icon: Icon(Icons.cached),
     page: NavigationPage.pools,
     //  SvgIcon(
@@ -212,6 +212,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
           ),
         )),
         bottomNavigationBar: Observer(builder: (_) {
+          debugPrint('---> ${bottomNavigationBarItems.length}');
           int currIndex = bottomNavigationBarItems.indexWhere((barItem) =>
               barItem.page ==
               ReefAppState.instance.model.navigationModel.currentPage);

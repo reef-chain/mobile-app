@@ -8,9 +8,11 @@ import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/modals/show_qr_code.dart';
 import 'package:reef_mobile_app/components/modals/export_qr_account_modal.dart';
+import 'package:reef_mobile_app/components/page_layout_anukul.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
+import 'package:reef_mobile_app/pages/home_page.dart';
 import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
@@ -359,8 +361,12 @@ showAlertDialog(BuildContext context, ReefAccount signer) {
       ],
     ),
     onPressed: () {
+      debugPrint('-------> ${signer.address}');
       ReefAppState.instance.accountCtrl.deleteAccount(signer.address);
       Navigator.of(context).pop();
+      Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (BuildContext context) => BottomNav()));
+
     },
   );
 

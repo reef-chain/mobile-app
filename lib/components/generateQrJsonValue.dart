@@ -13,7 +13,7 @@ class GenerateQrJsonValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return QrImage(
+    return QrImageView(
             data: shouldDisplayValueOnly! ?data: jsonEncode({"type":type.name,"data":data}).toString(),
             version: QrVersions.auto,
             // importAccount QR should be larger otherwise wrong value might be scanned
