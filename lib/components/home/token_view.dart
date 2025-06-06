@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -152,7 +154,7 @@ class _TokenViewState extends State<TokenView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                   ElevatedButton.icon(
+                   Platform.isAndroid ? ElevatedButton.icon(
                       icon:  Icon(
                         CupertinoIcons.repeat,
                         color: price==0 || isLoading?Color(0xFF898e9c):Color(0xffa93185),
@@ -177,8 +179,8 @@ class _TokenViewState extends State<TokenView> {
                             .navigateToSwapPage(context: context,preselectedTop: address);
                         }
                       },
-                    ),
-                    const SizedBox(width: 15),
+                    ) : SizedBox(),
+                    Platform.isAndroid ? const SizedBox(width: 15) : SizedBox(),
                     Expanded(
                         child: Container(
                       decoration: BoxDecoration(
