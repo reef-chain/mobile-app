@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 class IntroductionSlide extends StatelessWidget {
   final GlobalKey<LiquidCarouselState> liquidCarouselKey;

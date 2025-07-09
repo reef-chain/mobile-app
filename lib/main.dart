@@ -5,7 +5,7 @@ import 'package:reef_mobile_app/components/page_layout_anukul.dart';
 import 'package:reef_mobile_app/service/AppLifecycleManager.dart';
 import 'package:reef_mobile_app/service/LocalNotificationService.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

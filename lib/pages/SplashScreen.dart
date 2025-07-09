@@ -21,7 +21,7 @@ import '../main.dart';
 import '../model/ReefAppState.dart';
 import '../service/StorageService.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 typedef WidgetCallback = Widget Function();
 

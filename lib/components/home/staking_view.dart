@@ -9,7 +9,7 @@ import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 class StakingView extends StatefulWidget {
   const StakingView({Key? key}) : super(key: key);
