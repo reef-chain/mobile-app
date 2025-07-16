@@ -9,7 +9,7 @@ import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
 import 'package:reef_mobile_app/utils/ipfs.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';

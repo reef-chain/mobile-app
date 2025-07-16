@@ -8,7 +8,7 @@ import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/utils/password_manager.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 class ChangePassword extends StatefulWidget {
   final void Function()? onChanged;
