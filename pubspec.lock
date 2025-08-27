@@ -1229,10 +1229,9 @@ packages:
   reef_chain_flutter:
     dependency: "direct main"
     description:
-      name: reef_chain_flutter
-      sha256: "1b0225298b2c577cd12f13941e2ffd7ac4d675041b0e848f018b4aa5c7ded7cb"
-      url: "https://pub.dev"
-    source: hosted
+      path: "/Users/anukul/Desktop/reef-chain-flutter"
+      relative: false
+    source: path
     version: "0.0.6"
   reown_core:
     dependency: transitive
