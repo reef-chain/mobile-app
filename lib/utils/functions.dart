@@ -12,7 +12,7 @@ double getBalanceValue(double balance, price) {
   return balance * price;
 }
 
-double getBalanceValueBI(BigInt? balance, double? price) {
+double getBalanceValueBI(BigInt? balance, double? price,int decimals) {
   if (price == null || balance == null) {
     return 0.0;
   }
@@ -23,9 +23,9 @@ double getBalanceValueBI(BigInt? balance, double? price) {
     priceAfterDecimal = BigInt.parse(priceSplit[1]).toString();
   } catch (e) {}
 
-  var res = ((balance * BigInt.parse(priceSplit[0] + priceAfterDecimal)) /
-          BigInt.from(10).pow(decimalPlaces)) /
-      BigInt.from(10).pow(18).toDouble();
+  var res = (balance/BigInt.from(10).pow(decimals))*price;
+
+  print("anukul===balance=${balance} price=${(balance/BigInt.from(10).pow(decimals))*price} res=${res}");
   return res;
 }
 

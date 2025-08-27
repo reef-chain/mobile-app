@@ -111,7 +111,6 @@ class _TokenViewState extends State<TokenView> {
                                 final displayBalance = ReefAppState
                                     .instance.model.appConfig.displayBalance;
                                 return Observer(builder: (context) {
-                                  print("anukul===${balance}");
                                   return FutureBuilder<String>(
                                     future: ReefAppState.instance.accountCtrl
                                         .formatBalance(
