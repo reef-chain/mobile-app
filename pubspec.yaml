@@ -72,8 +72,7 @@ dependencies:
   flutter_local_notifications: ^19.2.0
   #  qr_code_tools: ^0.1.0
   sizer: ^3.0.5
-  reef_chain_flutter:
-    path: /Users/anukul/Desktop/reef-chain-flutter
+  reef_chain_flutter: ^0.0.6
   reown_yttrium: ^0.0.1
 #  flutter_js: ^0.8.3
 
