@@ -25,7 +25,6 @@ double getBalanceValueBI(BigInt? balance, double? price,int decimals) {
 
   var res = (balance/BigInt.from(10).pow(decimals))*price;
 
-  print("anukul===balance=${balance} price=${(balance/BigInt.from(10).pow(decimals))*price} res=${res}");
   return res;
 }
 
