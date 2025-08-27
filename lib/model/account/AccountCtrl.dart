@@ -51,8 +51,8 @@ class AccountCtrl {
   }
 
   Future<String> formatBalance(
-      String value, double price) async { 
-    return await _reefChainApi.reefState.accountApi.formatBalance(value, price);
+      String value, double price,int decimals) async { 
+    return await _reefChainApi.reefState.accountApi.formatBalance(value, price,decimals);
   }
 
 Future<dynamic> listenBindActivity(String address) async {

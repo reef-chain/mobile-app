@@ -35,6 +35,7 @@ class _TokenViewState extends State<TokenView> {
     String address = token.data.address;
     String? iconURL = token.data.iconUrl;
     BigInt? balance = token.data.balance;
+    int? decimals = token.data.decimals;
     double price = token.data.price ?? 0.0;
     String tokenName = token.data.symbol ?? "";
     bool isLoading = token.hasStatus(StatusCode.loading);
@@ -107,32 +108,38 @@ class _TokenViewState extends State<TokenView> {
                                 innerPadding: 2,
                               )
                             : Observer(builder: (context) {
-  final displayBalance = ReefAppState.instance.model.appConfig.displayBalance;
-  return Observer(builder: (context) {
-    return FutureBuilder<String>(
-      future: ReefAppState.instance.accountCtrl.formatBalance(balance.toString(), price),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Text("");
-        } else {
-          return BlurableContent(
-            GradientText(
-              price != 0 ? (snapshot.data ?? "") : "NA",
-              gradient: textGradient(),
-              style: GoogleFonts.poppins(
-                color: Styles.textColor,
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            displayBalance,
-          );
-        }
-      },
-    );
-  });
-}),
-
+                                final displayBalance = ReefAppState
+                                    .instance.model.appConfig.displayBalance;
+                                return Observer(builder: (context) {
+                                  print("anukul===${balance}");
+                                  return FutureBuilder<String>(
+                                    future: ReefAppState.instance.accountCtrl
+                                        .formatBalance(
+                                            balance.toString(), price,decimals),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Text("");
+                                      } else {
+                                        return BlurableContent(
+                                          GradientText(
+                                            price != 0
+                                                ? (snapshot.data ?? "")
+                                                : "NA",
+                                            gradient: textGradient(),
+                                            style: GoogleFonts.poppins(
+                                              color: Styles.textColor,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                          ),
+                                          displayBalance,
+                                        );
+                                      }
+                                    },
+                                  );
+                                });
+                              }),
                         Observer(builder: (context) {
                           return BlurableContent(
                               Text(
@@ -154,32 +161,41 @@ class _TokenViewState extends State<TokenView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                   Platform.isAndroid ? ElevatedButton.icon(
-                      icon:  Icon(
-                        CupertinoIcons.repeat,
-                        color: price==0 || isLoading?Color(0xFF898e9c):Color(0xffa93185),
-                        size: 16.0,
-                      ),
-                      style: ElevatedButton.styleFrom(
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          backgroundColor:price==0 || isLoading?  Color(0xFFd8dce6):const Color(0xffe7def0),
-                          shape: const StadiumBorder(),
-                          elevation: 0),
-                      label: Text(
-                        'Swap',
-                        style: TextStyle(
-                            color:price==0 || isLoading?Color(0xFF898e9c): Color(0xffa93185),
-                            fontWeight: FontWeight.w700),
-                      ),
-                      onPressed: () {
-                        if(price==0 || isLoading){
-
-                        }else{
-                        ReefAppState.instance.navigationCtrl
-                            .navigateToSwapPage(context: context,preselectedTop: address);
-                        }
-                      },
-                    ) : SizedBox(),
+                    Platform.isAndroid
+                        ? ElevatedButton.icon(
+                            icon: Icon(
+                              CupertinoIcons.repeat,
+                              color: price == 0 || isLoading
+                                  ? Color(0xFF898e9c)
+                                  : Color(0xffa93185),
+                              size: 16.0,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                backgroundColor: price == 0 || isLoading
+                                    ? Color(0xFFd8dce6)
+                                    : const Color(0xffe7def0),
+                                shape: const StadiumBorder(),
+                                elevation: 0),
+                            label: Text(
+                              'Swap',
+                              style: TextStyle(
+                                  color: price == 0 || isLoading
+                                      ? Color(0xFF898e9c)
+                                      : Color(0xffa93185),
+                                  fontWeight: FontWeight.w700),
+                            ),
+                            onPressed: () {
+                              if (price == 0 || isLoading) {
+                              } else {
+                                ReefAppState.instance.navigationCtrl
+                                    .navigateToSwapPage(
+                                        context: context,
+                                        preselectedTop: address);
+                              }
+                            },
+                          )
+                        : SizedBox(),
                     Platform.isAndroid ? const SizedBox(width: 15) : SizedBox(),
                     Expanded(
                         child: Container(
@@ -192,8 +208,11 @@ class _TokenViewState extends State<TokenView> {
                                 blurRadius: 20),
                           ],
                           borderRadius: BorderRadius.circular(80),
-                          gradient:LinearGradient(
-                            colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
+                          gradient: LinearGradient(
+                            colors: [
+                              Styles.purpleColorLight,
+                              Styles.secondaryAccentColorDark
+                            ],
                             begin: Alignment(-1, -1),
                             end: Alignment(1, 1),
                           )),
@@ -236,7 +255,8 @@ class _TokenViewState extends State<TokenView> {
         String? message = getFdmListMessage(
             selectedERC20s,
             AppLocalizations.of(context)!.balance,
-            AppLocalizations.of(context)!.loading,context);
+            AppLocalizations.of(context)!.loading,
+            context);
 
         return MultiSliver(
           pushPinnedChildren: false,
@@ -247,14 +267,14 @@ class _TokenViewState extends State<TokenView> {
             //         child: const Text("ReloadTEST"))),
 
             //if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
-              Column(
-                children: [
-                  // Container(
-                  //     margin:
-                  //         EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
-                  //     child: InsufficientBalance()),
-                ],
-              ),
+            Column(
+              children: [
+                // Container(
+                //     margin:
+                //         EdgeInsets.only(top: 10.0, left: 20.0, right: 20.0),
+                //     child: InsufficientBalance()),
+              ],
+            ),
             if (message != null)
               SliverToBoxAdapter(
                 child: Padding(

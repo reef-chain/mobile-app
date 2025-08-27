@@ -452,12 +452,12 @@ class _SwapPageState extends State<SwapPage> {
       selectedBottomToken = selectedBottomToken!.setAmount(res);
       amountBottomController.text = toAmountDisplayBigInt(
           selectedBottomToken!.amount,
-          decimals: selectedBottomToken!.decimals);
+          decimals: selectedBottomToken!.decimals,fractionDigits: 4);
     });
     print(
-        "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
+        "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals,fractionDigits: 4)}");
     print(
-        "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
+        "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals,fractionDigits: 4)}");
   }
 
   Future<void> _amountBottomUpdated(String value) async {
@@ -511,13 +511,13 @@ class _SwapPageState extends State<SwapPage> {
     setState(() {
       selectedTopToken = selectedTopToken!.setAmount(res);
       amountTopController.text = toAmountDisplayBigInt(selectedTopToken!.amount,
-          decimals: selectedTopToken!.decimals);
+          decimals: selectedTopToken!.decimals,fractionDigits: 4);
     });
 
     print(
-        "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals)}");
+        "${selectedTopToken!.amount} - ${toAmountDisplayBigInt(selectedTopToken!.amount, decimals: selectedTopToken!.decimals,fractionDigits: 4)}");
     print(
-        "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
+        "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals,fractionDigits: 4)}");
   }
 
   Future<List<dynamic>> _getPoolPairs(String tokenAddress) async {
@@ -761,7 +761,7 @@ class _SwapPageState extends State<SwapPage> {
               children: [
                 if (selectedTokenWithAmount != null) ...[
                   Text(
-                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount!.balance, decimals: selectedTokenWithAmount!.decimals)} ${selectedTokenWithAmount!.symbol}",
+                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount!.balance, decimals: selectedTokenWithAmount!.decimals,fractionDigits: 4)} ${selectedTokenWithAmount!.symbol}",
                     style:
                         TextStyle(color: Styles.textLightColor, fontSize: 12),
                   ),
@@ -770,7 +770,7 @@ class _SwapPageState extends State<SwapPage> {
                       var tokenBalance = toAmountDisplayBigInt(
                           selectedTokenWithAmount!.balance,
                           decimals: selectedTokenWithAmount!.decimals,
-                          fractionDigits: selectedTokenWithAmount!.decimals);
+                          fractionDigits: 4);
                       await amountUpdated(tokenBalance);
                       amountController.text = tokenBalance;
                     },

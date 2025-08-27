@@ -973,7 +973,7 @@ class _SendPageState extends State<SendPage> {
       token.address == Constants.REEF_TOKEN_ADDRESS ? balance - 3 : balance;
 
   double getSelectedTokenBalance(TokenWithAmount selectedToken) {
-    return double.parse(toAmountDisplayBigInt(selectedToken.balance));
+    return double.parse(toAmountDisplayBigInt(selectedToken.balance,decimals: selectedToken.decimals,fractionDigits: 4));
   }
 
   buildFeedbackUI(BuildContext context, SendStatus stat, void Function() onNew,
