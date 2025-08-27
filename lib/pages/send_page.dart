@@ -695,7 +695,7 @@ class _SendPageState extends State<SendPage> {
                                   : Styles.darkBackgroundColor),
                         ),
                         Text(
-                          "${selectedToken.balance != null && selectedToken.balance > BigInt.zero ? NumberFormat.compact().format((selectedToken.balance) / BigInt.from(10).pow(18)).toString() : 0} ${selectedToken.name.toUpperCase()}",
+                          "${selectedToken.balance != null && selectedToken.balance > BigInt.zero ? NumberFormat.compact().format((selectedToken.balance) / BigInt.from(10).pow(selectedToken.decimals)).toString() : 0} ${selectedToken.name.toUpperCase()}",
                           style: TextStyle(
                               color: Styles.textLightColor, fontSize: 12),
                         )
