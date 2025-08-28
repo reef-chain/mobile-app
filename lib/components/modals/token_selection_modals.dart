@@ -185,7 +185,7 @@ class TokenSelectionState extends State<TokenSelection> {
                                         Wrap(spacing: 8.0, children: [
                                           Text(toAmountDisplayBigInt(
                                               e.balance,
-                                              decimals: e.decimals)),
+                                              decimals: e.decimals,fractionDigits: 4)),
                                           Text(e.symbol)
                                         ]),
                                         Row(

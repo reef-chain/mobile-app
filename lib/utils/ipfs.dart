@@ -5,6 +5,7 @@ class IpfsUtils {
 
   static String resolveIpfsHash(String input) {
     if (input.startsWith("ipfs")) return getIpfsUrl(input.split("/").last);
+    if (input.indexOf("cloudflare-ipfs.com")>-1) return getIpfsUrl(input.split("/").last);
     return input;
   }
 }

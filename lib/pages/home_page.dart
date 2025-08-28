@@ -364,7 +364,7 @@ class _BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
   double _sumTokenBalances(List<TokenWithAmount> list) {
     var sum = 0.0;
     for (final token in list) {
-      double balValue = getBalanceValueBI(token.balance, token.price);
+      double balValue = getBalanceValueBI(token.balance, token.price,token.decimals);
       if (balValue > 0) {
         sum = sum + balValue;
       }

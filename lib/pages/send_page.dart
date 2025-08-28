@@ -695,7 +695,7 @@ class _SendPageState extends State<SendPage> {
                                   : Styles.darkBackgroundColor),
                         ),
                         Text(
-                          "${selectedToken.balance != null && selectedToken.balance > BigInt.zero ? NumberFormat.compact().format((selectedToken.balance) / BigInt.from(10).pow(18)).toString() : 0} ${selectedToken.name.toUpperCase()}",
+                          "${selectedToken.balance != null && selectedToken.balance > BigInt.zero ? NumberFormat.compact().format((selectedToken.balance) / BigInt.from(10).pow(selectedToken.decimals)).toString() : 0} ${selectedToken.name.toUpperCase()}",
                           style: TextStyle(
                               color: Styles.textLightColor, fontSize: 12),
                         )
@@ -973,7 +973,7 @@ class _SendPageState extends State<SendPage> {
       token.address == Constants.REEF_TOKEN_ADDRESS ? balance - 3 : balance;
 
   double getSelectedTokenBalance(TokenWithAmount selectedToken) {
-    return double.parse(toAmountDisplayBigInt(selectedToken.balance));
+    return double.parse(toAmountDisplayBigInt(selectedToken.balance,decimals: selectedToken.decimals,fractionDigits: 4));
   }
 
   buildFeedbackUI(BuildContext context, SendStatus stat, void Function() onNew,
