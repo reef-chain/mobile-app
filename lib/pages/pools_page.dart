@@ -579,7 +579,7 @@ class _PoolsPageState extends State<PoolsPage> {
                   .decode(dataUrl.split('data:image/svg+xml;base64,')[1])),
               width: 30,
               height: 30)
-          : Image.network(dataUrl, width: 30, height: 30, fit: BoxFit.cover),
+          : Image.network(IpfsUtils.resolveIpfsHash(dataUrl), width: 30, height: 30, fit: BoxFit.cover),
     );
   }
 
