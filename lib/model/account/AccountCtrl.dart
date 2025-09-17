@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
@@ -50,8 +51,8 @@ class AccountCtrl {
   }
 
   Future<String> formatBalance(
-      String value, double price) async { 
-    return await _reefChainApi.reefState.accountApi.formatBalance(value, price);
+      String value, double price,int decimals) async { 
+    return await _reefChainApi.reefState.accountApi.formatBalance(value, price,decimals);
   }
 
 Future<dynamic> listenBindActivity(String address) async {
@@ -93,6 +94,9 @@ Future<dynamic> listenBindActivity(String address) async {
 
   void deleteAccount(String address) async {
     var account = await _storage.getAccount(address);
+    debugPrint('-------> ${account}');
+
+
     if (account != null) {
       await account.delete();
     }
@@ -113,6 +117,7 @@ Future<dynamic> listenBindActivity(String address) async {
     var accounts = [];
     (await _storage.getAllAccounts())
         .forEach(((account) => {accounts.add(account.toJsonSkinny())}));
+
     return await _reefChainApi.reefState.accountApi.updateAccounts(accounts);
   }
 

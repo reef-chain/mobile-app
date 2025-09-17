@@ -1,7 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -164,7 +165,7 @@ class _AccountsPageState extends State<AccountsPage> {
           ),
           //if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
           if (accsFeedbackDataModel.data.isNotEmpty)
-          InsufficientBalance(),
+          Platform.isIOS ? SizedBox() : InsufficientBalance(),
           if(accsFeedbackDataModel.data.isEmpty)
           CreateAccountBox(textColor: Styles.whiteColor,)
         ],

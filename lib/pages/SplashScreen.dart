@@ -21,7 +21,7 @@ import '../main.dart';
 import '../model/ReefAppState.dart';
 import '../service/StorageService.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 typedef WidgetCallback = Widget Function();
 
@@ -31,8 +31,6 @@ class SplashApp extends StatefulWidget {
   WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
 
-  final ReefChainApi reefChainApi = ReefChainApi();
-  
   SplashApp({
     required Key key,
     required this.displayOnInit,
@@ -51,12 +49,15 @@ class SplashApp extends StatefulWidget {
 
 class _SplashAppState extends State<SplashApp> {
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
+  late final ReefChainApi reefChainApi;
 
   setLocale(String locale) {
     setState(() {
       _locale = locale;
     });
   }
+
+  Timer? _gifTimer;
 
   static const _firstLaunch = "firstLaunch";
   bool _hasError = false;
@@ -65,7 +66,7 @@ class _SplashAppState extends State<SplashApp> {
   bool _isAuthenticated = false;
   bool _wrongPassword = false;
   bool _biometricsIsAvailable = false;
-  bool? _isFirstLaunch;
+  bool? _isFirstLaunch = false;
   Widget? onInitWidget;
 
   var appReady = false;
@@ -74,13 +75,15 @@ class _SplashAppState extends State<SplashApp> {
   static final LocalAuthentication localAuth = LocalAuthentication();
 
   Future<bool> _checkBiometricsSupport() async {
-  final isDeviceSupported = await localAuth.isDeviceSupported();
-  final isAvailable = await localAuth.canCheckBiometrics;
-  //if it is true - user has registered for bio metrics else didn't
-  final isEnrolled = await localAuth.getAvailableBiometrics().then((value) => value.isNotEmpty);
-  //if biometrics are not enrolled this bool exp will return false
-  return isAvailable && isDeviceSupported && isEnrolled;
-}
+    final isDeviceSupported = await localAuth.isDeviceSupported();
+    final isAvailable = await localAuth.canCheckBiometrics;
+    //if it is true - user has registered for bio metrics else didn't
+    final isEnrolled = await localAuth
+        .getAvailableBiometrics()
+        .then((value) => value.isNotEmpty);
+    //if biometrics are not enrolled this bool exp will return false
+    return isAvailable && isDeviceSupported && isEnrolled;
+  }
 
   Future<bool> _checkRequiresPasswordAuth() async {
     final storedPassword =
@@ -94,13 +97,13 @@ class _SplashAppState extends State<SplashApp> {
     return languageCode;
   }
 
-  Future<void> initAuthentication() async{
+  Future<void> initAuthentication() async {
     var isFirstLaunch = await _checkIfFirstLaunch();
     setState(() {
-        _isFirstLaunch = isFirstLaunch;
+      _isFirstLaunch = isFirstLaunch;
     });
     //if firstLaunch or debugMode set authenticated to true
-    if(isFirstLaunch || kDebugMode){
+    if (isFirstLaunch || kDebugMode) {
       setState(() {
         _requiresAuth = false;
         _isAuthenticated = true;
@@ -109,10 +112,11 @@ class _SplashAppState extends State<SplashApp> {
     }
     // check for bio auth
     var supportsBioAuth = await _checkBiometricsSupport();
-    if(supportsBioAuth){
+    if (supportsBioAuth) {
       // check if user enabled biometrics auth
-      var hasUserEnabledBioAuth = await ReefAppState.instance.storage.getValue("biometricAuth");
-      if(hasUserEnabledBioAuth){
+      var hasUserEnabledBioAuth =
+          await ReefAppState.instance.storage.getValue("biometricAuth");
+      if (hasUserEnabledBioAuth) {
         authenticateWithBiometrics();
         setState(() {
           _biometricsIsAvailable = true;
@@ -121,31 +125,41 @@ class _SplashAppState extends State<SplashApp> {
       }
     }
     // check for password authentication
-      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
-      setState(() {
-          _requiresAuth = requiresPasswordAuth;
-          _isAuthenticated = !requiresPasswordAuth;
-      });
+    var requiresPasswordAuth = await _checkRequiresPasswordAuth();
+    setState(() {
+      _requiresAuth = requiresPasswordAuth;
+      _isAuthenticated = !requiresPasswordAuth;
+    });
   }
 
   @override
   void initState() {
-    getLocale().then((value) => setLocale(value));
-
+    getLocale().then((value) {
+      if (mounted) setLocale(value);
+    });
+    reefChainApi = ReefChainApi();
     _initializeAsyncDependencies();
-      initAuthentication();
-      _passwordController.addListener(() {
-        setState(() {
-          password = _passwordController.text;
-        });
+    initAuthentication();
+    _passwordController.addListener(() {
+      setState(() {
+        password = _passwordController.text;
       });
-      if(mounted){
-        Timer(const Duration(milliseconds: 3830), () {
-          setState(() {
-            _isGifFinished = true;
-          });
+    });
+
+    _gifTimer = Timer(const Duration(milliseconds: 3830), () {
+      if (mounted) {
+        setState(() {
+          _isGifFinished = true;
         });
       }
+    });
+    // if(mounted){
+    //   Timer(const Duration(milliseconds: 3830), () {
+    //     setState(() {
+    //       _isGifFinished = true;
+    //     });
+    //   });
+    // }
 
     super.initState();
   }
@@ -154,6 +168,7 @@ class _SplashAppState extends State<SplashApp> {
   void dispose() {
     super.dispose();
     _passwordController.dispose();
+    _gifTimer?.cancel();
   }
 
   Future<bool> _checkIfFirstLaunch() async {
@@ -163,12 +178,13 @@ class _SplashAppState extends State<SplashApp> {
   }
 
   Future<void> _initializeAsyncDependencies() async {
-       final storageService = StorageService();
-       final walletConnectService = WalletConnectService();
-       await ReefAppState.instance.init(storageService, walletConnectService,widget.reefChainApi);
-       setState(() {
-         appReady = true;
-       });
+    final storageService = StorageService();
+    final walletConnectService = WalletConnectService();
+    await ReefAppState.instance
+        .init(storageService, walletConnectService, reefChainApi);
+    setState(() {
+      appReady = true;
+    });
   }
 
   @override
@@ -194,7 +210,11 @@ class _SplashAppState extends State<SplashApp> {
   }
 
   Widget _buildBody() {
-    debugPrint('----------> $_isGifFinished');
+    debugPrint('_isGifFinished ----------> $_isGifFinished');
+
+    debugPrint('appReady ----------> $appReady');
+    debugPrint('_isAuthenticated ----------> $_isAuthenticated');
+    debugPrint('_isFirstLaunch ----------> $_isFirstLaunch');
 
     if (_hasError) {
       return Center(
@@ -204,11 +224,10 @@ class _SplashAppState extends State<SplashApp> {
         ),
       );
     }
-    //TODO: Initialise the widget back
 
     return Stack(children: <Widget>[
       // reefJsApiService.widget,
-      if ( (appReady == false || _isAuthenticated == false) ||
+      if ((appReady == false || _isAuthenticated == false) ||
           _isFirstLaunch == null)
         Stack(
           children: [
@@ -240,7 +259,7 @@ class _SplashAppState extends State<SplashApp> {
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOutCirc,
-                opacity: 1,//_isGifFinished && _isAuthenticated ? 1 : 0,
+                opacity: 1, //_isGifFinished && _isAuthenticated ? 1 : 0,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -253,27 +272,33 @@ class _SplashAppState extends State<SplashApp> {
                           decoration: TextDecoration.none),
                     ),
                     const Gap(4),
-                    StreamBuilder<String>(stream: ReefAppState.instance.initStatusStream.stream,
+                    StreamBuilder<String>(
+                        stream: ReefAppState.instance.initStatusStream.stream,
                         initialData: ".",
-                        builder: (BuildContext context,AsyncSnapshot<String> snapshot) {
-                          if(snapshot.hasData) {
-                            debugPrint('connectionState ----------> ${snapshot.connectionState}');
-                            return Text(snapshot.data??"...",
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(
+                              snapshot.data ?? "...",
                               style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w400,
                                   fontSize: 16,
                                   color: Styles.textLightColor,
-                                  decoration: TextDecoration.none),);
-                          }else if(snapshot.hasError){
-                            debugPrint('error ----------> ${snapshot.error.toString()}');
+                                  decoration: TextDecoration.none),
+                            );
+                          } else if (snapshot.hasError) {
+                            debugPrint(
+                                'error ----------> ${snapshot.error.toString()}');
                           }
-                          return Text("..",
+                          return Text(
+                            "..",
                             style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 16,
                                 color: Styles.textLightColor,
-                                decoration: TextDecoration.none),);
-                    }),
+                                decoration: TextDecoration.none),
+                          );
+                        }),
                     const Gap(4),
                     const SizedBox(
                       height: 12,
@@ -331,18 +356,17 @@ class _SplashAppState extends State<SplashApp> {
         _wrongPassword = false;
         _isAuthenticated = true;
       });
-    }
-    else{
+    } else {
       // if password set by user , show password screen
       var requiresPasswordAuth = await _checkRequiresPasswordAuth();
-      if(requiresPasswordAuth){
+      if (requiresPasswordAuth) {
         setState(() {
           _requiresAuth = true;
           _isAuthenticated = false;
         });
-      }else{
-      // else recursive call
-      authenticateWithBiometrics();
+      } else {
+        // else recursive call
+        authenticateWithBiometrics();
       }
     }
   }

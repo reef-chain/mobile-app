@@ -5,7 +5,7 @@ import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 class SwitchNetwork extends StatefulWidget {
   const SwitchNetwork({Key? key}) : super(key: key);
@@ -38,7 +38,6 @@ class _SwitchNetworkState extends State<SwitchNetwork> {
                   style: Theme.of(context).textTheme.bodyMedium);
             }),
             Switch(
-              // TODO listen to currentNetwork from mobx model
               value: ReefAppState.instance.model.network.selectedNetworkName ==
                   Network.mainnet.name,
               onChanged: (value) {

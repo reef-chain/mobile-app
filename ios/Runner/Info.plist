@@ -73,5 +73,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Optional location for app statistics</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Optional location for app statistics</string>
 </dict>
 </plist>

@@ -11,7 +11,7 @@ import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/ipfs.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
 
@@ -579,7 +579,7 @@ class _PoolsPageState extends State<PoolsPage> {
                   .decode(dataUrl.split('data:image/svg+xml;base64,')[1])),
               width: 30,
               height: 30)
-          : Image.network(dataUrl, width: 30, height: 30, fit: BoxFit.cover),
+          : Image.network(IpfsUtils.resolveIpfsHash(dataUrl), width: 30, height: 30, fit: BoxFit.cover),
     );
   }
 

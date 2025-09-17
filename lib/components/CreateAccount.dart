@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/utils/account_box.dart';
 
 class CreateAccountBox extends StatefulWidget {

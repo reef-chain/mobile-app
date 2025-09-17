@@ -1,5 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
@@ -8,9 +9,11 @@ import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/modals/show_qr_code.dart';
 import 'package:reef_mobile_app/components/modals/export_qr_account_modal.dart';
+import 'package:reef_mobile_app/components/page_layout_anukul.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
+import 'package:reef_mobile_app/pages/home_page.dart';
 import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 
@@ -337,102 +340,113 @@ class Constants {
 }
 
 showAlertDialog(BuildContext context, ReefAccount signer) {
-  // set up the buttons
-  Widget cancelButton = TextButton(
-    child: Text(AppLocalizations.of(context)!.cancel,
-        style: TextStyle(
-          color: Styles.blueColor,
-        )),
-    onPressed: () {
-      Navigator.of(context).pop();
-    },
-  );
-  Widget continueButton = TextButton(
-    child: Row(
-      children: [
-        Icon(Icons.delete, color: Styles.errorColor),
-        const SizedBox(width: 8.0),
-        Text(
-          "Delete Account",
-          style: TextStyle(color: Styles.errorColor),
-        ),
-      ],
-    ),
-    onPressed: () {
-      ReefAppState.instance.accountCtrl.deleteAccount(signer.address);
-      Navigator.of(context).pop();
-    },
-  );
-
-  // set up the container
-  Container container = Container(
-    decoration: BoxDecoration(
-      color: Styles.primaryBackgroundColor,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: "You will ",
-                style: TextStyle(
-                  color: Styles.textColor,
-                  fontSize: 16,
-                ),
-              ),
-              TextSpan(
-                text: AppLocalizations.of(context)!.permanently_lose,
-                style: TextStyle(
-                  color: Styles.errorColor,
-                  fontSize: 16,
-                ),
-              ),
-              TextSpan(
-                text: " ${AppLocalizations.of(context)!.access_to} ",
-                style: TextStyle(
-                  color: Styles.textColor,
-                  fontSize: 16,
-                ),
-              ),
-              TextSpan(
-                text: "${signer.name}",
-                style: TextStyle(
-                  color: Styles.textColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextSpan(
-                text:
-                    " ${signer.address.shorten()} ${AppLocalizations.of(context)!.unless_saved}",
-                style: TextStyle(
-                  color: Styles.textColor,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            cancelButton,
-            continueButton,
-          ],
-        ),
-      ],
-    ),
-  );
-
   // show the dialog
-  showModal(context,
-      child: container, headText: AppLocalizations.of(context)!.delete_account);
+  showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) => Center(
+              child: SingleChildScrollView(
+            child: CustomModal(
+                headText: AppLocalizations.of(context)!.delete_account,
+                dismissible: true,
+                background: Styles.primaryBackgroundColor,
+                textColor: Styles.textColor,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Styles.primaryBackgroundColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "You will ",
+                              style: TextStyle(
+                                color: Styles.textColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                            TextSpan(
+                              text: AppLocalizations.of(context)!
+                                  .permanently_lose,
+                              style: TextStyle(
+                                color: Styles.errorColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  " ${AppLocalizations.of(context)!.access_to} ",
+                              style: TextStyle(
+                                color: Styles.textColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "${signer.name}",
+                              style: TextStyle(
+                                color: Styles.textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  " ${signer.address.shorten()} ${AppLocalizations.of(context)!.unless_saved}",
+                              style: TextStyle(
+                                color: Styles.textColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            child: Text(AppLocalizations.of(context)!.cancel,
+                                style: TextStyle(
+                                  color: Styles.blueColor,
+                                )),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, color: Styles.errorColor),
+                                const SizedBox(width: 8.0),
+                                Text(
+                                  "Delete Account",
+                                  style: TextStyle(color: Styles.errorColor),
+                                ),
+                              ],
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              ReefAppState.instance.accountCtrl
+                                  .deleteAccount(signer.address);
+                              Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                      builder: (BuildContext context) =>
+                                          BottomNav()));
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )),
+          )));
 }
+
 
 void choiceAction(String choice, BuildContext context, ReefAccount account,
     VoidCallback onSelected) async {
