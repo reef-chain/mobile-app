@@ -7,7 +7,7 @@ import 'package:reef_mobile_app/pages/SplashScreen.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/gradient_text.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 List<TableRow> createTable({required keyTexts, required valueTexts}) {
   List<TableRow> rows = [];

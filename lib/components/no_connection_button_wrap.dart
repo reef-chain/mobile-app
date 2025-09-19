@@ -6,7 +6,7 @@ import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/pages/SplashScreen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
 class ConnectWrapperButton extends StatefulWidget {

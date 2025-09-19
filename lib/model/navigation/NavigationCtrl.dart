@@ -15,7 +15,7 @@ import 'package:reef_mobile_app/pages/wallet_connect_page.dart';
 import 'package:reef_mobile_app/pages/wallet_connect_tx_page.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 import '../../components/sign/SignatureContentToggle.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import "package:flutter/material.dart";
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
