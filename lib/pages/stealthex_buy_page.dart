@@ -37,6 +37,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   String txHash = "";
   double minAmount = 0;
   bool isMinAmountLoading = true;
+  bool isMaintenance = false;
   TextEditingController searchController = TextEditingController();
 
   FocusNode _focusNode = FocusNode();
@@ -51,6 +52,9 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
      ReefAppState.instance.stealthexCtrl.cacheCurrencies().then((v)=>{
     // Fetch the list of currencies
     setState(() {
+      if(ReefAppState.instance.model.stealthexModel.currencies.isEmpty){
+        isMaintenance = true;
+      }
       currencies = ReefAppState.instance.model.stealthexModel.currencies;
 
        _filteredCurrenciesNotifier.value = currencies;
@@ -342,7 +346,44 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return isPurchaseResponse
+    return isMaintenance? Container(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text("Stealthex is under maintenance",style: TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.w600,
+              color: Styles.textLightColor
+            ),),
+            Gap(8.0),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(100.0),
+              child: Container(
+                color: Color(0xFFFFEE33),
+                padding: EdgeInsets.all(8.0),
+                child: Image(
+                        image: AssetImage("./assets/images/stealthex.png"),
+                        width: 160,
+                        height: 160,
+                        ),
+              ),
+            ),
+            Gap(12.0),
+             Text("You'll be able to purchase REEFs shortly.",style: TextStyle(
+              fontSize: 12.0,
+              color: Styles.textLightColor
+            ),),
+            Gap(2.0),
+             Text("Check back soon!",style: TextStyle(
+              fontSize: 12.0,
+              color: Styles.textLightColor
+            ),),
+          ],
+        ),
+      ),
+    ): isPurchaseResponse
         ? Container(
             margin: EdgeInsets.all(16.0),
             padding: EdgeInsets.all(16.0),
