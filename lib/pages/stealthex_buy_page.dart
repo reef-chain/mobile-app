@@ -37,6 +37,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
   String txHash = "";
   double minAmount = 0;
   bool isMinAmountLoading = true;
+  bool isPurchasing = false;
   TextEditingController searchController = TextEditingController();
 
   FocusNode _focusNode = FocusNode();
@@ -248,12 +249,16 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
           padding: const EdgeInsets.all(0),
         ),
         onPressed: () async {
+          if(isPurchasing)return;
           if(inputAmount>minAmount){
 
           if(isCalculateBtn){
             await fetchEstimatedReef(inputAmount);
           }
           else if (estimatedReef > 0.0) {
+            setState(() {
+              isPurchasing=true;
+            });
             var res = await ReefAppState.instance.stealthexCtrl.createExchange(
                 selectedCurrency!["legacy_symbol"],
                 selectedCurrency!["network"],
@@ -273,15 +278,15 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
           decoration: BoxDecoration(
             color: const Color(0xffe6e2f1),
-            gradient: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount) ? null : Styles.buttonGradient,
+            gradient: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount && !isPurchasing) ? null : Styles.buttonGradient,
             borderRadius: const BorderRadius.all(Radius.circular(14.0)),
           ),
           child: Center(
             child: Text(
-              isCalculateBtn? inputAmount>minAmount?"Calculate":"Minimum amount is ${minAmount}":"Purchase",
+              isCalculateBtn? inputAmount>minAmount?"Calculate":"Minimum amount is ${minAmount}":isPurchasing?"Purchasing":"Purchase",
               style: TextStyle(
                 fontSize: 16,
-                color: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount)
+                color: !((estimatedReef > 0 || isCalculateBtn)&& inputAmount>minAmount && !isPurchasing)
                     ? const Color(0x65898e9c)
                     : Colors.white,
                 fontWeight: FontWeight.w700,
