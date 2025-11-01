@@ -58,26 +58,37 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    try{
+    super.initState(); // ✅ first
+
+    try {
       providerConnStateSubs = ReefAppState.instance.networkCtrl
           .getProviderConnLogs()
-          .listen((event) {
-        setState(() {
-          providerConn = event;
-          debugPrint('providerConn event  ----> ${event?.isConnected}');
-        });
-      });
-    } catch(e){
-  debugPrint('providerConn event  error ----> ${e}');
-  debugPrint('providerConn event  error ----> ${e.toString()}');
-
-  }
-    super.initState();
+          .listen(
+            (event) {
+          if (!mounted) return;            // ✅ guard
+          setState(() {
+            providerConn = event;
+            debugPrint('providerConn event  ----> ${event?.isConnected}');
+          });
+        },
+        onError: (e, st) {                  // ✅ error handler
+          debugPrint('providerConn listen error ----> $e');
+          if (!mounted) return;
+          setState(() {
+            providerConn = null;
+          });
+        },
+        cancelOnError: false,               // keep listening after errors
+      );
+    } catch (e) {
+      debugPrint('providerConn subscribe error ----> $e');
+    }
   }
 
   @override
   void dispose() {
-    providerConnStateSubs?.cancel();
+    // ✅ always cancel
+    try { providerConnStateSubs?.cancel(); } catch (_) {}
     super.dispose();
   }
 
@@ -168,42 +179,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget navSection() {
+    final shouldShowReload =
+        (gqlConn?.isConnected != true) || (providerConn?.isConnected != true); // ✅ clearer
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 12, left: 12, right: 12),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Styles.primaryBackgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: const HSLColor.fromAHSL(
-                      1, 256.3636363636, 0.379310344828, 0.843137254902)
-                  .toColor(),
-              offset: const Offset(10, 10),
-              blurRadius: 20,
-              spreadRadius: -5,
-            ),
-            BoxShadow(
-              color:
-                  const HSLColor.fromAHSL(1, 256.3636363636, 0.379310344828, 1)
-                      .toColor(),
-              offset: const Offset(-10, -10),
-              blurRadius: 20,
-              spreadRadius: -5,
-            ),
-          ]),
+        borderRadius: BorderRadius.circular(15),
+        color: Styles.primaryBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: const HSLColor.fromAHSL(
+                1, 256.3636363636, 0.379310344828, 0.843137254902)
+                .toColor(),
+            offset: const Offset(10, 10),
+            blurRadius: 20,
+            spreadRadius: -5,
+          ),
+          BoxShadow(
+            color: const HSLColor.fromAHSL(
+                1, 256.3636363636, 0.379310344828, 1)
+                .toColor(),
+            offset: const Offset(-10, -10),
+            blurRadius: 20,
+            spreadRadius: -5,
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          if(gqlConn!=null && providerConn!=null && (!gqlConn!.isConnected==true || !providerConn!.isConnected))rowMember({
-            "key": null,
-            "name": "Reload",
-            "component": null,
-            "icon": Icons.refresh,
-            "function": () => ReefAppState.instance.tokensCtrl.reload(true)
-          }),
-          ..._viewsMap.map<Widget>((e) => rowMember(e)).toList()
-        ]),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            if (shouldShowReload)
+              rowMember({
+                "key": null,
+                "name": "Reload",
+                "component": null,
+                "icon": Icons.refresh,
+                "function": () => ReefAppState.instance.tokensCtrl.reload(true),
+              }),
+            ..._viewsMap.map<Widget>((e) => rowMember(e)).toList(),
+          ],
+        ),
       ),
     );
   }

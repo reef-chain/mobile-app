@@ -27,13 +27,14 @@ typedef WidgetCallback = Widget Function();
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-class SplashApp extends StatefulWidget {
-  WidgetCallback displayOnInit;
-  final Widget heroVideo = const HeroVideo();
 
+
+class SplashApp extends StatefulWidget {
+  final WidgetCallback displayOnInit;
+  final Widget heroVideo = const HeroVideo();
   final ReefChainApi reefChainApi = ReefChainApi();
-  
-  SplashApp({
+
+   SplashApp({
     required Key key,
     required this.displayOnInit,
   }) : super(key: key);
@@ -41,22 +42,17 @@ class SplashApp extends StatefulWidget {
   @override
   _SplashAppState createState() => _SplashAppState();
 
+  // If something calls this, we guard inside to avoid setState after dispose.
   static void setLocale(BuildContext context, String newLocale) {
-    print(
-        'setting locale to ===================================== ${newLocale}');
-    _SplashAppState? state = context.findAncestorStateOfType<_SplashAppState>();
-    state?.setLocale(newLocale);
+    final state = context.findAncestorStateOfType<_SplashAppState>();
+    if (state != null && state.mounted) {
+      state.setLocale(newLocale);
+    }
   }
 }
 
 class _SplashAppState extends State<SplashApp> {
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
-
-  setLocale(String locale) {
-    setState(() {
-      _locale = locale;
-    });
-  }
 
   static const _firstLaunch = "firstLaunch";
   bool _hasError = false;
@@ -66,287 +62,272 @@ class _SplashAppState extends State<SplashApp> {
   bool _wrongPassword = false;
   bool _biometricsIsAvailable = false;
   bool? _isFirstLaunch;
-  Widget? onInitWidget;
 
-  var appReady = false;
+  bool appReady = false;
   final TextEditingController _passwordController = TextEditingController();
   String password = "";
   static final LocalAuthentication localAuth = LocalAuthentication();
 
+  Timer? _gifTimer;
+
+  void setLocale(String locale) {
+    if (!mounted) return;
+    setState(() => _locale = locale);
+  }
+
   Future<bool> _checkBiometricsSupport() async {
-  final isDeviceSupported = await localAuth.isDeviceSupported();
-  final isAvailable = await localAuth.canCheckBiometrics;
-  //if it is true - user has registered for bio metrics else didn't
-  final isEnrolled = await localAuth.getAvailableBiometrics().then((value) => value.isNotEmpty);
-  //if biometrics are not enrolled this bool exp will return false
-  return isAvailable && isDeviceSupported && isEnrolled;
-}
+    final isDeviceSupported = await localAuth.isDeviceSupported();
+    final isAvailable = await localAuth.canCheckBiometrics;
+    final isEnrolled =
+        (await localAuth.getAvailableBiometrics()).isNotEmpty;
+    return isAvailable && isDeviceSupported && isEnrolled;
+  }
 
   Future<bool> _checkRequiresPasswordAuth() async {
     final storedPassword =
-        await ReefAppState.instance.storage.getValue(StorageKey.password.name);
+    await ReefAppState.instance.storage.getValue(StorageKey.password.name);
     return storedPassword != null && storedPassword != "";
   }
 
-  Future<String> getLocale() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    String languageCode = _prefs.getString("languageCode") ?? 'en';
-    return languageCode;
-  }
-
-  Future<void> initAuthentication() async{
-    var isFirstLaunch = await _checkIfFirstLaunch();
-    setState(() {
-        _isFirstLaunch = isFirstLaunch;
-    });
-    //if firstLaunch or debugMode set authenticated to true
-    if(isFirstLaunch || kDebugMode){
-      setState(() {
-        _requiresAuth = false;
-        _isAuthenticated = true;
-      });
-      return;
-    }
-    // check for bio auth
-    var supportsBioAuth = await _checkBiometricsSupport();
-    if(supportsBioAuth){
-      // check if user enabled biometrics auth
-      var hasUserEnabledBioAuth = await ReefAppState.instance.storage.getValue("biometricAuth");
-      if(hasUserEnabledBioAuth){
-        authenticateWithBiometrics();
-        setState(() {
-          _biometricsIsAvailable = true;
-        });
-        return;
-      }
-    }
-    // check for password authentication
-      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
-      setState(() {
-          _requiresAuth = requiresPasswordAuth;
-          _isAuthenticated = !requiresPasswordAuth;
-      });
+  Future<String> _getSavedLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("languageCode") ?? 'en';
   }
 
   @override
   void initState() {
-    getLocale().then((value) => setLocale(value));
+    super.initState();
+
+    _getSavedLocale().then((value) {
+      if (!mounted) return;
+      setLocale(value);
+    });
 
     _initializeAsyncDependencies();
-      initAuthentication();
-      _passwordController.addListener(() {
-        setState(() {
-          password = _passwordController.text;
-        });
-      });
-      if(mounted){
-        Timer(const Duration(milliseconds: 3830), () {
-          setState(() {
-            _isGifFinished = true;
-          });
-        });
-      }
+    _initAuthentication();
 
-    super.initState();
+    _passwordController.addListener(() {
+      if (!mounted) return;
+      setState(() => password = _passwordController.text);
+    });
+
+    _gifTimer = Timer(const Duration(milliseconds: 3830), () {
+      if (!mounted) return;
+      setState(() => _isGifFinished = true);
+    });
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _gifTimer?.cancel();
     _passwordController.dispose();
+    super.dispose();
   }
 
   Future<bool> _checkIfFirstLaunch() async {
     final isFirstLaunch =
-        await ReefAppState.instance.storage.getValue(_firstLaunch);
+    await ReefAppState.instance.storage.getValue(_firstLaunch);
     return isFirstLaunch == null;
   }
 
-  Future<void> _initializeAsyncDependencies() async {
-       final storageService = StorageService();
-       final walletConnectService = WalletConnectService();
-       await ReefAppState.instance.init(storageService, walletConnectService,widget.reefChainApi);
-       setState(() {
-         appReady = true;
-       });
-  }
+  Future<void> _initAuthentication() async {
+    try {
+      final first = await _checkIfFirstLaunch();
+      if (!mounted) return;
+      setState(() => _isFirstLaunch = first);
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Reef Chain App',
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      locale: Locale(_locale),
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          primarySwatch: Colors.blue,
-          textTheme: GoogleFonts.poppinsTextTheme(
-            Theme.of(context).textTheme,
-          )),
-      home: _buildBody(),
-      navigatorKey: navigatorKey,
-    );
-  }
+      if (first || kDebugMode) {
+        if (!mounted) return;
+        setState(() {
+          _requiresAuth = false;
+          _isAuthenticated = true;
+        });
+        return;
+      }
 
-  Widget _buildBody() {
-    debugPrint('----------> $_isGifFinished');
+      final supportsBio = await _checkBiometricsSupport();
+      if (!mounted) return;
+      if (supportsBio) {
+        final hasUserEnabledBio =
+        await ReefAppState.instance.storage.getValue("biometricAuth");
+        if (!mounted) return;
+        if (hasUserEnabledBio == true) {
+          setState(() => _biometricsIsAvailable = true);
+          await _authenticateWithBiometrics();
+          return;
+        }
+      }
 
-    if (_hasError) {
-      return Center(
-        child: ElevatedButton(
-          child: const Text('retry'),
-          onPressed: () => main(),
-        ),
-      );
+      final requiresPwd = await _checkRequiresPasswordAuth();
+      if (!mounted) return;
+      setState(() {
+        _requiresAuth = requiresPwd;
+        _isAuthenticated = !requiresPwd;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _hasError = true);
     }
-    //TODO: Initialise the widget back
-
-    return Stack(children: <Widget>[
-      // reefJsApiService.widget,
-      if ( (appReady == false || _isAuthenticated == false) ||
-          _isFirstLaunch == null)
-        Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              color: Styles.splashBackgroundColor,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/images/intro.gif",
-                    height: 128.0,
-                    width: 128.0,
-                  ),
-                  const Gap(16),
-                  Visibility(
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    visible: _requiresAuth && !_isAuthenticated,
-                    child: _buildAuth(),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 24,
-              right: 24,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOutCirc,
-                opacity: 1,//_isGifFinished && _isAuthenticated ? 1 : 0,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Initializing app",
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                          color: Styles.textLightColor,
-                          decoration: TextDecoration.none),
-                    ),
-                    const Gap(4),
-                    StreamBuilder<String>(stream: ReefAppState.instance.initStatusStream.stream,
-                        initialData: ".",
-                        builder: (BuildContext context,AsyncSnapshot<String> snapshot) {
-                          if(snapshot.hasData) {
-                            return Text(snapshot.data??"...",
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: Styles.textLightColor,
-                                  decoration: TextDecoration.none),);
-                          }else if(snapshot.hasError){
-                            debugPrint('error ----------> ${snapshot.error.toString()}');
-                          }
-                          return Text("..",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
-                                color: Styles.textLightColor,
-                                decoration: TextDecoration.none),);
-                    }),
-                    const Gap(4),
-                    const SizedBox(
-                      height: 12,
-                      width: 12,
-                      child: CircularProgressIndicator.adaptive(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Styles.textLightColor)),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        )
-      else if (_isFirstLaunch == true &&
-          appReady == true &&
-          _isAuthenticated == true)
-        IntroductionPage(
-          heroVideo: widget.heroVideo,
-          onDone: () async {
-            await ReefAppState.instance.storage.setValue(_firstLaunch, false);
-            setState(() {
-              _isFirstLaunch = false;
-            });
-          },
-        )
-      else
-        widget.displayOnInit(),
-    ]);
   }
 
-  Future<void> authenticateWithPassword(String value) async {
-    final storedPassword =
-        await ReefAppState.instance.storage.getValue(StorageKey.password.name);
-    if (storedPassword == value) {
+  Future<void> _initializeAsyncDependencies() async {
+    try {
+      final storageService = StorageService();
+      final walletConnectService = WalletConnectService();
+      await ReefAppState.instance
+          .init(storageService, walletConnectService, widget.reefChainApi);
+      if (!mounted) return;
+      setState(() => appReady = true);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _hasError = true);
+    }
+  }
+
+  Future<void> _authenticateWithPassword(String value) async {
+    final stored =
+    await ReefAppState.instance.storage.getValue(StorageKey.password.name);
+    if (!mounted) return;
+    if (stored == value) {
       setState(() {
         _wrongPassword = false;
         _isAuthenticated = true;
       });
     } else {
-      setState(() {
-        _wrongPassword = true;
-      });
+      setState(() => _wrongPassword = true);
     }
   }
 
-  Future<void> authenticateWithBiometrics() async {
-    final isValid = await localAuth.authenticate(
-        localizedReason: 'Authenticate with biometrics',
-        options: const AuthenticationOptions(
-            useErrorDialogs: true, stickyAuth: true, biometricOnly: true));
-    if (isValid) {
-      setState(() {
-        _wrongPassword = false;
-        _isAuthenticated = true;
-      });
-    }
-    else{
-      // if password set by user , show password screen
-      var requiresPasswordAuth = await _checkRequiresPasswordAuth();
-      if(requiresPasswordAuth){
-        setState(() {
-          _requiresAuth = true;
-          _isAuthenticated = false;
-        });
-      }else{
-      // else recursive call
-      authenticateWithBiometrics();
-      }
-    }
+  Future<void> _authenticateWithBiometrics() => _authenticateWithBiometrics();
+
+
+  @override
+  Widget build(BuildContext context) {
+    // NOTE: No MaterialApp here — main.dart provides it.
+    return _buildBody(context);
   }
 
-  Widget _buildAuth() {
+  Widget _buildBody(BuildContext context) {
+    if (_hasError) {
+      return Center(
+        child: ElevatedButton(
+          child: const Text('Retry'),
+          onPressed: () {
+            // simple retry: rerun both
+            if (!mounted) return;
+            setState(() {
+              _hasError = false;
+              appReady = false;
+            });
+            _initializeAsyncDependencies();
+            _initAuthentication();
+          },
+        ),
+      );
+    }
+
+    return Stack(
+      children: <Widget>[
+        if ((appReady == false || _isAuthenticated == false) ||
+            _isFirstLaunch == null)
+          Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                color: Styles.splashBackgroundColor,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/images/intro.gif",
+                      height: 128.0,
+                      width: 128.0,
+                    ),
+                    const Gap(16),
+                    Visibility(
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      visible: _requiresAuth && !_isAuthenticated,
+                      child: _buildAuth(context),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 24,
+                right: 24,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOutCirc,
+                  opacity: 1,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)?.loading ?? "Initializing app",
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                          color: Styles.textLightColor,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                      const Gap(4),
+                      // Note: StreamBuilder is fine; it doesn't call setState on Splash
+                      // It's internal; no leak.
+                      StreamBuilder<String>(
+                        stream: ReefAppState.instance.initStatusStream.stream,
+                        initialData: ".",
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          final text = snapshot.hasData
+                              ? snapshot.data ?? "..."
+                              : "..";
+                          return Text(
+                            text,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
+                              color: Styles.textLightColor,
+                              decoration: TextDecoration.none,
+                            ),
+                          );
+                        },
+                      ),
+                      const Gap(4),
+                      const SizedBox(
+                        height: 12,
+                        width: 12,
+                        child: CircularProgressIndicator.adaptive(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Styles.textLightColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          )
+        else if (_isFirstLaunch == true && appReady == true && _isAuthenticated == true)
+          IntroductionPage(
+            heroVideo: widget.heroVideo,
+            onDone: () async {
+              await ReefAppState.instance.storage.setValue(_firstLaunch, false);
+              if (!mounted) return;
+              setState(() => _isFirstLaunch = false);
+            },
+          )
+        else
+          widget.displayOnInit(),
+      ],
+    );
+  }
+
+  Widget _buildAuth(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: Padding(
@@ -357,13 +338,15 @@ class _SplashAppState extends State<SplashApp> {
             const Text(
               "PASSWORD FOR REEF APP",
               style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Styles.textLightColor),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Styles.textLightColor,
+              ),
             ),
             const Gap(8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: Styles.whiteColor,
                 borderRadius: BorderRadius.circular(12),
@@ -376,9 +359,7 @@ class _SplashAppState extends State<SplashApp> {
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration.collapsed(hintText: ''),
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
+                style: const TextStyle(fontSize: 16),
               ),
             ),
             const Gap(8),
@@ -401,58 +382,49 @@ class _SplashAppState extends State<SplashApp> {
                 ],
               ),
             const Gap(12),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
+            SizedBox(
               width: double.infinity,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        splashFactory: !(password.isNotEmpty)
-                            ? NoSplash.splashFactory
-                            : InkSplash.splashFactory,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40)),
-                        shadowColor: const Color(0x559d6cff),
-                        elevation: 5,
-                        backgroundColor: (password.isNotEmpty)
-                            ? Styles.secondaryAccentColor
-                            : const Color(0xff9d6cff),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      onPressed: () {
-                        if (password.isNotEmpty) {
-                          authenticateWithPassword(password);
-                        }
-                      },
-                      child: Text(
-                        'Send',
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Styles.whiteColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  splashFactory: !(password.isNotEmpty)
+                      ? NoSplash.splashFactory
+                      : InkSplash.splashFactory,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40)),
+                  shadowColor: const Color(0x559d6cff),
+                  elevation: 5,
+                  backgroundColor: (password.isNotEmpty)
+                      ? Styles.secondaryAccentColor
+                      : const Color(0xff9d6cff),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () {
+                  if (password.isNotEmpty) {
+                    _authenticateWithPassword(password);
+                  }
+                },
+                child: Text(
+                  'Send',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Styles.whiteColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
+                ),
               ),
             ),
             const Gap(36),
             Visibility(
-                maintainSize: true,
-                maintainAnimation: true,
-                maintainState: true,
-                visible: _biometricsIsAvailable,
-                child: Center(
-                    child: MaterialButton(
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              visible: _biometricsIsAvailable,
+              child: Center(
+                child: MaterialButton(
                   minWidth: 0,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  onPressed: authenticateWithBiometrics,
+                  onPressed: _authenticateWithBiometrics,
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(0.0),
                   child: Ink(
@@ -472,10 +444,13 @@ class _SplashAppState extends State<SplashApp> {
                     child: Icon(Icons.fingerprint,
                         size: 36, color: Styles.whiteColor),
                   ),
-                ))),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+

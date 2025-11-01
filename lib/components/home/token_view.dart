@@ -34,6 +34,7 @@ class _TokenViewState extends State<TokenView> {
     String? iconURL = token.data.iconUrl;
     BigInt? balance = token.data.balance;
     double price = token.data.price ?? 0.0;
+    int decimals = (token.data.price ?? 0.0) as int;
     String tokenName = token.data.symbol ?? "";
     bool isLoading = token.hasStatus(StatusCode.loading);
 
@@ -108,7 +109,7 @@ class _TokenViewState extends State<TokenView> {
   final displayBalance = ReefAppState.instance.model.appConfig.displayBalance;
   return Observer(builder: (context) {
     return FutureBuilder<String>(
-      future: ReefAppState.instance.accountCtrl.formatBalance(balance.toString(), price),
+      future: ReefAppState.instance.accountCtrl.formatBalance(balance.toString(), price,decimals),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Text("");
