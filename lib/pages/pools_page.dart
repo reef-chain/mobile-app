@@ -14,6 +14,15 @@ import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
+import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
+import 'package:reef_mobile_app/model/ReefAppState.dart';
+import 'package:reef_mobile_app/utils/styles.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PoolsPage extends StatefulWidget {
   const PoolsPage({super.key});
@@ -24,24 +33,17 @@ class PoolsPage extends StatefulWidget {
 
 class _PoolsPageState extends State<PoolsPage> {
   List<dynamic> _pools = ReefAppState.instance.poolsCtrl.getCachedPools();
-  Map<String, dynamic> tokenBalances = {};
+  final Map<String, dynamic> tokenBalances = {};
   int offset = 0;
   bool isLoading = false;
 
-  // searched pools
+  // search
   List<dynamic>? searchedPools;
   String searchInput = "";
   bool searched = false;
-  bool displaySearchModal = false;
-  // bool filterSwappable = false;
+  bool hasReef = false;
 
-  // filtering pools
-  bool hasReef = false; //if user has reef display only swappable
-
-  // search input listeners
-  bool _isSearchEditing = false;
-
-  FocusNode _focusNodeSearch = FocusNode();
+  final FocusNode _focusNodeSearch = FocusNode();
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -53,26 +55,69 @@ class _PoolsPageState extends State<PoolsPage> {
       setState(() {
         searchInput = _searchController.text;
         searched = searchInput.isNotEmpty;
-        searchPools(searchInput);
       });
+      searchPools(searchInput);
     });
     _fetchUserBalance();
-    _fetchTokensAndPools();
+    _fetchTokensAndPools(initial: true);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _focusNodeSearch.removeListener(_onFocusSearchChange);
+    _focusNodeSearch.dispose();
+    super.dispose();
+  }
+
+  void _onFocusSearchChange() {
+    // optional visual effect toggle; keep if you use it in the UI
+    // setState(() {});
   }
 
   void _fetchUserBalance() {
     try {
-      var selectedAccount = ReefAppState.instance.model.accounts.accountsList
+      final selectedAccount = ReefAppState
+          .instance.model.accounts.accountsList
           .firstWhere((account) =>
-              account.address ==
-              ReefAppState.instance.model.accounts.selectedAddress);
+      account.address ==
+          ReefAppState.instance.model.accounts.selectedAddress);
       if (selectedAccount.balance > BigInt.zero) {
+        setState(() => hasReef = true);
+      }
+    } catch (e) {
+      debugPrint("error fetching selected account $e");
+    }
+  }
+
+  Future<void> _fetchTokensAndPools({bool initial = false}) async {
+    if (isLoading) return;
+    setState(() => isLoading = true);
+
+    // gather balances
+    final selectedTokens = ReefAppState.instance.model.tokens.selectedErc20List;
+    for (final token in selectedTokens) {
+      tokenBalances[token.address] = token.balance;
+    }
+
+    // fetch pools page
+    try {
+      final pools = await ReefAppState.instance.poolsCtrl.getPools(offset, "");
+      if (pools is List<dynamic>) {
+        if (initial && _pools.isEmpty) {
+          _pools = pools;
+        } else {
+          ReefAppState.instance.poolsCtrl.appendPools(pools);
+          _pools = ReefAppState.instance.poolsCtrl.getCachedPools();
+        }
         setState(() {
-          hasReef = true;
+          offset += 10;
         });
       }
     } catch (e) {
-      print("error in fetching selected account ${e}");
+      debugPrint('getPools error: $e');
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -81,76 +126,100 @@ class _PoolsPageState extends State<PoolsPage> {
       searchInput = "";
       _searchController.text = "";
       searched = false;
+      searchedPools = null;
     });
     searchPools("");
   }
 
-  void searchPools(String val) async {
-    final searchedPoolsRes =
-        await ReefAppState.instance.poolsCtrl.getPools(0, val);
-    setState(() {
-      searchedPools = searchedPoolsRes;
-    });
-  }
-
-  void _onFocusSearchChange() {
-    setState(() {
-      _isSearchEditing = !_isSearchEditing;
-    });
-  }
-
-  void _fetchTokensAndPools() async {
-    if (isLoading) return;
-    setState(() {
-      isLoading = true;
-    });
-
-    var selectedTokens = ReefAppState.instance.model.tokens.selectedErc20List;
-    for (var token in selectedTokens) {
-      tokenBalances[token.address] = token.balance;
-    }
-    final pools = offset == 0
-        ? []
-        : await ReefAppState.instance.poolsCtrl.getPools(offset, "");
-    if (pools is List<dynamic>) {
-      ReefAppState.instance.poolsCtrl.appendPools(pools);
+  Future<void> searchPools(String val) async {
+    try {
+      final res = await ReefAppState.instance.poolsCtrl.getPools(0, val);
+      if (!mounted) return;
       setState(() {
-        offset += 10;
-        isLoading = false;
+        searchedPools = res is List<dynamic> ? res : const [];
       });
+    } catch (e) {
+      debugPrint('searchPools error: $e');
+      if (!mounted) return;
+      setState(() => searchedPools = const []);
     }
   }
 
   bool hasBalance(String addr) {
     return tokenBalances.containsKey(addr) &&
-        tokenBalances[addr] > BigInt.from(0);
+        (tokenBalances[addr] as BigInt) > BigInt.zero;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _searchController.dispose();
-    _focusNodeSearch.removeListener(_onFocusSearchChange);
-    _focusNodeSearch.dispose();
+  // ---- UI helpers ----
+
+  String _normalizeIpfsUrl(String url) {
+    // some gateways can be blocked or flaky; fall back to ipfs.io
+    if (url.startsWith('https://cloudflare-ipfs.com/ipfs/')) {
+      return url.replaceFirst('https://cloudflare-ipfs.com/ipfs/', 'https://ipfs.io/ipfs/');
+    }
+    return url;
+  }
+
+  Widget _tokenIcon(String? dataUrl, {double size = 30}) {
+    if (dataUrl == null || dataUrl.isEmpty) {
+      return _fallbackTokenCircle(size);
+    }
+    // base64 svg inline
+    if (isValidSVG(dataUrl)) {
+      try {
+        final base64Str = dataUrl.split('data:image/svg+xml;base64,')[1];
+        return ClipOval(
+          child: SvgPicture.string(
+            utf8.decode(base64.decode(base64Str)),
+            width: size,
+            height: size,
+          ),
+        );
+      } catch (_) {
+        return _fallbackTokenCircle(size);
+      }
+    }
+    // network image with gateway normalization + safe fallback
+    final url = _normalizeIpfsUrl(dataUrl);
+    return ClipOval(
+      child: Image.network(
+        url,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _fallbackTokenCircle(size),
+      ),
+    );
+  }
+
+  Widget _fallbackTokenCircle(double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Color(0xFFECECF1),
+      ),
+      child: const Icon(Icons.image_not_supported, size: 16, color: Colors.grey),
+    );
   }
 
   Widget getPoolCard(dynamic pool) {
     return Container(
-      margin: EdgeInsets.only(bottom: 4.0),
+      margin: const EdgeInsets.only(bottom: 4.0),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ListTile(
-              leading: Container(
+              leading: SizedBox(
                 width: 44,
                 child: Stack(
                   clipBehavior: Clip.none,
                   alignment: Alignment.centerLeft,
                   children: [
-                    buildIcon(pool['iconUrl1'], 0),
-                    Positioned(
-                        left: 14, child: buildIcon(pool['iconUrl2'], 14)),
+                    _tokenIcon(pool['iconUrl1']),
+                    Positioned(left: 14, child: _tokenIcon(pool['iconUrl2'])),
                   ],
                 ),
               ),
@@ -159,164 +228,131 @@ class _PoolsPageState extends State<PoolsPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('${pool['symbol1']}/${pool['symbol2']}'),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Tooltip(
                     message: '${pool['token1']}/\n${pool['token2']}',
-                    textStyle: TextStyle(
-                      fontSize: 12.0,
-                      color: Colors.white,
-                    ),
+                    textStyle: const TextStyle(fontSize: 12.0, color: Colors.white),
                     decoration: BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Icon(
-                      Icons.help_outline,
-                      size: 18.0,
-                      color: Colors.grey,
-                    ),
+                    child: const Icon(Icons.help_outline, size: 18.0, color: Colors.grey),
                   ),
                 ],
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text('TVL : ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 12.0)),
-                      Text('\$${pool["tvl"]}',
-                          style: TextStyle(fontSize: 12.0)),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text('24h Vol. : ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 12.0)),
-                      Text('\$ ${pool['volume24h']}',
-                          style: TextStyle(fontSize: 12.0)),
-                      Text(' ${pool['volumeChange24h']} %',
-                          style: TextStyle(
-                              fontSize: 12.0,
-                              color: Styles.greenColor,
-                              fontWeight: FontWeight.bold)),
-                    ],
-                  ),
+                  Row(children: [
+                    const Text('TVL : ',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
+                    Text('\$${pool["tvl"]}', style: const TextStyle(fontSize: 12.0)),
+                  ]),
+                  Row(children: [
+                    const Text('24h Vol. : ',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
+                    Text('\$ ${pool['volume24h']}', style: const TextStyle(fontSize: 12.0)),
+                    Text(' ${pool['volumeChange24h']} %',
+                        style:  TextStyle(
+                            fontSize: 12.0, color: Styles.greenColor, fontWeight: FontWeight.bold)),
+                  ]),
                 ],
               ),
             ),
             if (hasBalance(pool['token1']) || hasBalance(pool['token2']))
               Container(
-                margin: EdgeInsets.only(
-                    top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
+                margin: const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
                 decoration: BoxDecoration(
-                  boxShadow: [
+                  boxShadow:  [
                     BoxShadow(
-                        color: Styles.secondaryAccentColorDark,
-                        spreadRadius: -10,
-                        offset: Offset(0, 5),
-                        blurRadius: 20),
+                      color: Styles.secondaryAccentColorDark,
+                      spreadRadius: -10,
+                      offset: Offset(0, 5),
+                      blurRadius: 20,
+                    ),
                   ],
                   borderRadius: BorderRadius.circular(80),
-                  gradient: LinearGradient(
-                    colors: [
-                      Styles.purpleColorLight,
-                      Styles.secondaryAccentColorDark
-                    ],
+                  gradient:  LinearGradient(
+                    colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
                     begin: Alignment(-1, -1),
                     end: Alignment(1, 1),
                   ),
                 ),
                 child: ElevatedButton.icon(
-                  icon: const Icon(
-                    CupertinoIcons.repeat,
-                    color: Colors.white,
-                    size: 16.0,
-                  ),
+                  icon: const Icon(CupertinoIcons.repeat, color: Colors.white, size: 16.0),
                   style: ElevatedButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor: Colors.transparent,
-                      shape: const StadiumBorder(),
-                      elevation: 0),
-                  label: Text(
-                    "Swap",
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w700),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    backgroundColor: Colors.transparent,
+                    shape: const StadiumBorder(),
+                    elevation: 0,
                   ),
+                  label: const Text('Swap',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   onPressed: () async {
                     ReefAppState.instance.navigationCtrl.navigateToSwapPage(
-                        context: context,
-                        preselectedTop: pool['token1'],
-                        preselectedBottom: pool['token2']);
+                      context: context,
+                      preselectedTop: pool['token1'],
+                      preselectedBottom: pool['token2'],
+                    );
                   },
                 ),
-              )
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget buildLoader() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(child: CircularProgressIndicator()),
-    );
-  }
-
   Widget buildSearchAcknowledge() {
     return Container(
       margin: const EdgeInsets.only(top: 8.0),
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          searchedPools == null
-              ? Text(
-                  "Search pools for ${searchInput} ...",
+          if (searchedPools == null)
+            Text(
+              "Search pools for $searchInput ...",
+              style: const TextStyle(
+                color: Styles.textLightColor,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w800,
+              ),
+            )
+          else if (searchedPools!.isEmpty)
+            Row(
+              children: const [
+                Icon(Icons.error, size: 14.0, color: Styles.errorColor),
+                Gap(4.0),
+                Text(
+                  "No pools found!",
                   style: TextStyle(
-                      color: Styles.textLightColor,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w800),
-                )
-              : searchedPools!.isEmpty
-                  ? Row(
-                      children: [
-                        Icon(Icons.error, size: 14.0, color: Styles.errorColor),
-                        const Gap(4.0),
-                        Text(
-                          "No pools found for ${searchInput}!",
-                          style: TextStyle(
-                              color: Styles.errorColor,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14),
-                        ),
-                      ],
-                    )
-                  : Text(
-                      "Search Results for ${searchInput} ( ${searchedPools?.length} )",
-                      style: TextStyle(
-                          color: Styles.textLightColor,
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w800),
-                    ),
+                    color: Styles.errorColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              "Search Results for $searchInput ( ${searchedPools!.length} )",
+              style: const TextStyle(
+                color: Styles.textLightColor,
+                fontSize: 14.0,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           GestureDetector(
-            onTap: () {
-              clearSearch();
-            },
+            onTap: clearSearch,
             child: Container(
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Styles.buttonColor),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.close,
-                  size: 12,
-                  color: Styles.whiteColor,
-                ),
+                borderRadius: BorderRadius.circular(20),
+                color: Styles.buttonColor,
+              ),
+              child:  Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Icon(Icons.close, size: 12, color: Styles.whiteColor),
               ),
             ),
           ),
@@ -328,38 +364,33 @@ class _PoolsPageState extends State<PoolsPage> {
   Widget buildSearchContainer() {
     return Column(
       children: [
-        Gap(16),
+        const Gap(16),
         Row(
           children: [
-            Gap(4.0),
+            const Gap(4.0),
             Expanded(
               child: AnimatedContainer(
-                duration: Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 decoration: BoxDecoration(
                   color: Styles.whiteColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0x20000000),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0x20000000), width: 1),
                 ),
                 child: TextField(
                   focusNode: _focusNodeSearch,
                   controller: _searchController,
-                  decoration:
-                      const InputDecoration.collapsed(hintText: 'Search'),
+                  decoration: const InputDecoration.collapsed(hintText: 'Search'),
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
             ),
           ],
         ),
-        Gap(4.0),
+        const Gap(4.0),
         if (searched) buildSearchAcknowledge(),
-        Gap(4.0),
+        const Gap(4.0),
       ],
     );
   }
@@ -375,6 +406,7 @@ class _PoolsPageState extends State<PoolsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -386,183 +418,80 @@ class _PoolsPageState extends State<PoolsPage> {
                         color: Colors.grey.shade100,
                       ),
                     ),
-                    Row(
-                      children: [
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     setState(() {
-                        //       filterSwappable = true;
-                        //     });
-                        //   },
-                        //   child: Container(
-                        //     decoration: BoxDecoration(
-                        //       borderRadius: BorderRadius.circular(20),
-                        //       color: Styles.boxBackgroundColor,
-                        //     ),
-                        //     child: Padding(
-                        //       padding: const EdgeInsets.all(8.0),
-                        //       child: Icon(
-                        //         Icons.sort,
-                        //         size: 18,
-                        //         color: Styles.textLightColor,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        // Gap(8.0),
-                        // GestureDetector(
-                        //   onTap: () {
-                        //     setState(() {
-                        //       displaySearchModal = true;
-                        //     });
-                        //   },
-                        //   child: Container(
-                        //     decoration: BoxDecoration(
-                        //         borderRadius: BorderRadius.circular(20),
-                        //         gradient: Styles.buttonGradient),
-                        //     child: Padding(
-                        //       padding: const EdgeInsets.all(8.0),
-                        //       child: Icon(
-                        //         Icons.search,
-                        //         size: 18,
-                        //         color: Styles.whiteColor,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                      ],
-                    ),
+                    const Row(children: [
+                      // action icons (kept commented intentionally)
+                    ]),
                   ],
                 ),
-                // if(filterSwappable)
-                // Container(
-                //   padding: EdgeInsets.only(bottom: 4.0),
-                //   child: Row(
-                //     children: [
-                //       Text(
-                //         "Filter applied ",
-                //         style: TextStyle(
-                //             color: Styles.textLightColor,
-                //             fontWeight: FontWeight.bold),
-                //       ),
-                //       Container(
-                //         padding: EdgeInsets.only(
-                //             top: 4.0, bottom: 4.0, left: 12.0, right: 12.0),
-                //         decoration: BoxDecoration(
-                //           color: Styles.whiteColor,
-                //           borderRadius: BorderRadius.circular(12.0),
-                //         ),
-                //         child: Row(
-                //           children: [
-                //             Text(
-                //               "can swap",
-                //               style: TextStyle(
-                //                   color: Styles.textLightColor,
-                //                   fontSize: 12,
-                //                   fontWeight: FontWeight.w600),
-                //             ),
-                //             Gap(8.0),
-                //             GestureDetector(
-                //               onTap: (){
-                //                 setState(() {
-                //                   filterSwappable=false;
-                //                 });
-                //               },
-                //                 child: Container(
-                //               decoration: BoxDecoration(
-                //                   color: Styles.greyColor,
-                //                   borderRadius: BorderRadius.circular(20)),
-                //               child: Padding(
-                //                 padding: const EdgeInsets.all(2.0),
-                //                 child: Icon(CupertinoIcons.xmark,
-                //                     color: Colors.black87, size: 12),
-                //               ),
-                //             )),
-                //           ],
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                if (hasReef)
+
+                if (hasReef) ...[
+                  const Gap(8.0),
+                  buildSearchContainer(),
+                  const Gap(8.0),
+                ] else
                   Column(
-                    children: [
-                      Gap(8.0),
-                      buildSearchContainer(),
-                      Gap(8.0),
+                    children: const [
+                      // Replace with your own “insufficient balance” widget if needed
+                      Gap(16.0),
                     ],
                   ),
-                if (!hasReef)
-                  Container(
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                                child: InsufficientBalance(
-                              customText: "Get REEFs to swap tokens",
-                            ))
-                          ],
-                        ),
-                        Gap(16.0)
-                      ],
-                    ),
-                  ),
-                Flexible(
+
+                // List area
+                Expanded(
                   child: NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification scrollInfo) {
+                    onNotification: (scrollInfo) {
                       if (!isLoading &&
-                          scrollInfo.metrics.pixels ==
-                              scrollInfo.metrics.maxScrollExtent) {
+                          scrollInfo.metrics.pixels >=
+                              scrollInfo.metrics.maxScrollExtent - 24) {
                         _fetchTokensAndPools();
                       }
-                      return true;
+                      return false;
                     },
-                    child: searchedPools != null && searchedPools!.isNotEmpty
-                        ? Expanded(
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: searchedPools!.length,
-                              itemBuilder: (context, index) {
-                                var pool = searchedPools![index];
-                                if (hasReef) {
-                                  if (hasBalance(pool['token1']) ||
-                                      hasBalance(pool['token2']))
-                                    return getPoolCard(pool);
-                                  else
-                                    return Container();
-                                }
-                                // return getPoolCard(pool);
-                              },
-                            ),
-                          )
-                        : _pools.isNotEmpty
-                            ? ListView.builder(
-                                padding: EdgeInsets.zero,
-                                itemCount: _pools.length,
-                                itemBuilder: (context, index) {
-                                  var pool = _pools[index];
-                                  //                             if(filterSwappable){
-                                  //   if(hasBalance(pool['token1']) || hasBalance(pool['token2']))return getPoolCard(pool);
-                                  //   else return Container();
-                                  // }else{
-                                  if (hasReef) {
-                                    if (hasBalance(pool['token1']) ||
-                                        hasBalance(pool['token2']))
-                                      return getPoolCard(pool);
-                                    else
-                                      return Container();
-                                  }
-                                  return getPoolCard(pool);
-                                  // }
-                                },
-                              )
-                            : Center(
-                                child: CircularProgressIndicator(
-                                    color: Styles.primaryColor)),
+                    child: (searched && searchedPools != null)
+                        ? ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: searchedPools!.length,
+                      itemBuilder: (context, index) {
+                        final pool = searchedPools![index];
+                        if (hasReef) {
+                          if (hasBalance(pool['token1']) ||
+                              hasBalance(pool['token2'])) {
+                            return getPoolCard(pool);
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        }
+                        return getPoolCard(pool);
+                      },
+                    )
+                        : (_pools.isNotEmpty)
+                        ? ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: _pools.length,
+                      itemBuilder: (context, index) {
+                        final pool = _pools[index];
+                        if (hasReef) {
+                          if (hasBalance(pool['token1']) ||
+                              hasBalance(pool['token2'])) {
+                            return getPoolCard(pool);
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        }
+                        return getPoolCard(pool);
+                      },
+                    )
+                        :  Center(
+                      child: CircularProgressIndicator(color: Styles.primaryColor),
+                    ),
                   ),
                 ),
-                if (isLoading && _pools.isNotEmpty) buildLoader()
+
+                if (isLoading && _pools.isNotEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
               ],
             ),
           ),
@@ -571,19 +500,8 @@ class _PoolsPageState extends State<PoolsPage> {
     );
   }
 
-  Widget buildIcon(String dataUrl, double positionOffset) {
-    return ClipOval(
-      child: isValidSVG(dataUrl)
-          ? SvgPicture.string(
-              utf8.decode(base64
-                  .decode(dataUrl.split('data:image/svg+xml;base64,')[1])),
-              width: 30,
-              height: 30)
-          : Image.network(dataUrl, width: 30, height: 30, fit: BoxFit.cover),
-    );
-  }
-
   bool isValidSVG(String? dataUrl) {
     return dataUrl != null && dataUrl.contains("data:image/svg+xml;base64,");
   }
 }
+

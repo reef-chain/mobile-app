@@ -35,7 +35,7 @@ List<BarItemNavigationPage> bottomNavigationBarItems = [
     page: NavigationPage.accounts,
     label: 'Accounts',
   ),
- if(Platform.isAndroid) BarItemNavigationPage(
+ if(Platform.isAndroid||Platform.isIOS) BarItemNavigationPage(
     icon: Icon(Icons.cached),
     page: NavigationPage.pools,
     label: 'Pools',
@@ -169,7 +169,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     var pages = [
       const HomePage(key: PageStorageKey("homepage")),
       AccountsPage(key: const PageStorageKey("accountPage")),
-      if(Platform.isAndroid) const PoolsPage(key: const PageStorageKey("poolsPage")),
+      if(Platform.isAndroid||Platform.isIOS) const PoolsPage(key: const PageStorageKey("poolsPage")),
       // const StealthexBuyPage(key: const PageStorageKey("stealthexBuyPage")),
       const SettingsPage(key: PageStorageKey("settingsPage"))];
    

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:reef_mobile_app/l10n/app_localizations.dart';
@@ -9,14 +8,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:reef_chain_flutter/network/ws-conn-state.dart';
 import 'package:reef_mobile_app/components/CreateAccount.dart';
-import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/home/NFT_view.dart';
-import 'package:reef_mobile_app/components/home/activity_view.dart';
 import 'package:reef_mobile_app/components/home/token_view.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/account_modals.dart';
-import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
-import 'package:reef_mobile_app/components/modals/restore_json_modal.dart';
 import 'package:reef_mobile_app/components/sign/SignatureContentToggle.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
@@ -26,59 +21,46 @@ import 'package:reef_mobile_app/utils/gradient_text.dart';
 import 'package:reef_mobile_app/utils/size_config.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-
 import '../components/BlurableContent.dart';
 
+
+
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  /*void _navigateTestDApp(String url) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => DAppPage(ReefAppState.instance, url)),
-    );
-  }
-
-  void _navigateTestPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const TestPage()),
-    );
-  }*/
-
   WsConnState? providerConn;
   WsConnState? gqlConn;
   StreamSubscription? providerConnStateSubs;
 
   @override
   void initState() {
-    super.initState(); // ✅ first
+    super.initState();
 
+    // Provider connection logs
     try {
       providerConnStateSubs = ReefAppState.instance.networkCtrl
           .getProviderConnLogs()
           .listen(
             (event) {
-          if (!mounted) return;            // ✅ guard
+          if (!mounted) return;
           setState(() {
             providerConn = event;
             debugPrint('providerConn event  ----> ${event?.isConnected}');
           });
         },
-        onError: (e, st) {                  // ✅ error handler
+        onError: (e, st) {
           debugPrint('providerConn listen error ----> $e');
           if (!mounted) return;
           setState(() {
             providerConn = null;
           });
         },
-        cancelOnError: false,               // keep listening after errors
+        cancelOnError: false,
       );
     } catch (e) {
       debugPrint('providerConn subscribe error ----> $e');
@@ -87,27 +69,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    // ✅ always cancel
-    try { providerConnStateSubs?.cancel(); } catch (_) {}
+    try {
+      providerConnStateSubs?.cancel();
+    } catch (_) {}
     super.dispose();
   }
 
-  final List _viewsMap = const [
+  // Tabs for Tokens / NFTs (same as your earlier map)
+  final List<Map<String, dynamic>> _viewsMap = const [
     {"key": 0, "name": "Tokens", "component": TokenView()},
-    /*{
-      "key": 1,
-      "name": "Stakings",
-      "active": false,
-      "component": const StakingView()
-    },*/
     {"key": 1, "name": "NFTs", "component": NFTView()},
-    // {"key": 2, "name": "Activity", "component": ActivityView()}
   ];
 
-  Widget rowMember(Map member) {
+  Widget _rowMember(Map member) {
     return InkWell(
       onTap: member['function'] ??
-          () {
+              () {
             HapticFeedback.selectionClick();
             ReefAppState.instance.navigationCtrl
                 .navigateHomePage(member["key"] as int);
@@ -115,27 +92,20 @@ class _HomePageState extends State<HomePage> {
       child: Observer(builder: (_) {
         final index =
             ReefAppState.instance.model.homeNavigationModel.currentIndex;
-        var color = member["key"] == index
-            ? Styles.whiteColor
-            : Styles.primaryBackgroundColor;
-        List<BoxShadow> boxShadow = member["key"] == index
-            ? [
-                const BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 5,
-                  offset: Offset(0, 2.5),
-                )
-              ]
-            : [];
+        final bool isActive = member["key"] == index;
 
-        var opacity = member["key"] == index ? 1.0 : 0.5;
+        Color color = isActive ? Styles.whiteColor : Styles.primaryBackgroundColor;
+        List<BoxShadow> boxShadow =
+        isActive ? [const BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2.5))] : [];
+        double opacity = isActive ? 1.0 : 0.5;
 
-        var textStyle = const TextStyle(
+        TextStyle textStyle = const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w700,
           color: Styles.textColor,
         );
 
+        // Special "Reload" tile (member["key"] == null)
         if (member["key"] == null) {
           color = Styles.purpleColor;
           boxShadow = [
@@ -148,39 +118,42 @@ class _HomePageState extends State<HomePage> {
           opacity = 1.0;
           textStyle = textStyle.copyWith(color: Styles.whiteColor);
         }
+
         return AnimatedContainer(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(9),
-              color: color,
-              boxShadow: boxShadow,
-            ),
-            duration: const Duration(milliseconds: 200),
-            child: Opacity(
-              opacity: opacity,
-              child: Row(
-                children: [
-                  if(member["icon"]!=null)...[Icon(member["icon"], color: Styles.textLightColor), const Gap(4)],
-                  Text(
-                    member["name"] == "Reload"
-                        ? "Reload"
-                        : member["name"] == "Tokens"
-                            ? AppLocalizations.of(context)!.tokens
-                            : member["name"] == "Activity"
-                                ? AppLocalizations.of(context)!.activity
-                                : AppLocalizations.of(context)!.nfts,
-                    style: textStyle,
-                  ),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            color: color,
+            boxShadow: boxShadow,
+          ),
+          duration: const Duration(milliseconds: 200),
+          child: Opacity(
+            opacity: opacity,
+            child: Row(
+              children: [
+                if (member["icon"] != null) ...[
+                  Icon(member["icon"], color: Styles.textLightColor),
+                  const Gap(4),
                 ],
-              ),
-            ));
+                Text(
+                  member["name"] == "Reload"
+                      ? "Reload"
+                      : member["name"] == "Tokens"
+                      ? AppLocalizations.of(context)!.tokens
+                      : AppLocalizations.of(context)!.nfts,
+                  style: textStyle,
+                ),
+              ],
+            ),
+          ),
+        );
       }),
     );
   }
 
-  Widget navSection() {
+  Widget _navSection() {
     final shouldShowReload =
-        (gqlConn?.isConnected != true) || (providerConn?.isConnected != true); // ✅ clearer
+        (gqlConn?.isConnected != true) || (providerConn?.isConnected != true);
 
     return Container(
       width: double.infinity,
@@ -190,17 +163,13 @@ class _HomePageState extends State<HomePage> {
         color: Styles.primaryBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: const HSLColor.fromAHSL(
-                1, 256.3636363636, 0.379310344828, 0.843137254902)
-                .toColor(),
+            color: const HSLColor.fromAHSL(1, 256.36, 0.379, 0.843).toColor(),
             offset: const Offset(10, 10),
             blurRadius: 20,
             spreadRadius: -5,
           ),
           BoxShadow(
-            color: const HSLColor.fromAHSL(
-                1, 256.3636363636, 0.379310344828, 1)
-                .toColor(),
+            color: const HSLColor.fromAHSL(1, 256.36, 0.379, 1).toColor(),
             offset: const Offset(-10, -10),
             blurRadius: 20,
             spreadRadius: -5,
@@ -213,17 +182,26 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             if (shouldShowReload)
-              rowMember({
+              _rowMember({
                 "key": null,
                 "name": "Reload",
                 "component": null,
                 "icon": Icons.refresh,
                 "function": () => ReefAppState.instance.tokensCtrl.reload(true),
               }),
-            ..._viewsMap.map<Widget>((e) => rowMember(e)).toList(),
+            ..._viewsMap.map<Widget>((e) => _rowMember(e)),
           ],
         ),
       ),
+    );
+  }
+
+  void _showCreateAccountModal(BuildContext context, {bool fromMnemonic = false}) {
+    showModal(
+      context,
+      headText: fromMnemonic ? "Import Account" : "Create Account",
+      dismissible: true,
+      child: CurrentScreen(fromMnemonic: fromMnemonic),
     );
   }
 
@@ -231,88 +209,51 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    return SignatureContentToggle(Container(
+    return SignatureContentToggle(
+      Container(
         color: Styles.primaryBackgroundColor,
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: const SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
-              statusBarIconBrightness: Brightness.dark,
-            ),
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              clipBehavior: Clip.none,
-              slivers: [
-                /*Row(children: [
-                ElevatedButton(
-                  child: const Text('test dApp 1'),
-                  onPressed: () => _navigateTestDApp(
-                      "https://mobile-dapp-test.web.app/testnet"),
-                  // https://min-dapp.web.app
-                  // https://app.reef.io
-                ),
-                ElevatedButton(
-                  child: const Text('test dApp 2'),
-                  onPressed: () => _navigateTestDApp(
-                      "https://console.reefscan.com/#/settings/metadata"),
-                ),
-                ElevatedButton(
-                    child: const Text('test'), onPressed: _navigateTestPage),
-              ]),*/
-                SliverPersistentHeader(delegate: _BalanceHeaderDelegate()),
-                SliverPinnedHeader(
-                  child: navSection(),
-                ),
-                // SliverToBoxAdapter(
-                //   child: AnimatedContainer(
-                //       duration: const Duration(milliseconds: 200),
-                //       height: _isScrolling ? 16 : 0),
-                // ),
-                Observer(builder: (_) {
-                  final accsFeedbackDataModel =
-                      ReefAppState.instance.model.accounts.accountsFDM;
-                  if (accsFeedbackDataModel.data.isEmpty) {
-                    return SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 12),
-                        sliver: SliverToBoxAdapter(
-                          child: CreateAccountBox(),
-                        ));
-                  }
-                  // return Text('len=${accsFeedbackDataModel.data.length}');
-                  final index = ReefAppState
-                      .instance.model.homeNavigationModel.currentIndex;
-                  return SliverClip(
-                    child: _viewsMap[index]["component"],
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+          ),
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            clipBehavior: Clip.none,
+            slivers: [
+              SliverPersistentHeader(delegate: BalanceHeaderDelegate()),
+              SliverPinnedHeader(child: _navSection()),
+              Observer(builder: (_) {
+                final accsFeedbackDataModel =
+                    ReefAppState.instance.model.accounts.accountsFDM;
+                if (accsFeedbackDataModel.data.isEmpty) {
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    sliver: SliverToBoxAdapter(child: CreateAccountBox()),
                   );
-                }),
+                }
 
-                // height: ((size.height + 64) / 2),
-                // width: double.infinity,
-
-                // TODO: ADD ALERT SYSTEM FOR ERRORS HERE
-                // test()
-              ],
-            ))));
-  }
-
-  void showCreateAccountModal(BuildContext context,
-      {bool fromMnemonic = false}) {
-    showModal(context,
-        headText: fromMnemonic ? "Import Account" : "Create Account",
-        dismissible: true,
-        child: CurrentScreen(fromMnemonic: fromMnemonic));
+                final index =
+                    ReefAppState.instance.model.homeNavigationModel.currentIndex;
+                return SliverClip(child: _viewsMap[index]["component"]);
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
-class _BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Opacity(
-      opacity: _calculateOpacity(shrinkOffset),
-      child: balanceSection(30),
-    );
-  }
+///
+/// Optimized balance header
+/// - Avoids recomputing balance on eye toggle
+/// - Clean opacity clamp
+///
+class BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
+  BalanceHeaderDelegate();
+
+  static final NumberFormat _fmtCompact = NumberFormat.compact();
 
   @override
   double get maxExtent => 200;
@@ -321,76 +262,98 @@ class _BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 0;
 
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return true;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => true;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Opacity(
+      opacity: _clamp01(((shrinkOffset - maxExtent) / maxExtent).abs()),
+      child: _balanceSection(context),
+    );
   }
 
-  Widget balanceSection(double size) {
+  Widget _balanceSection(BuildContext context) {
     return AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOutCirc,
-        width: size,
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOutCirc,
+      width: 30,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Builder(builder: (context) {
-                        return Text(AppLocalizations.of(context)!.balance,
-                            style: TextStyle(
-                                fontSize: 38,
-                                fontWeight: FontWeight.w700,
-                                color: Styles.primaryColor));
-                      }),
-                      IconButton(
-                          onPressed: () {
-                            ReefAppState.instance.appConfigCtrl
-                                .toggleDisplayBalance();
-                          },
-                          icon: Icon(ReefAppState.instance.model.appConfig
-                                      .displayBalance ==
-                                  true
-                              ? Icons.remove_red_eye_sharp
-                              : Icons.visibility_off),
-                          color: Styles.textLightColor),
-                    ],
+                  Builder(
+                    builder: (ctx) => Text(
+                      AppLocalizations.of(ctx)!.balance,
+                      style: TextStyle(
+                        fontSize: 38,
+                        fontWeight: FontWeight.w700,
+                        color: Styles.primaryColor,
+                      ),
+                    ),
                   ),
-                  Center(
-                    child: Observer(builder: (_) {
-                      return BlurableContent(
-                          GradientText(
-                            "\$${NumberFormat.compact().format(_sumTokenBalances(ReefAppState.instance.model.tokens.selectedErc20List.toList()))}",
-                            gradient: textGradient(),
-                            style: GoogleFonts.poppins(
-                                color: Styles.textColor,
-                                fontSize: 68,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 3),
-                          ),
-                          ReefAppState.instance.model.appConfig.displayBalance);
-                    }),
+                  IconButton(
+                    onPressed: () {
+                      ReefAppState.instance.appConfigCtrl.toggleDisplayBalance();
+                      HapticFeedback.selectionClick();
+                    },
+                    icon: Observer(
+                      builder: (_) => Icon(
+                        ReefAppState.instance.model.appConfig.displayBalance == true
+                            ? Icons.remove_red_eye_sharp
+                            : Icons.visibility_off,
+                      ),
+                    ),
+                    color: Styles.textLightColor,
                   ),
-                ]),
+                ],
+              ),
+
+              // 1) Total (depends on tokens only)
+              // 2) BlurableContent (depends on displayBalance only)
+              Observer(
+                builder: (_) {
+                  final tokens =
+                      ReefAppState.instance.model.tokens.selectedErc20List;
+                  final total = _sumTokenBalances(tokens);
+                  final totalStr = _fmtCompact.format(total);
+
+                  final totalWidget = GradientText(
+                    "\$$totalStr",
+                    gradient: textGradient(),
+                    style: GoogleFonts.poppins(
+                      color: Styles.textColor,
+                      fontSize: 68,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 3,
+                    ),
+                  );
+
+                  final show =
+                      ReefAppState.instance.model.appConfig.displayBalance;
+                  return BlurableContent(totalWidget, show);
+                },
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   double _sumTokenBalances(List<TokenWithAmount> list) {
     var sum = 0.0;
     for (final token in list) {
-      double balValue = getBalanceValueBI(token.balance, token.price);
-      if (balValue > 0) {
-        sum = sum + balValue;
-      }
+      final balValue = getBalanceValueBI(token.balance, token.price);
+      if (balValue > 0) sum += balValue;
     }
     return sum;
   }
 
-  double _calculateOpacity(double shrinkOffset) =>
-      ((shrinkOffset - 200) / 200).abs();
+  double _clamp01(double v) => v < 0 ? 0 : (v > 1 ? 1 : v);
 }
+

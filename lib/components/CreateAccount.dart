@@ -39,7 +39,7 @@ class _CreateAccountBoxState extends State<CreateAccountBox> {
                         
                 onPressed: () {
                   showAddAccountModal(
-                      AppLocalizations.of(context)!.add_account, openModal);
+                      AppLocalizations.of(context)!.add_account, openModal,context: context);
                 },
                 icon: const Icon(Icons.account_balance_wallet_outlined),
                 label: Text(AppLocalizations.of(context)!.add_account,style: TextStyle(color: Styles.whiteColor),));

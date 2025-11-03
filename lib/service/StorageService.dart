@@ -9,13 +9,23 @@ import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
 import 'package:reef_mobile_app/model/metadata/metadata.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
+
+
+/// Thrown when storage permission is not granted and Hive cannot be initialized.
+class StoragePermissionException implements Exception {
+  final String message;
+  StoragePermissionException([this.message = 'Storage permission not granted']);
+  @override
+  String toString() => 'StoragePermissionException: $message';
+}
 
 class StorageService {
-  Completer<Box<dynamic>> mainBox = Completer();
-  Completer<Box<dynamic>> metadataBox = Completer();
-  Completer<Box<dynamic>> authUrlsBox = Completer();
-  Completer<Box<dynamic>> accountsBox = Completer();
-  Completer<Box<dynamic>> jwtsBox = Completer();
+  final Completer<Box<dynamic>> mainBox = Completer();
+  final Completer<Box<dynamic>> metadataBox = Completer();
+  final Completer<Box<dynamic>> authUrlsBox = Completer();
+  final Completer<Box<dynamic>> accountsBox = Completer();
+  final Completer<Box<dynamic>> jwtsBox = Completer();
 
   StorageService() {
     _initAsync();
@@ -76,19 +86,30 @@ class StorageService {
       jwtsBox.future.then((Box<dynamic> box) => box.delete(address));
 
   Future<void> _initAsync() async {
-    if (await _checkPermission()) {
-      _initHive();
+    try {
+      final allowed = await _checkPermission();
+      if (!allowed) {
+        final e = StoragePermissionException();
+        _completeAllWithError(e);
+        return; // do not init Hive
+      }
+
+      await _initHive();
+    } catch (e, st) {
+      debugPrint('StorageService _initAsync error: $e\n$st');
+      _completeAllWithError(e, st);
     }
   }
 
   Future<void> _initHive() async {
     final prefs = await SharedPreferences.getInstance();
-    var dir = await getApplicationDocumentsDirectory();
-    var path = "${dir.path}/hive_store";
+    final dir = await getApplicationDocumentsDirectory();
+    final path = "${dir.path}/hive_store";
     Hive.init(path);
 
+    // Register adapters once
     if (!Hive.isAdapterRegistered(1)) {
-    Hive.registerAdapter(StoredAccountAdapter());
+      Hive.registerAdapter(StoredAccountAdapter());
     }
     if (!Hive.isAdapterRegistered(2)) {
       Hive.registerAdapter(MetadataAdapter());
@@ -97,44 +118,88 @@ class StorageService {
       Hive.registerAdapter(AuthUrlAdapter());
     }
 
-    mainBox.complete(Hive.openBox('ReefChainBox'));
-    metadataBox.complete(Hive.openBox('MetadataBox'));
-    authUrlsBox.complete(Hive.openBox('AuthUrlsBox'));
-    jwtsBox.complete(Hive.openBox('JwtsBox'));
+    // Open unencrypted boxes
+    if (!mainBox.isCompleted) {
+      mainBox.complete(Hive.openBox('ReefChainBox'));
+    }
+    if (!metadataBox.isCompleted) {
+      metadataBox.complete(Hive.openBox('MetadataBox'));
+    }
+    if (!authUrlsBox.isCompleted) {
+      authUrlsBox.complete(Hive.openBox('AuthUrlsBox'));
+    }
+    if (!jwtsBox.isCompleted) {
+      jwtsBox.complete(Hive.openBox('JwtsBox'));
+    }
 
-    // Encryption
+    // Encrypted box for accounts
     const secureStorage = FlutterSecureStorage();
     if (prefs.getBool('first_run') ?? true) {
       await secureStorage.deleteAll();
-
       prefs.setBool('first_run', false);
     }
+
     var key = await secureStorage.read(key: 'encryptionKey');
     if (key == null) {
-      var key = Hive.generateSecureKey();
+      final generated = Hive.generateSecureKey();
       await secureStorage.write(
-          key: 'encryptionKey', value: base64UrlEncode(key));
+        key: 'encryptionKey',
+        value: base64UrlEncode(generated),
+      );
+      key = await secureStorage.read(key: 'encryptionKey');
     }
-    key = await secureStorage.read(key: 'encryptionKey');
-    var encryptionKey = base64Url.decode(key!);
 
-    accountsBox.complete(Hive.openBox('AccountsBox',
-        encryptionCipher: HiveAesCipher(encryptionKey)));
+    final encryptionKey = base64Url.decode(key!);
+
+    if (!accountsBox.isCompleted) {
+      accountsBox.complete(
+        Hive.openBox(
+          'AccountsBox',
+          encryptionCipher: HiveAesCipher(encryptionKey),
+        ),
+      );
+    }
   }
 
   Future<bool> _checkPermission() async {
+    // NOTE: If you store in app documents dir, on modern Android this may not require
+    // runtime storage permission. If you still rely on it, keep this.
     final status = await Permission.storage.status;
-    print('PERMISSION STORAGE=$status');
-    if (status.isDenied) {
-      // We didn't ask for permission yet or the permission has been denied before but not permanently.
-      if (await Permission.storage.request().isGranted) {
-        print("PERMISSION GRANTED");
-        return true;
-      } else {
-        print("PERMISSION DENIED");
-        return true;
-      }
+    debugPrint('PERMISSION STORAGE=$status');
+
+    if (status.isGranted) return true;
+
+    if (status.isPermanentlyDenied) {
+      debugPrint("PERMISSION PERMANENTLY DENIED");
+      return false;
     }
-    return await Permission.storage.status.isGranted;
+
+    final result = await Permission.storage.request();
+
+    if (result.isGranted) {
+      debugPrint("PERMISSION GRANTED");
+      return true;
+    }
+
+    if (result.isPermanentlyDenied) {
+      debugPrint("PERMISSION PERMANENTLY DENIED (after request)");
+      return false;
+    }
+
+    debugPrint("PERMISSION DENIED");
+    return false;
+  }
+
+  void _completeAllWithError(Object e, [StackTrace? st]) {
+    if (!mainBox.isCompleted) mainBox.completeError(e, st ?? StackTrace.current);
+    if (!metadataBox.isCompleted) metadataBox.completeError(e, st ?? StackTrace.current);
+    if (!authUrlsBox.isCompleted) authUrlsBox.completeError(e, st ?? StackTrace.current);
+    if (!accountsBox.isCompleted) accountsBox.completeError(e, st ?? StackTrace.current);
+    if (!jwtsBox.isCompleted) jwtsBox.completeError(e, st ?? StackTrace.current);
+  }
+
+  /// Optional helper: call from UI to open app settings for permanently denied case
+  Future<void> openStoragePermissionSettings() async {
+    await openAppSettings();
   }
 }

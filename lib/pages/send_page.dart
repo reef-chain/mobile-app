@@ -940,6 +940,21 @@ class _SendPageState extends State<SendPage> {
   }
 
   List<Widget> buildSliderWidgets(TokenWithAmount selectedToken) {
+    // decide precision based on token decimals (cap at 8 for UI sanity)
+    final int uiDecimals = (selectedToken.decimals != null && selectedToken.decimals > 0)
+        ? (selectedToken.decimals > 8 ? 8 : selectedToken.decimals)
+        : 6;
+
+    double balance = getSelectedTokenBalance(selectedToken);
+    final double maxTransfer = getMaxTransferAmount(selectedToken, balance);
+
+    // keep rating within 0..1 (in case previous state got weird)
+    final double safeRating = rating.isNaN || rating.isInfinite
+        ? 0.0
+        : rating.clamp(0.0, 1.0);
+
+    String formatAmount(double v) => v.toStringAsFixed(uiDecimals);
+
     return [
       SliderTheme(
         data: SliderThemeData(
@@ -954,42 +969,51 @@ class _SendPageState extends State<SendPage> {
             darkenInactive: true,
           ),
           activeTickMarkColor: const Color(0xffffffff),
-          tickMarkShape:
-          const RoundSliderTickMarkShape(tickMarkRadius: 4),
+          tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
           thumbShape: const ThumbShape(),
         ),
         child: Slider(
-          value: rating,
+          // keep the internal 0..1 “rating” model
+          value: safeRating,
           onChanged: isFormDisabled
               ? null
               : (newRating) async {
-            final amountStr =
-            getSliderValues(newRating, selectedToken);
+            // compute amount from rating with better precision
+            final double rawAmt = (maxTransfer * newRating);
+            final String amountStr = formatAmount(
+              rawAmt.isNaN || rawAmt.isInfinite ? 0 : rawAmt.clamp(0, maxTransfer),
+            );
+
             final status = await _validate(
               address,
               selectedToken,
               amountStr,
-              true,
+              true, // skipAsync for smoothness while dragging
             );
             if (!mounted) return;
             setState(() {
+              rating = newRating.clamp(0.0, 1.0);
               amount = amountStr;
               amountController.text = amountStr;
               statusValue = status;
             });
           },
           onChangeEnd: (newRating) async {
-            final amountStr = getSliderValues(newRating, selectedToken);
+            final double rawAmt = (maxTransfer * newRating);
+            final String amountStr = formatAmount(
+              rawAmt.isNaN || rawAmt.isInfinite ? 0 : rawAmt.clamp(0, maxTransfer),
+            );
             amount = amountStr;
             amountController.text = amountStr;
-            final status =
-            await _validate(address, selectedToken, amount);
+
+            final status = await _validate(address, selectedToken, amount);
             if (!mounted) return;
             setState(() => statusValue = status);
           },
           inactiveColor: Colors.white24,
-          divisions: 100,
-          label: "${(rating * 100).toInt()}%",
+          // 👇 increase precision a lot
+          divisions: 1000,
+          label: "${(safeRating * 100).toStringAsFixed(0)}%",
         ),
       ),
       const Padding(
@@ -1140,16 +1164,31 @@ class _SendPageState extends State<SendPage> {
   }
 
   String getSliderValues(double newRating, TokenWithAmount selectedToken) {
-    rating = newRating;
-    final balance = getSelectedTokenBalance(selectedToken);
-    double? amountValue = (balance * rating);
-    if (amountValue <= 0) amountValue = null;
+    // Clamp rating within valid bounds
+    rating = newRating.clamp(0.0, 1.0);
 
+    // Get user token balance
+    final balance = getSelectedTokenBalance(selectedToken);
     final maxTransferAmount = getMaxTransferAmount(selectedToken, balance);
-    if (amountValue != null && amountValue > maxTransferAmount) {
+
+    // Calculate new amount value
+    double amountValue = balance * rating;
+
+    // Fix invalid or out-of-range values
+    if (amountValue.isNaN || amountValue.isInfinite || amountValue < 0) {
+      amountValue = 0;
+    }
+    if (amountValue > maxTransferAmount) {
       amountValue = maxTransferAmount >= 0 ? maxTransferAmount : 0;
     }
-    return amountValue?.toStringAsFixed(2) ?? '';
+
+    // Use token decimals for precision — up to 8 for UX neatness
+    final int uiDecimals = (selectedToken.decimals != null && selectedToken.decimals > 0)
+        ? (selectedToken.decimals > 8 ? 8 : selectedToken.decimals)
+        : 6;
+
+    // Return properly formatted string
+    return amountValue.toStringAsFixed(uiDecimals);
   }
 
   double getMaxTransferAmount(TokenWithAmount token, double balance) =>
