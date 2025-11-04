@@ -19,6 +19,11 @@ import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 import '../../components/sign/SignatureContentToggle.dart';
 
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+
 class NavigationCtrl with NavSwipeCompute {
   final NavigationModel _navigationModel;
   final HomePageNavigationModel _homePageNavigationModel;
@@ -46,198 +51,270 @@ class NavigationCtrl with NavSwipeCompute {
       return;
     }
     final pageDiff = computeSwipeAnimation(
-        currentPage: _navigationModel.currentPage, page: navigationPage);
+      currentPage: _navigationModel.currentPage,
+      page: navigationPage,
+    );
 
     if (pageDiff.abs() > 1) {
       HapticFeedback.selectionClick();
-      _swipeComplete = _swipePageTo(
-          nr: pageDiff);
+      _swipeComplete = _swipePageTo(nr: pageDiff);
     } else {
-      _swipeComplete = _swipePageTo(
-          nr: pageDiff);
+      _swipeComplete = _swipePageTo(nr: pageDiff);
       HapticFeedback.selectionClick();
       _navigationModel.navigate(navigationPage);
     }
   }
 
-  void navigateToSendPage(
-      {required BuildContext context,
-      required String preselected,
-      String? preSelectedTransferAddress}) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.send_tokens,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 24,
-                      color: Styles.whiteColor,
-                    )),
-                backgroundColor: Colors.deepPurple.shade700,
-                iconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
-              ),
-              body: SendPage(
-                  preselected,
-                  preSelectedTransferAddress: preSelectedTransferAddress,
-                ),
-               backgroundColor: Styles.greyColor,
-              ),
-             )));
+  // ---------- Safe navigator helpers ----------
+  BuildContext? _obtainContext(BuildContext? ctx) {
+    if (ctx != null) return ctx;
+    // Use your global navigatorKey if available in scope
+    try {
+      return navigatorKey.currentContext;
+    } catch (_) {
+      return null;
+    }
   }
 
-
-  void navigateToSendNFTPage(
-      {required BuildContext context,
-      required String nftUrl,
-      required String name,
-      required int balance,
-      required String nftId,
-      required String mimetype}) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.send_nft,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 24,
-                      color: Styles.whiteColor
-                    )),
-                backgroundColor: Colors.deepPurple.shade700,
-                iconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
-              ),
-              backgroundColor: Styles.greyColor,
-              body: 
-              // Padding(
-              //     padding:
-              //         const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-              //     child: 
-                  SendNFT(nftUrl, name, balance, nftId, mimetype)
-                  ),
-            // )
-            )
-            ));
-  }
-  void navigateToTxInfo(
-      {required BuildContext context,
-      required String unparsedTimestamp,
-      required String? imageUrl,
-      required String? iconUrl,
-      required String? mimetype}) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.transaction_info,
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 24,
-                      color: Styles.whiteColor
-                    )),
-                backgroundColor: Colors.deepPurple.shade700,
-                iconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
-              ),
-              body: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
-                child: TxInfo(unparsedTimestamp, imageUrl, iconUrl, mimetype),
-              ),
-              backgroundColor: Styles.greyColor,
-            ))));
+  bool get _isAppResumed {
+    final binding = WidgetsBinding.instance;
+    // If lifecycleState is unavailable/null, assume true to avoid false negatives
+    final state = binding.lifecycleState;
+    return state == null || state == AppLifecycleState.resumed;
   }
 
-  void navigateToSwapPage(
-      {required BuildContext context, String? preselectedTop,String? preselectedBottom}) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.swap_tokens,style: TextStyle(color: Styles.whiteColor),),
-                backgroundColor: Colors.deepPurple.shade700,
-                iconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
-              ),
-              body: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-                child: SwapPage(preselectedTop: preselectedTop,preselectedBottom:preselectedBottom),
-              ),
-              backgroundColor: Styles.greyColor,
-            ))));
+  Future<void> _pushSafe({
+    required WidgetBuilder builder,
+    BuildContext? context,
+    bool rootNavigator = false,
+  }) async {
+    final ctx = _obtainContext(context);
+    if (ctx == null) {
+      debugPrint("⚠️ Navigation skipped: no active context");
+      return;
+    }
+    if (!_isAppResumed) {
+      debugPrint("⚠️ Navigation skipped: app not in foreground");
+      return;
+    }
+    try {
+      await Navigator.of(ctx, rootNavigator: rootNavigator).push(
+        MaterialPageRoute(builder: builder),
+      );
+    } catch (e, st) {
+      debugPrint("❌ Navigation error: $e\n$st");
+    }
   }
 
-  void  navigateToWalletConnectSignaturePage() {
-    Navigator.of(navigatorKey.currentContext!).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text("WalletConnect",style: TextStyle(color: Styles.whiteColor),),
-                backgroundColor: Colors.deepPurple.shade700,
-                iconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
-                leading: SvgPicture.asset('assets/images/walletconnect.svg'),
+  // ---------- Existing navigations (unchanged signatures, safe push) ----------
+  void navigateToSendPage({
+    required BuildContext context,
+    required String preselected,
+    String? preSelectedTransferAddress,
+  }) {
+    _pushSafe(
+      context: context,
+      builder: (ctx) => SignatureContentToggle(
+        Scaffold(
+          appBar: AppBar(
+            title: Text(
+              AppLocalizations.of(ctx)!.send_tokens,
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w500,
+                fontSize: 24,
+                color: Styles.whiteColor,
               ),
-              body: const Padding(
-                padding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                child: WalletConnectTxPage(),
-              ),
-              backgroundColor: Styles.greyColor,
-            ))));
+            ),
+            backgroundColor: Colors.deepPurple.shade700,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: SendPage(
+            preselected,
+            preSelectedTransferAddress: preSelectedTransferAddress,
+          ),
+          backgroundColor: Styles.greyColor,
+        ),
+      ),
+    );
   }
 
-  void navigateToWalletConnectPage(
-      {required BuildContext context}) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text("WalletConnect",style: TextStyle(color: Styles.whiteColor),),
-                backgroundColor: Colors.deepPurple.shade700,
-                iconTheme: const IconThemeData(
-                  color: Colors.white,
-                ),
+  void navigateToSendNFTPage({
+    required BuildContext context,
+    required String nftUrl,
+    required String name,
+    required int balance,
+    required String nftId,
+    required String mimetype,
+  }) {
+    _pushSafe(
+      context: context,
+      builder: (ctx) => SignatureContentToggle(
+        Scaffold(
+          appBar: AppBar(
+            title: Text(
+              AppLocalizations.of(ctx)!.send_nft,
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w500,
+                fontSize: 24,
+                color: Styles.whiteColor,
               ),
-              body: const Padding(
-                padding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                child: WalletConnectPage(),
-              ),
-              backgroundColor: Styles.greyColor,
-            ))));
-  }
-  void navigateToPoolsPage(
-      {required BuildContext context}) {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SignatureContentToggle(Scaffold(
-              appBar: AppBar(
-                title: Text("Pools",style: TextStyle(color: Styles.whiteColor),),
-                backgroundColor: Colors.deepPurple.shade700,
-              ),
-              body: const Padding(
-                padding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-                child: PoolsPage(),
-              ),
-              backgroundColor: Styles.greyColor,
-            ))));
+            ),
+            backgroundColor: Colors.deepPurple.shade700,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          backgroundColor: Styles.greyColor,
+          body: SendNFT(nftUrl, name, balance, nftId, mimetype),
+        ),
+      ),
+    );
   }
 
-  Future<bool> _swipePageTo(
-      {required int nr}) async {
-    if(nr>0) {
-      for (var i =0;i<nr; i++) {
-        await carouselKey?.currentState!.swipeXNext(x: nr);
+  void navigateToTxInfo({
+    required BuildContext context,
+    required String unparsedTimestamp,
+    required String? imageUrl,
+    required String? iconUrl,
+    required String? mimetype,
+  }) {
+    _pushSafe(
+      context: context,
+      builder: (ctx) => SignatureContentToggle(
+        Scaffold(
+          appBar: AppBar(
+            title: Text(
+              AppLocalizations.of(ctx)!.transaction_info,
+              style: GoogleFonts.spaceGrotesk(
+                fontWeight: FontWeight.w500,
+                fontSize: 24,
+                color: Styles.whiteColor,
+              ),
+            ),
+            backgroundColor: Colors.deepPurple.shade700,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
+            child: TxInfo(unparsedTimestamp, imageUrl, iconUrl, mimetype),
+          ),
+          backgroundColor: Styles.greyColor,
+        ),
+      ),
+    );
+  }
+
+  void navigateToSwapPage({
+    required BuildContext context,
+    String? preselectedTop,
+    String? preselectedBottom,
+  }) {
+    _pushSafe(
+      context: context,
+      builder: (ctx) => SignatureContentToggle(
+        Scaffold(
+          appBar: AppBar(
+            title: Text(
+              AppLocalizations.of(ctx)!.swap_tokens,
+              style:  TextStyle(color: Styles.whiteColor),
+            ),
+            backgroundColor: Colors.deepPurple.shade700,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+            child: SwapPage(
+              preselectedTop: preselectedTop,
+              preselectedBottom: preselectedBottom,
+            ),
+          ),
+          backgroundColor: Styles.greyColor,
+        ),
+      ),
+    );
+  }
+
+  /// ✅ SAFE: optional BuildContext, no force-unwrap
+  void navigateToWalletConnectSignaturePage({BuildContext? context}) {
+    _pushSafe(
+      context: context, // can be null; will use navigatorKey fallback
+      builder: (ctx) => SignatureContentToggle(
+        Scaffold(
+          appBar: AppBar(
+            title:  Text(
+              "WalletConnect",
+              style: TextStyle(color: Styles.whiteColor),
+            ),
+            backgroundColor: Colors.deepPurple.shade700,
+            iconTheme: const IconThemeData(color: Colors.white),
+            leading: SvgPicture.asset('assets/images/walletconnect.svg'),
+          ),
+          body: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            child: WalletConnectTxPage(),
+          ),
+          backgroundColor: Styles.greyColor,
+        ),
+      ),
+    );
+  }
+
+  void navigateToWalletConnectPage({required BuildContext context}) {
+    _pushSafe(
+      context: context,
+      builder: (ctx) => SignatureContentToggle(
+        Scaffold(
+          appBar: AppBar(
+            title:  Text(
+              "WalletConnect",
+              style: TextStyle(color: Styles.whiteColor),
+            ),
+            backgroundColor: Colors.deepPurple.shade700,
+            iconTheme: const IconThemeData(color: Colors.white),
+          ),
+          body: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            child: WalletConnectPage(),
+          ),
+          backgroundColor: Styles.greyColor,
+        ),
+      ),
+    );
+  }
+
+  void navigateToPoolsPage({required BuildContext context}) {
+    _pushSafe(
+      context: context,
+      builder: (ctx) => SignatureContentToggle(
+        Scaffold(
+          appBar: AppBar(
+            title:  Text(
+              "Pools",
+              style: TextStyle(color: Styles.whiteColor),
+            ),
+            backgroundColor: Colors.deepPurple.shade700,
+          ),
+          body: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+            child: PoolsPage(),
+          ),
+          backgroundColor: Styles.greyColor,
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _swipePageTo({required int nr}) async {
+    final state = carouselKey?.currentState;
+    if (state == null) return true; // no-op if not mounted/ready
+
+    if (nr > 0) {
+      for (var i = 0; i < nr; i++) {
+        await state.swipeXNext(x: nr);
       }
-    }else {
-      for (var i =0;i>nr; i--) {
-        await carouselKey?.currentState!.swipeXPrevious(x: nr);
+    } else {
+      for (var i = 0; i > nr; i--) {
+        await state.swipeXPrevious(x: nr);
       }
     }
     return true;
   }
-
 }
