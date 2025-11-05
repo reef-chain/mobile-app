@@ -41,7 +41,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    // Provider connection logs
     try {
       providerConnStateSubs = ReefAppState.instance.networkCtrl
           .getProviderConnLogs()

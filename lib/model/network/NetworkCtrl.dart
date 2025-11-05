@@ -24,7 +24,7 @@ class NetworkCtrl {
           : null;
 
       if (incomingName != null) {
-        // If tx-lock active and incoming change differs → revert
+        // If tx-lock active and   incoming change differs → revert
         if (_txLock.value &&
             _lockedNetworkName.isNotEmpty &&
             incomingName != _lockedNetworkName) {

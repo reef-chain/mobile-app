@@ -104,12 +104,6 @@ class _BuyPageState extends State<BuyPage> {
   }
 
   // TODO: Once we have access to prod API, check if REEF network max and min withdrawal amounts
-  // are in the range of trade limits. If so, we have to request network for withdrawal limits
-  // void _getNetwork() async {
-  //   http.Response response = await http.get(Uri.parse('$baseUrl/get-network'));
-  //   tradeNetwork = BcNetwork.fromJson(manageResponse(response));
-  //   print(tradeNetwork);
-  // }
 
   void _getPairs() async {
     try {

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:reef_mobile_app/l10n/app_localizations.dart';
@@ -8,19 +7,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/CreateAccount.dart';
 import 'package:reef_mobile_app/components/InsufficientBalance.dart';
 import 'package:reef_mobile_app/components/accounts/accounts_list.dart';
-import 'package:reef_mobile_app/components/getQrTypeData.dart';
-import 'package:reef_mobile_app/components/modals/account_modals.dart';
-import 'package:reef_mobile_app/components/modals/export_qr_account_modal.dart';
-import 'package:reef_mobile_app/components/modals/import_account_from_qr.dart';
-import 'package:reef_mobile_app/components/modals/restore_json_modal.dart';
+
 import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/AccountCtrl.dart';
-import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/utils/account_profile.dart';
-import 'package:reef_mobile_app/utils/bind_evm.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:reef_mobile_app/utils/account_box.dart';
 import 'package:restart_app/restart_app.dart';
@@ -28,7 +21,7 @@ import 'package:restart_app/restart_app.dart';
 import '../components/sign/SignatureContentToggle.dart';
 
 class AccountsPage extends StatefulWidget {
-  AccountsPage({Key? key}) : super(key: key);
+  AccountsPage({super.key});
   final ReefAppState reefState = ReefAppState.instance;
   final AccountCtrl accountCtrl = ReefAppState.instance.accountCtrl;
 
@@ -46,7 +39,6 @@ class _AccountsPageState extends State<AccountsPage> {
     return SignatureContentToggle(Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       color: Styles.darkBackgroundColor,
-      // color: Color.fromARGB(255, 86, 54, 162),
       child: Column(
         children: <Widget>[
           buildHeader(context),
@@ -74,7 +66,6 @@ class _AccountsPageState extends State<AccountsPage> {
             if (accsFeedbackDataModel.data.isEmpty) {
               return const SizedBox.shrink();
             }
-            // return Text('len=${accsFeedbackDataModel.data.length}');
             return Flexible(
                 child: AccountsList(
                     ReefAppState.instance.model.accounts.accountsFDM.data,
@@ -106,11 +97,7 @@ class _AccountsPageState extends State<AccountsPage> {
             children: [
               Row(
                 children: [
-                  // const Image(
-                  //   image: AssetImage("./assets/images/reef.png"),
-                  //   width: 24,
-                  //   height: 24,
-                  // ),
+
                   const Gap(8),
                   Builder(builder: (context) {
                     return Text(
@@ -162,7 +149,6 @@ class _AccountsPageState extends State<AccountsPage> {
               ),
             ],
           ),
-          //if (!anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)))
           if (accsFeedbackDataModel.data.isNotEmpty)
           InsufficientBalance(),
           if(accsFeedbackDataModel.data.isEmpty)

@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -941,7 +939,7 @@ class _SendPageState extends State<SendPage> {
 
   List<Widget> buildSliderWidgets(TokenWithAmount selectedToken) {
     // decide precision based on token decimals (cap at 8 for UI sanity)
-    final int uiDecimals = (selectedToken.decimals != null && selectedToken.decimals > 0)
+    final int uiDecimals = (selectedToken.decimals > 0)
         ? (selectedToken.decimals > 8 ? 8 : selectedToken.decimals)
         : 6;
 
@@ -1183,7 +1181,7 @@ class _SendPageState extends State<SendPage> {
     }
 
     // Use token decimals for precision — up to 8 for UX neatness
-    final int uiDecimals = (selectedToken.decimals != null && selectedToken.decimals > 0)
+    final int uiDecimals = (selectedToken.decimals > 0)
         ? (selectedToken.decimals > 8 ? 8 : selectedToken.decimals)
         : 6;
 
