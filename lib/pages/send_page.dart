@@ -173,10 +173,17 @@ class _SendPageState extends State<SendPage> {
       jsConnStateSubs = jsStream.listen(
             (event) {
           if (!mounted) return;
-          setState(() => jsConn = (event == true));
+          setState(() {
+            jsConn = (event == true);
+          });
         },
-        onError: (e, st) => debugPrint('jsConn error: $e'),
+        onError: (e, st) {
+          if (!mounted) return;
+          debugPrint('jsConn error: $e');
+        },
       );
+    }).catchError((e) {
+      debugPrint('getJsConnStream error: $e');
     });
 
     // focus listeners
@@ -189,30 +196,18 @@ class _SendPageState extends State<SendPage> {
 
   @override
   void dispose() {
-
-    // 🧹 Clean up controllers
     valueController.dispose();
     amountController.dispose();
-
-    // 🧹 Clean up focus nodes
-    _focus.dispose();
-    _focusSecond.dispose();
-    // focus
     _focus.removeListener(_onFocusChange);
     _focusSecond.removeListener(_onFocusSecondChange);
     _focus.dispose();
     _focusSecond.dispose();
-
-    // streams
     jsConnStateSubs?.cancel();
     providerConnStateSubs?.cancel();
     indexerConnStateSubs?.cancel();
     _txSub?.cancel();
-
-    // mobx reactions
     _sigAppearDisposer?.call();
     _sigGoneDisposer?.call();
-
     super.dispose();
   }
 

@@ -34,7 +34,7 @@ class _TokenViewState extends State<TokenView> {
     String? iconURL = token.data.iconUrl;
     BigInt? balance = token.data.balance;
     double price = token.data.price ?? 0.0;
-    int decimals = (token.data.price ?? 0.0) as int;
+    int decimals = token.data.decimals ?? 18; // ✅ fixed
     String tokenName = token.data.symbol ?? "";
     bool isLoading = token.hasStatus(StatusCode.loading);
 
