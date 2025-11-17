@@ -46,10 +46,9 @@ class _SplashAppState extends State<SplashApp> {
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
 
   static const _firstLaunch = "firstLaunch";
-  // Add these in _SplashAppState:
   int _bioAttempts = 0;
   static const int _bioMaxAttempts = 3;
-  bool _bioLockedOut = false; // to stop further attempts until user acts
+  bool _bioLockedOut = false;
 
   bool _hasError = false;
   bool _requiresAuth = false;
@@ -61,6 +60,7 @@ class _SplashAppState extends State<SplashApp> {
   bool appReady = false;
   final TextEditingController _passwordController = TextEditingController();
   String password = "";
+
   static final LocalAuthentication localAuth = LocalAuthentication();
 
   Timer? _gifTimer;
@@ -82,10 +82,9 @@ class _SplashAppState extends State<SplashApp> {
     }
   }
 
+  // ✅ SECURE VERSION – hashed password check
   Future<bool> _checkRequiresPasswordAuth() async {
-    final storedPassword =
-    await ReefAppState.instance.storage.getValue(StorageKey.password.name);
-    return storedPassword != null && storedPassword != "";
+    return await ReefAppState.instance.storage.hasPasswordSet();
   }
 
   Future<String> _getSavedLocale() async {
@@ -97,22 +96,15 @@ class _SplashAppState extends State<SplashApp> {
   void initState() {
     super.initState();
 
-    // Locale load
     _getSavedLocale().then((value) {
       if (!mounted) return;
       setLocale(value);
     });
 
-    // Debounced status GIF (if you still need it)
-    _gifTimer = Timer(const Duration(milliseconds: 3830), () {
-      if (!mounted) return;
-      // We don’t actually use a GIF flag in UI now, keeping safe no-op.
-    });
+    _gifTimer = Timer(const Duration(milliseconds: 3830), () {});
 
-    // Single sequenced bootstrap
     _bootstrap();
 
-    // password text listener
     _passwordController.addListener(() {
       if (!mounted) return;
       setState(() => password = _passwordController.text);
@@ -121,9 +113,9 @@ class _SplashAppState extends State<SplashApp> {
 
   Future<void> _bootstrap() async {
     try {
-      await _initializeAsyncDependencies(); // storage, reef, services
+      await _initializeAsyncDependencies();
       if (!mounted) return;
-      await _initAuthentication();           // auth flows
+      await _initAuthentication();
     } catch (_) {
       if (!mounted) return;
       setState(() => _hasError = true);
@@ -149,7 +141,6 @@ class _SplashAppState extends State<SplashApp> {
       if (!mounted) return;
       setState(() => _isFirstLaunch = first);
 
-      // First launch OR debug => skip lock
       if (first || kDebugMode) {
         if (!mounted) return;
         setState(() {
@@ -159,13 +150,13 @@ class _SplashAppState extends State<SplashApp> {
         return;
       }
 
-      // Biometrics available + enabled?
       final supportsBio = await _checkBiometricsSupport();
       if (!mounted) return;
+
       if (supportsBio) {
         final hasUserEnabledBio =
         await ReefAppState.instance.storage.getValue("biometricAuth");
-        if (!mounted) return;
+
         if (hasUserEnabledBio == true) {
           setState(() => _biometricsIsAvailable = true);
           await _authenticateWithBiometrics();
@@ -173,9 +164,9 @@ class _SplashAppState extends State<SplashApp> {
         }
       }
 
-      // Else check password lock
       final requiresPwd = await _checkRequiresPasswordAuth();
       if (!mounted) return;
+
       setState(() {
         _requiresAuth = requiresPwd;
         _isAuthenticated = !requiresPwd;
@@ -191,8 +182,11 @@ class _SplashAppState extends State<SplashApp> {
       final storageService = StorageService();
       final walletConnectService = WalletConnectService();
 
-      await ReefAppState.instance
-          .init(storageService, walletConnectService, widget.reefChainApi);
+      await ReefAppState.instance.init(
+        storageService,
+        walletConnectService,
+        widget.reefChainApi,
+      );
 
       if (!mounted) return;
       setState(() => appReady = true);
@@ -202,11 +196,14 @@ class _SplashAppState extends State<SplashApp> {
     }
   }
 
-  Future<void> _authenticateWithPassword(String value) async {
-    final stored =
-    await ReefAppState.instance.storage.getValue(StorageKey.password.name);
+  // ✅ SECURE bcrypt verify
+  Future<void> _authenticateWithPassword(String enteredPassword) async {
+    final ok = await ReefAppState.instance.storage
+        .verifyPasswordSecure(enteredPassword);
+
     if (!mounted) return;
-    if (stored == value) {
+
+    if (ok) {
       setState(() {
         _wrongPassword = false;
         _isAuthenticated = true;
@@ -216,9 +213,11 @@ class _SplashAppState extends State<SplashApp> {
     }
   }
 
-  // ✅ FIXED: real biometric auth (no recursion)
+  // -----------------------------------
+  // BIOMETRIC AUTH (unchanged logic)
+  // -----------------------------------
   Future<void> _authenticateWithBiometrics() async {
-    if (_bioLockedOut) return;            // stop if we already locked out
+    if (_bioLockedOut) return;
     if (!mounted) return;
 
     try {
@@ -243,25 +242,20 @@ class _SplashAppState extends State<SplashApp> {
         return;
       }
 
-      // Fail case:
       _bioAttempts += 1;
 
       if (_bioAttempts < _bioMaxAttempts) {
-        // small backoff and try again (no recursion — scheduled task)
         await Future.delayed(const Duration(seconds: 1));
         if (!mounted || _bioLockedOut) return;
-        // call again safely
         _authenticateWithBiometrics();
       } else {
-        // Max attempts hit — lock out biometrics and show fallback
         setState(() {
           _isAuthenticated = false;
-          _wrongPassword = true;        // show error hint
-          _biometricsIsAvailable = false; // hide fingerprint button
+          _wrongPassword = true;
+          _biometricsIsAvailable = false;
           _bioLockedOut = true;
         });
 
-        // Optional: show a dialog to let the user decide
         if (mounted) {
           await showDialog<void>(
             context: context,
@@ -270,19 +264,14 @@ class _SplashAppState extends State<SplashApp> {
               title: const Text('Too many attempts'),
               content: const Text(
                   'Biometric authentication failed multiple times. '
-                      'Please try again later or use your password.'
-              ),
+                      'Please try again later or use your password.'),
               actions: [
                 TextButton(
-                  onPressed: () {
-                    // Allow password fallback; just close dialog
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Use Password'),
                 ),
                 TextButton(
                   onPressed: () {
-                    // Let user try again: unlock and re-enable fingerprint button
                     _bioAttempts = 0;
                     _bioLockedOut = false;
                     setState(() {
@@ -290,7 +279,6 @@ class _SplashAppState extends State<SplashApp> {
                       _wrongPassword = false;
                     });
                     Navigator.of(context).pop();
-                    // NOTE: We do NOT auto-retry here; user can tap the fingerprint again.
                   },
                   child: const Text('Try Again'),
                 ),
@@ -299,9 +287,8 @@ class _SplashAppState extends State<SplashApp> {
           );
         }
       }
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
-      // On unexpected error: stop retries and expose fallback
       setState(() {
         _isAuthenticated = false;
         _wrongPassword = true;
@@ -331,7 +318,8 @@ class _SplashAppState extends State<SplashApp> {
       );
     }
 
-    final stillLoading = (appReady == false || _isAuthenticated == false) || _isFirstLaunch == null;
+    final stillLoading = (appReady == false || _isAuthenticated == false) ||
+        _isFirstLaunch == null;
 
     return Stack(
       children: <Widget>[
@@ -344,7 +332,8 @@ class _SplashAppState extends State<SplashApp> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/intro.gif", height: 128.0, width: 128.0),
+                    Image.asset("assets/images/intro.gif",
+                        height: 128.0, width: 128.0),
                     const Gap(16),
                     Visibility(
                       maintainSize: true,
@@ -367,7 +356,8 @@ class _SplashAppState extends State<SplashApp> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        AppLocalizations.of(context)?.loading ?? "Initializing app",
+                        AppLocalizations.of(context)?.loading ??
+                            "Initializing app",
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w400,
                           fontSize: 16,
@@ -376,12 +366,14 @@ class _SplashAppState extends State<SplashApp> {
                         ),
                       ),
                       const Gap(4),
-                      // ✅ Safe now because stream is broadcast
                       StreamBuilder<String>(
-                        stream: ReefAppState.instance.initStatusStream.stream,
+                        stream: ReefAppState
+                            .instance.initStatusStream.stream,
                         initialData: ".",
-                        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                          final text = snapshot.hasData ? (snapshot.data ?? "...") : "..";
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          final text =
+                          snapshot.hasData ? (snapshot.data ?? "...") : "..";
                           return Text(
                             text,
                             style: GoogleFonts.poppins(
@@ -399,7 +391,8 @@ class _SplashAppState extends State<SplashApp> {
                         width: 12,
                         child: CircularProgressIndicator.adaptive(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Styles.textLightColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              Styles.textLightColor),
                         ),
                       ),
                     ],
@@ -408,11 +401,14 @@ class _SplashAppState extends State<SplashApp> {
               ),
             ],
           )
-        else if (_isFirstLaunch == true && appReady == true && _isAuthenticated == true)
+        else if (_isFirstLaunch == true &&
+            appReady == true &&
+            _isAuthenticated == true)
           IntroductionPage(
             heroVideo: widget.heroVideo,
             onDone: () async {
-              await ReefAppState.instance.storage.setValue(_firstLaunch, false);
+              await ReefAppState.instance.storage
+                  .setValue(_firstLaunch, false);
               if (!mounted) return;
               setState(() => _isFirstLaunch = false);
             },
@@ -441,16 +437,19 @@ class _SplashAppState extends State<SplashApp> {
             ),
             const Gap(8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: BoxDecoration(
                 color: Styles.whiteColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0x20000000), width: 1),
+                border:
+                Border.all(color: const Color(0x20000000), width: 1),
               ),
               child: TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration.collapsed(hintText: ''),
+                decoration:
+                const InputDecoration.collapsed(hintText: ''),
                 style: const TextStyle(fontSize: 16),
               ),
             ),
@@ -465,7 +464,8 @@ class _SplashAppState extends State<SplashApp> {
                   Flexible(
                     child: Text(
                       "Password is incorrect",
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      style: TextStyle(
+                          color: Colors.grey[600], fontSize: 13),
                     ),
                   ),
                 ],
@@ -512,7 +512,8 @@ class _SplashAppState extends State<SplashApp> {
               child: Center(
                 child: MaterialButton(
                   minWidth: 0,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  materialTapTargetSize:
+                  MaterialTapTargetSize.shrinkWrap,
                   onPressed: _authenticateWithBiometrics,
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(0.0),
@@ -529,7 +530,7 @@ class _SplashAppState extends State<SplashApp> {
                         ],
                       ),
                     ),
-                    child:  Icon(Icons.fingerprint,
+                    child: Icon(Icons.fingerprint,
                         size: 36, color: Styles.whiteColor),
                   ),
                 ),

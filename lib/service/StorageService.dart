@@ -13,6 +13,21 @@ import 'package:flutter/foundation.dart';
 
 
 /// Thrown when storage permission is not granted and Hive cannot be initialized.
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:bcrypt/bcrypt.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:reef_mobile_app/model/account/stored_account.dart';
+import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
+import 'package:reef_mobile_app/model/metadata/metadata.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
+
+/// Thrown when storage permission is not granted and Hive cannot be initialized.
 class StoragePermissionException implements Exception {
   final String message;
   StoragePermissionException([this.message = 'Storage permission not granted']);
@@ -27,9 +42,50 @@ class StorageService {
   final Completer<Box<dynamic>> accountsBox = Completer();
   final Completer<Box<dynamic>> jwtsBox = Completer();
 
+  // NEW — secure password store
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+
   StorageService() {
     _initAsync();
   }
+
+  // -------------------------
+  // SECURE PASSWORD MANAGEMENT
+  // -------------------------
+
+  /// Save password SECURELY (bcrypt hash)
+  Future<void> savePasswordSecure(String password) async {
+    final hash = BCrypt.hashpw(password, BCrypt.gensalt());
+
+    // Save hash in secure storage
+    await _secureStorage.write(key: 'password_hash', value: hash);
+
+    // Remove old insecure entry from Hive
+    await deleteValue("password");
+  }
+
+  /// Check if password is set
+  Future<bool> hasPasswordSet() async {
+    final stored = await _secureStorage.read(key: 'password_hash');
+    return stored != null && stored.isNotEmpty;
+  }
+
+  /// Verify password using bcrypt
+  Future<bool> verifyPasswordSecure(String enteredPassword) async {
+    final storedHash = await _secureStorage.read(key: 'password_hash');
+    if (storedHash == null) return false;
+
+    return BCrypt.checkpw(enteredPassword, storedHash);
+  }
+
+  /// Delete stored password (for reset)
+  Future<void> deletePasswordSecure() async {
+    await _secureStorage.delete(key: 'password_hash');
+  }
+
+  // -----------------------------
+  // ORIGINAL STORAGE FUNCTIONS
+  // -----------------------------
 
   Future<dynamic> getValue(String key) =>
       mainBox.future.then((Box<dynamic> box) => box.get(key));
@@ -85,6 +141,10 @@ class StorageService {
   Future<dynamic> deleteJwt(String address) =>
       jwtsBox.future.then((Box<dynamic> box) => box.delete(address));
 
+  // -----------------------
+  // Initialization
+  // -----------------------
+
   Future<void> _initAsync() async {
     try {
       final allowed = await _checkPermission();
@@ -132,7 +192,7 @@ class StorageService {
       jwtsBox.complete(Hive.openBox('JwtsBox'));
     }
 
-    // Encrypted box for accounts
+    // Encrypted Accounts Box
     const secureStorage = FlutterSecureStorage();
     if (prefs.getBool('first_run') ?? true) {
       await secureStorage.deleteAll();
@@ -162,8 +222,6 @@ class StorageService {
   }
 
   Future<bool> _checkPermission() async {
-    // NOTE: If you store in app documents dir, on modern Android this may not require
-    // runtime storage permission. If you still rely on it, keep this.
     final status = await Permission.storage.status;
     debugPrint('PERMISSION STORAGE=$status');
 
@@ -176,15 +234,7 @@ class StorageService {
 
     final result = await Permission.storage.request();
 
-    if (result.isGranted) {
-      debugPrint("PERMISSION GRANTED");
-      return true;
-    }
-
-    if (result.isPermanentlyDenied) {
-      debugPrint("PERMISSION PERMANENTLY DENIED (after request)");
-      return false;
-    }
+    if (result.isGranted) return true;
 
     debugPrint("PERMISSION DENIED");
     return false;
@@ -198,8 +248,8 @@ class StorageService {
     if (!jwtsBox.isCompleted) jwtsBox.completeError(e, st ?? StackTrace.current);
   }
 
-  /// Optional helper: call from UI to open app settings for permanently denied case
   Future<void> openStoragePermissionSettings() async {
     await openAppSettings();
   }
 }
+

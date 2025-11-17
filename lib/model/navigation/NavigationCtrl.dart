@@ -20,8 +20,6 @@ import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import '../../components/sign/SignatureContentToggle.dart';
 
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 
 class NavigationCtrl with NavSwipeCompute {
@@ -36,7 +34,55 @@ class NavigationCtrl with NavSwipeCompute {
 
   void navigateHomePage(int index) => _homePageNavigationModel.navigate(index);
 
-  void navigate(NavigationPage navigationPage) async {
+  // ---------------------------------------------------------
+  // SAFE CONTEXT HANDLING — prevents crash from null context
+  // ---------------------------------------------------------
+  BuildContext? _obtainContext(BuildContext? ctx) {
+    if (ctx != null) return ctx;
+
+    try {
+      return navigatorKey.currentContext;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool get _isAppResumed {
+    final binding = WidgetsBinding.instance;
+    final state = binding.lifecycleState;
+    return state == null || state == AppLifecycleState.resumed;
+  }
+
+  Future<void> _pushSafe({
+    required WidgetBuilder builder,
+    BuildContext? context,
+    bool rootNavigator = false,
+  }) async {
+    final ctx = _obtainContext(context);
+
+    if (ctx == null) {
+      debugPrint("⚠️ Navigation canceled: context is null");
+      return;
+    }
+
+    if (!_isAppResumed) {
+      debugPrint("⚠️ Navigation canceled: app is not in foreground");
+      return;
+    }
+
+    try {
+      await Navigator.of(ctx, rootNavigator: rootNavigator).push(
+        MaterialPageRoute(builder: builder),
+      );
+    } catch (e, st) {
+      debugPrint("❌ Navigation error: $e\n$st");
+    }
+  }
+
+  // ---------------------------------------------------------
+  // PAGE SWIPING (unchanged but null-safe)
+  // ---------------------------------------------------------
+  Future<void> navigate(NavigationPage navigationPage) async {
     if (_swiping) return;
 
     if (_swipeComplete != null) {
@@ -50,6 +96,7 @@ class NavigationCtrl with NavSwipeCompute {
       _swiping = false;
       return;
     }
+
     final pageDiff = computeSwipeAnimation(
       currentPage: _navigationModel.currentPage,
       page: navigationPage,
@@ -65,48 +112,26 @@ class NavigationCtrl with NavSwipeCompute {
     }
   }
 
-  // ---------- Safe navigator helpers ----------
-  BuildContext? _obtainContext(BuildContext? ctx) {
-    if (ctx != null) return ctx;
-    // Use your global navigatorKey if available in scope
-    try {
-      return navigatorKey.currentContext;
-    } catch (_) {
-      return null;
+  Future<bool> _swipePageTo({required int nr}) async {
+    final state = carouselKey?.currentState;
+    if (state == null) return true;
+
+    if (nr > 0) {
+      for (var i = 0; i < nr; i++) {
+        await state.swipeXNext(x: nr);
+      }
+    } else {
+      for (var i = 0; i > nr; i--) {
+        await state.swipeXPrevious(x: nr);
+      }
     }
+    return true;
   }
 
-  bool get _isAppResumed {
-    final binding = WidgetsBinding.instance;
-    // If lifecycleState is unavailable/null, assume true to avoid false negatives
-    final state = binding.lifecycleState;
-    return state == null || state == AppLifecycleState.resumed;
-  }
+  // ---------------------------------------------------------
+  // SAFE NAVIGATION ENDPOINTS (ALL FIXED)
+  // ---------------------------------------------------------
 
-  Future<void> _pushSafe({
-    required WidgetBuilder builder,
-    BuildContext? context,
-    bool rootNavigator = false,
-  }) async {
-    final ctx = _obtainContext(context);
-    if (ctx == null) {
-      debugPrint("⚠️ Navigation skipped: no active context");
-      return;
-    }
-    if (!_isAppResumed) {
-      debugPrint("⚠️ Navigation skipped: app not in foreground");
-      return;
-    }
-    try {
-      await Navigator.of(ctx, rootNavigator: rootNavigator).push(
-        MaterialPageRoute(builder: builder),
-      );
-    } catch (e, st) {
-      debugPrint("❌ Navigation error: $e\n$st");
-    }
-  }
-
-  // ---------- Existing navigations (unchanged signatures, safe push) ----------
   void navigateToSendPage({
     required BuildContext context,
     required String preselected,
@@ -160,7 +185,6 @@ class NavigationCtrl with NavSwipeCompute {
               ),
             ),
             backgroundColor: Colors.deepPurple.shade700,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           backgroundColor: Styles.greyColor,
           body: SendNFT(nftUrl, name, balance, nftId, mimetype),
@@ -190,7 +214,6 @@ class NavigationCtrl with NavSwipeCompute {
               ),
             ),
             backgroundColor: Colors.deepPurple.shade700,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
@@ -214,13 +237,12 @@ class NavigationCtrl with NavSwipeCompute {
           appBar: AppBar(
             title: Text(
               AppLocalizations.of(ctx)!.swap_tokens,
-              style:  TextStyle(color: Styles.whiteColor),
+              style: TextStyle(color: Styles.whiteColor),
             ),
             backgroundColor: Colors.deepPurple.shade700,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           body: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: SwapPage(
               preselectedTop: preselectedTop,
               preselectedBottom: preselectedBottom,
@@ -232,10 +254,10 @@ class NavigationCtrl with NavSwipeCompute {
     );
   }
 
-  /// ✅ SAFE: optional BuildContext, no force-unwrap
+  /// ⭐ MOST IMPORTANT FIX: no force unwrap, no null crash
   void navigateToWalletConnectSignaturePage({BuildContext? context}) {
     _pushSafe(
-      context: context, // can be null; will use navigatorKey fallback
+      context: context,
       builder: (ctx) => SignatureContentToggle(
         Scaffold(
           appBar: AppBar(
@@ -245,10 +267,17 @@ class NavigationCtrl with NavSwipeCompute {
             ),
             backgroundColor: Colors.deepPurple.shade700,
             iconTheme: const IconThemeData(color: Colors.white),
-            leading: SvgPicture.asset('assets/images/walletconnect.svg'),
+            leading: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                'assets/images/walletconnect.svg',
+                height: 24,
+                width: 24,
+              ),
+            ),
           ),
           body: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 20),
             child: WalletConnectTxPage(),
           ),
           backgroundColor: Styles.greyColor,
@@ -263,15 +292,12 @@ class NavigationCtrl with NavSwipeCompute {
       builder: (ctx) => SignatureContentToggle(
         Scaffold(
           appBar: AppBar(
-            title:  Text(
-              "WalletConnect",
-              style: TextStyle(color: Styles.whiteColor),
-            ),
+            title:  Text("WalletConnect",
+                style: TextStyle(color: Styles.whiteColor)),
             backgroundColor: Colors.deepPurple.shade700,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           body: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 20),
             child: WalletConnectPage(),
           ),
           backgroundColor: Styles.greyColor,
@@ -286,35 +312,17 @@ class NavigationCtrl with NavSwipeCompute {
       builder: (ctx) => SignatureContentToggle(
         Scaffold(
           appBar: AppBar(
-            title:  Text(
-              "Pools",
-              style: TextStyle(color: Styles.whiteColor),
-            ),
+            title:  Text("Pools",
+                style: TextStyle(color: Styles.whiteColor)),
             backgroundColor: Colors.deepPurple.shade700,
           ),
           body: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+            padding: EdgeInsets.symmetric(horizontal: 10),
             child: PoolsPage(),
           ),
           backgroundColor: Styles.greyColor,
         ),
       ),
     );
-  }
-
-  Future<bool> _swipePageTo({required int nr}) async {
-    final state = carouselKey?.currentState;
-    if (state == null) return true; // no-op if not mounted/ready
-
-    if (nr > 0) {
-      for (var i = 0; i < nr; i++) {
-        await state.swipeXNext(x: nr);
-      }
-    } else {
-      for (var i = 0; i > nr; i--) {
-        await state.swipeXPrevious(x: nr);
-      }
-    }
-    return true;
   }
 }
