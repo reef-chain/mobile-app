@@ -10,7 +10,7 @@ import 'package:reef_mobile_app/components/accounts/accounts_list.dart';
 
 import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
-import 'package:reef_mobile_app/model/account/AccountCtrl.dart';
+import 'package:reef_mobile_app/model/account/account_ctrl.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/utils/account_profile.dart';
@@ -29,67 +29,104 @@ class AccountsPage extends StatefulWidget {
   State<AccountsPage> createState() => _AccountsPageState();
 }
 
+// ===== CONSTANTS =====
+const double kHeaderFontSize = 32;
+const double kDefaultPadding = 12;
+const double kGapSmall = 8;
+const double kGapMedium = 16;
+const double kButtonHeight = 36;
+const double kAddIconSize = 22;
+
 class _AccountsPageState extends State<AccountsPage> {
   final svgData = AccountProfile.iconSvg;
 
-  // TODO replace strings with enum
-
   @override
   Widget build(BuildContext context) {
-    return SignatureContentToggle(Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      color: Styles.darkBackgroundColor,
-      child: Column(
-        children: <Widget>[
-          buildHeader(context),
-          const Gap(16),
-          Observer(builder: (_) {
-            var accsFeedbackDataModel =
-                ReefAppState.instance.model.accounts.accountsFDM;
-            if (accsFeedbackDataModel.hasStatus(StatusCode.completeData)) {
-              return const SizedBox.shrink();
-            }
-            return Column(
-              children: [
-                SizedBox(
-                    child: Text(
-                  accsFeedbackDataModel.statusList[0].message ?? '',
-                  style: TextStyle(fontSize: 16, color: Styles.textLightColor),
-                )),
-                if(accsFeedbackDataModel.statusList[0].message == "Request failed with status code 404")ElevatedButton(onPressed: (){Restart.restartApp();}, child: Text("Restart App"))
-              ],
-            );
-          }),
-          Observer(builder: (_) {
-            final accsFeedbackDataModel =
-                ReefAppState.instance.model.accounts.accountsFDM;
-            if (accsFeedbackDataModel.data.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            return Flexible(
-                child: AccountsList(
-                    ReefAppState.instance.model.accounts.accountsFDM.data,
-                    ReefAppState.instance.model.accounts.selectedAddress,
-                    (addr) async {
-              await ReefAppState.instance.accountCtrl.setSelectedAddress(addr);
-              ReefAppState.instance.navigationCtrl.navigateHomePage(0);
+    return SignatureContentToggle(
+      Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: kDefaultPadding, vertical: kDefaultPadding),
+        color: Styles.darkBackgroundColor,
+        child: Column(
+          children: <Widget>[
+            buildHeader(context),
+            const Gap(kGapMedium),
 
-              var navigateOnAccountSwitch =
-                  ReefAppState.instance.model.appConfig.navigateOnAccountSwitch;
-              if (navigateOnAccountSwitch)
-                ReefAppState.instance.navigationCtrl
-                    .navigate(NavigationPage.home);
-            }));
-          }),
-        ],
+            // ---- ACCOUNTS FEEDBACK BLOCK ----
+            Observer(builder: (_) {
+              var accsFeedbackDataModel =
+                  ReefAppState.instance.model.accounts.accountsFDM;
+
+              if (accsFeedbackDataModel.hasStatus(StatusCode.completeData)) {
+                return const SizedBox.shrink();
+              }
+
+              return Column(
+                children: [
+                  SizedBox(
+                    child: Text(
+                      accsFeedbackDataModel.statusList[0].message ?? '',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Styles.textLightColor,
+                      ),
+                    ),
+                  ),
+                  if (accsFeedbackDataModel.statusList[0].message ==
+                      "Request failed with status code 404")
+                    ElevatedButton(
+                      onPressed: () {
+                        Restart.restartApp();
+                      },
+                      child: Text("Restart App"),
+                    )
+                ],
+              );
+            }),
+
+            // ---- ACCOUNTS LIST ----
+            Observer(builder: (_) {
+              final accsFeedbackDataModel =
+                  ReefAppState.instance.model.accounts.accountsFDM;
+
+              if (accsFeedbackDataModel.data.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return Flexible(
+                child: AccountsList(
+                  ReefAppState.instance.model.accounts.accountsFDM.data,
+                  ReefAppState.instance.model.accounts.selectedAddress,
+                      (addr) async {
+                    await ReefAppState.instance.accountCtrl
+                        .setSelectedAddress(addr);
+
+                    ReefAppState.instance.navigationCtrl.navigateHomePage(0);
+
+                    var navigateOnAccountSwitch = ReefAppState
+                        .instance.model.appConfig.navigateOnAccountSwitch;
+
+                    if (navigateOnAccountSwitch) {
+                      ReefAppState.instance.navigationCtrl
+                          .navigate(NavigationPage.home);
+                    }
+                  },
+                ),
+              );
+            }),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
+  // ---------------- HEADER UI ----------------
   Padding buildHeader(BuildContext context) {
-    final accsFeedbackDataModel = ReefAppState.instance.model.accounts.accountsFDM;
+    final accsFeedbackDataModel =
+        ReefAppState.instance.model.accounts.accountsFDM;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: kGapSmall),
       child: Column(
         children: [
           Row(
@@ -97,64 +134,70 @@ class _AccountsPageState extends State<AccountsPage> {
             children: [
               Row(
                 children: [
-
-                  const Gap(8),
-                  Builder(builder: (context) {
-                    return Text(
-                      AppLocalizations.of(context)!.my_account,
-                      style: GoogleFonts.spaceGrotesk(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 32,
-                          color: Colors.grey.shade100),
-                    );
-                  }),
+                  const Gap(kGapSmall),
+                  Text(
+                    AppLocalizations.of(context)!.my_account,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.w500,
+                      fontSize: kHeaderFontSize,
+                      color: Colors.grey.shade100,
+                    ),
+                  ),
                 ],
               ),
+
+              // ===== ADD ACCOUNT BUTTON =====
               Row(
                 children: [
                   MaterialButton(
                     onPressed: () => showAddAccountModal(
-                        AppLocalizations.of(context)!.add_account, openModal,
-                        context: context),
+                      AppLocalizations.of(context)!.add_account,
+                      openModal,
+                      context: context,
+                    ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     minWidth: 0,
-                    height: 36,
+                    height: kButtonHeight,
                     elevation: 0,
                     color: Colors.transparent,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4, horizontal: kDefaultPadding),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(color: Styles.purpleColor)),
-                    child: Row(children: [
-                      Icon(
-                        Icons.add_circle_rounded,
-                        color: Styles.purpleColor,
-                        size: 22,
-                      ),
-                      const Gap(4),
-                      Builder(builder: (context) {
-                        return Text(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Styles.purpleColor),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.add_circle_rounded,
+                          color: Styles.purpleColor,
+                          size: kAddIconSize,
+                        ),
+                        const Gap(4),
+                        Text(
                           AppLocalizations.of(context)!.add,
                           style: GoogleFonts.roboto(
-                              color: Colors.grey.shade100,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500),
-                        );
-                      })
-                    ]),
+                            color: Colors.grey.shade100,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const Gap(8)
+                  const Gap(kGapSmall),
                 ],
               ),
             ],
           ),
-          if (accsFeedbackDataModel.data.isNotEmpty)
-          InsufficientBalance(),
-          if(accsFeedbackDataModel.data.isEmpty)
-          CreateAccountBox(textColor: Styles.whiteColor,)
+
+          // BALANCE / CREATE ACCOUNT
+          if (accsFeedbackDataModel.data.isNotEmpty) InsufficientBalance(),
+          if (accsFeedbackDataModel.data.isEmpty)
+            CreateAccountBox(textColor: Styles.whiteColor),
         ],
       ),
     );
   }
 }
+

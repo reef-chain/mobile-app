@@ -10,7 +10,6 @@ import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
-import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
@@ -24,9 +23,8 @@ class SendNFT extends StatefulWidget {
   final String nftId;
   final String mimetype;
 
-  SendNFT(this.nftUrl, this.name, this.balance, this.nftId, this.mimetype,
-      {Key? key})
-      : super(key: key);
+  const SendNFT(this.nftUrl, this.name, this.balance, this.nftId, this.mimetype,
+      {super.key});
 
   @override
   State<SendNFT> createState() => _SendNFTState();
@@ -34,7 +32,7 @@ class SendNFT extends StatefulWidget {
 
 class _SendNFTState extends State<SendNFT> {
   TextEditingController? _amountController;
-  bool _isValueEditing = false;
+  final bool _isValueEditing = false;
   int amountToSend = 1;
   bool isFormDisabled = false;
   bool isMinBtnEnabled = false;
@@ -53,18 +51,18 @@ class _SendNFTState extends State<SendNFT> {
   void initState() {
     listeners.add(ReefAppState.instance.networkCtrl.getProviderConnLogs().listen((event) {
       setState(() {
-        this.providerConn = event != null && event.isConnected;
+        providerConn = event != null && event.isConnected;
       });
     }));
     listeners.add(ReefAppState.instance.networkCtrl.getIndexerConnected().listen((event) {
       setState(() {
-        this.indexerConn = event != null && event==true;
+        indexerConn = event != null && event==true;
       });
     }));
     ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
       listeners.add(jsStream.listen((event) {
         setState(() {
-          this.jsConn = event != null && event==true;
+          jsConn = event==true;
         });
       }));
     });
@@ -81,6 +79,7 @@ class _SendNFTState extends State<SendNFT> {
     super.dispose();
   }
 
+  /// Fetches NFT contract address
   void getContractAddress() async {
     String? ownerAddress = ReefAppState.instance.model.accounts.selectedAddress;
     var fetchedContractAddress = await ReefAppState.instance.tokensCtrl
@@ -90,44 +89,47 @@ class _SendNFTState extends State<SendNFT> {
     });
   }
 
+  /// Returns button label based on status
   getSendBtnLabel(SendStatus validation) {
     switch (validation) {
-      case SendStatus.NO_ADDRESS:
+      case SendStatus.noAddress:
         return AppLocalizations.of(context)!.missing_destination;
-      case SendStatus.NO_AMT:
+      case SendStatus.noAmt:
         return AppLocalizations.of(context)!.insert_amount;
-      case SendStatus.AMT_TOO_HIGH:
+      case SendStatus.amtTooHigh:
         return AppLocalizations.of(context)!.amount_too_high;
-      case SendStatus.NO_EVM_CONNECTED:
+      case SendStatus.noEvmConnected:
         return AppLocalizations.of(context)!.target_not_evm;
-      case SendStatus.ADDR_NOT_VALID:
+      case SendStatus.addrNotValid:
         return AppLocalizations.of(context)!.enter_valid_address;
-      case SendStatus.ADDR_NOT_EXIST:
+      case SendStatus.addrNotExist:
         return AppLocalizations.of(context)!.unknown_address;
-      case SendStatus.SIGNING:
+      case SendStatus.signing:
         return AppLocalizations.of(context)!.sending_transaction;
-      case SendStatus.SENDING:
+      case SendStatus.sending:
         return AppLocalizations.of(context)!.sending;
-      case SendStatus.READY:
+      case SendStatus.ready:
         return AppLocalizations.of(context)!.confirm_send;
       default:
         return AppLocalizations.of(context)!.not_valid;
     }
   }
 
+  /// Handles error responses from transaction
   bool handleExceptionResponse(txResponse) {
     if (txResponse == null || txResponse['success'] != true) {
       setState(() {
         isFormDisabled = false;
         statusValue = txResponse['data'] == '_canceled'
-            ? SendStatus.READY
-            : SendStatus.ERROR;
+            ? SendStatus.ready
+            : SendStatus.error;
       });
       return true;
     }
     return false;
   }
 
+  /// Updates status when signature popup is closed
   void setStatusOnSignatureClosed() {
     when(
         (p0) =>
@@ -140,7 +142,7 @@ class _SendNFTState extends State<SendNFT> {
           () {
         print('REMOVED SIGN DISPLAY');
         setState(() {
-          statusValue = SendStatus.SENDING;
+          statusValue = SendStatus.sending;
         });
       });
     });
@@ -148,24 +150,26 @@ class _SendNFTState extends State<SendNFT> {
 
   String address = "";
   TextEditingController valueController = TextEditingController();
-  SendStatus statusValue = SendStatus.NO_ADDRESS;
+  SendStatus statusValue = SendStatus.noAddress;
 
+  /// Updates send status based on amount and address
   void setAmountState() async {
     bool isValidAddr = await _isValidAddress(address);
     setState(() {
       if (amountToSend <= widget.balance && amountToSend > 0) {
         if (isValidAddr) {
           isValidAddress = true;
-          statusValue = SendStatus.READY;
+          statusValue = SendStatus.ready;
         } else {
-          statusValue = SendStatus.ADDR_NOT_VALID;
+          statusValue = SendStatus.addrNotValid;
         }
       } else {
-        statusValue = SendStatus.NO_AMT;
+        statusValue = SendStatus.noAmt;
       }
     });
   }
 
+  /// Executes NFT transfer transaction
   Future<Stream<dynamic>> executeTransferTransaction(
       String unresolvedFrom, String evmFrom, String evmTo) async {
     return await ReefAppState.instance.signingCtrl.sendNFT(
@@ -177,6 +181,7 @@ class _SendNFTState extends State<SendNFT> {
         int.tryParse(widget.nftId)!);
   }
 
+  /// Validates Substrate or EVM address
   Future<bool> _isValidAddress(String address) async {
     //checking if selected address is not evm
     if (address.startsWith("5")) {
@@ -200,14 +205,14 @@ class _SendNFTState extends State<SendNFT> {
           setState(() {
             if (isValidAddr) {
               if(resolvedEvmAddress==null || resolvedEvmAddress==""){
-              statusValue = SendStatus.NO_EVM_CONNECTED;
+              statusValue = SendStatus.noEvmConnected;
               isValidAddress = false;
             }else{
               setAmountState();
               isValidAddress = true;
             }
             } else {
-              statusValue = SendStatus.ADDR_NOT_VALID;
+              statusValue = SendStatus.addrNotValid;
               isValidAddress = false;
             }
           });
@@ -326,21 +331,21 @@ class _SendNFTState extends State<SendNFT> {
     ConnectWrapperButton buildSendStatusButton() {
       return ConnectWrapperButton(child: SizedBox(
         width: double.infinity,
-        child: statusValue != SendStatus.SIGNING
+        child: statusValue != SendStatus.signing
             ? ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                   shadowColor: const Color(0x559d6cff),
                   elevation: 0,
-                  backgroundColor: (statusValue == SendStatus.READY)
+                  backgroundColor: (statusValue == SendStatus.ready)
                       ? const Color(0xffe6e2f1)
                       : Colors.transparent,
                   padding: const EdgeInsets.all(0),
                 ),
                 onPressed: () async {
                   setState(() {
-                    statusValue = SendStatus.SIGNING;
+                    statusValue = SendStatus.signing;
                   });
                   setStatusOnSignatureClosed();
                   String? unresolvedFrom =
@@ -363,19 +368,19 @@ class _SendNFTState extends State<SendNFT> {
                     if (txResponse['data']['status'] == 'broadcast') {
                       setState(() {
                         transactionData = txResponse['data'];
-                        statusValue = SendStatus.SENT_TO_NETWORK;
+                        statusValue = SendStatus.sentToNetwork;
                       });
                     }
                     if (txResponse['data']['status'] == 'included-in-block') {
                       setState(() {
                         transactionData = txResponse['data'];
-                        statusValue = SendStatus.INCLUDED_IN_BLOCK;
+                        statusValue = SendStatus.includedInBlock;
                       });
                     }
                     if (txResponse['data']['status'] == 'finalized') {
                       setState(() {
                         transactionData = txResponse['data'];
-                        statusValue = SendStatus.FINALIZED;
+                        statusValue = SendStatus.finalized;
                       });
                     }
                   });
@@ -386,7 +391,7 @@ class _SendNFTState extends State<SendNFT> {
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
                   decoration: BoxDecoration(
                     color: const Color(0xffe6e2f1),
-                    gradient: (statusValue == SendStatus.READY)
+                    gradient: (statusValue == SendStatus.ready)
                         ? const LinearGradient(colors: [
                             Color(0xffae27a5),
                             Color(0xff742cb2),
@@ -400,7 +405,7 @@ class _SendNFTState extends State<SendNFT> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: (statusValue != SendStatus.READY)
+                        color: (statusValue != SendStatus.ready)
                             ? const Color(0x65898e9c)
                             : Colors.white,
                       ),
@@ -423,11 +428,7 @@ class _SendNFTState extends State<SendNFT> {
     );
       }
 
-    void _onFocusChange() {
-      setState(() {
-        _isValueEditing = !_isValueEditing;
-      });
-    }
+
 
     void resetState() {
       valueController.clear();
@@ -436,7 +437,7 @@ class _SendNFTState extends State<SendNFT> {
         address = '';
         isValidAddress = false;
         isFormDisabled = false;
-        statusValue = SendStatus.NO_ADDRESS;
+        statusValue = SendStatus.noAddress;
         transactionData = null;
       });
     }
@@ -542,7 +543,7 @@ class _SendNFTState extends State<SendNFT> {
                                    mainAxisAlignment: MainAxisAlignment.start,
                                    children: [
                                      Text(
-                                       AppLocalizations.of(context)!.balance+" : ",
+                                       "${AppLocalizations.of(context)!.balance} : ",
                                        style: TextStyle(
                                          fontSize: 14,
                                          fontWeight: FontWeight.bold,
@@ -572,7 +573,7 @@ class _SendNFTState extends State<SendNFT> {
                                        ),
                                      ),
                                      Text(
-                                       "${widget.nftId}",
+                                       widget.nftId,
                                        style: TextStyle(
                                          fontSize: 14,
                                          fontWeight: FontWeight.w700,
@@ -611,7 +612,7 @@ class _SendNFTState extends State<SendNFT> {
                                                ],
                                              )
                                            : Text(
-                                               "${contractAddress}",
+                                               contractAddress,
                                                softWrap: true,
                                                style: TextStyle(
                                          fontSize: 14,
@@ -743,56 +744,54 @@ class _SendNFTState extends State<SendNFT> {
                                  ],
                                ),
                                Expanded(
-                                 child: Container(
-                                   child: TextField(
-                                     controller: _amountController,
-                                     keyboardType: TextInputType.number,
-                                     style: TextStyle(
-                                       fontSize: 22,
-                                       fontWeight: FontWeight.bold,
-                                       color: Styles.primaryAccentColor,
-                                     ),
-                                     decoration: InputDecoration(
-                                       border: InputBorder.none,
-                                     ),
-                                     textAlign: TextAlign.center,
-                                     onChanged: (value) {
-                                       setState(() {
-                                         if (value.isEmpty) {
-                                           amountToSend = 0;
+                                 child: TextField(
+                                   controller: _amountController,
+                                   keyboardType: TextInputType.number,
+                                   style: TextStyle(
+                                     fontSize: 22,
+                                     fontWeight: FontWeight.bold,
+                                     color: Styles.primaryAccentColor,
+                                   ),
+                                   decoration: InputDecoration(
+                                     border: InputBorder.none,
+                                   ),
+                                   textAlign: TextAlign.center,
+                                   onChanged: (value) {
+                                     setState(() {
+                                       if (value.isEmpty) {
+                                         amountToSend = 0;
+                                         isMinBtnEnabled = false;
+                                         isMaxBtnEnabled = true;
+                                       } else {
+                                         int enteredValue =
+                                             int.tryParse(value) ?? 0;
+                                         if (enteredValue < 0) {
+                                           statusValue = SendStatus.noAmt;
+                                           _amountController!.text =
+                                               enteredValue.toString();
+                                           amountToSend = enteredValue;
                                            isMinBtnEnabled = false;
                                            isMaxBtnEnabled = true;
+                                         } else if (enteredValue >
+                                             widget.balance) {
+                                           statusValue =
+                                               SendStatus.amtTooHigh;
+                                           _amountController!.text =
+                                               enteredValue.toString();
+                                           amountToSend = enteredValue;
+                                           isMinBtnEnabled = true;
+                                           isMaxBtnEnabled = false;
                                          } else {
-                                           int enteredValue =
-                                               int.tryParse(value) ?? 0;
-                                           if (enteredValue < 0) {
-                                             statusValue = SendStatus.NO_AMT;
-                                             _amountController!.text =
-                                                 enteredValue.toString();
-                                             amountToSend = enteredValue;
-                                             isMinBtnEnabled = false;
-                                             isMaxBtnEnabled = true;
-                                           } else if (enteredValue >
+                                           amountToSend = enteredValue;
+                                           isMinBtnEnabled = true;
+                                           if (enteredValue ==
                                                widget.balance) {
-                                             statusValue =
-                                                 SendStatus.AMT_TOO_HIGH;
-                                             _amountController!.text =
-                                                 enteredValue.toString();
-                                             amountToSend = enteredValue;
-                                             isMinBtnEnabled = true;
                                              isMaxBtnEnabled = false;
-                                           } else {
-                                             amountToSend = enteredValue;
-                                             isMinBtnEnabled = true;
-                                             if (enteredValue ==
-                                                 widget.balance) {
-                                               isMaxBtnEnabled = false;
-                                             }
                                            }
                                          }
-                                       });
-                                     },
-                                   ),
+                                       }
+                                     });
+                                   },
                                  ),
                                ),
                                Column(
@@ -897,49 +896,49 @@ class _SendNFTState extends State<SendNFT> {
 }
 
 enum SendStatus {
-  READY,
-  NO_EVM_CONNECTED,
-  NO_ADDRESS,
-  NO_AMT,
-  AMT_TOO_HIGH,
-  ADDR_NOT_VALID,
-  ADDR_NOT_EXIST,
-  SIGNING,
-  SENDING,
-  CANCELED,
-  ERROR,
-  SENT_TO_NETWORK,
-  INCLUDED_IN_BLOCK,
-  FINALIZED,
-  NOT_FINALIZED,
+  ready,
+  noEvmConnected,
+  noAddress,
+  noAmt,
+  amtTooHigh,
+  addrNotValid,
+  addrNotExist,
+  signing,
+  sending,
+  canceled,
+  error,
+  sentToNetwork,
+  includedInBlock,
+  finalized,
+  notFinalized,
 }
 
 buildFeedbackUI(BuildContext context, SendStatus stat, void Function() onNew,
     void Function() onHome) {
   int? index;
 
-  if (stat == SendStatus.ERROR) {
+  if (stat == SendStatus.error) {
     //index = 'Transaction Error';
     print('send tx error');
   }
-  if (stat == SendStatus.CANCELED) {
+  if (stat == SendStatus.canceled) {
     //title = 'Transaction Canceled';
     print('send tx canceled');
   }
-  if (stat == SendStatus.SENDING) {
+  if (stat == SendStatus.sending) {
     index = 0;
   }
-  if (stat == SendStatus.SENT_TO_NETWORK) {
+  if (stat == SendStatus.sentToNetwork) {
     index = 1;
   }
-  if (stat == SendStatus.INCLUDED_IN_BLOCK) {
+  if (stat == SendStatus.includedInBlock) {
     index = 2;
   }
-  if (stat == SendStatus.FINALIZED) {
+  if (stat == SendStatus.finalized) {
     index = 3;
   }
   // index = 2;
-  if (stat == SendStatus.NOT_FINALIZED) {
+  if (stat == SendStatus.notFinalized) {
     // title = 'NOT finalized!';
   }
 
@@ -1107,19 +1106,19 @@ List<ReefStep> steps(SendStatus stat, int index) => [
 
 ReefStepState getStepState(SendStatus stat, int stepIndex, int currentIndex) {
   switch (stat) {
-    case SendStatus.FINALIZED:
+    case SendStatus.finalized:
       if (stepIndex == currentIndex) {
         return ReefStepState.complete;
       } else if (stepIndex < currentIndex) {
         return ReefStepState.complete;
       }
       break;
-    case SendStatus.CANCELED:
+    case SendStatus.canceled:
       if (stepIndex == currentIndex) {
         return ReefStepState.error;
       }
       break;
-    case SendStatus.ERROR:
+    case SendStatus.error:
       if (stepIndex == currentIndex) {
         return ReefStepState.error;
       }

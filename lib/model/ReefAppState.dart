@@ -25,7 +25,7 @@ import 'package:reef_mobile_app/model/transfer/TransferCtrl.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/service/WalletConnectService.dart';
 
-import 'account/AccountCtrl.dart';
+import 'account/account_ctrl.dart';
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';

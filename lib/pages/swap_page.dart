@@ -1,9 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
@@ -16,10 +14,9 @@ import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
-
+//not
 class SwapPage extends StatefulWidget {
   final String preselected;
   const SwapPage(this.preselected, {Key? key}) : super(key: key);
@@ -144,6 +141,7 @@ class _SwapPageState extends State<SwapPage> {
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
+  /// Handles top token amount input and calculates swap output
   Future<void> _amountTopUpdated(String value) async {
     if (selectedTopToken == null) {
       return;
@@ -190,6 +188,7 @@ class _SwapPageState extends State<SwapPage> {
         "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
   }
 
+  /// Handles bottom token amount input and calculates required input
   Future<void> _amountBottomUpdated(String value) async {
     if (selectedBottomToken == null) {
       return;
@@ -243,6 +242,7 @@ class _SwapPageState extends State<SwapPage> {
         "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
   }
 
+  /// Executes token swap based on selected tokens and amounts
   void _executeSwap() async {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;

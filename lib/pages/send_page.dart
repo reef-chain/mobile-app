@@ -28,33 +28,66 @@ import 'package:reef_mobile_app/utils/styles.dart';
 
 
 
-const int MIN_EVM_TX_BALANCE = 80; // REEF required for EVM tx fees
+const int minEvmTaxBalance = 80; // REEF required for EVM tx fees
 
 enum SendStatus {
-  NO_ADDRESS,
-  NO_AMT,
-  AMT_TOO_HIGH,
-  NO_EVM_CONNECTED,
-  ADDR_NOT_VALID,
-  ADDR_NOT_EXIST,
-  SIGNING,
-  SENDING,
-  SENT_TO_NETWORK,
-  INCLUDED_IN_BLOCK,
-  FINALIZED,
-  NOT_FINALIZED,
-  LOW_REEF_EVM,
-  LOW_REEF_NATIVE,
-  EVM_NOT_BINDED,
-  RECIPIENT_NOT_BINDED, // ✅ added
-  CANCELED,
-  ERROR,
-  CONNECTING,
-  READY,
+  noAddress,
+  noAmt,
+  amtTooHigh,
+  noEvmConnected,
+  addrNotValid,
+  addrNotExist,
+  signing,
+  sending,
+  sentToNetwork,
+  includedInBlock,
+  finalized,
+  notFinalized,
+  lowReefEvm,
+  lowReefNative,
+  evmNotBinded,
+  recipientNotBinded, // ✅ added
+  canceled,
+  error,
+  connecting,
+  ready,
 }
 
 
-// -----------------------------------------------
+const double kSendPaddingV = 30.0;
+const double kSendPaddingH = 10.0;
+
+const double kInputPaddingAll = 12.0;
+const double kInputBorderRadius = 12.0;
+const double kInputBoxShadowBlur = 15.0;
+const double kInputBoxShadowSpread = -8.0;
+const double kInputBoxShadowOffsetY = 10.0;
+
+const double kIconSize = 48.0;
+const double kTokenIconSize = 48.0;
+
+const double kGap10 = 10.0;
+const double kGap12 = 12.0;
+const double kGap13 = 13.0;
+const double kGap24 = 24.0;
+const double kGap36 = 36.0;
+
+const double kSliderTickMarkRadius = 4.0;
+
+const double kButtonRadius = 14.0;
+const double kButtonPaddingV = 15.0;
+const double kButtonPaddingH = 22.0;
+
+const double kStepperPaddingV = 30.0;
+const double kStepperPaddingH = 20.0;
+
+const double kStepContentPadding = 20.0;
+
+const double kQrButtonSize = 48.0;
+
+const double kAddressFontSize = 12.0;
+const double kErrorIconSize = 16.0;
+// --------------------------------------------------------------------
 
 class SendPage extends StatefulWidget {
   final String preselected;
@@ -62,9 +95,9 @@ class SendPage extends StatefulWidget {
 
   const SendPage(
       this.preselected, {
-        Key? key,
+        super.key,
         this.preSelectedTransferAddress,
-      }) : super(key: key);
+      });
 
   @override
   State<SendPage> createState() => _SendPageState();
@@ -73,7 +106,7 @@ class SendPage extends StatefulWidget {
 class _SendPageState extends State<SendPage> {
   // UI / State
   bool isTokenReef = false;
-  SendStatus statusValue = SendStatus.NO_ADDRESS;
+  SendStatus statusValue = SendStatus.noAddress;
 
   final TextEditingController valueController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
@@ -135,7 +168,7 @@ class _SendPageState extends State<SendPage> {
       final v = widget.preSelectedTransferAddress!.trim();
       address = v;
       valueController.text = v;
-      statusValue = SendStatus.NO_AMT;
+      statusValue = SendStatus.noAmt;
       isValidAddress = true;
     }
 
@@ -224,6 +257,8 @@ class _SendPageState extends State<SendPage> {
   }
 
   // ---- logic ----
+
+  /// Disables form input if balance or gas is insufficient
   Future<void> _disableInput() async {
     final tokens = ReefAppState.instance.model.tokens.selectedErc20List;
     if (tokens.isEmpty) return;
@@ -240,19 +275,20 @@ class _SendPageState extends State<SendPage> {
         selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS) {
       if (!mounted) return;
       setState(() {
-        statusValue = SendStatus.LOW_REEF_NATIVE;
+        statusValue = SendStatus.lowReefNative;
         isFormDisabled = true;
       });
     } else if (selectedToken.address != Constants.REEF_TOKEN_ADDRESS &&
         !hasEnoughForEvmTx) {
       if (!mounted) return;
       setState(() {
-        statusValue = SendStatus.LOW_REEF_EVM;
+        statusValue = SendStatus.lowReefEvm;
         isFormDisabled = true;
       });
     }
   }
 
+  /// Validates Substrate or EVM address format
   Future<bool> _isValidAddress(String addr) async {
     if (addr.startsWith("5")) {
       return ReefAppState.instance.accountCtrl.isValidSubstrateAddress(addr);
@@ -262,11 +298,13 @@ class _SendPageState extends State<SendPage> {
     return false;
   }
 
+  /// Checks if signer has enough REEF for EVM gas
   bool hasBalanceForEvmTx(ReefAccount? reefSigner) {
     if (reefSigner == null) return false;
-    return reefSigner.balance >= BigInt.from(MIN_EVM_TX_BALANCE * 1e18);
+    return reefSigner.balance >= BigInt.from(minEvmTaxBalance * 1e18);
   }
 
+  /// Validates address, token and amount before sending
   Future<SendStatus> _validate(
       String addr,
       TokenWithAmount token,
@@ -280,62 +318,88 @@ class _SendPageState extends State<SendPage> {
     if (amt.isEmpty) amt = '0';
     final amtVal = double.tryParse(amt) ?? 0;
 
-    if (!mounted) return SendStatus.ERROR;
+    if (!mounted) return SendStatus.error;
     setState(() => isValidAddress = isValidAddr);
 
-    if (addr.isEmpty) {
-      return SendStatus.NO_ADDRESS;
-    } else if (amtVal > getMaxTransferAmount(token, balance)) {
-      if (getMaxTransferAmount(token, balance) < 5 &&
+    // 1. Address empty
+    if (addr.isEmpty) return SendStatus.noAddress;
+
+    // 2. Amount validation
+    final maxAmount = getMaxTransferAmount(token, balance);
+
+    if (amtVal > maxAmount) {
+      if (maxAmount < 5 &&
           selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS) {
-        return SendStatus.LOW_REEF_NATIVE;
+        return SendStatus.lowReefNative;
       }
-      return SendStatus.AMT_TOO_HIGH;
-    } else if (amtVal <= 0) {
-      return SendStatus.NO_AMT;
-    } else if (token.address != Constants.REEF_TOKEN_ADDRESS &&
-        !hasEnoughForEvmTx) {
-      return SendStatus.LOW_REEF_EVM;
-    } else if (isValidAddr &&
+      return SendStatus.amtTooHigh;
+    }
+
+    if (amtVal <= 0) return SendStatus.noAmt;
+
+    // 3. Check REEF for EVM gas
+    if (token.address != Constants.REEF_TOKEN_ADDRESS && !hasEnoughForEvmTx) {
+      return SendStatus.lowReefEvm;
+    }
+
+    // 4. Invalid address format
+    if (!isValidAddr) return SendStatus.addrNotValid;
+
+    // 5. Substrate address → check EVM mapping
+    if (isValidAddr &&
         token.address != Constants.REEF_TOKEN_ADDRESS &&
         !addr.startsWith('0x')) {
-      try {
-        if (!skipAsync) {
+
+      if (!skipAsync) {
+        try {
           resolvedEvmAddress =
           await ReefAppState.instance.accountCtrl.resolveEvmAddress(addr);
+        } catch (_) {
+          resolvedEvmAddress = null;
         }
-      } catch (_) {
-        resolvedEvmAddress = null;
       }
+
       if (resolvedEvmAddress == null) {
-        return SendStatus.NO_EVM_CONNECTED;
-      }
-    } else if (!isValidAddr) {
-      return SendStatus.ADDR_NOT_VALID;
-    } else if (!skipAsync && addr.startsWith('0x')) {
-      if (!(await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr))) {
-        return SendStatus.ADDR_NOT_EXIST;
-      } else if (selectedAccount != null &&
-          !selectedAccount!.isEvmClaimed &&
-          !(await ReefAppState.instance.accountCtrl.isEvmAddressExist(
-            await ReefAppState.instance.accountCtrl
-                .resolveEvmAddress(selectedAccount!.address),
-          ))) {
-        return SendStatus.EVM_NOT_BINDED;
+        return SendStatus.noEvmConnected;
       }
     }
-    return SendStatus.READY;
+
+    // 6. EVM address → check existence & binding
+    if (!skipAsync && addr.startsWith('0x')) {
+      final exists =
+      await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr);
+
+      if (!exists) return SendStatus.addrNotExist;
+
+      if (selectedAccount != null && !selectedAccount!.isEvmClaimed) {
+        final evm = await ReefAppState.instance.accountCtrl
+            .resolveEvmAddress(selectedAccount!.address);
+
+        final isBounded =
+        await ReefAppState.instance.accountCtrl.isEvmAddressExist(evm);
+
+        if (!isBounded) return SendStatus.evmNotBinded;
+      }
+    }
+
+    return SendStatus.ready;
   }
 
+
+  /// Handles send button click and initiates transaction
   Future<void> _onConfirmSend(TokenWithAmount sendToken) async {
-    if (address.isEmpty ||
-        sendToken.balance <= BigInt.zero ||
-        statusValue != SendStatus.READY) {
+    // ❌ No balance check here (as per client requirement)
+    // ❌ No amount check here
+    // ❌ No max transfer check
+
+    if (address.isEmpty || statusValue != SendStatus.ready) {
       return;
     }
+
+    // connection check (this stays)
     if (!(jsConn && indexerConn && providerConn)) {
       if (!mounted) return;
-      setState(() => statusValue = SendStatus.CONNECTING);
+      setState(() => statusValue = SendStatus.connecting);
       await _waitForConnections(sendToken);
       return;
     }
@@ -343,7 +407,7 @@ class _SendPageState extends State<SendPage> {
     if (!mounted) return;
     setState(() {
       isFormDisabled = true;
-      statusValue = SendStatus.SIGNING;
+      statusValue = SendStatus.signing;
     });
 
     setStatusOnSignatureClosed();
@@ -377,25 +441,26 @@ class _SendPageState extends State<SendPage> {
         if (!mounted) return;
         setState(() {
           isFormDisabled = false;
-          statusValue = SendStatus.ERROR;
+          statusValue = SendStatus.error;
         });
       },
     );
   }
 
+  /// Waits until all providers are connected
   Future<void> _waitForConnections(TokenWithAmount sendToken) async {
     const maxWait = Duration(seconds: 30);
     final start = DateTime.now();
 
     while (!(jsConn && indexerConn && providerConn)) {
       if (!mounted) return;
-      setState(() => statusValue = SendStatus.CONNECTING);
+      setState(() => statusValue = SendStatus.connecting);
       await Future.delayed(const Duration(seconds: 1));
       if (DateTime.now().difference(start) > maxWait) {
         if (!mounted) return;
         setState(() {
           isFormDisabled = false;
-          statusValue = SendStatus.ERROR;
+          statusValue = SendStatus.error;
         });
         return;
       }
@@ -403,6 +468,7 @@ class _SendPageState extends State<SendPage> {
     await _onConfirmSend(sendToken);
   }
 
+  /// Creates and executes token transfer stream
   Future<Stream<dynamic>> executeTransferTransaction(
       TokenWithAmount sendToken,
       ) async {
@@ -427,7 +493,7 @@ class _SendPageState extends State<SendPage> {
         .transferTokensStream(signerAddress, toAddress, tokenToTransfer);
   }
 
-  // MobX reactions for signature UI lifecycle
+  /// Updates status when signature dialog opens/closes
   void setStatusOnSignatureClosed() {
     _sigAppearDisposer?.call();
     _sigGoneDisposer?.call();
@@ -442,46 +508,48 @@ class _SendPageState extends State<SendPage> {
               .instance.signingCtrl.signatureRequests.list.isEmpty,
               () {
             if (!mounted) return;
-            setState(() => statusValue = SendStatus.SENDING);
+            setState(() => statusValue = SendStatus.sending);
           },
         );
       },
     );
   }
 
+  /// Maps raw error response to SendStatus
   SendStatus handleErrorResponse(String response) {
     if (response == "-32603: execution fatal: Module { index: 6, error: 3, message: None }") {
-      return SendStatus.EVM_NOT_BINDED;
+      return SendStatus.evmNotBinded;
     }
     if (response == 'invalid address (argument="address", value="", code=INVALID_ARGUMENT, version=address/5.7.0) (argument="recipient", value="", code=INVALID_ARGUMENT, version=abi/5.7.0)') {
       // If you added a RECIPIENT_NOT_BINDED enum, map to it; else generic error/not valid.
-      return SendStatus.ADDR_NOT_VALID;
+      return SendStatus.addrNotValid;
     }
 
     // New cases:
     if (response == "timeout") {
-      return SendStatus.ERROR; // or a specific TIMEOUT state if you have it
+      return SendStatus.error; // or a specific TIMEOUT state if you have it
     }
     if (response == "provider_disconnected") {
-      return SendStatus.ERROR;
+      return SendStatus.error;
     }
     if (response == "_canceled") {
-      return SendStatus.READY; // user canceled: allow retry immediately
+      return SendStatus.ready; // user canceled: allow retry immediately
     }
     if (response == "signer_not_found") {
-      return SendStatus.ERROR;
+      return SendStatus.error;
     }
 
-    return SendStatus.ERROR;
+    return SendStatus.error;
   }
 
+  /// Handles transaction error responses
   bool handleExceptionResponse(dynamic txResponse) {
     if (txResponse == null || txResponse['success'] != true) {
       if (!mounted) return true;
       setState(() {
         isFormDisabled = false;
         statusValue = txResponse['data'] == '_canceled'
-            ? SendStatus.READY
+            ? SendStatus.ready
             : handleErrorResponse(txResponse['data']?.toString() ?? '');
       });
       return true;
@@ -489,49 +557,51 @@ class _SendPageState extends State<SendPage> {
     return false;
   }
 
+  /// Handles EVM transaction responses
   bool handleEvmTransactionResponse(dynamic txResponse) {
     if (txResponse['type'] == 'reef20') {
       final status = txResponse['data']['status'];
       if (status == 'broadcast') {
         setState(() {
           transactionData = txResponse['data'];
-          statusValue = SendStatus.SENT_TO_NETWORK;
+          statusValue = SendStatus.sentToNetwork;
         });
       } else if (status == 'included-in-block') {
         setState(() {
           transactionData = txResponse['data'];
-          statusValue = SendStatus.INCLUDED_IN_BLOCK;
+          statusValue = SendStatus.includedInBlock;
         });
       } else if (status == 'finalized') {
         setState(() {
           transactionData = txResponse['data'];
-          statusValue = SendStatus.FINALIZED;
+          statusValue = SendStatus.finalized;
         });
       } else if (status == 'not-finalized') {
-        setState(() => statusValue = SendStatus.NOT_FINALIZED);
+        setState(() => statusValue = SendStatus.notFinalized);
       }
       return true;
     }
     return false;
   }
 
+  /// Handles native transfer responses
   bool handleNativeTransferResponse(dynamic txResponse) {
     if (txResponse['type'] == 'native') {
       final status = txResponse['data']['status'];
       if (status == 'broadcast') {
         setState(() {
           transactionData = txResponse['data'];
-          statusValue = SendStatus.SENT_TO_NETWORK;
+          statusValue = SendStatus.sentToNetwork;
         });
       } else if (status == 'included-in-block') {
         setState(() {
           transactionData = txResponse['data'];
-          statusValue = SendStatus.INCLUDED_IN_BLOCK;
+          statusValue = SendStatus.includedInBlock;
         });
       } else if (status == 'finalized') {
         setState(() {
           transactionData = txResponse['data'];
-          statusValue = SendStatus.FINALIZED;
+          statusValue = SendStatus.finalized;
         });
       }
       return true;
@@ -549,39 +619,39 @@ class _SendPageState extends State<SendPage> {
       address = '';
       rating = 0;
       isFormDisabled = false;
-      statusValue = SendStatus.NO_ADDRESS;
+      statusValue = SendStatus.noAddress;
     });
   }
 
   String getSendBtnLabel(SendStatus validation) {
     switch (validation) {
-      case SendStatus.NO_ADDRESS:
+      case SendStatus.noAddress:
         return AppLocalizations.of(context)!.missing_destination;
-      case SendStatus.NO_AMT:
+      case SendStatus.noAmt:
         return AppLocalizations.of(context)!.insert_amount;
-      case SendStatus.AMT_TOO_HIGH:
+      case SendStatus.amtTooHigh:
         return AppLocalizations.of(context)!.amount_too_high;
-      case SendStatus.NO_EVM_CONNECTED:
+      case SendStatus.noEvmConnected:
         return AppLocalizations.of(context)!.target_not_evm;
-      case SendStatus.ADDR_NOT_VALID:
+      case SendStatus.addrNotValid:
         return AppLocalizations.of(context)!.enter_valid_address;
-      case SendStatus.ADDR_NOT_EXIST:
+      case SendStatus.addrNotExist:
         return AppLocalizations.of(context)!.unknown_address;
-      case SendStatus.SIGNING:
+      case SendStatus.signing:
         return AppLocalizations.of(context)!.sending_tx;
-      case SendStatus.SENDING:
+      case SendStatus.sending:
         return AppLocalizations.of(context)!.sending;
-      case SendStatus.LOW_REEF_EVM:
+      case SendStatus.lowReefEvm:
         return AppLocalizations.of(context)!.minimum_80_reef;
-      case SendStatus.LOW_REEF_NATIVE:
+      case SendStatus.lowReefNative:
         return AppLocalizations.of(context)!.minimum_5_reef;
-      case SendStatus.EVM_NOT_BINDED:
+      case SendStatus.evmNotBinded:
         return AppLocalizations.of(context)!.evm_not_connected;
-      case SendStatus.CONNECTING:
+      case SendStatus.connecting:
         return AppLocalizations.of(context)!.connecting.capitalize();
-      case SendStatus.RECIPIENT_NOT_BINDED: // ✅ now exists
+      case SendStatus.recipientNotBinded: // ✅ now exists
         return AppLocalizations.of(context)!.recipient_not_binded;
-      case SendStatus.READY:
+      case SendStatus.ready:
         return AppLocalizations.of(context)!.confirm_send;
       default:
         return AppLocalizations.of(context)!.not_valid;
@@ -1051,14 +1121,14 @@ class _SendPageState extends State<SendPage> {
         children: [
           SizedBox(
             width: double.infinity,
-            child: statusValue != SendStatus.SIGNING
+            child: statusValue != SendStatus.signing
                 ? ElevatedButton(
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
                 shadowColor: const Color(0x559d6cff),
                 elevation: 0,
-                backgroundColor: (statusValue == SendStatus.READY)
+                backgroundColor: (statusValue == SendStatus.ready)
                     ? const Color(0xffe6e2f1)
                     : Colors.transparent,
                 padding: const EdgeInsets.all(0),
@@ -1070,7 +1140,7 @@ class _SendPageState extends State<SendPage> {
                     vertical: 15, horizontal: 22),
                 decoration: BoxDecoration(
                   color: const Color(0xffe6e2f1),
-                  gradient: (statusValue == SendStatus.READY)
+                  gradient: (statusValue == SendStatus.ready)
                       ? Styles.buttonGradient
                       : null,
                   borderRadius: const BorderRadius.all(
@@ -1082,7 +1152,7 @@ class _SendPageState extends State<SendPage> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: (statusValue != SendStatus.READY)
+                      color: (statusValue != SendStatus.ready)
                           ? const Color(0x65898e9c)
                           : Colors.white,
                     ),
@@ -1103,7 +1173,7 @@ class _SendPageState extends State<SendPage> {
             ),
           ),
           const Gap(8.0),
-          if (statusValue == SendStatus.EVM_NOT_BINDED &&
+          if (statusValue == SendStatus.evmNotBinded &&
               anyAccountHasBalance(BigInt.from(MIN_BALANCE * 1e18)) &&
               selectedAccount != null)
             SizedBox(
@@ -1122,10 +1192,10 @@ class _SendPageState extends State<SendPage> {
                     context,
                     bindFor: selectedAccount!,
                     callback: () async {
-                      final _statusValue =
+                      var statusValue =
                       await _validate(address, selectedToken, amount);
                       if (!mounted) return;
-                      setState(() => statusValue = _statusValue);
+                      setState(() => statusValue = statusValue);
                     },
                   );
                 },
@@ -1201,10 +1271,10 @@ class _SendPageState extends State<SendPage> {
       ) {
     int? index;
 
-    if (stat == SendStatus.SENDING) index = 0;
-    if (stat == SendStatus.SENT_TO_NETWORK) index = 1;
-    if (stat == SendStatus.INCLUDED_IN_BLOCK) index = 2;
-    if (stat == SendStatus.FINALIZED) index = 3;
+    if (stat == SendStatus.sending) index = 0;
+    if (stat == SendStatus.sentToNetwork) index = 1;
+    if (stat == SendStatus.includedInBlock) index = 2;
+    if (stat == SendStatus.finalized) index = 3;
 
     if (index == null) return null;
 
@@ -1342,11 +1412,11 @@ class _SendPageState extends State<SendPage> {
   ReefStepState getStepState(
       SendStatus stat, int stepIndex, int currentIndex) {
     switch (stat) {
-      case SendStatus.FINALIZED:
+      case SendStatus.finalized:
         if (stepIndex <= currentIndex) return ReefStepState.complete;
         break;
-      case SendStatus.CANCELED:
-      case SendStatus.ERROR:
+      case SendStatus.canceled:
+      case SendStatus.error:
         if (stepIndex == currentIndex) return ReefStepState.error;
         break;
       default:

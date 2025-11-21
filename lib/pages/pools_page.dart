@@ -11,6 +11,29 @@ import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import '../components/sign/SignatureContentToggle.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// ========== CONSTANTS ==========
+
+// Header / Titles
+const double kHeaderFontSize = 32.0;
+
+// Search & spacing
+const double kSearchGap = 4.0;
+const double kSearchGapLarge = 16.0;
+const double kSearchFieldPaddingV = 14.0;
+const double kSearchFieldRadius = 12.0;
+
+// Pool card
+const double kPoolMargin = 4.0;
+const double kTokenOverlap = 14.0;
+const double kPoolIconSize = 30.0;
+
+// Fonts
+const double kSubtitleFont = 12.0;
+const double kSwapIconSize = 16.0;
+
 class PoolsPage extends StatefulWidget {
   const PoolsPage({super.key});
 
@@ -56,12 +79,10 @@ class _PoolsPageState extends State<PoolsPage> {
     _focusNodeSearch.dispose();
     super.dispose();
   }
+  /// Triggered when search focus changes
+  void _onFocusSearchChange() {}
 
-  void _onFocusSearchChange() {
-    // optional visual effect toggle; keep if you use it in the UI
-    // setState(() {});
-  }
-
+  /// Checks if selected account has REEF balance
   void _fetchUserBalance() {
     try {
       final selectedAccount = ReefAppState
@@ -69,6 +90,7 @@ class _PoolsPageState extends State<PoolsPage> {
           .firstWhere((account) =>
       account.address ==
           ReefAppState.instance.model.accounts.selectedAddress);
+
       if (selectedAccount.balance > BigInt.zero) {
         setState(() => hasReef = true);
       }
@@ -77,17 +99,16 @@ class _PoolsPageState extends State<PoolsPage> {
     }
   }
 
+  /// Fetches tokens & pools with pagination
   Future<void> _fetchTokensAndPools({bool initial = false}) async {
     if (isLoading) return;
     setState(() => isLoading = true);
 
-    // gather balances
     final selectedTokens = ReefAppState.instance.model.tokens.selectedErc20List;
     for (final token in selectedTokens) {
       tokenBalances[token.address] = token.balance;
     }
 
-    // fetch pools page
     try {
       final pools = await ReefAppState.instance.poolsCtrl.getPools(offset, "");
       if (pools is List<dynamic>) {
@@ -97,9 +118,7 @@ class _PoolsPageState extends State<PoolsPage> {
           ReefAppState.instance.poolsCtrl.appendPools(pools);
           _pools = ReefAppState.instance.poolsCtrl.getCachedPools();
         }
-        setState(() {
-          offset += 10;
-        });
+        setState(() => offset += 10);
       }
     } catch (e) {
       debugPrint('getPools error: $e');
@@ -108,6 +127,7 @@ class _PoolsPageState extends State<PoolsPage> {
     }
   }
 
+  /// Clears search input and resets state
   void clearSearch() {
     setState(() {
       searchInput = "";
@@ -118,13 +138,12 @@ class _PoolsPageState extends State<PoolsPage> {
     searchPools("");
   }
 
+  /// Searches pools based on input value
   Future<void> searchPools(String val) async {
     try {
       final res = await ReefAppState.instance.poolsCtrl.getPools(0, val);
       if (!mounted) return;
-      setState(() {
-        searchedPools = res is List<dynamic> ? res : const [];
-      });
+      setState(() => searchedPools = res is List ? res : const []);
     } catch (e) {
       debugPrint('searchPools error: $e');
       if (!mounted) return;
@@ -132,26 +151,26 @@ class _PoolsPageState extends State<PoolsPage> {
     }
   }
 
+  /// Checks if token has balance
   bool hasBalance(String addr) {
     return tokenBalances.containsKey(addr) &&
         (tokenBalances[addr] as BigInt) > BigInt.zero;
   }
 
-  // ---- UI helpers ----
+  // ========== UI HELPERS ==========
 
   String _normalizeIpfsUrl(String url) {
-    // some gateways can be blocked or flaky; fall back to ipfs.io
     if (url.startsWith('https://cloudflare-ipfs.com/ipfs/')) {
-      return url.replaceFirst('https://cloudflare-ipfs.com/ipfs/', 'https://ipfs.io/ipfs/');
+      return url.replaceFirst(
+          'https://cloudflare-ipfs.com/ipfs/', 'https://ipfs.io/ipfs/');
     }
     return url;
   }
 
-  Widget _tokenIcon(String? dataUrl, {double size = 30}) {
+  Widget _tokenIcon(String? dataUrl, {double size = kPoolIconSize}) {
     if (dataUrl == null || dataUrl.isEmpty) {
       return _fallbackTokenCircle(size);
     }
-    // base64 svg inline
     if (isValidSVG(dataUrl)) {
       try {
         final base64Str = dataUrl.split('data:image/svg+xml;base64,')[1];
@@ -166,10 +185,12 @@ class _PoolsPageState extends State<PoolsPage> {
         return _fallbackTokenCircle(size);
       }
     }
-    // network image with gateway normalization + safe fallback
+
     final url = _normalizeIpfsUrl(dataUrl);
     return ClipOval(
       child: Image.network(
+        cacheWidth: 600,
+
         url,
         width: size,
         height: size,
@@ -187,13 +208,14 @@ class _PoolsPageState extends State<PoolsPage> {
         shape: BoxShape.circle,
         color: Color(0xFFECECF1),
       ),
-      child: const Icon(Icons.image_not_supported, size: 16, color: Colors.grey),
+      child: Icon(Icons.image_not_supported,
+          size: kSubtitleFont, color: Colors.grey),
     );
   }
 
   Widget getPoolCard(dynamic pool) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 4.0),
+      margin: const EdgeInsets.only(bottom: kPoolMargin),
       child: Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -206,7 +228,9 @@ class _PoolsPageState extends State<PoolsPage> {
                   alignment: Alignment.centerLeft,
                   children: [
                     _tokenIcon(pool['iconUrl1']),
-                    Positioned(left: 14, child: _tokenIcon(pool['iconUrl2'])),
+                    Positioned(
+                        left: kTokenOverlap,
+                        child: _tokenIcon(pool['iconUrl2'])),
                   ],
                 ),
               ),
@@ -215,15 +239,17 @@ class _PoolsPageState extends State<PoolsPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('${pool['symbol1']}/${pool['symbol2']}'),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: kSearchGap),
                   Tooltip(
                     message: '${pool['token1']}/\n${pool['token2']}',
-                    textStyle: const TextStyle(fontSize: 12.0, color: Colors.white),
+                    textStyle:
+                    const TextStyle(fontSize: kSubtitleFont, color: Colors.white),
                     decoration: BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Icon(Icons.help_outline, size: 18.0, color: Colors.grey),
+                    child: const Icon(Icons.help_outline,
+                        size: 18.0, color: Colors.grey),
                   ),
                 ],
               ),
@@ -232,41 +258,53 @@ class _PoolsPageState extends State<PoolsPage> {
                 children: [
                   Row(children: [
                     const Text('TVL : ',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
-                    Text('\$${pool["tvl"]}', style: const TextStyle(fontSize: 12.0)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: kSubtitleFont)),
+                    Text('\$${pool["tvl"]}',
+                        style: const TextStyle(fontSize: kSubtitleFont)),
                   ]),
                   Row(children: [
                     const Text('24h Vol. : ',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
-                    Text('\$ ${pool['volume24h']}', style: const TextStyle(fontSize: 12.0)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: kSubtitleFont)),
+                    Text('\$ ${pool['volume24h']}',
+                        style: const TextStyle(fontSize: kSubtitleFont)),
                     Text(' ${pool['volumeChange24h']} %',
-                        style:  TextStyle(
-                            fontSize: 12.0, color: Styles.greenColor, fontWeight: FontWeight.bold)),
+                        style: TextStyle(
+                            fontSize: kSubtitleFont,
+                            color: Styles.greenColor,
+                            fontWeight: FontWeight.bold)),
                   ]),
                 ],
               ),
             ),
+
+            // Swap button when user has balance
             if (hasBalance(pool['token1']) || hasBalance(pool['token2']))
               Container(
-                margin: const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
+                margin: const EdgeInsets.only(
+                    top: 8.0, left: 16.0, right: 16.0, bottom: 8.0),
                 decoration: BoxDecoration(
-                  boxShadow:  [
+                  boxShadow: [
                     BoxShadow(
                       color: Styles.secondaryAccentColorDark,
                       spreadRadius: -10,
-                      offset: Offset(0, 5),
+                      offset: const Offset(0, 5),
                       blurRadius: 20,
                     ),
                   ],
                   borderRadius: BorderRadius.circular(80),
-                  gradient:  LinearGradient(
+                  gradient: LinearGradient(
                     colors: [Styles.purpleColorLight, Styles.secondaryAccentColorDark],
-                    begin: Alignment(-1, -1),
-                    end: Alignment(1, 1),
+                    begin: const Alignment(-1, -1),
+                    end: const Alignment(1, 1),
                   ),
                 ),
                 child: ElevatedButton.icon(
-                  icon: const Icon(CupertinoIcons.repeat, color: Colors.white, size: 16.0),
+                  icon: const Icon(CupertinoIcons.repeat,
+                      color: Colors.white, size: kSwapIconSize),
                   style: ElevatedButton.styleFrom(
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     backgroundColor: Colors.transparent,
@@ -274,7 +312,8 @@ class _PoolsPageState extends State<PoolsPage> {
                     elevation: 0,
                   ),
                   label: const Text('Swap',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w700)),
                   onPressed: () async {
                     ReefAppState.instance.navigationCtrl.navigateToSwapPage(
                       context: context,
@@ -292,8 +331,8 @@ class _PoolsPageState extends State<PoolsPage> {
 
   Widget buildSearchAcknowledge() {
     return Container(
-      margin: const EdgeInsets.only(top: 8.0),
-      padding: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.only(top: kSearchGap),
+      padding: const EdgeInsets.all(kSearchGap + 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -301,23 +340,21 @@ class _PoolsPageState extends State<PoolsPage> {
             Text(
               "Search pools for $searchInput ...",
               style: const TextStyle(
-                color: Styles.textLightColor,
-                fontSize: 14.0,
-                fontWeight: FontWeight.w800,
-              ),
+                  color: Styles.textLightColor,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w800),
             )
           else if (searchedPools!.isEmpty)
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Icon(Icons.error, size: 14.0, color: Styles.errorColor),
-                Gap(4.0),
+                Gap(kSearchGap),
                 Text(
                   "No pools found!",
                   style: TextStyle(
-                    color: Styles.errorColor,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  ),
+                      color: Styles.errorColor,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14),
                 ),
               ],
             )
@@ -325,11 +362,11 @@ class _PoolsPageState extends State<PoolsPage> {
             Text(
               "Search Results for $searchInput ( ${searchedPools!.length} )",
               style: const TextStyle(
-                color: Styles.textLightColor,
-                fontSize: 14.0,
-                fontWeight: FontWeight.w800,
-              ),
+                  color: Styles.textLightColor,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w800),
             ),
+
           GestureDetector(
             onTap: clearSearch,
             child: Container(
@@ -337,8 +374,8 @@ class _PoolsPageState extends State<PoolsPage> {
                 borderRadius: BorderRadius.circular(20),
                 color: Styles.buttonColor,
               ),
-              child:  Padding(
-                padding: EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Icon(Icons.close, size: 12, color: Styles.whiteColor),
               ),
             ),
@@ -351,33 +388,35 @@ class _PoolsPageState extends State<PoolsPage> {
   Widget buildSearchContainer() {
     return Column(
       children: [
-        const Gap(16),
+        const Gap(kSearchGapLarge),
         Row(
           children: [
-            const Gap(4.0),
+            const Gap(kSearchGap),
             Expanded(
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: kSearchFieldPaddingV),
                 decoration: BoxDecoration(
                   color: Styles.whiteColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(kSearchFieldRadius),
                   border: Border.all(color: const Color(0x20000000), width: 1),
                 ),
                 child: TextField(
                   focusNode: _focusNodeSearch,
                   controller: _searchController,
-                  decoration: const InputDecoration.collapsed(hintText: 'Search'),
+                  decoration:
+                  const InputDecoration.collapsed(hintText: 'Search'),
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
             ),
           ],
         ),
-        const Gap(4.0),
+        const Gap(kSearchGap),
         if (searched) buildSearchAcknowledge(),
-        const Gap(4.0),
+        const Gap(kSearchGap),
       ],
     );
   }
@@ -388,7 +427,8 @@ class _PoolsPageState extends State<PoolsPage> {
       Stack(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             color: Styles.darkBackgroundColor,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,29 +441,26 @@ class _PoolsPageState extends State<PoolsPage> {
                       AppLocalizations.of(context)!.pools,
                       style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w500,
-                        fontSize: 32,
+                        fontSize: kHeaderFontSize,
                         color: Colors.grey.shade100,
                       ),
                     ),
-                    const Row(children: [
-                      // action icons (kept commented intentionally)
-                    ]),
+                    const Row(children: []),
                   ],
                 ),
 
                 if (hasReef) ...[
-                  const Gap(8.0),
+                  const Gap(kSearchGapLarge),
                   buildSearchContainer(),
-                  const Gap(8.0),
+                  const Gap(kSearchGapLarge),
                 ] else
-                  Column(
-                    children: const [
-                      // Replace with your own “insufficient balance” widget if needed
+                  const Column(
+                    children: [
                       Gap(16.0),
                     ],
                   ),
 
-                // List area
+                // List
                 Expanded(
                   child: NotificationListener<ScrollNotification>(
                     onNotification: (scrollInfo) {
@@ -468,8 +505,9 @@ class _PoolsPageState extends State<PoolsPage> {
                         return getPoolCard(pool);
                       },
                     )
-                        :  Center(
-                      child: CircularProgressIndicator(color: Styles.primaryColor),
+                        : Center(
+                      child: CircularProgressIndicator(
+                          color: Styles.primaryColor),
                     ),
                   ),
                 ),
@@ -488,7 +526,9 @@ class _PoolsPageState extends State<PoolsPage> {
   }
 
   bool isValidSVG(String? dataUrl) {
-    return dataUrl != null && dataUrl.contains("data:image/svg+xml;base64,");
+    return dataUrl != null &&
+        dataUrl.contains("data:image/svg+xml;base64,");
   }
 }
+
 

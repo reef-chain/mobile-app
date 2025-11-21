@@ -6,7 +6,7 @@ import 'package:reef_mobile_app/components/home/tx_info.dart';
 import 'package:reef_mobile_app/model/navigation/homepage_navigation_model.dart';
 import 'package:reef_mobile_app/model/navigation/nav_swipe_compute.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
-import 'package:reef_mobile_app/pages/SplashScreen.dart';
+import 'package:reef_mobile_app/pages/splash_screen.dart';
 import 'package:reef_mobile_app/pages/pools_page.dart';
 import 'package:reef_mobile_app/pages/send_nft.dart';
 import 'package:reef_mobile_app/pages/send_page.dart';

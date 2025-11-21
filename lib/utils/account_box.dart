@@ -3,7 +3,7 @@ import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/account_modals.dart';
 import 'package:reef_mobile_app/components/modals/restore_json_modal.dart';
 import 'package:reef_mobile_app/l10n/app_localizations.dart';
-import 'package:reef_mobile_app/pages/SplashScreen.dart';
+import 'package:reef_mobile_app/pages/splash_screen.dart';
 
 // TODO convert modal name to Enum vlaue
 void openModal(String modalName) {

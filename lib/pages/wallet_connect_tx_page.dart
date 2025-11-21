@@ -3,6 +3,26 @@ import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
+// ================== CONSTANTS ==================
+const double kWCTxMarginTop = 12.0;
+const double kWCTxBorderRadius = 12.0;
+
+const double kWCTxPaddingAll = 16.0;
+
+const double kWCTxGap4 = 4.0;
+
+const double kWCTxTitleFontSize = 18.0;
+
+const int kWCTxCountdownMs = 10000;
+const double kWCTxCountdownSize = 75.0;
+const double kWCTxCountdownStroke = 4.0;
+
+const double kWCTxBtnRadius = 40.0;
+const double kWCTxBtnPaddingV = 12.0;
+const double kWCTxBtnPaddingH = 28.0;
+const double kWCTxBtnFontSize = 14.0;
+// ==============================================
+
 class WalletConnectTxPage extends StatefulWidget {
   const WalletConnectTxPage({super.key});
 
@@ -14,45 +34,52 @@ class _WalletConnectTxPageState extends State<WalletConnectTxPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 12.0),
+      margin: const EdgeInsets.only(top: kWCTxMarginTop),
       decoration: BoxDecoration(
         color: Styles.whiteColor,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(kWCTxBorderRadius),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(kWCTxPaddingAll),
         child: IntrinsicHeight(
           child: Column(
             children: [
-              Gap(4.0),
+              const Gap(kWCTxGap4),
+
               Text(
                 "Confirming Transaction with WalletConnect",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: kWCTxTitleFontSize,
                   fontWeight: FontWeight.w700,
                   color: Styles.textColor,
                 ),
               ),
-              Gap(4.0),
+
+              const Gap(kWCTxGap4),
+
               CircularCountDown(
-                countdownMs: 10000,
-                width: 75,
-                height: 75,
+                countdownMs: kWCTxCountdownMs,
+                width: kWCTxCountdownSize,
+                height: kWCTxCountdownSize,
                 fillColor: Styles.blueColor,
-                strokeWidth: 4,
+                strokeWidth: kWCTxCountdownStroke,
                 svgAssetPath: 'assets/images/walletconnect.svg',
               ),
-              Gap(4.0),
+
+              const Gap(kWCTxGap4),
+
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
+                    borderRadius: BorderRadius.circular(kWCTxBtnRadius),
                   ),
                   shadowColor: const Color(0x559d6cff),
                   elevation: 5,
                   backgroundColor: Styles.primaryAccentColor,
                   padding: const EdgeInsets.symmetric(
-                      vertical: 12, horizontal: 28),
+                    vertical: kWCTxBtnPaddingV,
+                    horizontal: kWCTxBtnPaddingH,
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -64,7 +91,7 @@ class _WalletConnectTxPageState extends State<WalletConnectTxPage> {
                       Text(
                         "OK",
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: kWCTxBtnFontSize,
                           fontWeight: FontWeight.w700,
                           color: Styles.whiteColor,
                         ),

@@ -1,19 +1,15 @@
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:reef_mobile_app/components/CircularCountdown.dart';
 import 'package:reef_mobile_app/components/MaxAmountButton.dart';
 import 'package:reef_mobile_app/components/SliderStandAlone.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
-import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/token_selection_modals.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
@@ -26,15 +22,13 @@ import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
 
 class SwapPage extends StatefulWidget {
   final String? preselectedTop;
   final String? preselectedBottom;
-  const SwapPage({this.preselectedTop = "", this.preselectedBottom, Key? key})
-      : super(key: key);
+  const SwapPage({this.preselectedTop = "", this.preselectedBottom, super.key});
 
   @override
   State<SwapPage> createState() => _SwapPageState();
@@ -73,7 +67,7 @@ class _SwapPageState extends State<SwapPage> {
   String fee = "";
 
   //status reefstepper
-  SendStatus statusValue = SendStatus.NO_ADDRESS;
+  SendStatus statusValue = SendStatus.noAddress;
   dynamic transactionData;
 
   //swap button label
@@ -166,6 +160,7 @@ class _SwapPageState extends State<SwapPage> {
     super.initState();
   }
 
+  /// Resets slippage slider to default value
   void resetDefaultSlider(){
       ReefAppState.instance.model.swapSettings.setSlippageTolerance(0.008);
       setState(() {
@@ -173,6 +168,7 @@ class _SwapPageState extends State<SwapPage> {
       });
   }
 
+  /// Fetches and updates pool reserves
   void _getPoolReserves() async {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
@@ -207,6 +203,7 @@ class _SwapPageState extends State<SwapPage> {
     print("Pool reserves: ${res['reserve1']}, ${res['reserve1']}");
   }
 
+  /// Returns current swap rate from pool
   Future<String> getPoolRate() async {
     var token1 = selectedTopToken!.setAmount(reserveTop);
     var token2 = selectedBottomToken!.setAmount(reserveBottom);
@@ -220,6 +217,7 @@ class _SwapPageState extends State<SwapPage> {
     return '1 ${token1.symbol} = $formattedRes ${token2.symbol}';
   }
 
+  /// Executes token swap transaction
   Widget buildPreloader() {
     return Align(
       alignment: Alignment(0, 0.64),
@@ -282,6 +280,7 @@ class _SwapPageState extends State<SwapPage> {
     );
   }
 
+  /// Executes token swap transaction
   void _executeSwap() async {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
@@ -357,34 +356,36 @@ class _SwapPageState extends State<SwapPage> {
     print("SWAP TOKEN RESPONSE === $executeTransactionFeedbackStream");
   }
 
+  /// Handles EVM swap transaction status updates
   bool handleEvmTransactionResponse(txResponse) {
     if (txResponse['status'] == 'broadcast') {
       setState(() {
         transactionData = txResponse['data'];
-        statusValue = SendStatus.SENT_TO_NETWORK;
+        statusValue = SendStatus.sentToNetwork;
       });
     }
     if (txResponse['status'] == 'included-in-block') {
       setState(() {
         transactionData = txResponse['data'];
-        statusValue = SendStatus.INCLUDED_IN_BLOCK;
+        statusValue = SendStatus.includedInBlock;
       });
     }
     if (txResponse['status'] == 'finalized') {
       setState(() {
         transactionData = txResponse['data'];
-        statusValue = SendStatus.FINALIZED;
+        statusValue = SendStatus.finalized;
       });
     }
     if (txResponse['status'] == 'not-finalized') {
       print('block was not finalized');
       setState(() {
-        statusValue = SendStatus.NOT_FINALIZED;
+        statusValue = SendStatus.notFinalized;
       });
     }
     return true;
   }
 
+  /// Handles top token amount input and calculates output
   Future<void> _amountTopUpdated(String value) async {
     if (selectedTopToken == null) {
       return;
@@ -450,6 +451,7 @@ class _SwapPageState extends State<SwapPage> {
         "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
   }
 
+  /// Handles bottom token amount input and calculates required input
   Future<void> _amountBottomUpdated(String value) async {
     if (selectedBottomToken == null) {
       return;
@@ -509,7 +511,8 @@ class _SwapPageState extends State<SwapPage> {
     print(
         "${selectedBottomToken!.amount} - ${toAmountDisplayBigInt(selectedBottomToken!.amount, decimals: selectedBottomToken!.decimals)}");
   }
-  
+
+  /// Fetches available pool pairs for a token
   Future<List<dynamic>> _getPoolPairs(String tokenAddress)async{
     var poolPairs = await ReefAppState.instance.tokensCtrl.getPoolPairs(tokenAddress);
     setState(() {
@@ -518,6 +521,7 @@ class _SwapPageState extends State<SwapPage> {
     return poolPairs;
   }
 
+  /// Updates selected top token and refreshes pools
   void _changeSelectedTopToken(TokenWithAmount token) {
     setState(() {
       selectedTopToken = token;
@@ -526,6 +530,7 @@ class _SwapPageState extends State<SwapPage> {
     });
   }
 
+  /// Updates selected bottom token and resets related settings
   void _changeSelectedBottomToken(TokenWithAmount token) {
     setState(() {
       selectedBottomToken = token;
@@ -585,7 +590,7 @@ class _SwapPageState extends State<SwapPage> {
               ),
               Expanded(
                 child: Text(
-                  "${rate}",
+                  rate,
                   textAlign: TextAlign.right,
                   style: TextStyle(
                       fontWeight: FontWeight.w600, letterSpacing: 1.0),
@@ -713,9 +718,9 @@ class _SwapPageState extends State<SwapPage> {
                     if (selectedTokenWithAmount == null)
                       const Text("Select token")
                     else ...[
-                      IconFromUrl(selectedTokenWithAmount!.iconUrl),
+                      IconFromUrl(selectedTokenWithAmount.iconUrl),
                       const Gap(4),
-                      Text(selectedTokenWithAmount!.symbol),
+                      Text(selectedTokenWithAmount.symbol),
                     ],
                     const Gap(4),
                     Icon(CupertinoIcons.chevron_down,
@@ -749,16 +754,16 @@ class _SwapPageState extends State<SwapPage> {
               children: [
                 if (selectedTokenWithAmount != null) ...[
                   Text(
-                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount!.balance, decimals: selectedTokenWithAmount!.decimals)} ${selectedTokenWithAmount!.symbol}",
+                    "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount.balance, decimals: selectedTokenWithAmount.decimals)} ${selectedTokenWithAmount.symbol}",
                     style:
                         TextStyle(color: Styles.textLightColor, fontSize: 12),
                   ),
                   MaxAmountButton(
                     onPressed: () async {
                       var tokenBalance = toAmountDisplayBigInt(
-                          selectedTokenWithAmount!.balance,
-                          decimals: selectedTokenWithAmount!.decimals,
-                          fractionDigits: selectedTokenWithAmount!.decimals);
+                          selectedTokenWithAmount.balance,
+                          decimals: selectedTokenWithAmount.decimals,
+                          fractionDigits: selectedTokenWithAmount.decimals);
                       await amountUpdated(tokenBalance);
                       amountController.text = tokenBalance;
                     },
@@ -869,7 +874,7 @@ class _SwapPageState extends State<SwapPage> {
                       Container(
                         constraints: BoxConstraints(maxWidth: 120), // Adjust the width accordingly
                         child: Text(
-                          token != null ? token!.name : 'Select',
+                          token != null ? token.name : 'Select',
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
@@ -882,7 +887,7 @@ class _SwapPageState extends State<SwapPage> {
                       Container(
                         constraints: BoxConstraints(maxWidth: 120), // Adjust the width accordingly
                         child: Text(
-                          "${toAmountDisplayBigInt(token!.balance)} ${token!.name.toUpperCase()}",
+                          "${toAmountDisplayBigInt(token.balance)} ${token.name.toUpperCase()}",
                           style: TextStyle(
                             color: Styles.textLightColor,
                             fontSize: 12,
@@ -947,28 +952,28 @@ class _SwapPageState extends State<SwapPage> {
       void Function() onHome) {
     int? index;
 
-    if (stat == SendStatus.ERROR) {
+    if (stat == SendStatus.error) {
       //index = 'Transaction Error';
       print('send tx error');
     }
-    if (stat == SendStatus.CANCELED) {
+    if (stat == SendStatus.canceled) {
       //title = 'Transaction Canceled';
       print('send tx canceled');
     }
-    if (stat == SendStatus.SENDING) {
+    if (stat == SendStatus.sending) {
       index = 0;
     }
-    if (stat == SendStatus.SENT_TO_NETWORK) {
+    if (stat == SendStatus.sentToNetwork) {
       index = 1;
     }
-    if (stat == SendStatus.INCLUDED_IN_BLOCK) {
+    if (stat == SendStatus.includedInBlock) {
       index = 2;
     }
-    if (stat == SendStatus.FINALIZED) {
+    if (stat == SendStatus.finalized) {
       index = 3;
     }
     // index = 2;
-    if (stat == SendStatus.NOT_FINALIZED) {
+    if (stat == SendStatus.notFinalized) {
       // title = 'NOT finalized!';
     }
 
@@ -1260,19 +1265,19 @@ class _SwapPageState extends State<SwapPage> {
 
 ReefStepState getStepState(SendStatus stat, int stepIndex, int currentIndex) {
   switch (stat) {
-    case SendStatus.FINALIZED:
+    case SendStatus.finalized:
       if (stepIndex == currentIndex) {
         return ReefStepState.complete;
       } else if (stepIndex < currentIndex) {
         return ReefStepState.complete;
       }
       break;
-    case SendStatus.CANCELED:
+    case SendStatus.canceled:
       if (stepIndex == currentIndex) {
         return ReefStepState.error;
       }
       break;
-    case SendStatus.ERROR:
+    case SendStatus.error:
       if (stepIndex == currentIndex) {
         return ReefStepState.error;
       }
@@ -1288,23 +1293,23 @@ ReefStepState getStepState(SendStatus stat, int stepIndex, int currentIndex) {
 }
 
 enum SendStatus {
-  READY,
-  NO_EVM_CONNECTED,
-  NO_ADDRESS,
-  NO_AMT,
-  AMT_TOO_HIGH,
-  ADDR_NOT_VALID,
-  ADDR_NOT_EXIST,
-  LOW_REEF_EVM,
-  LOW_REEF_NATIVE,
-  SIGNING,
-  SENDING,
-  CANCELED,
-  ERROR,
-  SENT_TO_NETWORK,
-  INCLUDED_IN_BLOCK,
-  FINALIZED,
-  NOT_FINALIZED,
-  EVM_NOT_BINDED,
-  CONNECTING
+  ready,
+  noEvmConnected,
+  noAddress,
+  noAmt,
+  amtTooHigh,
+  addrNotValid,
+  addrNotExist,
+  lowReefEvm,
+  lowReefNative,
+  signing,
+  sending,
+  canceled,
+  error,
+  sentToNetwork,
+  includedInBlock,
+  finalized,
+  notFinalized,
+  evmNotBinded,
+  connecting
 }

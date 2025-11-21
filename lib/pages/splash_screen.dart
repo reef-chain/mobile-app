@@ -2,12 +2,10 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:local_auth/local_auth.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/components/introduction_page/hero_video.dart';
-import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/pages/introduction_page.dart';
 import 'package:reef_mobile_app/service/WalletConnectService.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
@@ -15,12 +13,53 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/ReefAppState.dart';
 import '../service/StorageService.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 typedef WidgetCallback = Widget Function();
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
+
+
+// Timing
+const int kSplashGifDurationMs = 3830;
+
+// Biometrics
+const int kBioMaxAttemptsConst = 3;
+
+// Padding / Sizes
+const double kSplashAuthPadding = 24.0;
+const double kSplashInputPaddingV = 14.0;
+const double kSplashInputPaddingH = 12.0;
+
+const double kSplashGifSize = 128.0;
+const double kSplashGap16 = 16.0;
+const double kSplashGap8 = 8.0;
+const double kSplashGap12 = 12.0;
+const double kSplashGap36 = 36.0;
+const double kSplashGap4 = 4.0;
+
+// UI values
+const double kSplashPasswordTitleSize = 14.0;
+const double kSplashPasswordFontSize = 16.0;
+
+const double kSplashLoadingIconSize = 12.0;
+const double kSplashErrorIconSize = 16.0;
+const double kSplashFingerprintSize = 36.0;
+
+// Border / Radius
+const double kSplashBorderRadius = 12.0;
+const double kSplashBtnRadius = 40.0;
+const double kSplashInputBorderWidth = 1.0;
+
+// String Keys
+const String kKeyFirstLaunch = "firstLaunch";
+const String kKeyLanguageCode = "languageCode";
+const String kKeyBiometricAuth = "biometricAuth";
+
+
+// =============================================================
+//                        SplashApp
+// =============================================================
 class SplashApp extends StatefulWidget {
   final WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
@@ -45,9 +84,7 @@ class SplashApp extends StatefulWidget {
 class _SplashAppState extends State<SplashApp> {
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
 
-  static const _firstLaunch = "firstLaunch";
   int _bioAttempts = 0;
-  static const int _bioMaxAttempts = 3;
   bool _bioLockedOut = false;
 
   bool _hasError = false;
@@ -62,7 +99,6 @@ class _SplashAppState extends State<SplashApp> {
   String password = "";
 
   static final LocalAuthentication localAuth = LocalAuthentication();
-
   Timer? _gifTimer;
 
   void setLocale(String locale) {
@@ -70,6 +106,7 @@ class _SplashAppState extends State<SplashApp> {
     setState(() => _locale = locale);
   }
 
+  /// Checks if biometric authentication is supported and enrolled
   Future<bool> _checkBiometricsSupport() async {
     try {
       final isDeviceSupported = await localAuth.isDeviceSupported();
@@ -82,14 +119,15 @@ class _SplashAppState extends State<SplashApp> {
     }
   }
 
-  // ✅ SECURE VERSION – hashed password check
+  /// Checks if user has password authentication enabled
   Future<bool> _checkRequiresPasswordAuth() async {
     return await ReefAppState.instance.storage.hasPasswordSet();
   }
 
+  /// Gets saved language locale from storage
   Future<String> _getSavedLocale() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("languageCode") ?? 'en';
+    return prefs.getString(kKeyLanguageCode) ?? 'en';
   }
 
   @override
@@ -101,7 +139,7 @@ class _SplashAppState extends State<SplashApp> {
       setLocale(value);
     });
 
-    _gifTimer = Timer(const Duration(milliseconds: 3830), () {});
+    _gifTimer = Timer(const Duration(milliseconds: kSplashGifDurationMs), () {});
 
     _bootstrap();
 
@@ -129,12 +167,14 @@ class _SplashAppState extends State<SplashApp> {
     super.dispose();
   }
 
+  /// Checks if app is launched for the first time
   Future<bool> _checkIfFirstLaunch() async {
     final isFirstLaunch =
-    await ReefAppState.instance.storage.getValue(_firstLaunch);
+    await ReefAppState.instance.storage.getValue(kKeyFirstLaunch);
     return isFirstLaunch == null;
   }
 
+  /// Initializes authentication flow on app start
   Future<void> _initAuthentication() async {
     try {
       final first = await _checkIfFirstLaunch();
@@ -142,7 +182,6 @@ class _SplashAppState extends State<SplashApp> {
       setState(() => _isFirstLaunch = first);
 
       if (first || kDebugMode) {
-        if (!mounted) return;
         setState(() {
           _requiresAuth = false;
           _isAuthenticated = true;
@@ -155,7 +194,7 @@ class _SplashAppState extends State<SplashApp> {
 
       if (supportsBio) {
         final hasUserEnabledBio =
-        await ReefAppState.instance.storage.getValue("biometricAuth");
+        await ReefAppState.instance.storage.getValue(kKeyBiometricAuth);
 
         if (hasUserEnabledBio == true) {
           setState(() => _biometricsIsAvailable = true);
@@ -172,11 +211,11 @@ class _SplashAppState extends State<SplashApp> {
         _isAuthenticated = !requiresPwd;
       });
     } catch (_) {
-      if (!mounted) return;
       setState(() => _hasError = true);
     }
   }
 
+  /// Initializes async app dependencies
   Future<void> _initializeAsyncDependencies() async {
     try {
       final storageService = StorageService();
@@ -191,12 +230,12 @@ class _SplashAppState extends State<SplashApp> {
       if (!mounted) return;
       setState(() => appReady = true);
     } catch (_) {
-      if (!mounted) return;
       setState(() => _hasError = true);
     }
   }
 
-  // ✅ SECURE bcrypt verify
+
+  /// Authenticates user using secure password
   Future<void> _authenticateWithPassword(String enteredPassword) async {
     final ok = await ReefAppState.instance.storage
         .verifyPasswordSecure(enteredPassword);
@@ -213,9 +252,7 @@ class _SplashAppState extends State<SplashApp> {
     }
   }
 
-  // -----------------------------------
-  // BIOMETRIC AUTH (unchanged logic)
-  // -----------------------------------
+  /// Authenticates user using biometrics
   Future<void> _authenticateWithBiometrics() async {
     if (_bioLockedOut) return;
     if (!mounted) return;
@@ -244,7 +281,7 @@ class _SplashAppState extends State<SplashApp> {
 
       _bioAttempts += 1;
 
-      if (_bioAttempts < _bioMaxAttempts) {
+      if (_bioAttempts < kBioMaxAttemptsConst) {
         await Future.delayed(const Duration(seconds: 1));
         if (!mounted || _bioLockedOut) return;
         _authenticateWithBiometrics();
@@ -255,42 +292,9 @@ class _SplashAppState extends State<SplashApp> {
           _biometricsIsAvailable = false;
           _bioLockedOut = true;
         });
-
-        if (mounted) {
-          await showDialog<void>(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => AlertDialog(
-              title: const Text('Too many attempts'),
-              content: const Text(
-                  'Biometric authentication failed multiple times. '
-                      'Please try again later or use your password.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Use Password'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    _bioAttempts = 0;
-                    _bioLockedOut = false;
-                    setState(() {
-                      _biometricsIsAvailable = true;
-                      _wrongPassword = false;
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Try Again'),
-                ),
-              ],
-            ),
-          );
-        }
       }
     } catch (_) {
-      if (!mounted) return;
       setState(() {
-        _isAuthenticated = false;
         _wrongPassword = true;
         _biometricsIsAvailable = false;
         _bioLockedOut = true;
@@ -298,6 +302,9 @@ class _SplashAppState extends State<SplashApp> {
     }
   }
 
+  // =============================================================
+  //                         UI BUILD
+  // =============================================================
   @override
   Widget build(BuildContext context) => _buildBody(context);
 
@@ -307,7 +314,6 @@ class _SplashAppState extends State<SplashApp> {
         child: ElevatedButton(
           child: const Text('Retry'),
           onPressed: () {
-            if (!mounted) return;
             setState(() {
               _hasError = false;
               appReady = false;
@@ -318,8 +324,8 @@ class _SplashAppState extends State<SplashApp> {
       );
     }
 
-    final stillLoading = (appReady == false || _isAuthenticated == false) ||
-        _isFirstLaunch == null;
+    final stillLoading =
+    (!appReady || !_isAuthenticated || _isFirstLaunch == null);
 
     return Stack(
       children: <Widget>[
@@ -332,9 +338,12 @@ class _SplashAppState extends State<SplashApp> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/intro.gif",
-                        height: 128.0, width: 128.0),
-                    const Gap(16),
+                    Image.asset(
+                      "assets/images/intro.gif",
+                      height: kSplashGifSize,
+                      width: kSplashGifSize,
+                    ),
+                    const SizedBox(height: kSplashGap16),
                     Visibility(
                       maintainSize: true,
                       maintainAnimation: true,
@@ -343,60 +352,6 @@ class _SplashAppState extends State<SplashApp> {
                       child: _buildAuth(context),
                     ),
                   ],
-                ),
-              ),
-              Positioned(
-                bottom: 24,
-                right: 24,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOutCirc,
-                  opacity: 1,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)?.loading ??
-                            "Initializing app",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                          color: Styles.textLightColor,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                      const Gap(4),
-                      StreamBuilder<String>(
-                        stream: ReefAppState
-                            .instance.initStatusStream.stream,
-                        initialData: ".",
-                        builder: (BuildContext context,
-                            AsyncSnapshot<String> snapshot) {
-                          final text =
-                          snapshot.hasData ? (snapshot.data ?? "...") : "..";
-                          return Text(
-                            text,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Styles.textLightColor,
-                              decoration: TextDecoration.none,
-                            ),
-                          );
-                        },
-                      ),
-                      const Gap(4),
-                      const SizedBox(
-                        height: 12,
-                        width: 12,
-                        child: CircularProgressIndicator.adaptive(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Styles.textLightColor),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],
@@ -408,7 +363,7 @@ class _SplashAppState extends State<SplashApp> {
             heroVideo: widget.heroVideo,
             onDone: () async {
               await ReefAppState.instance.storage
-                  .setValue(_firstLaunch, false);
+                  .setValue(kKeyFirstLaunch, false);
               if (!mounted) return;
               setState(() => _isFirstLaunch = false);
             },
@@ -419,58 +374,77 @@ class _SplashAppState extends State<SplashApp> {
     );
   }
 
+  // =============================================================
+  //                      Password Auth UI
+  // =============================================================
   Widget _buildAuth(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(kSplashAuthPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               "PASSWORD FOR REEF APP",
               style: TextStyle(
-                fontSize: 14,
+                fontSize: kSplashPasswordTitleSize,
                 fontWeight: FontWeight.w500,
                 color: Styles.textLightColor,
               ),
             ),
-            const Gap(8),
+            const SizedBox(height: kSplashGap8),
+
+            // Password Box
             Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSplashInputPaddingH,
+                vertical: kSplashInputPaddingV,
+              ),
               decoration: BoxDecoration(
                 color: Styles.whiteColor,
-                borderRadius: BorderRadius.circular(12),
-                border:
-                Border.all(color: const Color(0x20000000), width: 1),
+                borderRadius: BorderRadius.circular(kSplashBorderRadius),
+                border: Border.all(
+                  color: const Color(0x20000000),
+                  width: kSplashInputBorderWidth,
+                ),
               ),
               child: TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration:
-                const InputDecoration.collapsed(hintText: ''),
-                style: const TextStyle(fontSize: 16),
+                decoration: const InputDecoration.collapsed(hintText: ''),
+                style: const TextStyle(fontSize: kSplashPasswordFontSize),
               ),
             ),
-            const Gap(8),
+
+            const SizedBox(height: kSplashGap8),
+
+            // Incorrect Password
             if (_wrongPassword)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(CupertinoIcons.exclamationmark_triangle_fill,
-                      color: Styles.errorColor, size: 16),
-                  const Gap(8),
+                  const Icon(
+                    CupertinoIcons.exclamationmark_triangle_fill,
+                    color: Styles.errorColor,
+                    size: kSplashErrorIconSize,
+                  ),
+                  const SizedBox(width: kSplashGap8),
                   Flexible(
                     child: Text(
                       "Password is incorrect",
                       style: TextStyle(
-                          color: Colors.grey[600], fontSize: 13),
+                        color: Colors.grey[600],
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
               ),
-            const Gap(12),
+
+            const SizedBox(height: kSplashGap12),
+
+            // Send Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -479,7 +453,8 @@ class _SplashAppState extends State<SplashApp> {
                       ? NoSplash.splashFactory
                       : InkSplash.splashFactory,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40)),
+                    borderRadius: BorderRadius.circular(kSplashBtnRadius),
+                  ),
                   shadowColor: const Color(0x559d6cff),
                   elevation: 5,
                   backgroundColor: (password.isNotEmpty)
@@ -492,7 +467,7 @@ class _SplashAppState extends State<SplashApp> {
                     _authenticateWithPassword(password);
                   }
                 },
-                child: Text(
+                child:  Text(
                   'Send',
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -503,7 +478,10 @@ class _SplashAppState extends State<SplashApp> {
                 ),
               ),
             ),
-            const Gap(36),
+
+            const SizedBox(height: kSplashGap36),
+
+            // Biometrics Button
             Visibility(
               maintainSize: true,
               maintainAnimation: true,
@@ -512,13 +490,12 @@ class _SplashAppState extends State<SplashApp> {
               child: Center(
                 child: MaterialButton(
                   minWidth: 0,
-                  materialTapTargetSize:
-                  MaterialTapTargetSize.shrinkWrap,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   onPressed: _authenticateWithBiometrics,
                   shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(0.0),
+                  padding: EdgeInsets.zero,
                   child: Ink(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(kSplashGap8),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -530,8 +507,11 @@ class _SplashAppState extends State<SplashApp> {
                         ],
                       ),
                     ),
-                    child: Icon(Icons.fingerprint,
-                        size: 36, color: Styles.whiteColor),
+                    child:  Icon(
+                      Icons.fingerprint,
+                      size: kSplashFingerprintSize,
+                      color: Styles.whiteColor,
+                    ),
                   ),
                 ),
               ),
@@ -542,3 +522,4 @@ class _SplashAppState extends State<SplashApp> {
     );
   }
 }
+
