@@ -14,20 +14,19 @@ import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/binance_connect/bc_pair.dart';
 import 'package:reef_mobile_app/model/binance_connect/bc_trade_resp.dart';
 import 'package:reef_mobile_app/model/network/NetworkCtrl.dart';
-import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
 
-const FIAT_NAME = 'USD';
-const TOKEN_NAME = 'BUSD'; // TODO change to REEF
+const fiatName = 'USD';
+const tokenNAME = 'BUSD';
 
 enum TradeState { pending, requested, redirected }
 
 class BuyPage extends StatefulWidget {
-  const BuyPage({Key? key}) : super(key: key);
+  const BuyPage({super.key});
 
   @override
   State<BuyPage> createState() => _BuyPageState();
@@ -54,6 +53,7 @@ class _BuyPageState extends State<BuyPage> {
   TextEditingController amountFiatController = TextEditingController();
   TextEditingController amountReefController = TextEditingController();
 
+
   dynamic manageResponse(http.Response response) {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -71,6 +71,7 @@ class _BuyPageState extends State<BuyPage> {
     }
   }
 
+  /// Updates REEF based on fiat input
   Future<void> _amountFiatUpdated(String value) async {
     if (value.isEmpty) {
       amountReefController.text = '';
@@ -87,6 +88,7 @@ class _BuyPageState extends State<BuyPage> {
     amountReefController.text = reefAmount.toStringAsFixed(2);
   }
 
+  /// Updates fiat based on REEF input
   Future<void> _amountReefUpdated(String value) async {
     if (value.isEmpty) {
       amountFiatController.text = '';
@@ -103,14 +105,7 @@ class _BuyPageState extends State<BuyPage> {
     amountFiatController.text = fiatAmount.toStringAsFixed(2);
   }
 
-  // TODO: Once we have access to prod API, check if REEF network max and min withdrawal amounts
-  // are in the range of trade limits. If so, we have to request network for withdrawal limits
-  // void _getNetwork() async {
-  //   http.Response response = await http.get(Uri.parse('$baseUrl/get-network'));
-  //   tradeNetwork = BcNetwork.fromJson(manageResponse(response));
-  //   print(tradeNetwork);
-  // }
-
+  /// Fetches and sets Binance trading pairs
   void _getPairs() async {
     try {
       http.Response response = await http.get(Uri.parse('$baseUrl/get-pairs'));
@@ -119,8 +114,8 @@ class _BuyPageState extends State<BuyPage> {
           .toList();
       pairs = pairs
           .where((pair) =>
-              pair.fiatCurrency == FIAT_NAME &&
-              pair.cryptoCurrency == TOKEN_NAME)
+              pair.fiatCurrency == fiatName &&
+              pair.cryptoCurrency == tokenNAME)
           .toList();
       if (pairs.isNotEmpty) {
         setState(() {
@@ -147,6 +142,7 @@ class _BuyPageState extends State<BuyPage> {
     }
   }
 
+  /// Authenticates user and returns JWT
   Future<String> _authenticate() async {
     try {
       var signerAddress = await ReefAppState.instance.storageCtrl
@@ -176,6 +172,7 @@ class _BuyPageState extends State<BuyPage> {
     }
   }
 
+  /// Places buy order via Binance Connect
   void _buy() async {
     var signerAddress = await ReefAppState.instance.storageCtrl
         .getValue(StorageKey.selected_address.name);
@@ -188,7 +185,7 @@ class _BuyPageState extends State<BuyPage> {
     }
     var body = {
       'address': signerAddress,
-      'fiatCurrency': FIAT_NAME,
+      'fiatCurrency': fiatName,
       'orderAmount': num.parse(amountFiatController.text).toStringAsFixed(2),
     };
     var headers = {'Authorization': 'Bearer $jwt'};
@@ -219,6 +216,7 @@ class _BuyPageState extends State<BuyPage> {
     }
   }
 
+  /// Opens Binance checkout page
   void _navigateBinanceConnect() {
     launchUrl(Uri.parse(tradeResp.eternalRedirectUrl));
     fiatAmount = 0;
@@ -232,6 +230,7 @@ class _BuyPageState extends State<BuyPage> {
             }));
   }
 
+  /// Fetches order status
   void _getOrder() async {
     var _orderStatus = "unknown";
     try {
@@ -435,7 +434,7 @@ class _BuyPageState extends State<BuyPage> {
                           child: TextField(
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(
-                                  RegExp(r'[\.0-9]'))
+                                  RegExp(r'[.0-9]'))
                             ],
                             keyboardType: TextInputType.number,
                             controller: amountFiatController,
@@ -503,7 +502,7 @@ class _BuyPageState extends State<BuyPage> {
                           child: TextField(
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'[\.0-9]'))
+                                    RegExp(r'[.0-9]'))
                               ],
                               keyboardType: TextInputType.number,
                               controller: amountReefController,

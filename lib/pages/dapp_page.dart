@@ -12,7 +12,7 @@ class DAppPage extends StatefulWidget {
   final ReefAppState reefState;
   final DAppRequestService dAppRequestService = const DAppRequestService();
 
-  const DAppPage(this.reefState, this.url);
+  const DAppPage(this.reefState, this.url, {super.key});
 
   Future<String> _getHtml(String url) async {
     return http.read(Uri.parse(url));

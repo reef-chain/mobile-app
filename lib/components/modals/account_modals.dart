@@ -887,7 +887,8 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
   return ViewBoxContainer(
       color: Styles.whiteColor,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 10.0),
+
         child: Flex(
           direction: Axis.horizontal,
           children: [

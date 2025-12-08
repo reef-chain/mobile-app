@@ -67,7 +67,9 @@ class IconFromUrl extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
+          memCacheWidth: 600,   // optimization
+
+          placeholder: (context, url) => Container(
                   width: size,
                   height: size,
                   child: Center(

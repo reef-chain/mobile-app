@@ -5,13 +5,22 @@ import 'package:reef_mobile_app/components/navigation/liquid_carousel_wrapper.da
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
+
+const double kIntroVideoSize = 240.0;
+const double kIntroHeadingFont = 35.0;
+const double kIntroSubtitleFont = 16.0;
+
+const double kIntroPaddingSmall = 4.0;
+const double kIntroPaddingLarge = 35.0;
+
+const double kIntroGapLarge = 30.0;
+
 class IntroductionPage extends StatefulWidget {
   final Future<void> Function() onDone;
   final Widget heroVideo;
 
   const IntroductionPage(
-      {Key? key, required this.heroVideo, required this.onDone})
-      : super(key: key);
+      {super.key, required this.heroVideo, required this.onDone});
 
   @override
   State<IntroductionPage> createState() => _IntroductionPageState();
@@ -48,7 +57,6 @@ class IntroView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //? Use a key to interact with the carousel from another widget (for triggering swipeToNext or swipeToPrevious from a button for example)
     final carouselKey = GlobalKey<LiquidCarouselState>();
     return Scaffold(
       body: LiquidCarousel(
@@ -56,69 +64,94 @@ class IntroView extends StatelessWidget {
         key: carouselKey,
         children: <Widget>[
           const LiquidCarouselWrapper(),
+
+          // --------------------------- SLIDE ---------------------------
           IntroductionSlide(
-              done: onDone,
-              liquidCarouselKey: carouselKey,
-              color: Styles.splashBackgroundColor,
-              buttonColor: Colors.deepPurpleAccent,
-              title: "First View",
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                direction: Axis.vertical,
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 240.0,
-                      width: 240.0,
-                      child: Padding(
-                          padding: const EdgeInsets.all(35), child: heroVideo),
+            done: onDone,
+            liquidCarouselKey: carouselKey,
+            color: Styles.splashBackgroundColor,
+            buttonColor: Colors.deepPurpleAccent,
+            title: "First View",
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              direction: Axis.vertical,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: kIntroVideoSize,
+                    width: kIntroVideoSize,
+                    child: Padding(
+                      padding: const EdgeInsets.all(kIntroPaddingLarge),
+                      child: heroVideo,
                     ),
                   ),
-                  Flexible(
-                      child: FittedBox(
-                          child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Text(
-                          AppLocalizations.of(context)!.reliable,
-                          style: const TextStyle(fontSize: 35),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Text(
-                          AppLocalizations.of(context)!.extensible,
-                          style: const TextStyle(fontSize: 35),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Text(
-                          AppLocalizations.of(context)!.efficient,
-                          style: const TextStyle(fontSize: 35),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Text(
-                          AppLocalizations.of(context)!.fast,
-                          style: const TextStyle(fontSize: 35),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                ),
+
+                // TEXT SECTION
+                Flexible(
+                  child: FittedBox(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding:
+                          const EdgeInsets.all(kIntroPaddingSmall),
                           child: Text(
-                            AppLocalizations.of(context)!.blockchain_for_defi,
-                            style: const TextStyle(fontSize: 16),
-                          )),
-                    ],
-                  )))
-                ],
-              )),
-          const LiquidCarouselWrapper()
+                            AppLocalizations.of(context)!.reliable,
+                            style: const TextStyle(
+                                fontSize: kIntroHeadingFont),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                          const EdgeInsets.all(kIntroPaddingSmall),
+                          child: Text(
+                            AppLocalizations.of(context)!.extensible,
+                            style: const TextStyle(
+                                fontSize: kIntroHeadingFont),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                          const EdgeInsets.all(kIntroPaddingSmall),
+                          child: Text(
+                            AppLocalizations.of(context)!.efficient,
+                            style: const TextStyle(
+                                fontSize: kIntroHeadingFont),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                          const EdgeInsets.all(kIntroPaddingSmall),
+                          child: Text(
+                            AppLocalizations.of(context)!.fast,
+                            style: const TextStyle(
+                                fontSize: kIntroHeadingFont),
+                          ),
+                        ),
+
+                        const SizedBox(height: kIntroGapLarge),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: kIntroPaddingSmall),
+                          child: Text(
+                            AppLocalizations.of(context)!
+                                .blockchain_for_defi,
+                            style: const TextStyle(
+                              fontSize: kIntroSubtitleFont,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+
+          const LiquidCarouselWrapper(),
         ],
       ),
     );

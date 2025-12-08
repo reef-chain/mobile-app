@@ -13,6 +13,7 @@ import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+//not
 
 class StealthexBuyPage extends StatefulWidget {
   const StealthexBuyPage({super.key});
@@ -73,6 +74,7 @@ class _StealthexBuyPageState extends State<StealthexBuyPage> {
     });
   }
 
+  /// Fetches estimated REEF amount for the given input currency
   Future<void> fetchEstimatedReef(amount) async {
     if (amount == Null || selectedCurrency == null) return;
     double amt = 0.0;
