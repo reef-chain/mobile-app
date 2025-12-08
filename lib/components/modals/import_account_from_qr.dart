@@ -9,7 +9,7 @@ import 'package:reef_mobile_app/components/modals/change_password_modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/stored_account.dart';
-import 'package:reef_mobile_app/pages/SplashScreen.dart';
+import 'package:reef_mobile_app/pages/splash_screen.dart';
 import 'package:reef_mobile_app/utils/password_manager.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:reef_mobile_app/utils/account_profile.dart';

@@ -7,7 +7,7 @@ import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
-import 'package:reef_mobile_app/pages/SplashScreen.dart';
+import 'package:reef_mobile_app/pages/splash_screen.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:reef_mobile_app/utils/password_manager.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
