@@ -145,9 +145,11 @@ class SignatureContentToggle extends StatelessObserverWidget {
   }
 
   Future<bool> _confirmSign(
-          SignatureRequest signatureRequest, String? password) =>
-      ReefAppState.instance.signingCtrl
-          .authenticateAndSign(signatureRequest, password);
+          SignatureRequest signatureRequest, String? password) async {
+    final result = await ReefAppState.instance.signingCtrl
+        .authenticateAndSign(signatureRequest, password);
+    return result.success;
+  }
 
   void _cancel(SignatureRequest? signatureRequest) {
     if (signatureRequest == null) return;

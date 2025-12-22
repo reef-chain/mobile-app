@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:mobx/src/api/store.dart';
 import 'package:reef_chain_flutter/js_api_service.dart';
@@ -11,6 +12,7 @@ import 'package:reef_mobile_app/model/signing/signature_request.dart';
 import 'package:reef_mobile_app/model/signing/signature_requests.dart';
 import 'package:reef_mobile_app/model/signing/signer_payload_json.dart';
 import 'package:reef_mobile_app/model/signing/signer_payload_raw.dart';
+import 'package:reef_mobile_app/model/signing/signing_result.dart';
 import 'package:reef_mobile_app/model/signing/tx_decoded_data.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/service/StorageService.dart';
@@ -38,21 +40,105 @@ class SigningCtrl {
     });
   }
 
-  Future<bool> authenticateAndSign(SignatureRequest signatureRequest, String? verifyPassword) async {
-    bool authenticated = false;
+  /// Authenticate and sign a transaction with improved error handling
+  /// Returns [SigningResult] with detailed success/failure information
+  Future<SigningResult> authenticateAndSign(
+    SignatureRequest signatureRequest,
+    String? verifyPassword,
+  ) async {
+    try {
+      // 1. Verify account exists before attempting authentication
+      final account = await storage.getAccount(signatureRequest.payload.address);
+      if (account == null) {
+        return SigningResult.failure(
+          SigningError.accountNotFound,
+          'Account ${toShortDisplay(signatureRequest.payload.address)} not found',
+        );
+      }
 
-    if (await checkBiometricsSupport() && verifyPassword==null) {
-      authenticated = await _authenticateWithBiometrics(signatureRequest);
-    } else {
-      authenticated = await _authenticateWithPassword( signatureRequest, verifyPassword);
-    }
-    if (authenticated == true){
-      _confirmSignature(
-        signatureRequest.signatureIdent,
-        signatureRequest.payload.address,
+      // 2. Authenticate with appropriate method
+      bool authenticated = false;
+
+      if (await checkBiometricsSupport() && verifyPassword == null) {
+        // Try biometrics with timeout
+        try {
+          authenticated = await _authenticateWithBiometrics(signatureRequest)
+              .timeout(const Duration(seconds: 30));
+        } on TimeoutException {
+          return SigningResult.failure(
+            SigningError.biometricsFailed,
+            'Biometric authentication timed out',
+          );
+        } catch (e) {
+          return SigningResult.failure(
+            SigningError.biometricsFailed,
+            'Biometric authentication failed: ${e.toString()}',
+          );
+        }
+      } else {
+        // Password authentication
+        authenticated = await _authenticateWithPassword(signatureRequest, verifyPassword);
+        if (!authenticated) {
+          return SigningResult.failure(
+            SigningError.wrongPassword,
+            'Incorrect password',
+          );
+        }
+      }
+
+      if (!authenticated) {
+        return SigningResult.failure(
+          SigningError.userCancelled,
+          'Authentication was cancelled',
+        );
+      }
+
+      // 3. Confirm signature with retry logic for network errors
+      try {
+        await _confirmSignatureWithRetry(
+          signatureRequest.signatureIdent,
+          signatureRequest.payload.address,
+          maxRetries: 3,
+        );
+
+        return SigningResult.success();
+      } on TimeoutException {
+        return SigningResult.failure(
+          SigningError.networkTimeout,
+          'Network timeout. Please check your connection and try again.',
+        );
+      } catch (e) {
+        if (e.toString().contains('network') ||
+            e.toString().contains('connection')) {
+          return SigningResult.failure(
+            SigningError.networkTimeout,
+            'Network error: ${e.toString()}',
+          );
+        }
+        rethrow;
+      }
+    } catch (e, stackTrace) {
+      // Log detailed error for debugging
+      if (kDebugMode) {
+        print("ERROR authenticateAndSign: $e\n$stackTrace");
+      }
+
+      return SigningResult.failure(
+        SigningError.unknown,
+        'Unexpected error: ${e.toString()}',
       );
     }
-    return authenticated;
+  }
+
+  /// Legacy method for backward compatibility
+  /// New code should use authenticateAndSign which returns SigningResult
+  @Deprecated('Use authenticateAndSign instead for better error handling')
+  Future<bool> authenticateAndSignLegacy(
+    SignatureRequest signatureRequest,
+    String? verifyPassword,
+  ) async {
+    final result = await authenticateAndSign(signatureRequest, verifyPassword);
+    return result.success;
   }
 
   Future<dynamic> signRaw(String address, String message) =>
@@ -67,12 +153,43 @@ class SigningCtrl {
   Future<dynamic> bytesString(String bytes) =>
       reefChainApi.reefState.signingApi.bytesString(bytes);
 
+  /// Confirm signature with retry logic for network failures
+  Future<void> _confirmSignatureWithRetry(
+    String sigConfirmationIdent,
+    String address, {
+    int maxRetries = 3,
+  }) async {
+    int attempts = 0;
+
+    while (attempts < maxRetries) {
+      try {
+        await _confirmSignature(sigConfirmationIdent, address)
+            .timeout(const Duration(seconds: 10));
+        return; // Success - exit retry loop
+      } on TimeoutException {
+        attempts++;
+        if (attempts >= maxRetries) {
+          rethrow; // Max retries reached, throw error
+        }
+
+        // Exponential backoff before retry
+        await Future.delayed(Duration(seconds: attempts * 2));
+
+        if (kDebugMode) {
+          print('Retry attempt $attempts/$maxRetries for signature confirmation');
+        }
+      }
+    }
+  }
+
   Future<void> _confirmSignature(
       String sigConfirmationIdent, String address) async {
     var account = await storage.getAccount(address);
     if (account == null) {
-      print("ERROR: confirmSignature - Account not found.");
-      return;
+      if (kDebugMode) {
+        print("ERROR: confirmSignature - Account not found.");
+      }
+      throw Exception('Account not found');
     }
     signatureRequests.remove(sigConfirmationIdent);
     reefChainApi.reefState.signingApi.confirmTxSignature(sigConfirmationIdent, account.mnemonic);
