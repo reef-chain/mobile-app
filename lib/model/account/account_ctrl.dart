@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
@@ -13,10 +11,6 @@ import 'package:reef_mobile_app/service/StorageService.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
 
 import 'account_model.dart';
-
-import 'dart:async';
-import 'package:flutter/foundation.dart';
-
 
 class AccountCtrl {
   final AccountModel _accountModel;
@@ -55,7 +49,7 @@ class AccountCtrl {
 
     void _subscribe() {
       sub = stream.listen(
-            (data) {
+        (data) {
           attempt = 0; // reset on success
           try {
             onData(data);
@@ -108,10 +102,11 @@ class AccountCtrl {
     return await _reefChainApi.reefState.accountApi.restoreJson(file, password);
   }
 
-  Future<String> formatBalance(
-      String value, double price, int decimals) async {
-    return await _reefChainApi.reefState.accountApi
-        .formatBalance(value, price, decimals);
+  Future<String> formatBalance(String value, double price, int decimals) async {
+    return await _reefChainApi.reefState.accountApi.formatBalance(
+      value,
+      price,
+    );
   }
 
   Future<dynamic> listenBindActivity(String address) async {
@@ -129,8 +124,7 @@ class AccountCtrl {
         .changeAccountPassword(address, newPass, oldPass);
   }
 
-  Future<dynamic> accountsCreateSuri(
-      String mnemonic, String password) async {
+  Future<dynamic> accountsCreateSuri(String mnemonic, String password) async {
     return await _reefChainApi.reefState.accountApi
         .accountsCreateSuri(mnemonic, password);
   }
@@ -235,14 +229,12 @@ class AccountCtrl {
       onData: (accs) async {
         // ⬇️ your original parsing kept as-is (uses your project helpers)
         ParseListFn<StatusDataObject<ReefAccount>> parsableListFn =
-        getParsableListFn(ReefAccount.fromJson);
-        var accsListFdm =
-        StatusDataObject.fromJsonList(accs, parsableListFn);
+            getParsableListFn(ReefAccount.fromJson);
+        var accsListFdm = StatusDataObject.fromJsonList(accs, parsableListFn);
 
-        print(
-            'GOT ACCOUNTS ${accsListFdm.hasStatus(StatusCode.completeData)} '
-                '${accsListFdm.statusList[0].message} '
-                'len = ${accsListFdm.data.length}');
+        print('GOT ACCOUNTS ${accsListFdm.hasStatus(StatusCode.completeData)} '
+            '${accsListFdm.statusList[0].message} '
+            'len = ${accsListFdm.data.length}');
 
         _setAccountIconsFromStorage(accsListFdm);
         _accountModel.setAccountsFDM(accsListFdm);
@@ -251,8 +243,7 @@ class AccountCtrl {
   }
 
   void _initSavedDeviceAccountAddress(StorageService storage) async {
-    var savedAddress =
-    await storage.getValue(StorageKey.selected_address.name);
+    var savedAddress = await storage.getValue(StorageKey.selected_address.name);
 
     if (savedAddress != null) {
       // check if the saved address exists in the allAccounts list
@@ -292,7 +283,7 @@ class AccountCtrl {
 
     accsListFdm.data.forEach((accFdm) {
       var accIcon = accIcons.firstWhere(
-            (accIcon) => accIcon['address'] == accFdm.data.address,
+        (accIcon) => accIcon['address'] == accFdm.data.address,
         orElse: () => null,
       );
       accFdm.data.iconSVG = accIcon?['svg'];

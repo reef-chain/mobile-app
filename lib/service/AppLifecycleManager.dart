@@ -22,11 +22,11 @@ class AppLifecycleManager with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
+      case AppLifecycleState.hidden: // Naya state add karein
         _isAppForeground = false;
         break;
     }
   }
 
   bool get isAppInForeground => _isAppForeground;
-
 }

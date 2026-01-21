@@ -1,15 +1,15 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 class EnsureVisibleWhenFocused extends StatefulWidget {
   const EnsureVisibleWhenFocused({
     Key? key,
     required this.child,
     required this.focusNode,
-    this.curve: Curves.ease,
-    this.duration: const Duration(milliseconds: 100),
+    this.curve = Curves.ease,
+    this.duration = const Duration(milliseconds: 100),
   }) : super(key: key);
 
   final FocusNode focusNode;

@@ -12,13 +12,9 @@ import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/pages/accounts_page.dart';
 import 'package:reef_mobile_app/pages/home_page.dart';
-import 'package:reef_mobile_app/pages/send_page.dart';
 import 'package:reef_mobile_app/pages/settings_page.dart';
-import 'package:reef_mobile_app/pages/swap_page.dart';
-import 'package:reef_mobile_app/utils/constants.dart';
 import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
-import 'package:restart_app/restart_app.dart';
 
 import '../pages/pools_page.dart';
 import 'sign/SignatureContentToggle.dart';
@@ -46,15 +42,16 @@ List<BarItemNavigationPage> bottomNavigationBarItems = [
     // ),
     label: 'Accounts',
   ),
-  if (Platform.isAndroid) BarItemNavigationPage(
-    icon: Icon(Icons.cached),
-    page: NavigationPage.pools,
-    //  SvgIcon(
-    //   'assets/images/reef_icon.svg',
-    //   height: 20,
-    // ),
-    label: 'Pools',
-  ),
+  if (Platform.isAndroid)
+    BarItemNavigationPage(
+      icon: Icon(Icons.cached),
+      page: NavigationPage.pools,
+      //  SvgIcon(
+      //   'assets/images/reef_icon.svg',
+      //   height: 20,
+      // ),
+      label: 'Pools',
+    ),
 
   BarItemNavigationPage(
     icon: Icon(Icons.settings_outlined),
@@ -103,7 +100,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
         // breaks signing when using app for signing browser txs - switching apps
           if(!Platform.isIOS) Restart.restartApp();
       }*/
-      
+
       // reconnecting provider breaks signing since app looses focus and provider gets disconnected on resumed when signature is sent
       // await ReefAppState.instance.networkCtrl.reconnectProvider();
       // ReefAppState.instance.tokensCtrl.reload(false);
@@ -246,8 +243,8 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
   }
 
   List<Widget> getMainNavPages() {
-    var pages = bottomNavigationBarItems.map((navItem){
-      switch (navItem.page){
+    var pages = bottomNavigationBarItems.map((navItem) {
+      switch (navItem.page) {
         case NavigationPage.home:
           return const HomePage(key: PageStorageKey("homepage"));
         case NavigationPage.accounts:
@@ -256,8 +253,9 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
           return const PoolsPage(key: const PageStorageKey("poolsPage"));
         case NavigationPage.settings:
           return const SettingsPage(key: PageStorageKey("settingsPage"));
+        case NavigationPage.buy:
+          return const Placeholder();
       }
-      throw "Define page for menu item in getMainNavPages!";
     }).toList(growable: true);
     pages.insert(0, const LiquidCarouselWrapper());
     pages.insert(pages.length, const LiquidCarouselWrapper());
