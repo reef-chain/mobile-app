@@ -6,13 +6,13 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/components/getQrTypeData.dart';
 import 'package:reef_mobile_app/components/modals/bind_modal.dart';
 import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
 import 'package:reef_mobile_app/components/modals/select_account_modal.dart';
 import 'package:reef_mobile_app/components/no_connection_button_wrap.dart';
 import 'package:reef_mobile_app/components/send/custom_stepper.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/StorageKey.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
@@ -23,10 +23,6 @@ import 'package:reef_mobile_app/utils/elements.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-
-
-
-
 
 const int minEvmTaxBalance = 80; // REEF required for EVM tx fees
 
@@ -52,7 +48,6 @@ enum SendStatus {
   connecting,
   ready,
 }
-
 
 const double kSendPaddingV = 30.0;
 const double kSendPaddingH = 10.0;
@@ -94,10 +89,10 @@ class SendPage extends StatefulWidget {
   final String? preSelectedTransferAddress;
 
   const SendPage(
-      this.preselected, {
-        super.key,
-        this.preSelectedTransferAddress,
-      });
+    this.preselected, {
+    super.key,
+    this.preSelectedTransferAddress,
+  });
 
   @override
   State<SendPage> createState() => _SendPageState();
@@ -155,7 +150,7 @@ class _SendPageState extends State<SendPage> {
       selectedAccount = null;
     } else {
       selectedAccount = accounts.firstWhere(
-            (e) => e.address == selAddr,
+        (e) => e.address == selAddr,
         orElse: () => accounts.first,
       );
     }
@@ -180,32 +175,32 @@ class _SendPageState extends State<SendPage> {
     // listeners: provider
     providerConnStateSubs =
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen(
-              (event) {
-            if (!mounted) return;
-            setState(() {
-              providerConn = event?.isConnected == true;
-            });
-          },
-          onError: (e, st) => debugPrint('providerConn error: $e'),
-        );
+      (event) {
+        if (!mounted) return;
+        setState(() {
+          providerConn = event?.isConnected == true;
+        });
+      },
+      onError: (e, st) => debugPrint('providerConn error: $e'),
+    );
 
     // listeners: indexer
     indexerConnStateSubs =
         ReefAppState.instance.networkCtrl.getIndexerConnected().listen(
-              (event) {
-            if (!mounted) return;
-            setState(() {
-              indexerConn = (event == true);
-            });
-          },
-          onError: (e, st) => debugPrint('indexerConn error: $e'),
-        );
+      (event) {
+        if (!mounted) return;
+        setState(() {
+          indexerConn = (event == true);
+        });
+      },
+      onError: (e, st) => debugPrint('indexerConn error: $e'),
+    );
 
     // listeners: jsConn (via future -> stream)
     ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
       if (!mounted) return;
       jsConnStateSubs = jsStream.listen(
-            (event) {
+        (event) {
           if (!mounted) return;
           setState(() {
             jsConn = (event == true);
@@ -264,7 +259,7 @@ class _SendPageState extends State<SendPage> {
     if (tokens.isEmpty) return;
 
     final selectedToken = tokens.firstWhere(
-          (tkn) => tkn.address == selectedTokenAddress,
+      (tkn) => tkn.address == selectedTokenAddress,
       orElse: () => tokens.first,
     );
 
@@ -306,11 +301,11 @@ class _SendPageState extends State<SendPage> {
 
   /// Validates address, token and amount before sending
   Future<SendStatus> _validate(
-      String addr,
-      TokenWithAmount token,
-      String amt, [
-        bool skipAsync = false,
-      ]) async {
+    String addr,
+    TokenWithAmount token,
+    String amt, [
+    bool skipAsync = false,
+  ]) async {
     final isValidAddr = await _isValidAddress(addr);
     final balance = getSelectedTokenBalance(token);
     final hasEnoughForEvmTx = hasBalanceForEvmTx(selectedAccount);
@@ -349,11 +344,10 @@ class _SendPageState extends State<SendPage> {
     if (isValidAddr &&
         token.address != Constants.REEF_TOKEN_ADDRESS &&
         !addr.startsWith('0x')) {
-
       if (!skipAsync) {
         try {
           resolvedEvmAddress =
-          await ReefAppState.instance.accountCtrl.resolveEvmAddress(addr);
+              await ReefAppState.instance.accountCtrl.resolveEvmAddress(addr);
         } catch (_) {
           resolvedEvmAddress = null;
         }
@@ -367,7 +361,7 @@ class _SendPageState extends State<SendPage> {
     // 6. EVM address → check existence & binding
     if (!skipAsync && addr.startsWith('0x')) {
       final exists =
-      await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr);
+          await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr);
 
       if (!exists) return SendStatus.addrNotExist;
 
@@ -376,7 +370,7 @@ class _SendPageState extends State<SendPage> {
             .resolveEvmAddress(selectedAccount!.address);
 
         final isBounded =
-        await ReefAppState.instance.accountCtrl.isEvmAddressExist(evm);
+            await ReefAppState.instance.accountCtrl.isEvmAddressExist(evm);
 
         if (!isBounded) return SendStatus.evmNotBinded;
       }
@@ -385,18 +379,14 @@ class _SendPageState extends State<SendPage> {
     return SendStatus.ready;
   }
 
-
   /// Handles send button click and initiates transaction
   Future<void> _onConfirmSend(TokenWithAmount sendToken) async {
-    // ❌ No balance check here (as per client requirement)
-    // ❌ No amount check here
-    // ❌ No max transfer check
+    FocusManager.instance.primaryFocus?.unfocus();
 
     if (address.isEmpty || statusValue != SendStatus.ready) {
       return;
     }
 
-    // connection check (this stays)
     if (!(jsConn && indexerConn && providerConn)) {
       if (!mounted) return;
       setState(() => statusValue = SendStatus.connecting);
@@ -417,7 +407,7 @@ class _SendPageState extends State<SendPage> {
 
     _txSub?.cancel();
     _txSub = broadcast.listen(
-          (txResponse) {
+      (txResponse) {
         if (!mounted) return;
 
         if (handleExceptionResponse(txResponse)) {
@@ -425,24 +415,6 @@ class _SendPageState extends State<SendPage> {
               .logAnalytics("send-tx-error");
           return;
         }
-        if (handleNativeTransferResponse(txResponse)) {
-          ReefAppState.instance.firebaseAnalyticsCtrl
-              .logAnalytics("native-send-tx-success");
-          return;
-        }
-        if (handleEvmTransactionResponse(txResponse)) {
-          ReefAppState.instance.firebaseAnalyticsCtrl
-              .logAnalytics("evm-send-tx-success");
-          return;
-        }
-      },
-      onError: (e, st) {
-        debugPrint('tx stream error: $e');
-        if (!mounted) return;
-        setState(() {
-          isFormDisabled = false;
-          statusValue = SendStatus.error;
-        });
       },
     );
   }
@@ -470,8 +442,8 @@ class _SendPageState extends State<SendPage> {
 
   /// Creates and executes token transfer stream
   Future<Stream<dynamic>> executeTransferTransaction(
-      TokenWithAmount sendToken,
-      ) async {
+    TokenWithAmount sendToken,
+  ) async {
     final signerAddress = await ReefAppState.instance.storageCtrl
         .getValue(StorageKey.selected_address.name);
 
@@ -499,14 +471,14 @@ class _SendPageState extends State<SendPage> {
     _sigGoneDisposer?.call();
 
     _sigAppearDisposer = when(
-          (_) =>
-      ReefAppState.instance.signingCtrl.signatureRequests.list.isNotEmpty,
-          () {
+      (_) =>
+          ReefAppState.instance.signingCtrl.signatureRequests.list.isNotEmpty,
+      () {
         _sigGoneDisposer?.call();
         _sigGoneDisposer = when(
-              (_) => ReefAppState
-              .instance.signingCtrl.signatureRequests.list.isEmpty,
-              () {
+          (_) =>
+              ReefAppState.instance.signingCtrl.signatureRequests.list.isEmpty,
+          () {
             if (!mounted) return;
             setState(() => statusValue = SendStatus.sending);
           },
@@ -517,10 +489,12 @@ class _SendPageState extends State<SendPage> {
 
   /// Maps raw error response to SendStatus
   SendStatus handleErrorResponse(String response) {
-    if (response == "-32603: execution fatal: Module { index: 6, error: 3, message: None }") {
+    if (response ==
+        "-32603: execution fatal: Module { index: 6, error: 3, message: None }") {
       return SendStatus.evmNotBinded;
     }
-    if (response == 'invalid address (argument="address", value="", code=INVALID_ARGUMENT, version=address/5.7.0) (argument="recipient", value="", code=INVALID_ARGUMENT, version=abi/5.7.0)') {
+    if (response ==
+        'invalid address (argument="address", value="", code=INVALID_ARGUMENT, version=address/5.7.0) (argument="recipient", value="", code=INVALID_ARGUMENT, version=abi/5.7.0)') {
       // If you added a RECIPIENT_NOT_BINDED enum, map to it; else generic error/not valid.
       return SendStatus.addrNotValid;
     }
@@ -548,9 +522,13 @@ class _SendPageState extends State<SendPage> {
       if (!mounted) return true;
       setState(() {
         isFormDisabled = false;
-        statusValue = txResponse['data'] == '_canceled'
-            ? SendStatus.ready
-            : handleErrorResponse(txResponse['data']?.toString() ?? '');
+        if (txResponse['data'] == '_canceled') {
+          statusValue = SendStatus.ready;
+          ReefAppState.instance.signingCtrl.signatureRequests.list.clear();
+        } else {
+          statusValue =
+              handleErrorResponse(txResponse['data']?.toString() ?? '');
+        }
       });
       return true;
     }
@@ -661,7 +639,7 @@ class _SendPageState extends State<SendPage> {
   @override
   Widget build(BuildContext context) {
     final transferStatusUI =
-    buildFeedbackUI(context, statusValue, resetState, () {
+        buildFeedbackUI(context, statusValue, resetState, () {
       Navigator.of(context).pop();
     });
 
@@ -682,15 +660,15 @@ class _SendPageState extends State<SendPage> {
               child: Column(
                 children: [
                   Observer(builder: (_) {
-                    final tokens = ReefAppState
-                        .instance.model.tokens.selectedErc20List;
+                    final tokens =
+                        ReefAppState.instance.model.tokens.selectedErc20List;
                     if (tokens.isEmpty) {
                       return Text(
                         AppLocalizations.of(context)!.no_token_selected,
                       );
                     }
                     final selectedToken = tokens.firstWhere(
-                          (t) => t.address == selectedTokenAddress,
+                      (t) => t.address == selectedTokenAddress,
                       orElse: () => tokens.first,
                     );
                     return Container(
@@ -757,22 +735,22 @@ class _SendPageState extends State<SendPage> {
                 onPressed: isFormDisabled
                     ? null
                     : () {
-                  showSelectAccountModal(
-                    AppLocalizations.of(context)!.select_address,
-                        (selectedAddress) async {
-                      if (!mounted) return;
-                      setState(() {
-                        address = selectedAddress.trim();
-                        valueController.text = address;
-                      });
-                      final state = await _validate(
-                          address, selectedToken, amount);
-                      if (!mounted) return;
-                      setState(() => statusValue = state);
-                    },
-                    isTokenReef,
-                  );
-                },
+                        showSelectAccountModal(
+                          AppLocalizations.of(context)!.select_address,
+                          (selectedAddress) async {
+                            if (!mounted) return;
+                            setState(() {
+                              address = selectedAddress.trim();
+                              valueController.text = address;
+                            });
+                            final state =
+                                await _validate(address, selectedToken, amount);
+                            if (!mounted) return;
+                            setState(() => statusValue = state);
+                          },
+                          isTokenReef,
+                        );
+                      },
                 child: RotatedBox(
                   quarterTurns: 1,
                   child: Icon(
@@ -803,21 +781,19 @@ class _SendPageState extends State<SendPage> {
                     );
                   });
 
-                  final state =
-                  await _validate(address, selectedToken, amount);
+                  final state = await _validate(address, selectedToken, amount);
                   if (!mounted) return;
                   setState(() => statusValue = state);
                 },
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: isFormDisabled
-                      ? Styles.textLightColor
-                      : Styles.textColor,
+                  color:
+                      isFormDisabled ? Styles.textLightColor : Styles.textColor,
                 ),
                 decoration: InputDecoration(
                   contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                   border: InputBorder.none,
                   hintText: AppLocalizations.of(context)!.send_to_address,
                   hintStyle: const TextStyle(color: Styles.textLightColor),
@@ -843,13 +819,13 @@ class _SendPageState extends State<SendPage> {
                 onPressed: isFormDisabled
                     ? null
                     : () {
-                  showQrTypeDataModal(
-                    AppLocalizations.of(context)!.scan_address,
-                    context,
-                    expectedType: ReefQrCodeType.address,
-                    preselectedTokenAddress: selectedToken.address,
-                  );
-                },
+                        showQrTypeDataModal(
+                          AppLocalizations.of(context)!.scan_address,
+                          context,
+                          expectedType: ReefQrCodeType.address,
+                          preselectedTokenAddress: selectedToken.address,
+                        );
+                      },
                 child: const Icon(
                   Icons.qr_code_scanner_sharp,
                   color: Styles.textColor,
@@ -940,12 +916,12 @@ class _SendPageState extends State<SendPage> {
                       ),
                     ],
                     keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     controller: amountController,
                     onChanged: (text) async {
                       amount = amountController.text;
                       final status =
-                      await _validate(address, selectedToken, amount);
+                          await _validate(address, selectedToken, amount);
                       if (!mounted) return;
                       setState(() {
                         statusValue = status;
@@ -973,14 +949,13 @@ class _SendPageState extends State<SendPage> {
                     decoration: const InputDecoration(
                       constraints: BoxConstraints(maxHeight: 32),
                       contentPadding:
-                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
-                        borderSide:
-                        BorderSide(color: Colors.transparent),
+                        borderSide: BorderSide(color: Colors.transparent),
                       ),
                       hintText: '0.0',
                       hintStyle: TextStyle(color: Styles.textLightColor),
@@ -1013,9 +988,8 @@ class _SendPageState extends State<SendPage> {
     final double maxTransfer = getMaxTransferAmount(selectedToken, balance);
 
     // keep rating within 0..1 (in case previous state got weird)
-    final double safeRating = rating.isNaN || rating.isInfinite
-        ? 0.0
-        : rating.clamp(0.0, 1.0);
+    final double safeRating =
+        rating.isNaN || rating.isInfinite ? 0.0 : rating.clamp(0.0, 1.0);
 
     String formatAmount(double v) => v.toStringAsFixed(uiDecimals);
 
@@ -1042,30 +1016,34 @@ class _SendPageState extends State<SendPage> {
           onChanged: isFormDisabled
               ? null
               : (newRating) async {
-            // compute amount from rating with better precision
-            final double rawAmt = (maxTransfer * newRating);
-            final String amountStr = formatAmount(
-              rawAmt.isNaN || rawAmt.isInfinite ? 0 : rawAmt.clamp(0, maxTransfer),
-            );
+                  // compute amount from rating with better precision
+                  final double rawAmt = (maxTransfer * newRating);
+                  final String amountStr = formatAmount(
+                    rawAmt.isNaN || rawAmt.isInfinite
+                        ? 0
+                        : rawAmt.clamp(0, maxTransfer),
+                  );
 
-            final status = await _validate(
-              address,
-              selectedToken,
-              amountStr,
-              true, // skipAsync for smoothness while dragging
-            );
-            if (!mounted) return;
-            setState(() {
-              rating = newRating.clamp(0.0, 1.0);
-              amount = amountStr;
-              amountController.text = amountStr;
-              statusValue = status;
-            });
-          },
+                  final status = await _validate(
+                    address,
+                    selectedToken,
+                    amountStr,
+                    true, // skipAsync for smoothness while dragging
+                  );
+                  if (!mounted) return;
+                  setState(() {
+                    rating = newRating.clamp(0.0, 1.0);
+                    amount = amountStr;
+                    amountController.text = amountStr;
+                    statusValue = status;
+                  });
+                },
           onChangeEnd: (newRating) async {
             final double rawAmt = (maxTransfer * newRating);
             final String amountStr = formatAmount(
-              rawAmt.isNaN || rawAmt.isInfinite ? 0 : rawAmt.clamp(0, maxTransfer),
+              rawAmt.isNaN || rawAmt.isInfinite
+                  ? 0
+                  : rawAmt.clamp(0, maxTransfer),
             );
             amount = amountStr;
             amountController.text = amountStr;
@@ -1123,54 +1101,54 @@ class _SendPageState extends State<SendPage> {
             width: double.infinity,
             child: statusValue != SendStatus.signing
                 ? ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-                shadowColor: const Color(0x559d6cff),
-                elevation: 0,
-                backgroundColor: (statusValue == SendStatus.ready)
-                    ? const Color(0xffe6e2f1)
-                    : Colors.transparent,
-                padding: const EdgeInsets.all(0),
-              ),
-              onPressed: () => _onConfirmSend(selectedToken),
-              child: Ink(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    vertical: 15, horizontal: 22),
-                decoration: BoxDecoration(
-                  color: const Color(0xffe6e2f1),
-                  gradient: (statusValue == SendStatus.ready)
-                      ? Styles.buttonGradient
-                      : null,
-                  borderRadius: const BorderRadius.all(
-                      Radius.circular(14.0)),
-                ),
-                child: Center(
-                  child: Text(
-                    getSendBtnLabel(statusValue),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: (statusValue != SendStatus.ready)
-                          ? const Color(0x65898e9c)
-                          : Colors.white,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                      shadowColor: const Color(0x559d6cff),
+                      elevation: 0,
+                      backgroundColor: (statusValue == SendStatus.ready)
+                          ? const Color(0xffe6e2f1)
+                          : Colors.transparent,
+                      padding: const EdgeInsets.all(0),
                     ),
-                  ),
-                ),
-              ),
-            )
+                    onPressed: () => _onConfirmSend(selectedToken),
+                    child: Ink(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 22),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffe6e2f1),
+                        gradient: (statusValue == SendStatus.ready)
+                            ? Styles.buttonGradient
+                            : null,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(14.0)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          getSendBtnLabel(statusValue),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: (statusValue != SendStatus.ready)
+                                ? const Color(0x65898e9c)
+                                : Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
                 : Column(
-              children: [
-                Text(AppLocalizations.of(context)!.generating_signature),
-                const Gap(12),
-                const LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                      Styles.primaryAccentColor),
-                  backgroundColor: Styles.greyColor,
-                ),
-              ],
-            ),
+                    children: [
+                      Text(AppLocalizations.of(context)!.generating_signature),
+                      const Gap(12),
+                      const LinearProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Styles.primaryAccentColor),
+                        backgroundColor: Styles.greyColor,
+                      ),
+                    ],
+                  ),
           ),
           const Gap(8.0),
           if (statusValue == SendStatus.evmNotBinded &&
@@ -1193,7 +1171,7 @@ class _SendPageState extends State<SendPage> {
                     bindFor: selectedAccount!,
                     callback: () async {
                       var statusValue =
-                      await _validate(address, selectedToken, amount);
+                          await _validate(address, selectedToken, amount);
                       if (!mounted) return;
                       setState(() => statusValue = statusValue);
                     },
@@ -1201,13 +1179,12 @@ class _SendPageState extends State<SendPage> {
                 },
                 child: Ink(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 15, horizontal: 22),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
                   decoration: BoxDecoration(
                     color: const Color(0xffe6e2f1),
                     gradient: Styles.buttonGradient,
-                    borderRadius:
-                    const BorderRadius.all(Radius.circular(14.0)),
+                    borderRadius: const BorderRadius.all(Radius.circular(14.0)),
                   ),
                   child: Center(
                     child: Text(
@@ -1264,14 +1241,14 @@ class _SendPageState extends State<SendPage> {
 
   // ---------- TX Feedback UI ----------
   Widget? buildFeedbackUI(
-      BuildContext context,
-      SendStatus stat,
-      void Function() onNew,
-      void Function() onHome,
-      ) {
+    BuildContext context,
+    SendStatus stat,
+    void Function() onNew,
+    void Function() onHome,
+  ) {
     int? index;
 
-    if (stat == SendStatus.sending) index = 0;
+    if (stat == SendStatus.signing || stat == SendStatus.sending) index = 0;
     if (stat == SendStatus.sentToNetwork) index = 1;
     if (stat == SendStatus.includedInBlock) index = 2;
     if (stat == SendStatus.finalized) index = 3;
@@ -1334,83 +1311,81 @@ class _SendPageState extends State<SendPage> {
   }
 
   List<ReefStep> steps(SendStatus stat, int index) => [
-    ReefStep(
-      state: getStepState(stat, 0, index),
-      title: Text(AppLocalizations.of(context)!.sending_transaction),
-      content: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Flex(
-          direction: Axis.horizontal,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Text(
-                AppLocalizations.of(context)!.sending_tx_to_nw,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade700,
+        ReefStep(
+          state: getStepState(stat, 0, index),
+          title: Text(AppLocalizations.of(context)!.sending_transaction),
+          content: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Flex(
+              direction: Axis.horizontal,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    AppLocalizations.of(context)!.sending_tx_to_nw,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    ),
-    ReefStep(
-      state: getStepState(stat, 1, index),
-      title: Text(AppLocalizations.of(context)!.adding_to_chain),
-      content: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Flex(
-          direction: Axis.horizontal,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Text(
-                AppLocalizations.of(context)!
-                    .waiting_to_include_in_block,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade700,
+        ReefStep(
+          state: getStepState(stat, 1, index),
+          title: Text(AppLocalizations.of(context)!.adding_to_chain),
+          content: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Flex(
+              direction: Axis.horizontal,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    AppLocalizations.of(context)!.waiting_to_include_in_block,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    ),
-    ReefStep(
-      state: getStepState(stat, 2, index),
-      title: Text(AppLocalizations.of(context)!.sealing_block),
-      content: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Flex(
-          direction: Axis.horizontal,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Text(
-                AppLocalizations.of(context)!.unreversible_finality,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade700,
+        ReefStep(
+          state: getStepState(stat, 2, index),
+          title: Text(AppLocalizations.of(context)!.sealing_block),
+          content: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Flex(
+              direction: Axis.horizontal,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    AppLocalizations.of(context)!.unreversible_finality,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    ),
-    ReefStep(
-      state: getStepState(stat, 3, index),
-      title: Text(AppLocalizations.of(context)!.transaction_finalized),
-      content: const SizedBox(),
-      icon: Icons.lock,
-    ),
-  ];
+        ReefStep(
+          state: getStepState(stat, 3, index),
+          title: Text(AppLocalizations.of(context)!.transaction_finalized),
+          content: const SizedBox(),
+          icon: Icons.lock,
+        ),
+      ];
 
-  ReefStepState getStepState(
-      SendStatus stat, int stepIndex, int currentIndex) {
+  ReefStepState getStepState(SendStatus stat, int stepIndex, int currentIndex) {
     switch (stat) {
       case SendStatus.finalized:
         if (stepIndex <= currentIndex) return ReefStepState.complete;
@@ -1429,4 +1404,3 @@ class _SendPageState extends State<SendPage> {
     return ReefStepState.indexed;
   }
 }
-
