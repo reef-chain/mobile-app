@@ -1,7 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +11,7 @@ import 'package:reef_mobile_app/components/CreateAccount.dart';
 import 'package:reef_mobile_app/components/home/NFT_view.dart';
 import 'package:reef_mobile_app/components/home/token_view.dart';
 import 'package:reef_mobile_app/components/sign/SignatureContentToggle.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 import 'package:reef_mobile_app/utils/elements.dart';
@@ -19,10 +20,8 @@ import 'package:reef_mobile_app/utils/gradient_text.dart';
 import 'package:reef_mobile_app/utils/size_config.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+
 import '../components/BlurableContent.dart';
-
-
-
 
 const double kNavPadding = 12;
 const double kNavItemVPadding = 10;
@@ -59,10 +58,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     try {
-      providerConnStateSubs = ReefAppState.instance.networkCtrl
-          .getProviderConnLogs()
-          .listen(
-            (event) {
+      providerConnStateSubs =
+          ReefAppState.instance.networkCtrl.getProviderConnLogs().listen(
+        (event) {
           if (!mounted) return;
           setState(() {
             providerConn = event;
@@ -98,7 +96,7 @@ class _HomePageState extends State<HomePage> {
   Widget _rowMember(Map member) {
     return InkWell(
       onTap: member['function'] ??
-              () {
+          () {
             HapticFeedback.selectionClick();
             ReefAppState.instance.navigationCtrl
                 .navigateHomePage(member["key"] as int);
@@ -109,15 +107,15 @@ class _HomePageState extends State<HomePage> {
         final bool isActive = member["key"] == index;
 
         Color color =
-        isActive ? Styles.whiteColor : Styles.primaryBackgroundColor;
+            isActive ? Styles.whiteColor : Styles.primaryBackgroundColor;
 
         List<BoxShadow> boxShadow = isActive
             ? [
-          const BoxShadow(
-              color: Colors.black12,
-              blurRadius: 5,
-              offset: Offset(0, 2.5))
-        ]
+                const BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 5,
+                    offset: Offset(0, 2.5))
+              ]
             : [];
 
         double opacity = isActive ? kOpacityActive : kOpacityInactive;
@@ -165,8 +163,8 @@ class _HomePageState extends State<HomePage> {
                   member["name"] == "Reload"
                       ? "Reload"
                       : member["name"] == "Tokens"
-                      ? AppLocalizations.of(context)!.tokens
-                      : AppLocalizations.of(context)!.nfts,
+                          ? AppLocalizations.of(context)!.tokens
+                          : AppLocalizations.of(context)!.nfts,
                   style: textStyle,
                 ),
               ],
@@ -217,8 +215,7 @@ class _HomePageState extends State<HomePage> {
                 "name": "Reload",
                 "component": null,
                 "icon": Icons.refresh,
-                "function": () =>
-                    ReefAppState.instance.tokensCtrl.reload(true),
+                "function": () => ReefAppState.instance.tokensCtrl.reload(true),
               }),
             ..._viewsMap.map<Widget>((e) => _rowMember(e)),
           ],
@@ -257,8 +254,8 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                final index =
-                    ReefAppState.instance.model.homeNavigationModel.currentIndex;
+                final index = ReefAppState
+                    .instance.model.homeNavigationModel.currentIndex;
                 return SliverClip(child: _viewsMap[index]["component"]);
               }),
             ],
@@ -283,10 +280,10 @@ class BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
       true;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Opacity(
-      opacity:
-      _clamp01(((shrinkOffset - maxExtent) / maxExtent).abs()),
+      opacity: _clamp01(((shrinkOffset - maxExtent) / maxExtent).abs()),
       child: _balanceSection(context),
     );
   }
@@ -300,7 +297,7 @@ class BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
         fit: BoxFit.contain,
         child: Padding(
           padding:
-          const EdgeInsets.symmetric(vertical: kBalanceVerticalPadding),
+              const EdgeInsets.symmetric(vertical: kBalanceVerticalPadding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -316,13 +313,14 @@ class BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ),
                   IconButton(
                     onPressed: () {
-                      ReefAppState.instance.appConfigCtrl.toggleDisplayBalance();
+                      ReefAppState.instance.appConfigCtrl
+                          .toggleDisplayBalance();
                       HapticFeedback.selectionClick();
                     },
                     icon: Observer(
                       builder: (_) => Icon(
                         ReefAppState.instance.model.appConfig.displayBalance ==
-                            true
+                                true
                             ? Icons.remove_red_eye_sharp
                             : Icons.visibility_off,
                       ),
@@ -331,7 +329,6 @@ class BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ),
                 ],
               ),
-
               Observer(builder: (_) {
                 final tokens =
                     ReefAppState.instance.model.tokens.selectedErc20List;
@@ -363,14 +360,11 @@ class BalanceHeaderDelegate extends SliverPersistentHeaderDelegate {
   double _sumTokenBalances(List<TokenWithAmount> list) {
     var sum = 0.0;
     for (final token in list) {
-      final balValue =
-      getBalanceValueBI(token.balance, token.price);
+      final balValue = getBalanceValueBI(token.balance, token.price);
       if (balValue > 0) sum += balValue;
     }
     return sum;
   }
 
-  double _clamp01(double v) =>
-      v < 0 ? 0 : (v > 1 ? 1 : v);
+  double _clamp01(double v) => v < 0 ? 0 : (v > 1 ? 1 : v);
 }
-

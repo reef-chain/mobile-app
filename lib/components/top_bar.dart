@@ -5,11 +5,10 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:reef_mobile_app/components/modals/add_account_modal.dart';
 import 'package:reef_mobile_app/components/modals/reconnect_modal.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/size_config.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
 
 import '../model/navigation/navigation_model.dart';
 import '../model/network/NetworkCtrl.dart';
@@ -59,45 +58,44 @@ Widget topBar(BuildContext context) {
               var selSignerList = ReefAppState
                   .instance.model.accounts.accountsList
                   .where((element) => element.address == selAddr);
-
+// ... baki code same rahega ...
               return selSignerList.length > 0
                   ? Padding(
                       padding: EdgeInsets.only(top: 4, left: 8),
-                      child: Wrap(
-                        alignment: WrapAlignment.end,
+                      child: Row(
+                        // Wrap ki zarurat nahi agar hum end-alignment use kar rahe hain
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              AccountPill(selSignerList.first.name),
-                              Gap(2.0),
-                              Material(
-                                elevation: 4,
-                                borderRadius: BorderRadius.circular(22.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    ReefAppState.instance.navigationCtrl
-                                        .navigateToWalletConnectPage(
-                                            context: context);
-                                  },
-                                  child: Container(
+                          // Fix: Isse Flexible se wrap kiya taaki lamba naam overflow na kare
+                          Flexible(
+                            child: AccountPill(selSignerList.first.name),
+                          ),
+                          const Gap(2.0),
+                          Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(22.0),
+                            child: InkWell(
+                              onTap: () {
+                                ReefAppState.instance.navigationCtrl
+                                    .navigateToWalletConnectPage(
+                                        context: context);
+                              },
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: Styles.whiteColor,
+                                  borderRadius: BorderRadius.circular(22.0),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: SvgPicture.asset(
+                                    'assets/images/walletconnect.svg',
                                     width: 30,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                      color: Styles.whiteColor,
-                                      borderRadius: BorderRadius.circular(22.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(4.0),
-                                      child: SvgPicture.asset(
-                                        'assets/images/walletconnect.svg',
-                                        width: 30,
-                                      ),
-                                    ),
                                   ),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -180,7 +178,7 @@ class _AccountPillState extends State<AccountPill> {
               color: Styles.purpleColor,
               fontSize: 18,
               fontWeight: FontWeight.bold),
-          overflow: TextOverflow.fade,
+          overflow: TextOverflow.ellipsis,
           maxLines: 1,
           softWrap: false,
         ),

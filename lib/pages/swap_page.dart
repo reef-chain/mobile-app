@@ -16,6 +16,7 @@ import 'package:reef_mobile_app/utils/icon_url.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
 import '../components/sign/SignatureContentToggle.dart';
+
 //not
 class SwapPage extends StatefulWidget {
   final String preselected;
@@ -121,7 +122,7 @@ class _SwapPageState extends State<SwapPage> {
     if (selectedTopToken == null || selectedBottomToken == null) {
       return;
     }
-    
+
     selectedTopToken = selectedTopToken!.setAmount("0");
     amountTopController.clear();
     selectedBottomToken = selectedBottomToken!.setAmount("0");
@@ -500,7 +501,8 @@ class _SwapPageState extends State<SwapPage> {
                                               //you can access nameController in its scope to get
                                               // the value of text entered as shown below
                                               amount = amountController.text;
-                                              _amountTopUpdated( amountController.text);
+                                              _amountTopUpdated(
+                                                  amountController.text);
                                             });
                                           },
                                           decoration: InputDecoration(
@@ -858,10 +860,14 @@ class _SwapPageState extends State<SwapPage> {
                           ),
                         ),
                       ),
-                      ElevatedButton(onPressed: (){
-                        print("${selectedTopToken?.name}-${selectedBottomToken?.name}");
-                        print("${selectedTopToken?.amount}-${selectedBottomToken?.amount}");
-                      }, child: Text("print values"))
+                      ElevatedButton(
+                          onPressed: () {
+                            print(
+                                "${selectedTopToken?.name}-${selectedBottomToken?.name}");
+                            print(
+                                "${selectedTopToken?.amount}-${selectedBottomToken?.amount}");
+                          },
+                          child: Text("print values"))
                     ],
                   ),
                 ]),

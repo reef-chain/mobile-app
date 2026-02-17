@@ -1,48 +1,25 @@
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-// import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:reef_mobile_app/components/modal.dart';
 import 'package:reef_mobile_app/components/modals/change_password_modal.dart';
 import 'package:reef_mobile_app/components/modals/import_account_from_qr.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/utils/constants.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/password_manager.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
-// import 'package:qr_code_tools/qr_code_tools.dart';
-
-// lib/components/getQrTypeData.dart
-
-import 'dart:convert';
-
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-
-import 'package:reef_mobile_app/components/modal.dart';
-import 'package:reef_mobile_app/components/modals/account_modals.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
-import 'package:reef_mobile_app/model/ReefAppState.dart';
-import 'package:reef_mobile_app/pages/splash_screen.dart';
-import 'package:reef_mobile_app/utils/constants.dart';
-import 'package:reef_mobile_app/utils/functions.dart';
-import 'package:reef_mobile_app/utils/styles.dart';
-
-// If your PasswordManager / ChangePassword widgets live elsewhere,
-// keep this import or adjust to your actual path:
-import 'package:reef_mobile_app/utils/password_manager.dart';
 
 class QrDataDisplay extends StatefulWidget {
   final ReefQrCodeType? expectedType;
   final String? preselectedTokenAddress;
 
-  const QrDataDisplay(this.expectedType, this.preselectedTokenAddress, {Key? key})
+  const QrDataDisplay(this.expectedType, this.preselectedTokenAddress,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -129,7 +106,8 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
     try {
       final obj = jsonDecode(data);
       if (obj is Map) {
-        final hasAddr = obj.containsKey('address') || obj.containsKey('encoded');
+        final hasAddr =
+            obj.containsKey('address') || obj.containsKey('encoded');
         final hasMeta = obj.containsKey('meta') || obj.containsKey('encoding');
         return hasAddr && hasMeta;
       }
@@ -174,7 +152,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
           final tName = (decoded["type"] as String).trim();
           final tData = (decoded["data"] as String?)?.trim() ?? "";
           final maybeType =
-          ReefQrCodeType.values.where((e) => e.name == tName).toList();
+              ReefQrCodeType.values.where((e) => e.name == tName).toList();
           if (maybeType.isNotEmpty) {
             finalCode = ReefQrCode(maybeType.first, tData);
           }
@@ -207,7 +185,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
       if (widget.expectedType == ReefQrCodeType.walletConnect &&
           widget.expectedType != qrCodeValue!.type) {
         qrTypeLabel =
-        "Please place device correctly, detected ${getHumanReadableQrType(qrCodeValue?.type)} instead of WalletConnect.";
+            "Please place device correctly, detected ${getHumanReadableQrType(qrCodeValue?.type)} instead of WalletConnect.";
         return;
       }
 
@@ -220,74 +198,77 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
     if (widget.expectedType != null && widget.expectedType != qrCode.type) {
       setState(() {
         qrTypeLabel =
-        "Expected ${getHumanReadableQrType(widget.expectedType)} but detected ${getHumanReadableQrType(qrCode.type)}.";
+            "Expected ${getHumanReadableQrType(widget.expectedType)} but detected ${getHumanReadableQrType(qrCode.type)}.";
       });
       return;
     }
 
     try {
       switch (qrCode.type) {
-        case ReefQrCodeType.address: {
-          // Validate defensively again
-          final isAddr = await ReefAppState.instance.accountCtrl
-              .isValidSubstrateAddress(qrCode.data);
-          if (!isAddr || !isReefAddrPrefix(qrCode.data)) {
-            setState(() => qrTypeLabel = "Invalid Reef address QR.");
-            return;
-          }
+        case ReefQrCodeType.address:
+          {
+            // Validate defensively again
+            final isAddr = await ReefAppState.instance.accountCtrl
+                .isValidSubstrateAddress(qrCode.data);
+            if (!isAddr || !isReefAddrPrefix(qrCode.data)) {
+              setState(() => qrTypeLabel = "Invalid Reef address QR.");
+              return;
+            }
 
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          }
-          ReefAppState.instance.navigationCtrl.navigateToSendPage(
-            context: context,
-            preselected:
-            widget.preselectedTokenAddress ?? Constants.REEF_TOKEN_ADDRESS,
-            preSelectedTransferAddress: qrCode.data.trim(),
-          );
-          break;
-        }
-
-        case ReefQrCodeType.accountJson: {
-          if (!_isLikelyAccountJson(qrCode.data)) {
-            setState(() => qrTypeLabel = "Invalid Account JSON QR.");
-            return;
-          }
-
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          }
-
-          if (await PasswordManager.checkIfPassword()) {
-            showImportAccountQrModal(data: qrCode);
-          } else {
-            showModal(
-              context,
-              headText: "Choose Password",
-              child: ChangePassword(
-                onChanged: () => showImportAccountQrModal(data: qrCode),
-              ),
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+            ReefAppState.instance.navigationCtrl.navigateToSendPage(
+              context: context,
+              preselected: widget.preselectedTokenAddress ??
+                  Constants.REEF_TOKEN_ADDRESS,
+              preSelectedTransferAddress: qrCode.data.trim(),
             );
-          }
-          break;
-        }
-
-        case ReefQrCodeType.walletConnect: {
-          final uri = _validateWalletConnectUri(qrCode.data);
-          if (uri == null) {
-            setState(() => qrTypeLabel = "Invalid WalletConnect URI.");
-            return;
+            break;
           }
 
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
+        case ReefQrCodeType.accountJson:
+          {
+            if (!_isLikelyAccountJson(qrCode.data)) {
+              setState(() => qrTypeLabel = "Invalid Account JSON QR.");
+              return;
+            }
+
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+
+            if (await PasswordManager.checkIfPassword()) {
+              showImportAccountQrModal(data: qrCode);
+            } else {
+              showModal(
+                context,
+                headText: "Choose Password",
+                child: ChangePassword(
+                  onChanged: () => showImportAccountQrModal(data: qrCode),
+                ),
+              );
+            }
+            break;
           }
 
-          await ReefAppState.instance.walletConnect.getWeb3Wallet().pair(
-            uri: uri,
-          );
-          break;
-        }
+        case ReefQrCodeType.walletConnect:
+          {
+            final uri = _validateWalletConnectUri(qrCode.data);
+            if (uri == null) {
+              setState(() => qrTypeLabel = "Invalid WalletConnect URI.");
+              return;
+            }
+
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+
+            await ReefAppState.instance.walletConnect.getWeb3Wallet().pair(
+                  uri: uri,
+                );
+            break;
+          }
 
         default:
           setState(() => qrTypeLabel = "Unsupported / invalid QR code.");
@@ -302,7 +283,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
   Future<String?> scanFile() async {
     try {
       final pickedFile =
-      await FilePicker.platform.pickFiles(type: FileType.image);
+          await FilePicker.platform.pickFiles(type: FileType.image);
       if (pickedFile == null) return null;
 
       final filePath = pickedFile.files.single.path;
@@ -369,11 +350,10 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
                       const Gap(16.0),
                       Center(
                         child: ElevatedButton.icon(
-                          icon:  Icon(Icons.crop_free,
-                              color: Styles.whiteColor),
+                          icon: Icon(Icons.crop_free, color: Styles.whiteColor),
                           label: Text(
                             AppLocalizations.of(context)!.scan_from_image,
-                            style:  TextStyle(
+                            style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: Styles.whiteColor),
@@ -433,7 +413,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
                             expectedType: ReefQrCodeType.walletConnect,
                           );
                         },
-                        child:  Text(
+                        child: Text(
                           "Scan again",
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -456,8 +436,7 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
                               shadowColor: const Color(0x559d6cff),
                               elevation: 5,
                               backgroundColor: const Color(0xff9d6cff),
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
                             onPressed: () {
                               actOnQrCodeValue(qrCodeValue!);
@@ -489,11 +468,11 @@ class _QrDataDisplayState extends State<QrDataDisplay> {
 
 // ---------- Modal launcher ----------
 void showQrTypeDataModal(
-    String title,
-    BuildContext context, {
-      ReefQrCodeType? expectedType,
-      String? preselectedTokenAddress,
-    }) {
+  String title,
+  BuildContext context, {
+  ReefQrCodeType? expectedType,
+  String? preselectedTokenAddress,
+}) {
   showModal(
     context,
     child: QrDataDisplay(expectedType, preselectedTokenAddress),

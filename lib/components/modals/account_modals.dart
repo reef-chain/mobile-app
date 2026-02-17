@@ -883,50 +883,56 @@ class _CurrentScreenState extends State<CurrentScreen> {
   }
 }
 
-Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
+Widget buildAccountBox(StoredAccount? account, {String name = "<No Name>"}) {
   return ViewBoxContainer(
-      color: Styles.whiteColor,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 10.0),
-
-        child: Flex(
-          direction: Axis.horizontal,
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black12,
-              ),
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(64),
-                  child: (account?.svg != null)
-                      ? SvgPicture.string(account?.svg as String)
-                      : Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(color: Colors.grey[600]!),
-                        )),
+    color: Styles.whiteColor,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 10.0),
+      child: Row( // Changed Flex to Row for simplicity
+        children: [
+          // 1. Avatar Section (Fixed Width)
+          Container(
+            width: 64, // Ensure explicit size
+            height: 64,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black12,
             ),
-            const Gap(12),
-            Flex(
-              direction: Axis.vertical,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(64),
+              child: (account?.svg != null)
+                  ? SvgPicture.string(account!.svg!)
+                  : Container(color: Colors.grey[600]),
+            ),
+          ),
+          const Gap(12),
+
+          // 2. Wrap the text column in Expanded to take up remaining space
+          Expanded(
+            child: Column( // Changed Flex to Column
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis, // Prevents name overflow
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const Gap(2),
-                Flex(
-                  direction: Axis.horizontal,
+                Row(
                   children: [
-                    Text(
-                      "Address: ${account?.address.shorten() ?? "Loading..."}",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.grey[600]!),
+                    // 3. Wrap the long address in Flexible
+                    Flexible(
+                      child: Text(
+                        "Address: ${account?.address.shorten() ?? "Loading..."}",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(color: Colors.grey[600]!),
+                      ),
                     ),
                     const Gap(2),
                     IconButton(
@@ -934,19 +940,21 @@ Widget buildAccountBox(StoredAccount? account, {name = "<No Name>"}) {
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.copy, size: 12),
                       onPressed: () {
-                        Clipboard.setData(
-                            ClipboardData(text: account?.address??""));
+                        if (account?.address != null) {
+                          Clipboard.setData(ClipboardData(text: account!.address));
+                        }
                       },
                     )
                   ],
                 ),
               ],
             ),
-          ],
-        ),
-      ));
+          ),
+        ],
+      ),
+    ),
+  );
 }
-
 void showCreateAccountModal(BuildContext context,
     {bool fromMnemonic = false, bool fromJson = false}) {
   showModal(context,
