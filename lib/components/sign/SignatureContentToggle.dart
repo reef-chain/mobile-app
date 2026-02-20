@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_mobx/flutter_mobx.dart'; // <--- Added for Observer
 import 'package:gap/gap.dart';
 import 'package:reef_mobile_app/components/account_box.dart';
 import 'package:reef_mobile_app/components/sign/MethodBytesDataDisplay.dart';
 import 'package:reef_mobile_app/components/sign/SignatureControls.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/account/ReefAccount.dart';
 import 'package:reef_mobile_app/model/signing/signature_request.dart';
@@ -14,93 +12,54 @@ import 'package:reef_mobile_app/model/signing/signer_payload_json.dart';
 import 'package:reef_mobile_app/model/status-data-object/StatusDataObject.dart';
 import 'package:reef_mobile_app/service/TransactionDescService.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
+
 import '../../utils/functions.dart';
 import 'MethodDataDisplay.dart';
 import 'MethodDataLoadingIndicator.dart';
-import 'package:mobx/mobx.dart';
 
-
-class SignatureContentToggle extends StatefulWidget {
+class SignatureContentToggle extends StatelessWidget {
   final Widget content;
 
-  const SignatureContentToggle(this.content, {Key? key}) : super(key: key);
+  const SignatureContentToggle(this.content, {super.key});
 
   @override
-  State<SignatureContentToggle> createState() => _SignatureContentToggleState();
-}
-
-class _SignatureContentToggleState extends State<SignatureContentToggle> {
-  ReactionDisposer? _disposer;
-
-  SignatureRequest? _signatureRequest;
-  StatusDataObject<ReefAccount>? _signer;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // React to changes in the signature request list and update UI state
-    _disposer = reaction<List<SignatureRequest>>(
-          (_) => ReefAppState.instance.model.signatureRequests.list,
-          (requests) {
-        if (!mounted) return;
-        final req = requests.isNotEmpty ? requests.first : null;
+  Widget build(BuildContext context) {
+    return Observer(
+      builder: (_) {
+        final requests = ReefAppState.instance.model.signatureRequests.list;
+        final signatureRequest = requests.isNotEmpty ? requests.first : null;
 
         StatusDataObject<ReefAccount>? signer;
-        if (req != null) {
+        if (signatureRequest != null) {
           try {
-            signer = ReefAppState.instance.signingCtrl.getSignatureSigner(req);
+            signer = ReefAppState.instance.signingCtrl
+                .getSignatureSigner(signatureRequest);
           } catch (_) {
             signer = null;
           }
         }
 
-        setState(() {
-          _signatureRequest = req;
-          _signer = signer;
-        });
+        final displayIdx = signatureRequest != null ? 0 : 1;
+
+        return IndexedStack(
+          index: displayIdx,
+          children: [
+            if (signatureRequest != null)
+              buildSignUI(context, signatureRequest, signer)
+            else
+              const SizedBox.shrink(), // Render nothing if no request
+            content,
+          ],
+        );
       },
-      delay: 0, // no debounce; update immediately
-    );
-
-    // Seed current state once
-    final current = ReefAppState.instance.model.signatureRequests.list;
-    if (current.isNotEmpty) {
-      final req = current.first;
-      StatusDataObject<ReefAccount>? signer;
-      try {
-        signer = ReefAppState.instance.signingCtrl.getSignatureSigner(req);
-      } catch (_) {
-        signer = null;
-      }
-      _signatureRequest = req;
-      _signer = signer;
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposer?.call();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final displayIdx = _signatureRequest != null ? 0 : 1;
-    return IndexedStack(
-      index: displayIdx,
-      children: [
-        buildSignUI(context, _signatureRequest, _signer),
-        widget.content,
-      ],
     );
   }
 
   Scaffold buildSignUI(
-      BuildContext context,
-      SignatureRequest? signatureRequest,
-      StatusDataObject<ReefAccount>? account,
-      ) {
+    BuildContext context,
+    SignatureRequest signatureRequest,
+    StatusDataObject<ReefAccount>? account,
+  ) {
     return Scaffold(
       backgroundColor: Styles.primaryBackgroundColor,
       appBar: AppBar(
@@ -147,9 +106,9 @@ class _SignatureContentToggleState extends State<SignatureContentToggle> {
             child: Column(
               children: [
                 const Gap(48),
-                if (signatureRequest?.payload is SignerPayloadJSON)
+                if (signatureRequest.payload is SignerPayloadJSON)
                   Text(
-                    "Transaction on ${isMainnet(signatureRequest?.payload.genesisHash) ? 'Reef Mainnet' : toShortDisplay(signatureRequest?.payload.genesisHash?.toString())}",
+                    "Transaction on ${isMainnet(signatureRequest.payload.genesisHash) ? 'Reef Mainnet' : toShortDisplay(signatureRequest.payload.genesisHash?.toString())}",
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -180,40 +139,39 @@ class _SignatureContentToggleState extends State<SignatureContentToggle> {
                 ),
                 const Gap(15),
                 MethodDataLoadingIndicator(signatureRequest),
-                signatureRequest?.payload.type == "bytes"
+                signatureRequest.payload.type == "bytes"
                     ? MethodBytesDataDisplay(
-                    signatureRequest, signatureRequest?.bytesData)
+                        signatureRequest, signatureRequest.bytesData)
                     : MethodDataDisplay(signatureRequest),
               ],
             ),
           ),
-          if (signatureRequest != null)
-            Column(
-              children: [
-                SignatureControls(
-                  signatureRequest,
-                      (String? password) =>
-                      _confirmSign(signatureRequest, password),
-                      () => _cancel(signatureRequest),
-                ),
-              ],
-            ),
+          Column(
+            children: [
+              SignatureControls(
+                signatureRequest,
+                (String? password) => _confirmSign(signatureRequest, password),
+                () => _cancel(signatureRequest),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
   Future<bool> _confirmSign(
-      SignatureRequest signatureRequest,
-      String? password,
-      ) {
+    SignatureRequest signatureRequest,
+    String? password,
+  ) {
     return ReefAppState.instance.signingCtrl
         .authenticateAndSign(signatureRequest, password);
   }
 
-  void _cancel(SignatureRequest? signatureRequest) {
-    if (signatureRequest == null) return;
+  void _cancel(SignatureRequest signatureRequest) {
     ReefAppState.instance.signingCtrl
         .rejectSignature(signatureRequest.signatureIdent);
+
+    ReefAppState.instance.model.signatureRequests.list.remove(signatureRequest);
   }
 }

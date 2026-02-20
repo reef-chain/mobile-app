@@ -24,6 +24,8 @@ import 'package:reef_mobile_app/utils/functions.dart';
 import 'package:reef_mobile_app/utils/icon_url.dart';
 import 'package:reef_mobile_app/utils/styles.dart';
 
+import '../components/sign/SignatureContentToggle.dart';
+
 const int minEvmTaxBalance = 80; // REEF required for EVM tx fees
 
 enum SendStatus {
@@ -42,7 +44,7 @@ enum SendStatus {
   lowReefEvm,
   lowReefNative,
   evmNotBinded,
-  recipientNotBinded, // ✅ added
+  recipientNotBinded,
   canceled,
   error,
   connecting,
@@ -51,38 +53,28 @@ enum SendStatus {
 
 const double kSendPaddingV = 30.0;
 const double kSendPaddingH = 10.0;
-
 const double kInputPaddingAll = 12.0;
 const double kInputBorderRadius = 12.0;
 const double kInputBoxShadowBlur = 15.0;
 const double kInputBoxShadowSpread = -8.0;
 const double kInputBoxShadowOffsetY = 10.0;
-
 const double kIconSize = 48.0;
 const double kTokenIconSize = 48.0;
-
 const double kGap10 = 10.0;
 const double kGap12 = 12.0;
 const double kGap13 = 13.0;
 const double kGap24 = 24.0;
 const double kGap36 = 36.0;
-
 const double kSliderTickMarkRadius = 4.0;
-
 const double kButtonRadius = 14.0;
 const double kButtonPaddingV = 15.0;
 const double kButtonPaddingH = 22.0;
-
 const double kStepperPaddingV = 30.0;
 const double kStepperPaddingH = 20.0;
-
 const double kStepContentPadding = 20.0;
-
 const double kQrButtonSize = 48.0;
-
 const double kAddressFontSize = 12.0;
 const double kErrorIconSize = 16.0;
-// --------------------------------------------------------------------
 
 class SendPage extends StatefulWidget {
   final String preselected;
@@ -99,7 +91,6 @@ class SendPage extends StatefulWidget {
 }
 
 class _SendPageState extends State<SendPage> {
-  // UI / State
   bool isTokenReef = false;
   SendStatus statusValue = SendStatus.noAddress;
 
@@ -123,12 +114,10 @@ class _SendPageState extends State<SendPage> {
 
   dynamic transactionData;
 
-  // connections
   bool jsConn = false;
   bool indexerConn = false;
   bool providerConn = false;
 
-  // subscriptions / disposers
   StreamSubscription? jsConnStateSubs;
   StreamSubscription? providerConnStateSubs;
   StreamSubscription? indexerConnStateSubs;
@@ -136,14 +125,12 @@ class _SendPageState extends State<SendPage> {
   ReactionDisposer? _sigAppearDisposer;
   ReactionDisposer? _sigGoneDisposer;
 
-  // accounts
   ReefAccount? selectedAccount;
 
   @override
   void initState() {
     super.initState();
 
-    // ✅ resolve selectedAccount safely without returning null from a non-null closure
     final accounts = ReefAppState.instance.model.accounts.accountsList;
     final selAddr = ReefAppState.instance.model.accounts.selectedAddress;
     if (accounts.isEmpty) {
@@ -155,10 +142,8 @@ class _SendPageState extends State<SendPage> {
       );
     }
 
-    // set selected token address
     selectedTokenAddress = widget.preselected;
 
-    // prefill destination if provided
     if (widget.preSelectedTransferAddress != null) {
       final v = widget.preSelectedTransferAddress!.trim();
       address = v;
@@ -167,12 +152,10 @@ class _SendPageState extends State<SendPage> {
       isValidAddress = true;
     }
 
-    // check if REEF token selected
     if (selectedTokenAddress == Constants.REEF_TOKEN_ADDRESS) {
       isTokenReef = true;
     }
 
-    // listeners: provider
     providerConnStateSubs =
         ReefAppState.instance.networkCtrl.getProviderConnLogs().listen(
       (event) {
@@ -184,7 +167,6 @@ class _SendPageState extends State<SendPage> {
       onError: (e, st) => debugPrint('providerConn error: $e'),
     );
 
-    // listeners: indexer
     indexerConnStateSubs =
         ReefAppState.instance.networkCtrl.getIndexerConnected().listen(
       (event) {
@@ -196,7 +178,6 @@ class _SendPageState extends State<SendPage> {
       onError: (e, st) => debugPrint('indexerConn error: $e'),
     );
 
-    // listeners: jsConn (via future -> stream)
     ReefAppState.instance.metadataCtrl.getJsConnStream().then((jsStream) {
       if (!mounted) return;
       jsConnStateSubs = jsStream.listen(
@@ -215,11 +196,9 @@ class _SendPageState extends State<SendPage> {
       debugPrint('getJsConnStream error: $e');
     });
 
-    // focus listeners
     _focus.addListener(_onFocusChange);
     _focusSecond.addListener(_onFocusSecondChange);
 
-    // initial form disable check
     _disableInput();
   }
 
@@ -240,7 +219,6 @@ class _SendPageState extends State<SendPage> {
     super.dispose();
   }
 
-  // ---- listeners helpers ----
   void _onFocusChange() {
     if (!mounted) return;
     setState(() => _isValueEditing = !_isValueEditing);
@@ -251,9 +229,6 @@ class _SendPageState extends State<SendPage> {
     setState(() => _isValueSecondEditing = !_isValueSecondEditing);
   }
 
-  // ---- logic ----
-
-  /// Disables form input if balance or gas is insufficient
   Future<void> _disableInput() async {
     final tokens = ReefAppState.instance.model.tokens.selectedErc20List;
     if (tokens.isEmpty) return;
@@ -283,7 +258,6 @@ class _SendPageState extends State<SendPage> {
     }
   }
 
-  /// Validates Substrate or EVM address format
   Future<bool> _isValidAddress(String addr) async {
     if (addr.startsWith("5")) {
       return ReefAppState.instance.accountCtrl.isValidSubstrateAddress(addr);
@@ -293,13 +267,11 @@ class _SendPageState extends State<SendPage> {
     return false;
   }
 
-  /// Checks if signer has enough REEF for EVM gas
   bool hasBalanceForEvmTx(ReefAccount? reefSigner) {
     if (reefSigner == null) return false;
     return reefSigner.balance >= BigInt.from(minEvmTaxBalance * 1e18);
   }
 
-  /// Validates address, token and amount before sending
   Future<SendStatus> _validate(
     String addr,
     TokenWithAmount token,
@@ -316,10 +288,8 @@ class _SendPageState extends State<SendPage> {
     if (!mounted) return SendStatus.error;
     setState(() => isValidAddress = isValidAddr);
 
-    // 1. Address empty
     if (addr.isEmpty) return SendStatus.noAddress;
 
-    // 2. Amount validation
     final maxAmount = getMaxTransferAmount(token, balance);
 
     if (amtVal > maxAmount) {
@@ -332,15 +302,12 @@ class _SendPageState extends State<SendPage> {
 
     if (amtVal <= 0) return SendStatus.noAmt;
 
-    // 3. Check REEF for EVM gas
     if (token.address != Constants.REEF_TOKEN_ADDRESS && !hasEnoughForEvmTx) {
       return SendStatus.lowReefEvm;
     }
 
-    // 4. Invalid address format
     if (!isValidAddr) return SendStatus.addrNotValid;
 
-    // 5. Substrate address → check EVM mapping
     if (isValidAddr &&
         token.address != Constants.REEF_TOKEN_ADDRESS &&
         !addr.startsWith('0x')) {
@@ -358,7 +325,6 @@ class _SendPageState extends State<SendPage> {
       }
     }
 
-    // 6. EVM address → check existence & binding
     if (!skipAsync && addr.startsWith('0x')) {
       final exists =
           await ReefAppState.instance.accountCtrl.isEvmAddressExist(addr);
@@ -379,7 +345,6 @@ class _SendPageState extends State<SendPage> {
     return SendStatus.ready;
   }
 
-  /// Handles send button click and initiates transaction
   Future<void> _onConfirmSend(TokenWithAmount sendToken) async {
     FocusManager.instance.primaryFocus?.unfocus();
 
@@ -415,11 +380,13 @@ class _SendPageState extends State<SendPage> {
               .logAnalytics("send-tx-error");
           return;
         }
+
+        bool isEvm = handleEvmTransactionResponse(txResponse);
+        bool isNative = handleNativeTransferResponse(txResponse);
       },
     );
   }
 
-  /// Waits until all providers are connected
   Future<void> _waitForConnections(TokenWithAmount sendToken) async {
     const maxWait = Duration(seconds: 30);
     final start = DateTime.now();
@@ -440,7 +407,6 @@ class _SendPageState extends State<SendPage> {
     await _onConfirmSend(sendToken);
   }
 
-  /// Creates and executes token transfer stream
   Future<Stream<dynamic>> executeTransferTransaction(
     TokenWithAmount sendToken,
   ) async {
@@ -465,7 +431,6 @@ class _SendPageState extends State<SendPage> {
         .transferTokensStream(signerAddress, toAddress, tokenToTransfer);
   }
 
-  /// Updates status when signature dialog opens/closes
   void setStatusOnSignatureClosed() {
     _sigAppearDisposer?.call();
     _sigGoneDisposer?.call();
@@ -487,7 +452,6 @@ class _SendPageState extends State<SendPage> {
     );
   }
 
-  /// Maps raw error response to SendStatus
   SendStatus handleErrorResponse(String response) {
     if (response ==
         "-32603: execution fatal: Module { index: 6, error: 3, message: None }") {
@@ -495,28 +459,16 @@ class _SendPageState extends State<SendPage> {
     }
     if (response ==
         'invalid address (argument="address", value="", code=INVALID_ARGUMENT, version=address/5.7.0) (argument="recipient", value="", code=INVALID_ARGUMENT, version=abi/5.7.0)') {
-      // If you added a RECIPIENT_NOT_BINDED enum, map to it; else generic error/not valid.
       return SendStatus.addrNotValid;
     }
-
-    // New cases:
-    if (response == "timeout") {
-      return SendStatus.error; // or a specific TIMEOUT state if you have it
-    }
-    if (response == "provider_disconnected") {
-      return SendStatus.error;
-    }
-    if (response == "_canceled") {
-      return SendStatus.ready; // user canceled: allow retry immediately
-    }
-    if (response == "signer_not_found") {
-      return SendStatus.error;
-    }
+    if (response == "timeout") return SendStatus.error;
+    if (response == "provider_disconnected") return SendStatus.error;
+    if (response == "_canceled") return SendStatus.ready;
+    if (response == "signer_not_found") return SendStatus.error;
 
     return SendStatus.error;
   }
 
-  /// Handles transaction error responses
   bool handleExceptionResponse(dynamic txResponse) {
     if (txResponse == null || txResponse['success'] != true) {
       if (!mounted) return true;
@@ -535,7 +487,6 @@ class _SendPageState extends State<SendPage> {
     return false;
   }
 
-  /// Handles EVM transaction responses
   bool handleEvmTransactionResponse(dynamic txResponse) {
     if (txResponse['type'] == 'reef20') {
       final status = txResponse['data']['status'];
@@ -562,7 +513,6 @@ class _SendPageState extends State<SendPage> {
     return false;
   }
 
-  /// Handles native transfer responses
   bool handleNativeTransferResponse(dynamic txResponse) {
     if (txResponse['type'] == 'native') {
       final status = txResponse['data']['status'];
@@ -627,7 +577,7 @@ class _SendPageState extends State<SendPage> {
         return AppLocalizations.of(context)!.evm_not_connected;
       case SendStatus.connecting:
         return AppLocalizations.of(context)!.connecting.capitalize();
-      case SendStatus.recipientNotBinded: // ✅ now exists
+      case SendStatus.recipientNotBinded:
         return AppLocalizations.of(context)!.recipient_not_binded;
       case SendStatus.ready:
         return AppLocalizations.of(context)!.confirm_send;
@@ -644,55 +594,59 @@ class _SendPageState extends State<SendPage> {
     });
 
     return transferStatusUI ??
-        Column(
-          children: [
-            if (!(jsConn && indexerConn && providerConn))
-              GestureDetector(
-                onTap: () => showReconnectProviderModal(
-                    AppLocalizations.of(context)!.connection_stats),
-                child: Text(
-                  AppLocalizations.of(context)!.connecting,
-                  style: Theme.of(context).textTheme.bodyLarge,
+        // ✅ FIXED: Wrapped inside SignatureContentToggle so modal appears!
+        SignatureContentToggle(
+          Column(
+            children: [
+              if (!(jsConn && indexerConn && providerConn))
+                GestureDetector(
+                  onTap: () => showReconnectProviderModal(
+                      AppLocalizations.of(context)!.connection_stats),
+                  child: Text(
+                    AppLocalizations.of(context)!.connecting,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
+                child: Column(
+                  children: [
+                    Observer(builder: (_) {
+                      final tokens =
+                          ReefAppState.instance.model.tokens.selectedErc20List;
+                      if (tokens.isEmpty) {
+                        return Text(
+                          AppLocalizations.of(context)!.no_token_selected,
+                        );
+                      }
+                      final selectedToken = tokens.firstWhere(
+                        (t) => t.address == selectedTokenAddress,
+                        orElse: () => tokens.first,
+                      );
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Styles.primaryBackgroundColor,
+                          boxShadow: neumorphicShadow(),
+                        ),
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          children: <Widget>[
+                            ...buildInputElements(selectedToken),
+                            const Gap(36),
+                            ...buildSliderWidgets(selectedToken),
+                            const Gap(36),
+                            buildSendStatusButton(selectedToken),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
-              child: Column(
-                children: [
-                  Observer(builder: (_) {
-                    final tokens =
-                        ReefAppState.instance.model.tokens.selectedErc20List;
-                    if (tokens.isEmpty) {
-                      return Text(
-                        AppLocalizations.of(context)!.no_token_selected,
-                      );
-                    }
-                    final selectedToken = tokens.firstWhere(
-                      (t) => t.address == selectedTokenAddress,
-                      orElse: () => tokens.first,
-                    );
-                    return Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: Styles.primaryBackgroundColor,
-                        boxShadow: neumorphicShadow(),
-                      ),
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: <Widget>[
-                          ...buildInputElements(selectedToken),
-                          const Gap(36),
-                          ...buildSliderWidgets(selectedToken),
-                          const Gap(36),
-                          buildSendStatusButton(selectedToken),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         );
   }
 
@@ -979,7 +933,6 @@ class _SendPageState extends State<SendPage> {
   }
 
   List<Widget> buildSliderWidgets(TokenWithAmount selectedToken) {
-    // decide precision based on token decimals (cap at 8 for UI sanity)
     final int uiDecimals = (selectedToken.decimals > 0)
         ? (selectedToken.decimals > 8 ? 8 : selectedToken.decimals)
         : 6;
@@ -987,7 +940,6 @@ class _SendPageState extends State<SendPage> {
     double balance = getSelectedTokenBalance(selectedToken);
     final double maxTransfer = getMaxTransferAmount(selectedToken, balance);
 
-    // keep rating within 0..1 (in case previous state got weird)
     final double safeRating =
         rating.isNaN || rating.isInfinite ? 0.0 : rating.clamp(0.0, 1.0);
 
@@ -1011,12 +963,10 @@ class _SendPageState extends State<SendPage> {
           thumbShape: const ThumbShape(),
         ),
         child: Slider(
-          // keep the internal 0..1 “rating” model
           value: safeRating,
           onChanged: isFormDisabled
               ? null
               : (newRating) async {
-                  // compute amount from rating with better precision
                   final double rawAmt = (maxTransfer * newRating);
                   final String amountStr = formatAmount(
                     rawAmt.isNaN || rawAmt.isInfinite
@@ -1028,7 +978,7 @@ class _SendPageState extends State<SendPage> {
                     address,
                     selectedToken,
                     amountStr,
-                    true, // skipAsync for smoothness while dragging
+                    true,
                   );
                   if (!mounted) return;
                   setState(() {
@@ -1053,7 +1003,6 @@ class _SendPageState extends State<SendPage> {
             setState(() => statusValue = status);
           },
           inactiveColor: Colors.white24,
-          // 👇 increase precision a lot
           divisions: 1000,
           label: "${(safeRating * 100).toStringAsFixed(0)}%",
         ),
@@ -1205,17 +1154,11 @@ class _SendPageState extends State<SendPage> {
   }
 
   String getSliderValues(double newRating, TokenWithAmount selectedToken) {
-    // Clamp rating within valid bounds
     rating = newRating.clamp(0.0, 1.0);
-
-    // Get user token balance
     final balance = getSelectedTokenBalance(selectedToken);
     final maxTransferAmount = getMaxTransferAmount(selectedToken, balance);
-
-    // Calculate new amount value
     double amountValue = balance * rating;
 
-    // Fix invalid or out-of-range values
     if (amountValue.isNaN || amountValue.isInfinite || amountValue < 0) {
       amountValue = 0;
     }
@@ -1223,12 +1166,10 @@ class _SendPageState extends State<SendPage> {
       amountValue = maxTransferAmount >= 0 ? maxTransferAmount : 0;
     }
 
-    // Use token decimals for precision — up to 8 for UX neatness
     final int uiDecimals = (selectedToken.decimals > 0)
         ? (selectedToken.decimals > 8 ? 8 : selectedToken.decimals)
         : 6;
 
-    // Return properly formatted string
     return amountValue.toStringAsFixed(uiDecimals);
   }
 

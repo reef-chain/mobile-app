@@ -1,4 +1,3 @@
-import 'package:reef_chain_flutter/js_api_service.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/model/tokens/TokenWithAmount.dart';
 
@@ -11,7 +10,8 @@ class TransferCtrl {
       String fromAddress, String toAddress, TokenWithAmount token) {
     // print(
     //     "$fromAddress | $toAddress | ${token.amount.toString()} | ${token.decimals}  | ${token.address}");
-    return reefChainApi.reefState.transferApi.transferTokensStream(fromAddress, toAddress, token);
+    return reefChainApi.reefState.transferApi
+        .transferTokensStream(fromAddress, toAddress, token);
   }
 
   Future<dynamic> transferTokens(
@@ -20,7 +20,8 @@ class TransferCtrl {
     //     "$fromAddress | $toAddress | ${token.amount.toString()} | ${token.decimals}  | ${token.address}");
     // return jsApi.jsPromise(
     //     'window.transfer.sendPromise("$fromAddress", "$toAddress", "${token.amount.toString()}", ${token.decimals}, "${token.address}")');
-    return reefChainApi.reefState.transferApi.transferTokens(fromAddress, toAddress, token);
+    return reefChainApi.reefState.transferApi
+        .transferTokens(fromAddress, toAddress, token);
   }
 
   /*Future<dynamic> testTransferTokens(String from) async {
