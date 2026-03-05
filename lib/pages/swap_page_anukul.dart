@@ -611,15 +611,15 @@ class _SwapPageState extends State<SwapPage> {
         color: const Color(0xffE7E2F2),
         borderRadius: BorderRadius.circular(10.0),
       ),
-      margin: EdgeInsets.only(top: 8.0),
-      padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+      margin: const EdgeInsets.only(top: 8.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
+              const Text(
                 "Rate: ",
                 style: TextStyle(
                     color: Styles.primaryAccentColor,
@@ -629,7 +629,7 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   rate,
                   textAlign: TextAlign.right,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.w600, letterSpacing: 1.0),
                 ),
               ),
@@ -637,7 +637,7 @@ class _SwapPageState extends State<SwapPage> {
           ),
           Row(
             children: [
-              Text(
+              const Text(
                 "Fee: ",
                 style: TextStyle(
                     color: Styles.primaryAccentColor,
@@ -650,7 +650,7 @@ class _SwapPageState extends State<SwapPage> {
                       ? "${max(selectedTopToken!.amount.toDouble() * (selectedTopToken!.price?.toDouble() ?? 0) * 0.0003 / 1e18, 0.0000).toStringAsFixed(4)}\$"
                       : "0.0000\$",
                   textAlign: TextAlign.right,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.w600, letterSpacing: 1.0),
                 ),
               ),
@@ -658,7 +658,7 @@ class _SwapPageState extends State<SwapPage> {
           ),
           Row(
             children: [
-              Text(
+              const Text(
                 "Slippage: ",
                 style: TextStyle(
                     color: Styles.primaryAccentColor,
@@ -668,7 +668,7 @@ class _SwapPageState extends State<SwapPage> {
                 child: Text(
                   "${(double.parse(slippage) * 100).toStringAsFixed(2)}%",
                   textAlign: TextAlign.right,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.w600, letterSpacing: 1.0),
                 ),
               ),
@@ -701,14 +701,14 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   InputDecoration getInputDecoration() {
-    return InputDecoration(
-        constraints: const BoxConstraints(maxHeight: 32),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        enabledBorder: const OutlineInputBorder(
+    return const InputDecoration(
+        constraints: BoxConstraints(maxHeight: 32),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.transparent),
         ),
-        border: const OutlineInputBorder(),
-        focusedBorder: const OutlineInputBorder(
+        border: OutlineInputBorder(),
+        focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
             color: Colors.transparent,
           ),
@@ -764,7 +764,7 @@ class _SwapPageState extends State<SwapPage> {
                       Text(selectedTokenWithAmount.symbol),
                     ],
                     const Gap(4),
-                    Icon(CupertinoIcons.chevron_down,
+                    const Icon(CupertinoIcons.chevron_down,
                         size: 16, color: Styles.textLightColor)
                   ],
                 ),
@@ -796,8 +796,8 @@ class _SwapPageState extends State<SwapPage> {
                 if (selectedTokenWithAmount != null) ...[
                   Text(
                     "Balance: ${toAmountDisplayBigInt(selectedTokenWithAmount.balance, decimals: selectedTokenWithAmount.decimals)} ${selectedTokenWithAmount.symbol}",
-                    style:
-                        TextStyle(color: Styles.textLightColor, fontSize: 12),
+                    style: const TextStyle(
+                        color: Styles.textLightColor, fontSize: 12),
                   ),
                   MaxAmountButton(
                     onPressed: () async {
@@ -834,8 +834,8 @@ class _SwapPageState extends State<SwapPage> {
           shadowColor: const Color(0x559d6cff),
           elevation: 0,
           backgroundColor: isDisabled
-              ? Color.fromARGB(255, 125, 125, 125)
-              : Color.fromARGB(0, 215, 31, 31),
+              ? const Color.fromARGB(255, 125, 125, 125)
+              : const Color.fromARGB(0, 215, 31, 31),
           padding: const EdgeInsets.all(0),
         ),
         onPressed: isDisabled
@@ -902,7 +902,7 @@ class _SwapPageState extends State<SwapPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        constraints: BoxConstraints(maxWidth: 120),
+                        constraints: const BoxConstraints(maxWidth: 120),
                         child: Text(
                           token != null ? token.name : 'Select',
                           style: const TextStyle(
@@ -915,10 +915,10 @@ class _SwapPageState extends State<SwapPage> {
                       ),
                       if (token != null)
                         Container(
-                          constraints: BoxConstraints(maxWidth: 120),
+                          constraints: const BoxConstraints(maxWidth: 120),
                           child: Text(
                             "${toAmountDisplayBigInt(token.balance)} ${token.name.toUpperCase()}",
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Styles.textLightColor,
                               fontSize: 12,
                             ),
@@ -941,15 +941,15 @@ class _SwapPageState extends State<SwapPage> {
                   onChanged: (text) async {
                     await amountUpdated(text);
                   },
-                  decoration: InputDecoration(
-                      constraints: const BoxConstraints(maxHeight: 32),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      enabledBorder: const OutlineInputBorder(
+                  decoration: const InputDecoration(
+                      constraints: BoxConstraints(maxHeight: 32),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.transparent),
                       ),
-                      border: const OutlineInputBorder(),
-                      focusedBorder: const OutlineInputBorder(
+                      border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Colors.transparent,
                         ),
@@ -1184,7 +1184,7 @@ class _SwapPageState extends State<SwapPage> {
             ),
           ),
         ),
-        Gap(8.0),
+        const Gap(8.0),
         Expanded(
           child: SliderStandAlone(
               isDisabled: txInProgress || selectedTopToken == null,
@@ -1193,7 +1193,6 @@ class _SwapPageState extends State<SwapPage> {
                 setState(() {
                   rating = newRating;
 
-                  // CLEAN: Remove commas before calculating slider value
                   String rawBalance = cleanAmountStr(toAmountDisplayBigInt(
                       selectedTopToken!.balance,
                       decimals: selectedTopToken!.decimals,
@@ -1202,9 +1201,10 @@ class _SwapPageState extends State<SwapPage> {
                   String amountValue =
                       (double.parse(rawBalance) * rating).toStringAsFixed(2);
 
-                  if (amountValue.endsWith(".00"))
+                  if (amountValue.endsWith(".00")) {
                     amountValue =
                         amountValue.substring(0, amountValue.length - 3);
+                  }
 
                   amountTopController.text = amountValue;
                 });
@@ -1218,7 +1218,7 @@ class _SwapPageState extends State<SwapPage> {
   Row getSlippageSlider() {
     return Row(
       children: [
-        Text(
+        const Text(
           "Slippage :",
           style: TextStyle(
               color: Styles.textLightColor,
@@ -1243,69 +1243,80 @@ class _SwapPageState extends State<SwapPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     var transferStatusUI = buildFeedbackUI(context, statusValue, () => {}, () {
       final navigator = Navigator.of(context);
       navigator.pop();
     });
     return transferStatusUI ??
-        SignatureContentToggle(
-          Stack(children: [
-            Column(
-              children: [
-                Gap(24),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Styles.primaryBackgroundColor,
-                      boxShadow: neumorphicShadow()),
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      isPreselectedTopExists
-                          ? getFixedTokenField(
-                              _isValueTopEditing,
-                              selectedTopToken,
-                              _focusTop,
-                              amountTopController,
-                              _amountTopUpdated)
-                          : getToken(
-                              _isValueTopEditing,
-                              _changeSelectedTopToken,
-                              selectedTopToken,
-                              _focusTop,
-                              amountTopController,
-                              _amountTopUpdated),
-                      Gap(16),
-                      getSlider(),
-                      Gap(16),
-                      isPreselectedBottomExists
-                          ? getFixedTokenField(
-                              _isValueBottomEditing,
-                              selectedBottomToken,
-                              _focusBottom,
-                              amountBottomController,
-                              _amountBottomUpdated)
-                          : getToken(
-                              _isValueBottomEditing,
-                              _changeSelectedBottomToken,
-                              selectedBottomToken,
-                              _focusBottom,
-                              amountBottomController,
-                              _amountBottomUpdated),
-                      Gap(16),
-                      getSlippageSlider(),
-                      Gap(16),
-                      if (rate != "") getPoolSummary(),
-                      Gap(16),
-                      getSwapBtn(),
-                    ],
-                  ),
+        GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: SignatureContentToggle(
+            Stack(children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 40.0),
+                child: Column(
+                  children: [
+                    const Gap(24),
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Styles.primaryBackgroundColor,
+                          boxShadow: neumorphicShadow()),
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        children: [
+                          isPreselectedTopExists
+                              ? getFixedTokenField(
+                                  _isValueTopEditing,
+                                  selectedTopToken,
+                                  _focusTop,
+                                  amountTopController,
+                                  _amountTopUpdated)
+                              : getToken(
+                                  _isValueTopEditing,
+                                  _changeSelectedTopToken,
+                                  selectedTopToken,
+                                  _focusTop,
+                                  amountTopController,
+                                  _amountTopUpdated),
+                          const Gap(16),
+                          getSlider(),
+                          const Gap(16),
+                          isPreselectedBottomExists
+                              ? getFixedTokenField(
+                                  _isValueBottomEditing,
+                                  selectedBottomToken,
+                                  _focusBottom,
+                                  amountBottomController,
+                                  _amountBottomUpdated)
+                              : getToken(
+                                  _isValueBottomEditing,
+                                  _changeSelectedBottomToken,
+                                  selectedBottomToken,
+                                  _focusBottom,
+                                  amountBottomController,
+                                  _amountBottomUpdated),
+                          const Gap(16),
+                          getSlippageSlider(),
+                          const Gap(16),
+                          // Swap Button
+                          getSwapBtn(),
+                          if (rate != "") ...[
+                            const Gap(16),
+                            getPoolSummary(),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            if (preloader) buildPreloader(),
-          ]),
+              ),
+              if (preloader) buildPreloader(),
+            ]),
+          ),
         );
   }
 }

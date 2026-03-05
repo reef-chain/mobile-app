@@ -587,6 +587,7 @@ class _SendPageState extends State<SendPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final transferStatusUI =
         buildFeedbackUI(context, statusValue, resetState, () {
@@ -594,62 +595,67 @@ class _SendPageState extends State<SendPage> {
     });
 
     return transferStatusUI ??
-        // ✅ FIXED: Wrapped inside SignatureContentToggle so modal appears!
-        SignatureContentToggle(
-          Column(
-            children: [
-              if (!(jsConn && indexerConn && providerConn))
-                GestureDetector(
-                  onTap: () => showReconnectProviderModal(
-                      AppLocalizations.of(context)!.connection_stats),
-                  child: Text(
-                    AppLocalizations.of(context)!.connecting,
-                    style: Theme.of(context).textTheme.bodyLarge,
+        GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: SignatureContentToggle(
+            SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 40.0),
+              child: Column(
+                children: [
+                  if (!(jsConn && indexerConn && providerConn))
+                    GestureDetector(
+                      onTap: () => showReconnectProviderModal(
+                          AppLocalizations.of(context)!.connection_stats),
+                      child: Text(
+                        AppLocalizations.of(context)!.connecting,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 10),
+                    child: Column(
+                      children: [
+                        Observer(builder: (_) {
+                          final tokens = ReefAppState
+                              .instance.model.tokens.selectedErc20List;
+                          if (tokens.isEmpty) {
+                            return Text(
+                              AppLocalizations.of(context)!.no_token_selected,
+                            );
+                          }
+                          final selectedToken = tokens.firstWhere(
+                            (t) => t.address == selectedTokenAddress,
+                            orElse: () => tokens.first,
+                          );
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Styles.primaryBackgroundColor,
+                              boxShadow: neumorphicShadow(),
+                            ),
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: <Widget>[
+                                ...buildInputElements(selectedToken),
+                                const Gap(36),
+                                ...buildSliderWidgets(selectedToken),
+                                const Gap(36),
+                                buildSendStatusButton(selectedToken),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
                   ),
-                ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
-                child: Column(
-                  children: [
-                    Observer(builder: (_) {
-                      final tokens =
-                          ReefAppState.instance.model.tokens.selectedErc20List;
-                      if (tokens.isEmpty) {
-                        return Text(
-                          AppLocalizations.of(context)!.no_token_selected,
-                        );
-                      }
-                      final selectedToken = tokens.firstWhere(
-                        (t) => t.address == selectedTokenAddress,
-                        orElse: () => tokens.first,
-                      );
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Styles.primaryBackgroundColor,
-                          boxShadow: neumorphicShadow(),
-                        ),
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          children: <Widget>[
-                            ...buildInputElements(selectedToken),
-                            const Gap(36),
-                            ...buildSliderWidgets(selectedToken),
-                            const Gap(36),
-                            buildSendStatusButton(selectedToken),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         );
   }
-
   // ---------- UI Parts ----------
 
   List<Widget> buildInputElements(TokenWithAmount selectedToken) {

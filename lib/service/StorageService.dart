@@ -1,22 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:reef_mobile_app/model/account/stored_account.dart';
-import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
-import 'package:reef_mobile_app/model/metadata/metadata.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
-
-
-/// Thrown when storage permission is not granted and Hive cannot be initialized.
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:bcrypt/bcrypt.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -25,7 +11,6 @@ import 'package:reef_mobile_app/model/account/stored_account.dart';
 import 'package:reef_mobile_app/model/auth_url/auth_url.dart';
 import 'package:reef_mobile_app/model/metadata/metadata.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
 
 /// Thrown when storage permission is not granted and Hive cannot be initialized.
 class StoragePermissionException implements Exception {
@@ -147,13 +132,9 @@ class StorageService {
 
   Future<void> _initAsync() async {
     try {
-      final allowed = await _checkPermission();
-      if (!allowed) {
-        final e = StoragePermissionException();
-        _completeAllWithError(e);
-        return; // do not init Hive
-      }
-
+      // FIXED: Removed the unnecessary _checkPermission() block.
+      // `getApplicationDocumentsDirectory()` is an internal app sandbox
+      // and does NOT require any external storage permissions on Android.
       await _initHive();
     } catch (e, st) {
       debugPrint('StorageService _initAsync error: $e\n$st');
@@ -221,35 +202,27 @@ class StorageService {
     }
   }
 
+  // FIXED: Simply return true.
+  // We keep the function signature intact so other files don't break if they call it,
+  // but it safely bypasses the Android 13+ crashing behavior.
   Future<bool> _checkPermission() async {
-    final status = await Permission.storage.status;
-    debugPrint('PERMISSION STORAGE=$status');
-
-    if (status.isGranted) return true;
-
-    if (status.isPermanentlyDenied) {
-      debugPrint("PERMISSION PERMANENTLY DENIED");
-      return false;
-    }
-
-    final result = await Permission.storage.request();
-
-    if (result.isGranted) return true;
-
-    debugPrint("PERMISSION DENIED");
-    return false;
+    return true;
   }
 
   void _completeAllWithError(Object e, [StackTrace? st]) {
-    if (!mainBox.isCompleted) mainBox.completeError(e, st ?? StackTrace.current);
-    if (!metadataBox.isCompleted) metadataBox.completeError(e, st ?? StackTrace.current);
-    if (!authUrlsBox.isCompleted) authUrlsBox.completeError(e, st ?? StackTrace.current);
-    if (!accountsBox.isCompleted) accountsBox.completeError(e, st ?? StackTrace.current);
-    if (!jwtsBox.isCompleted) jwtsBox.completeError(e, st ?? StackTrace.current);
+    if (!mainBox.isCompleted)
+      mainBox.completeError(e, st ?? StackTrace.current);
+    if (!metadataBox.isCompleted)
+      metadataBox.completeError(e, st ?? StackTrace.current);
+    if (!authUrlsBox.isCompleted)
+      authUrlsBox.completeError(e, st ?? StackTrace.current);
+    if (!accountsBox.isCompleted)
+      accountsBox.completeError(e, st ?? StackTrace.current);
+    if (!jwtsBox.isCompleted)
+      jwtsBox.completeError(e, st ?? StackTrace.current);
   }
 
   Future<void> openStoragePermissionSettings() async {
     await openAppSettings();
   }
 }
-
