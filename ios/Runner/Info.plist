@@ -50,6 +50,10 @@
 	<string>Scan code</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Authenticate with biometrics</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Reef may use your location to enhance your experience</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Reef may use your location to enhance your experience</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Select file</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
