@@ -143,9 +143,16 @@ class AccountCtrl {
 
   Future saveAccount(StoredAccount account) async {
     await _storage.saveAccount(account);
-    await updateAccounts();
-    _initJsObservables(_storage);
-    setSelectedAddress(account.address);
+
+    try {
+      updateAccounts().then((_) {
+        setSelectedAddress(account.address);
+      }).catchError((e) {
+        debugPrint("JS Sync error (Network unvailable): $e");
+      });
+    } catch (e) {
+      debugPrint("Account saved locally but JS update failed: $e");
+    }
   }
 
   void deleteAccount(String address) async {
