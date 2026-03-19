@@ -67,3 +67,6 @@ app.*.map.json
 # FIREBASE ANALYTICS
 env.json
 /android/app/build/
+
+# FVM Version Cache
+.fvm/

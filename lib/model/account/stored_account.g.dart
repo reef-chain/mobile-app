@@ -8,7 +8,7 @@ part of 'stored_account.dart';
 
 class StoredAccountAdapter extends TypeAdapter<StoredAccount> {
   @override
-  final int typeId = 1;
+  final typeId = 1;
 
   @override
   StoredAccount read(BinaryReader reader) {

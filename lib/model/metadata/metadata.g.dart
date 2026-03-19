@@ -8,7 +8,7 @@ part of 'metadata.dart';
 
 class MetadataAdapter extends TypeAdapter<Metadata> {
   @override
-  final int typeId = 2;
+  final typeId = 2;
 
   @override
   Metadata read(BinaryReader reader) {
@@ -20,9 +20,9 @@ class MetadataAdapter extends TypeAdapter<Metadata> {
       ..chain = fields[0] as String
       ..genesisHash = fields[1] as String
       ..icon = fields[2] as String
-      ..specVersion = fields[3] as int
-      ..ss58Format = fields[4] as int
-      ..tokenDecimals = fields[5] as int
+      ..specVersion = (fields[3] as num).toInt()
+      ..ss58Format = (fields[4] as num).toInt()
+      ..tokenDecimals = (fields[5] as num).toInt()
       ..tokenSymbol = fields[6] as String
       ..types = fields[7] as dynamic
       ..color = fields[8] as String

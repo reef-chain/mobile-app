@@ -8,8 +8,8 @@ class EnsureVisibleWhenFocused extends StatefulWidget {
     Key? key,
     required this.child,
     required this.focusNode,
-    this.curve: Curves.ease,
-    this.duration: const Duration(milliseconds: 100),
+    this.curve = Curves.ease,
+    this.duration = const Duration(milliseconds: 100),
   }) : super(key: key);
 
   final FocusNode focusNode;
