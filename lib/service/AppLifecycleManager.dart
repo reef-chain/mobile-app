@@ -22,6 +22,7 @@ class AppLifecycleManager with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
         _isAppForeground = false;
         break;
     }

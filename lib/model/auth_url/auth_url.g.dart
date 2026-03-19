@@ -8,7 +8,7 @@ part of 'auth_url.dart';
 
 class AuthUrlAdapter extends TypeAdapter<AuthUrl> {
   @override
-  final int typeId = 3;
+  final typeId = 3;
 
   @override
   AuthUrl read(BinaryReader reader) {

@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'dart:convert';
 
 part 'stored_account.g.dart';
