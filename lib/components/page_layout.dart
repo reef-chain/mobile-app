@@ -1,58 +1,41 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:reef_mobile_app/components/navigation/liquid_carousel_wrapper.dart';
 import 'package:reef_mobile_app/components/top_bar.dart';
 import 'package:reef_mobile_app/model/ReefAppState.dart';
 import 'package:reef_mobile_app/model/navigation/navigation_model.dart';
 import 'package:reef_mobile_app/pages/accounts_page.dart';
 import 'package:reef_mobile_app/pages/home_page.dart';
 import 'package:reef_mobile_app/pages/settings_page.dart';
-import 'package:reef_mobile_app/utils/liquid_edge/liquid_carousel.dart';
 import "package:reef_mobile_app/utils/styles.dart";
 
 import '../pages/pools_page.dart';
 import 'sign/SignatureContentToggle.dart';
 
+// FIXED: Removed Platform checks to make Pools/Swap available everywhere
 List<BarItemNavigationPage> bottomNavigationBarItems = [
   BarItemNavigationPage(
     icon: Icon(Icons.home_outlined),
     page: NavigationPage.home,
     label: 'Home',
   ),
-  // BottomNavigationBarItem(
-  //   icon: Icon(CupertinoIcons.arrow_right_arrow_left_square),
-  //   label: 'Swap',
-  // ),
-  // BottomNavigationBarItem(
-  //   icon: Icon(CupertinoIcons.money_dollar_circle),
-  //   label: 'Buy',
-  // ),
   BarItemNavigationPage(
     icon: Icon(Icons.account_balance_wallet_outlined),
     page: NavigationPage.accounts,
-    //  SvgIcon(
-    //   'assets/images/reef_icon.svg',
-    //   height: 20,
-    // ),
     label: 'Accounts',
   ),
-  if (Platform.isAndroid)
-    BarItemNavigationPage(
-      icon: Icon(Icons.cached),
-      page: NavigationPage.pools,
-      //  SvgIcon(
-      //   'assets/images/reef_icon.svg',
-      //   height: 20,
-      // ),
-      label: 'Pools',
-    ),
-
+  BarItemNavigationPage(
+    icon: Icon(Icons.cached),
+    page: NavigationPage.pools,
+    label: 'Pools',
+  ),
+  // BarItemNavigationPage(
+  //   icon: Icon(Icons.monetization_on_outlined),
+  //   page: NavigationPage.buy,
+  //   label: 'Buy Reef',
+  // ),
   BarItemNavigationPage(
     icon: Icon(Icons.settings_outlined),
     page: NavigationPage.settings,
@@ -68,16 +51,13 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
-  final _liquidCarouselKey = GlobalKey<LiquidCarouselState>();
-  bool _swiping = false;
-  // bool _fromHidden = false;
+  int selectedPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _checkNotificationPermission();
-    ReefAppState.instance.navigationCtrl.carouselKey = _liquidCarouselKey;
   }
 
   @override
@@ -86,58 +66,12 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (kDebugMode) {
-      print('APP STATE=$state');
-    }
-    /*if (state == AppLifecycleState.hidden) {
-      this._fromHidden = true;
-    }*/
-    if (state == AppLifecycleState.resumed) {
-      /*if (this._fromHidden) {
-        this._fromHidden = false;
-        // breaks signing when using app for signing browser txs - switching apps
-          if(!Platform.isIOS) Restart.restartApp();
-      }*/
-
-      // reconnecting provider breaks signing since app looses focus and provider gets disconnected on resumed when signature is sent
-      // await ReefAppState.instance.networkCtrl.reconnectProvider();
-      // ReefAppState.instance.tokensCtrl.reload(false);
-    }
-  }
-
   Future<bool> _checkNotificationPermission() async {
     final status = await Permission.storage.status;
     if (status.isDenied) {
       await Permission.notification.request();
     }
     return status.isGranted;
-  }
-
-  /*Widget _getWidget(NavigationPage page) {
-    switch (page) {
-      case NavigationPage.home:
-        return const HomePage();
-      case NavigationPage.send:
-        return SendPage(ReefAppState.instance.model.navigationModel.data ??
-            Constants.REEF_TOKEN_ADDRESS);
-
-      case NavigationPage.accounts:
-        return AccountsPage();
-      case NavigationPage.settings:
-        return const SettingsPage();
-      case NavigationPage.swap:
-        return SwapPage(ReefAppState.instance.model.navigationModel.data ??
-            Constants.REEF_TOKEN_ADDRESS);
-      default:
-        return const HomePage();
-    }
-  }*/
-
-  void _onItemTapped(int index) async {
-    ReefAppState.instance.navigationCtrl
-        .navigate(bottomNavigationBarItems[index].page);
   }
 
   @override
@@ -161,8 +95,6 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                   color: Styles.primaryBackgroundColor,
                 ),
                 Column(
-                  // physics: const NeverScrollableScrollPhysics(),
-                  // padding: const EdgeInsets.symmetric(vertical: 0),
                   children: <Widget>[
                     Material(
                       elevation: 3,
@@ -179,29 +111,7 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
                           ),
                           child: topBar(context)),
                     ),
-                    Expanded(
-                        child: LiquidCarousel(
-                      parentContext: context,
-                      key: _liquidCarouselKey,
-                      cyclic: false,
-                      onSwipe: (int index) {
-                        ReefAppState.instance.model.navigationModel
-                            .navigate(bottomNavigationBarItems[index - 1].page);
-                      },
-                      children: getMainNavPages(),
-                    )),
-                    // Expanded(
-                    //   child: Container(
-                    //     padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                    //     width: double.infinity,
-                    //     child: Observer(builder: (_) {
-                    //       print(
-                    //           'DISPLAY PAGE =${ReefAppState.instance.navigation.currentPage}');
-                    //       return _getWidget(
-                    //           ReefAppState.instance.navigation.currentPage);
-                    //     }),
-                    //   ),
-                    // )
+                    Expanded(child: getMainNavPages())
                   ],
                 ),
               ],
@@ -209,7 +119,6 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
           ),
         )),
         bottomNavigationBar: Observer(builder: (_) {
-          debugPrint('---> ${bottomNavigationBarItems.length}');
           int currIndex = bottomNavigationBarItems.indexWhere((barItem) =>
               barItem.page ==
               ReefAppState.instance.model.navigationModel.currentPage);
@@ -234,32 +143,29 @@ class _BottomNavState extends State<BottomNav> with WidgetsBindingObserver {
             selectedItemColor: itemColor,
             unselectedItemColor: Colors.black38,
             items: bottomNavigationBarItems,
-            currentIndex: currIndex,
-            onTap: _onItemTapped,
+            currentIndex: selectedPageIndex,
+            onTap: (idx) {
+              setState(() {
+                selectedPageIndex = idx;
+              });
+            },
           );
         }),
       ),
     ));
   }
 
-  List<Widget> getMainNavPages() {
-    var pages = bottomNavigationBarItems.map((navItem) {
-      switch (navItem.page) {
-        case NavigationPage.home:
-          return const HomePage(key: PageStorageKey("homepage"));
-        case NavigationPage.accounts:
-          return AccountsPage(key: const PageStorageKey("accountPage"));
-        case NavigationPage.pools:
-          return const PoolsPage(key: const PageStorageKey("poolsPage"));
-        case NavigationPage.settings:
-          return const SettingsPage(key: PageStorageKey("settingsPage"));
-        case NavigationPage.buy:
-          return const Placeholder();
-      }
-    }).toList(growable: true);
-    pages.insert(0, const LiquidCarouselWrapper());
-    pages.insert(pages.length, const LiquidCarouselWrapper());
-    return pages;
+  Widget getMainNavPages() {
+    // FIXED: Removed Platform checks from pages list
+    var pages = [
+      const HomePage(key: PageStorageKey("homepage")),
+      AccountsPage(key: const PageStorageKey("accountPage")),
+      const PoolsPage(key: PageStorageKey("poolsPage")),
+      // const StealthexBuyPage(key: const PageStorageKey("stealthexBuyPage")),
+      const SettingsPage(key: PageStorageKey("settingsPage"))
+    ];
+
+    return pages[selectedPageIndex];
   }
 }
 

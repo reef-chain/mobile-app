@@ -1,8 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:local_auth/local_auth.dart';
 import 'package:reef_chain_flutter/reef_api.dart';
 import 'package:reef_mobile_app/components/introduction_page/hero_video.dart';
@@ -17,8 +17,6 @@ import '../service/StorageService.dart';
 typedef WidgetCallback = Widget Function();
 
 final navigatorKey = GlobalKey<NavigatorState>();
-
-
 
 // Timing
 const int kSplashGifDurationMs = 3830;
@@ -56,14 +54,14 @@ const String kKeyFirstLaunch = "firstLaunch";
 const String kKeyLanguageCode = "languageCode";
 const String kKeyBiometricAuth = "biometricAuth";
 
-
 // =============================================================
 //                        SplashApp
 // =============================================================
 class SplashApp extends StatefulWidget {
   final WidgetCallback displayOnInit;
   final Widget heroVideo = const HeroVideo();
-  final ReefChainApi reefChainApi = ReefChainApi();
+
+  // ✅ FIX 1: Removed reefChainApi from here so it doesn't recreate on every rebuild
 
   SplashApp({
     required Key key,
@@ -83,6 +81,9 @@ class SplashApp extends StatefulWidget {
 
 class _SplashAppState extends State<SplashApp> {
   String _locale = ReefAppState.instance.model.locale.selectedLanguage;
+
+  // ✅ FIX 2: Added reefChainApi to State class
+  late final ReefChainApi reefChainApi;
 
   int _bioAttempts = 0;
   bool _bioLockedOut = false;
@@ -111,8 +112,7 @@ class _SplashAppState extends State<SplashApp> {
     try {
       final isDeviceSupported = await localAuth.isDeviceSupported();
       final isAvailable = await localAuth.canCheckBiometrics;
-      final isEnrolled =
-          (await localAuth.getAvailableBiometrics()).isNotEmpty;
+      final isEnrolled = (await localAuth.getAvailableBiometrics()).isNotEmpty;
       return isAvailable && isDeviceSupported && isEnrolled;
     } catch (_) {
       return false;
@@ -134,12 +134,16 @@ class _SplashAppState extends State<SplashApp> {
   void initState() {
     super.initState();
 
+    // ✅ FIX 3: Initialize JS Engine exactly once in the entire lifecycle
+    reefChainApi = ReefChainApi();
+
     _getSavedLocale().then((value) {
       if (!mounted) return;
       setLocale(value);
     });
 
-    _gifTimer = Timer(const Duration(milliseconds: kSplashGifDurationMs), () {});
+    _gifTimer =
+        Timer(const Duration(milliseconds: kSplashGifDurationMs), () {});
 
     _bootstrap();
 
@@ -170,7 +174,7 @@ class _SplashAppState extends State<SplashApp> {
   /// Checks if app is launched for the first time
   Future<bool> _checkIfFirstLaunch() async {
     final isFirstLaunch =
-    await ReefAppState.instance.storage.getValue(kKeyFirstLaunch);
+        await ReefAppState.instance.storage.getValue(kKeyFirstLaunch);
     return isFirstLaunch == null;
   }
 
@@ -194,7 +198,7 @@ class _SplashAppState extends State<SplashApp> {
 
       if (supportsBio) {
         final hasUserEnabledBio =
-        await ReefAppState.instance.storage.getValue(kKeyBiometricAuth);
+            await ReefAppState.instance.storage.getValue(kKeyBiometricAuth);
 
         if (hasUserEnabledBio == true) {
           setState(() => _biometricsIsAvailable = true);
@@ -218,13 +222,21 @@ class _SplashAppState extends State<SplashApp> {
   /// Initializes async app dependencies
   Future<void> _initializeAsyncDependencies() async {
     try {
+      // ✅ FIX 4: Safety lock to prevent double loading
+      if (ReefAppState.instance.isInitialized ||
+          ReefAppState.instance.isInitializing) {
+        if (!mounted) return;
+        setState(() => appReady = true);
+        return;
+      }
+
       final storageService = StorageService();
       final walletConnectService = WalletConnectService();
 
       await ReefAppState.instance.init(
         storageService,
         walletConnectService,
-        widget.reefChainApi,
+        reefChainApi, // ✅ FIX 5: Use local state instance instead of widget
       );
 
       if (!mounted) return;
@@ -233,7 +245,6 @@ class _SplashAppState extends State<SplashApp> {
       setState(() => _hasError = true);
     }
   }
-
 
   /// Authenticates user using secure password
   Future<void> _authenticateWithPassword(String enteredPassword) async {
@@ -325,7 +336,7 @@ class _SplashAppState extends State<SplashApp> {
     }
 
     final stillLoading =
-    (!appReady || !_isAuthenticated || _isFirstLaunch == null);
+        (!appReady || !_isAuthenticated || _isFirstLaunch == null);
 
     return Stack(
       children: <Widget>[
@@ -467,7 +478,7 @@ class _SplashAppState extends State<SplashApp> {
                     _authenticateWithPassword(password);
                   }
                 },
-                child:  Text(
+                child: Text(
                   'Send',
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -507,7 +518,7 @@ class _SplashAppState extends State<SplashApp> {
                         ],
                       ),
                     ),
-                    child:  Icon(
+                    child: Icon(
                       Icons.fingerprint,
                       size: kSplashFingerprintSize,
                       color: Styles.whiteColor,
@@ -522,4 +533,3 @@ class _SplashAppState extends State<SplashApp> {
     );
   }
 }
-

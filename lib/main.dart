@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
-import 'package:reef_mobile_app/pages/splash_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:reef_mobile_app/components/page_layout_anukul.dart';
+import 'package:reef_mobile_app/l10n/app_localizations.dart';
+import 'package:reef_mobile_app/pages/splash_screen.dart';
 import 'package:reef_mobile_app/service/AppLifecycleManager.dart';
 import 'package:reef_mobile_app/service/LocalNotificationService.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:reef_mobile_app/l10n/app_localizations.dart';
+import 'package:sizer/sizer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
             Locale('en', ''),
           ],
           home: SplashApp(
-            key: UniqueKey(),
+            key: const Key('reef_splash_app'),
             displayOnInit: () {
               return const BottomNav();
             },
